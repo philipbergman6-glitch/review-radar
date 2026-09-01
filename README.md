@@ -2,10 +2,31 @@
 
 BIU 8688697201 — Big Data and AI, final project (solo, approved by the instructor).
 
-Reviews stream through Kafka into a Spark Structured Streaming job that cleans them,
-enriches them against a SQL product catalogue, writes an Iceberg lakehouse on an S3
-object store, and indexes them into Elasticsearch — where an AI layer adds embeddings,
-LLM-derived aspect sentiment, semantic search, RAG question answering and anomaly detection.
+Reviews replay through Kafka into a Spark Structured Streaming job that lands them
+unparsed — and exactly once across an unclean restart — as an Iceberg table on a MinIO
+object store, with the Iceberg catalogue in PostgreSQL. **That is what runs today.**
+Everything downstream of it — silver/gold transformation, the SQL product-catalogue
+join, Elasticsearch indexing, and an AI layer (embeddings + semantic search, LLM aspect
+sentiment, RAG) — is designed but not built. The table below is the honest split, and it
+stays in this README until it is all in the "built" column.
+
+## Status
+
+| component | state | evidence / what is missing |
+|---|---|---|
+| Kafka replay producer | **built** | `src/ingest/producer.py`; 701,528 records on `reviews.raw` |
+| Bronze ingest → Iceberg on MinIO | **built** | `src/spark/bronze.py`; 701,528 rows, 96.5 MB of Parquet |
+| Iceberg JDBC catalogue in Postgres | **built** | `iceberg_tables` row for `bronze.reviews_raw` |
+| Exactly-once proof (kill + restart) | **built** | `scripts/prove_exactly_once.py` — see below |
+| Data profiling | **built** | [`docs/phase0-profile.txt`](docs/phase0-profile.txt) |
+| Silver / gold transformation | *planned* | nothing written yet |
+| Product catalogue + JDBC enrichment | *planned* | `products` table exists and is **empty**; no loader script |
+| Elasticsearch index (BM25 + kNN) | *planned* | cluster is up and healthy; **no indices** |
+| AI: embeddings, semantic search | *planned* | `src/ai/` is an empty package |
+| AI: LLM aspect sentiment + validation | *planned* | — |
+| AI: RAG question answering | *planned* | — |
+| Streamlit app | *planned* | `src/serving/` is an empty package |
+| Design doc, slides, demo runbook | *planned* | `docs/` holds the profile and the audit only |
 
 ## Dataset
 
@@ -67,29 +88,36 @@ data/raw/*.jsonl
        ▼
 ┌─────────────────────────────────────────────┐        ┌──────────────┐
 │      Spark Structured Streaming             │◀──JDBC─│  PostgreSQL  │
-│  bronze → silver → gold                     │        │  products    │
-│  parse · clean · dedupe · join · KPIs       │        └──────────────┘
-└──────┬──────────────────────────────┬───────┘
-       │ Iceberg tables               │ enriched docs
+│  bronze            [built]                  │ (plan) │  products    │
+│  silver → gold     [planned]                │        │  (empty)     │
+└──────┬──────────────────────────────┬───────┘        └──────────────┘
+       │ Iceberg tables               │ enriched docs (planned)
        ▼                              ▼
 ┌──────────────┐              ┌──────────────────┐
 │ MinIO (S3)   │              │  Elasticsearch   │
 │  lakehouse   │              │  BM25 + kNN      │
+│    [built]   │              │    [planned]     │
 └──────────────┘              └────────┬─────────┘
                                        ▼
                           ┌────────────────────────┐
                           │  Streamlit app         │
                           │  semantic search · RAG │
-                          │  anomalies · narrative │
+                          │       [planned]        │
                           └────────────────────────┘
 ```
 
-**Course technologies used:** Kafka (streaming) · Spark (batch + streaming) · Iceberg
-(table format) · MinIO (object store) · Elasticsearch (NoSQL + vector search) · PostgreSQL
-(RDBMS/SQL enrichment) · Docker (containers) · JSON (semi-structured) · free text (unstructured).
+Solid today: producer → Kafka → bronze → Iceberg/MinIO, with Postgres as the Iceberg
+catalogue. Everything marked `[planned]` is architecture, not code.
 
-**AI capabilities** (brief §6.2): (a) LLM enrichment, (b) embeddings + semantic search,
-(c) RAG, (e) streaming AI enrichment, (f) ML anomaly detection, (g) insight narrative.
+**Course technologies — in use now:** Kafka (streaming) · Spark (Structured Streaming) ·
+Iceberg (table format) · MinIO (object store) · PostgreSQL (Iceberg JDBC catalogue) ·
+Docker (containers) · JSON (semi-structured) · free text (unstructured).
+**Planned:** Elasticsearch (NoSQL + vector search), PostgreSQL in its second role as the
+SQL enrichment source.
+
+**AI capabilities** (brief §6.2) — *none built yet*. Planned, in this order:
+(b) embeddings + semantic search, (a) LLM aspect sentiment with a measured validation,
+(c) RAG on top of (b). (e), (f) and (g) are explicitly out of scope for now.
 
 ## Setup
 
@@ -122,6 +150,77 @@ Get the data and profile it:
 `./run.sh` is a thin wrapper that pins `JAVA_HOME` to JDK 17 and runs inside the uv
 environment — Spark 3.5 will not start otherwise.
 
+## Running the pipeline
+
+Check the stack first — it prints one line per component and exits non-zero if any of the
+five (Kafka, MinIO, Elasticsearch, Postgres, Spark) is not reachable:
+
+```bash
+./run.sh python scripts/healthcheck.py
+```
+
+**1 — replay the reviews into Kafka.** Creates the topic if it does not exist (6
+partitions), keys every record by `parent_asin`, and reports throughput as it goes.
+
+```bash
+./run.sh python -m src.ingest.producer --category All_Beauty
+#  --limit N     stop after N records (0 = the whole file, the default)
+#  --rate R      cap at R records/sec (0 = as fast as the broker accepts, the default)
+#  --topic T     default reviews.raw
+#  --source PATH override the input .jsonl
+```
+
+**2 — drain the topic into the bronze Iceberg table.** `--trigger once` processes
+everything available and stops; a duration like `--trigger 5s` keeps the query running.
+The table and checkpoint are derived from the topic name, so `reviews.raw` can only ever
+write to `lake.bronze.reviews_raw` / `checkpoints/bronze_reviews_raw`.
+
+```bash
+# the command that produced the current 701,528-row table
+./run.sh python -m src.spark.bronze --trigger once --max-per-trigger 150000
+#  --reset             drop the table and checkpoint first (DESTRUCTIVE)
+#  --reset-only        drop them and exit without streaming
+#  --starting-offsets  earliest (default) | latest
+```
+
+`--max-per-trigger` is the memory throttle: 150,000 records per micro-batch gave five
+commits and ~10 s wall for the full category on this machine. The code default is
+100,000; the larger value is a deliberate choice for the bulk load, not a hidden one.
+
+**3 — see what landed** (row count, snapshot history, and a time-travel read of the
+first snapshot):
+
+```bash
+./run.sh python scripts/verify_iceberg.py
+```
+
+**4 — the exactly-once gate.** Loads a known number of records, starts bronze, `SIGKILL`s
+it mid-stream, restarts it from the checkpoint, and asserts no loss, no duplicates, *and*
+that the kill actually interrupted work in progress (a run that drained before the kill
+now fails instead of printing a vacuous PASS).
+
+```bash
+./run.sh python scripts/prove_exactly_once.py --records 120000 --kill-after 25
+```
+
+It runs against its own topic (`reviews.eos`) and therefore its own table
+(`bronze.reviews_eos`) — it cannot touch the production one. About 65 s end to end; full
+Spark output in `checkpoints/eos_run.log`.
+
+### Measured producer throughput
+
+The producer replays the full 701,528-review file in roughly 1.5–3 s: **232,000–484,000
+rec/s**, measured with
+
+```bash
+./run.sh python -m src.ingest.producer --topic audit.perf   # whole file, --rate 0
+```
+
+on an Apple Silicon laptop (16 GB) with the stack running under Colima. Quote the range,
+not a point estimate: the high end is an otherwise-idle host, the low end is the same
+command with nine unrelated containers competing for the VM. The number is host- and
+load-dependent, so a single figure is not reproducible.
+
 ## Service endpoints
 
 | service | endpoint | credentials |
@@ -131,8 +230,28 @@ environment — Spark 3.5 will not start otherwise.
 | Elasticsearch | `localhost:9200` | security disabled (local only) |
 | PostgreSQL | `localhost:5432` | `bigdata` / `bigdata`, db `catalog` |
 
-Memory is capped per container in `docker-compose.yml` (ES 1 GB heap, Kafka 1 GB) because
-Spark runs on the host on the same 16 GB machine.
+## Resource envelope
+
+Everything here shares one 16 GB laptop, and the budget is tighter than it looks.
+
+| what | budget | where |
+|---|---|---|
+| Colima VM | 8 GB / 6 CPU | `colima start --cpu 6 --memory 8` |
+| Kafka container | 2 GB (`-Xmx1G` heap) | `docker-compose.yml` |
+| Elasticsearch container | 2 GB (1 GB heap) | `docker-compose.yml` |
+| MinIO container | 1 GB | `docker-compose.yml` |
+| Postgres container | 512 MB | `docker-compose.yml` |
+| Spark driver (on the host, not in the VM) | 4 GB | `src/common/spark.py` |
+| `.venv` on disk | 1.7 GB (torch alone is 489 MB) | `uv sync` |
+
+Container caps total 5.5 GB of the 8 GB VM, and the Spark driver's 4 GB is host memory on
+top of that. It fits — but only if the VM is running this stack alone. Containers from
+another project sharing the same Colima VM measurably slow the producer (see the
+throughput range above), so stop them before a demo:
+
+```bash
+docker ps --format '{{.Names}}'      # expect only bd-* containers
+```
 
 ## Layout
 
@@ -140,13 +259,14 @@ Spark runs on the host on the same 16 GB machine.
 conf/postgres-init/   catalogue + audit schema
 data/raw/             downloaded JSONL (git-ignored)
 data/sample/          10k-review sample, committed for the submission
-docs/                 profiling output, design document
-scripts/              download, sample, profile
+docs/                 profiling output, audit report
+scripts/              download, sample, profile, healthcheck, verify, EOS gate
 src/common/           config + explicit Spark schemas
 src/ingest/           Kafka producer
-src/spark/            bronze / silver / gold jobs
-src/ai/               embeddings, LLM enrichment, anomaly detection
-src/serving/          Streamlit app
+src/spark/            bronze job (silver / gold: planned)
+src/ai/               empty package (planned)
+src/serving/          empty package (planned)
+tests/                unit tests for the bronze naming + gate verdict logic
 run.sh                JAVA_HOME + uv wrapper
 ```
 
