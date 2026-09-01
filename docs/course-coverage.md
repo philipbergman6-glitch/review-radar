@@ -132,3 +132,97 @@ An earlier pass reported `RAG` ≈ 70. That was a substring false positive —
 `grep -oi rag` matches sto**rag**e (33), ave**rag**e, P**rag**ue, leve**rag**ing.
 True count: **1**. Any term of three or fewer letters needs `-w` or a
 substring audit before it is trusted.
+
+---
+
+# Validation pass (2026-09-01)
+
+The nine findings above came from a hypothesis-driven term list — I grepped for
+technologies I already had in mind, which cannot find what I did not think of.
+This pass re-derives the topic inventory from the **decks' own section headers**
+(`grep -xE "[A-Z][A-Z0-9 &/,'.()-]{4,60}"` after whitespace strip) and checks
+each header against the build.
+
+**Result: the first pass was incomplete.** Five additions and one correction.
+
+## Correction to Finding 1 — the lakehouse IS taught
+Deck 3 has a slide titled `Big Data & Lakehouse architecture` whose diagram is
+labelled, verbatim:
+
+> `Bronze      Silver          Gold`   (deck 3, lines 138 and 208)
+
+`medallion` = 0 mentions, but the bronze/silver/gold layering is on the slide.
+Finding 1 said Iceberg earns no course credit — still true (`Iceberg` = 1, in a
+boilerplate list). But the **architecture** it implements is course-taught.
+Frame it that way: "the course's lakehouse diagram, implemented with a table
+format that gives it ACID snapshots." That is a much stronger answer than
+defending Iceberg on its own.
+
+## Addition A — Kafka Connect (43 mentions) is taught; the project ignores it
+> `KAFKA CONNECT` … `Kafka Connect & Streams`
+> `▪ Kafka Connect is a tool included with Kafka that imports and exports data to Kafka`
+> `▪ Dedicated to importing data from external systems into Kafka topics, and …`
+
+43 mentions is the **third-heaviest Kafka topic in the largest deck**. The
+project's ingestion is a hand-rolled `confluent-kafka` producer
+(`src/ingest/producer.py`). That producer is better engineered than a Connect
+config and demonstrates `acks`/idempotence, which the deck also teaches — but
+Connect being absent is a real coverage hole, not a neutral choice.
+Also taught, lighter: `Kafka Streams` (5), `ksqlDB` (4).
+
+## Addition B — Elasticsearch text analysis is taught heavily; the project has none
+> `TEXT ANALYSIS` / `TEXT ANALYSIS CONCEPTS` / `ANALYZERS` / `INVERTED INDEX`
+
+`analyzer` = 54, `tokenizer` = 13, `inverted index` = 7. Deck 5 also has
+sections for `INDEX TEMPLATES`, `ROUTING`, `FUZZY QUERY`, `MULTI-MATCH QUERY`,
+`COMPOUND QUERIES`, `FUNCTION SCORE QUERY`, `BOOSTING QUERY`, `GEO QUERIES`,
+`DATA STREAM`, `X-PACK`, and `HANDS-ON`.
+
+Grep of the repo for `analyzer|dense_vector|mappings` in `.py`: **no matches**
+outside `scripts/healthcheck.py`. Nothing indexes into Elasticsearch yet.
+When it is built, defining a custom analyzer and an explicit mapping — rather
+than accepting dynamic defaults — converts the single largest deck (264 pages)
+from partial credit into full credit for near-zero extra effort.
+
+## Addition C — the course defines a Big Data project by the V's
+> `▪ When to define a project as a Big Data project?`
+> `▪ Project that involves collection and analyze data with at least on of the 4 V's`
+> `dimensions to big data known as Volume, Variety, Velocity, Variability and [Veracity]`
+
+The design doc should name which V's this project exercises and back each with
+a measured number from `docs/phase0-profile.txt`. This is the instructor's own
+definitional slide; matching it costs a paragraph.
+
+## Addition D — Spark graph processing is taught
+`GraphFrames` = 5, `GraphX` = 4, plus a `Graph` node in the deck-3 architecture
+diagram. Not currently in scope. **Recommend leaving it cut** — co-review
+graphs are a plausible but large detour, and the 25% understanding criterion
+punishes breadth. Recorded so the omission is deliberate.
+
+## Addition E — Kibana confirmed missing in the build
+`docker-compose.yml` services: `kafka`, `minio`, `minio-init`, `elasticsearch`,
+`postgres`. No Kibana. Confirms Finding 2 against the actual file.
+
+## Headers checked and already covered
+Deck 1 `CAP MODEL`, `RDBMS`, `BIG DATA DB`; deck 2 `HADOOP DISTRIBUTED [FS]`,
+`ZOOKEEPER`, `PARQUET`, `APACHE FLUME/OOZIE/SQOOP`, `MR V1`, `HADOOP V2`;
+deck 3 `SPARK CORE/SQL/ARCHITECTURE/MLLIB/STRUCTURED STREAMING`, `DATABRICKS`;
+deck 4 `KAFKA BROKER/TOPICS/PRODUCER/CONSUMER/REPLICATION/ARCHITECTURE`,
+`SASL SCRAM`, `TUNING KAFKA FOR OPTIMAL PERFORMANCE`; deck 5 `LUCENE`,
+`ELASTICSEARCH SCORE`, `RESTFUL API`, `SEARCHING DATA`, `CRUD`, `BEATS`.
+`ML/DL/LLM` and `THE SYNERGY` are diagram labels in the deck-3 architecture
+picture, not taught units.
+
+## Ranked answer to "do we need to add anything else?"
+1. **Kibana** — expected verbatim, missing, ~10 lines of compose. Do it.
+2. **ES explicit mapping + custom analyzer** — unlocks full credit on the
+   largest deck; must be written anyway when indexing is built.
+3. **State the V's in the design doc** — one paragraph, uses existing numbers.
+4. **Kafka Connect** — real hole; cheapest fix is one sink/source connector
+   alongside the hand-rolled producer, or a defensible written justification.
+5. **HDFS** — still unresolved from Finding 7; taught hands-on.
+6. **Oozie** — still an opinion-based cut (Finding 8).
+7. **GraphFrames** — deliberately declined.
+
+Everything else the decks teach is either already in the build or is a Hadoop
+component covered by findings 7-8.
