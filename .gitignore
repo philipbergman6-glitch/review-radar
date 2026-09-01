@@ -1,5 +1,4 @@
 data/raw/
-data/sample/
 data/warehouse/
 .venv/
 __pycache__/

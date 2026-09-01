@@ -170,6 +170,18 @@ partitions), keys every record by `parent_asin`, and reports throughput as it go
 #  --source PATH override the input .jsonl
 ```
 
+**Running on the sample.** `data/sample/` is committed (10k reviews, 5k products — the
+first N lines of each raw file, so `scripts/make_sample.py` reproduces it exactly). It
+lets you replay step 1 without the 0.54 GB download:
+
+```bash
+./run.sh python -m src.ingest.producer --source data/sample/All_Beauty.sample.jsonl
+```
+
+Everything downstream — bronze, the verify script, the exactly-once gate — then runs
+against 10k rows instead of 701,528. `scripts/download_data.py` and
+`scripts/profile_data.py` still need the full raw files.
+
 **2 — drain the topic into the bronze Iceberg table.** `--trigger once` processes
 everything available and stops; a duration like `--trigger 5s` keeps the query running.
 The table and checkpoint are derived from the topic name, so `reviews.raw` can only ever
@@ -258,7 +270,7 @@ docker ps --format '{{.Names}}'      # expect only bd-* containers
 ```
 conf/postgres-init/   catalogue + audit schema
 data/raw/             downloaded JSONL (git-ignored)
-data/sample/          10k-review sample, committed for the submission
+data/sample/          10k reviews + 5k products, committed (see "Running on the sample")
 docs/                 profiling output, audit report
 scripts/              download, sample, profile, healthcheck, verify, EOS gate
 src/common/           config + explicit Spark schemas
