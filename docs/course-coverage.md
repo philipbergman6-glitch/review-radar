@@ -226,3 +226,136 @@ picture, not taught units.
 
 Everything else the decks teach is either already in the build or is a Hadoop
 component covered by findings 7-8.
+
+---
+
+# Decisions (2026-09-01)
+
+Resolutions for the seven ranked items above, with the argument to use in the
+design doc and the Q&A. Items 1-3 are committed work; 4-7 are reasoned
+positions that must survive a follow-up question.
+
+## 1. Kibana — ADD. Committed to Phase 2.
+Not a judgement call. Deck 5, verbatim: `We will mostly use Kibana throughout
+this course`, and the ELK diagram is `Beats  Kafka  Logstash  Elasticsearch
+Kibana`. One compose service against the running Elasticsearch, plus a saved
+dashboard over the gold layer. It also solves a separate problem: the live demo
+currently has no visual surface, and presentation is 10% of the grade.
+
+## 2. Explicit ES mapping + custom analyzer — ADD. Committed to Phase 2.
+Deck 5 is the largest deck (264 pages) and teaches `TEXT ANALYSIS`, `ANALYZERS`,
+`INVERTED INDEX`, `tokenizer` (13), `analyzer` (54). Indexing has to be written
+anyway; writing it with an explicit mapping and a deliberately chosen analyzer
+instead of dynamic defaults costs almost nothing and is the difference between
+"used Elasticsearch" and "understood Elasticsearch".
+
+Concretely: define the review-text field with a custom analyzer (lowercase +
+stop + stemmer), keep a `.keyword` subfield for aggregations, and give
+`dense_vector` its own explicit field. Then the BM25-vs-kNN comparison in
+Finding 3 runs against a mapping we can explain line by line.
+
+## 3. Name the V's in the design doc — ADD. One paragraph.
+Deck 2 defines the scope: `Project that involves collection and analyze data
+with at least on of the 4 V's`. Each claim gets a measured number from
+`docs/phase0-profile.txt` rather than an adjective:
+
+- **Volume** — 701,528 reviews / 112,590 products; 311 MB JSONL compacting to
+  96.5 MB Parquet+zstd (3.2x).
+- **Velocity** — sustained 483,503 records/s into Kafka; Structured Streaming
+  consumed 701,528 rows in ~11 s across 5 micro-batches.
+- **Variety** — semi-structured JSON with a free-form `details` object whose
+  keys collide on case (this is why `src/common/schemas.py` types it as a
+  string), plus a relational catalogue joined from PostgreSQL.
+- **Veracity** — 6,139 duplicate `(user_id, parent_asin, timestamp)` triples,
+  720 empty-text reviews, `price` present on only 15.7% of products and dirty
+  when present (`null` / `9.99` / `$9.99` / ranges).
+
+Variability is the fifth V on the slide; the 2000-2023 span with a 2020 peak of
+126,753 reviews covers it if asked.
+
+## 4. Kafka Connect — DECLINE the connector, but the honest reason is narrow
+The deck answers this itself. On what Connect ships with:
+
+> `▪ The Kafka project does not itself develop any actual connectors (sources or
+>   sinks) for Kafka Connect`
+> `        ▪ Except for a trivial "file" connector`
+
+Our source is a local JSONL replay, so the only Connect source that would apply
+is the one the deck calls **trivial**. Swapping a hand-written producer that
+demonstrates `acks=all`, `enable.idempotence`, keyed partitioning by
+`parent_asin` and `BufferError` backpressure — all four taught in deck 4, with
+`props.put("acks", "all")` appearing verbatim on a slide — for a two-line file
+connector config would *lose* demonstrated understanding, not gain it. That is
+the argument, and it is a good one.
+
+**But be honest about its limit.** The deck also says:
+
+> `▪ Kafka Connect connectors for JDBC, HDFS, S3, and Elasticsearch`
+
+So a *sink* connector is not covered by the "trivial file connector" argument.
+An Elasticsearch sink is a genuine, non-trivial, course-named use of Connect,
+and we will be writing Kafka-to-Elasticsearch data movement regardless.
+
+**Position:** decline a Connect *source* on the reasoning above. Treat a Connect
+*Elasticsearch sink* as the top stretch item — take it if Phase 2 and 3 land
+comfortably, since it closes a 43-mention hole for modest work. If it is not
+taken, say so out loud in the design doc rather than leaving it unmentioned;
+an acknowledged gap reads as judgement, an unmentioned one reads as ignorance.
+
+Kafka Streams (5 mentions) and ksqlDB (4) stay cut — Spark already does the
+stream processing and duplicating it would add surface without adding
+understanding.
+
+## 5. HDFS — DECLINE, on a resource argument, stated plainly
+The hardest of the seven. Deck 2 teaches it hands-on, with live transcripts
+(`root@eff23c07f886:~# hdfs dfs -ls /`), 41 mentions.
+
+The argument: the machine is 16 GB with Colima allotted 8, already running
+Kafka, Elasticsearch, PostgreSQL, MinIO and Spark. A NameNode plus DataNodes
+does not fit alongside them, and the project needs S3-compatible object storage
+for Iceberg regardless, so MinIO is not a substitute chosen out of preference —
+it is the storage layer the table format requires.
+
+The concession to make explicitly: HDFS and MinIO are not equivalent. HDFS is a
+distributed filesystem with block-level replication and rack awareness; MinIO is
+an object store with a flat key space and no rename. The design decision is
+defensible; claiming they are interchangeable is not.
+
+**Fallback if this feels too exposed:** a single-node HDFS container used for
+exactly one demonstrated step — `hdfs dfs -put` of the raw JSONL, read back by
+Spark — proves the API without carrying a cluster. Cheap insurance for 41
+mentions. Take it if memory allows after Kibana is in.
+
+## 6. Oozie, Sqoop, Pig — DECLINE. Sqoop has a citation; the others do not.
+Sqoop is settled by the course's own slide:
+
+> `▪ Apache Sqoop moved into the Attic in June 2021`
+
+Quote it verbatim. Pig (3 mentions total) goes with it — the deck pairs them as
+`Apache Sqoop (Extract, Load), Apache Pig (Transform)`, and Spark SQL performs
+both in one engine.
+
+Oozie has **no such escape hatch** — it is not retired, and deck 2 teaches it as
+`Hadoop ETL - Apache Oozie` across 25 mentions with the stated motivation
+`A need for a general-purpose system to run multistage Hadoop jobs`. The cut
+rests on the claim that Spark Structured Streaming plus checkpointed jobs make a
+separate XML workflow scheduler redundant for a pipeline of this shape. That is
+an opinion, defensible but unsupported by any quote. **Own it as an opinion.**
+The follow-up to prepare for is "so how do you orchestrate multi-stage jobs?" —
+answer with the actual mechanism (checkpoint-gated stages, `availableNow`
+triggers, the `pipeline_runs` audit table in PostgreSQL), not with a dismissal
+of Oozie.
+
+## 7. GraphFrames / GraphX — DECLINE, deliberately
+`GraphFrames` 5, `GraphX` 4, plus a `Graph` node in the deck-3 architecture
+diagram. A co-review or co-purchase graph is plausible on this dataset and would
+be interesting. It is cut because the rubric's 25% understanding component
+punishes breadth, and the AI scope is already the largest risk in the project.
+Recorded here so the omission is a decision rather than an oversight.
+
+## Standing rule
+Every one of these cuts is a sentence in the design doc, not a silence. The
+rubric line is "use of course technologies", and a technology consciously
+declined with a stated reason demonstrates more command of the material than one
+included without understanding. Silence on a 41-mention topic reads as a gap;
+a paragraph on it reads as engineering judgement.
