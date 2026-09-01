@@ -261,8 +261,8 @@ with at least on of the 4 V's`. Each claim gets a measured number from
 
 - **Volume** — 701,528 reviews / 112,590 products; 311 MB JSONL compacting to
   96.5 MB Parquet+zstd (3.2x).
-- **Velocity** — sustained 483,503 records/s into Kafka; Structured Streaming
-  consumed 701,528 rows in ~11 s across 5 micro-batches.
+- **Velocity** — ~232k records/s into Kafka (measured 2026-09-01; earlier run reported 483k); Structured Streaming
+  consumed 701,528 rows in ~5 s across 5 micro-batches.
 - **Variety** — semi-structured JSON with a free-form `details` object whose
   keys collide on case (this is why `src/common/schemas.py` types it as a
   string), plus a relational catalogue joined from PostgreSQL.
