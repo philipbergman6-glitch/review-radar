@@ -10,3 +10,8 @@ spark-warehouse/
 checkpoints/
 *.crc
 .ipynb_checkpoints/
+
+# Course material — copyrighted lecture slides and their extracted text.
+# Kept locally as a grep target; never committed.
+docs/course/
+בר אילן*.pdf
