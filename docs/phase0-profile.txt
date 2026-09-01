@@ -1,0 +1,152 @@
+==============================================================================
+REVIEW SCHEMA
+==============================================================================
+root
+ |-- rating: double (nullable = true)
+ |-- title: string (nullable = true)
+ |-- text: string (nullable = true)
+ |-- images: array (nullable = true)
+ |    |-- element: struct (containsNull = true)
+ |    |    |-- small_image_url: string (nullable = true)
+ |    |    |-- medium_image_url: string (nullable = true)
+ |    |    |-- large_image_url: string (nullable = true)
+ |    |    |-- attachment_type: string (nullable = true)
+ |-- asin: string (nullable = true)
+ |-- parent_asin: string (nullable = true)
+ |-- user_id: string (nullable = true)
+ |-- timestamp: long (nullable = true)
+ |-- helpful_vote: integer (nullable = true)
+ |-- verified_purchase: boolean (nullable = true)
+==============================================================================
+META SCHEMA
+==============================================================================
+root
+ |-- main_category: string (nullable = true)
+ |-- title: string (nullable = true)
+ |-- average_rating: double (nullable = true)
+ |-- rating_number: integer (nullable = true)
+ |-- features: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+ |-- description: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+ |-- price: string (nullable = true)
+ |-- images: array (nullable = true)
+ |    |-- element: struct (containsNull = true)
+ |    |    |-- thumb: string (nullable = true)
+ |    |    |-- large: string (nullable = true)
+ |    |    |-- variant: string (nullable = true)
+ |    |    |-- hi_res: string (nullable = true)
+ |-- videos: array (nullable = true)
+ |    |-- element: struct (containsNull = true)
+ |    |    |-- title: string (nullable = true)
+ |    |    |-- url: string (nullable = true)
+ |    |    |-- user_id: string (nullable = true)
+ |-- store: string (nullable = true)
+ |-- categories: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+ |-- details: string (nullable = true)
+ |-- parent_asin: string (nullable = true)
+ |-- bought_together: string (nullable = true)
+==============================================================================
+VOLUME
+==============================================================================
+reviews          : 701,528
+products (meta)  : 112,590
+distinct users   : 631,986
+distinct products: 112,565
+==============================================================================
+TEXT QUALITY (drives the AI component)
+==============================================================================
++------------------+---------+---------+---------+-----------------+
+|mean_chars        |p50_chars|p90_chars|max_chars|mean_words       |
++------------------+---------+---------+---------+-----------------+
+|173.03164093236478|102      |386      |14989    |32.75012258954739|
++------------------+---------+---------+---------+-----------------+
+empty-text reviews: 720 (0.10%)
+reviews >= 20 words (worth embedding): 349,059 (49.8%)
+==============================================================================
+RATING DISTRIBUTION (class imbalance for the AI step)
+==============================================================================
++------+------+-----+
+|rating| count|  pct|
++------+------+-----+
+|   1.0|102080|14.55|
+|   2.0| 43034| 6.13|
+|   3.0| 56307| 8.03|
+|   4.0| 79381|11.32|
+|   5.0|420726|59.97|
++------+------+-----+
+==============================================================================
+TIME RANGE (windowing for drift / anomaly detection)
+==============================================================================
++-------------------+-----------------------+
+|first              |last                   |
++-------------------+-----------------------+
+|2000-11-01 04:24:18|2023-09-09 00:39:36.666|
++-------------------+-----------------------+
++----+------+
+|  yr| count|
++----+------+
+|2000|     1|
+|2001|    12|
+|2002|    24|
+|2003|    56|
+|2004|   134|
+|2005|   267|
+|2006|   419|
+|2007|  1162|
+|2008|  1269|
+|2009|  1207|
+|2010|  1586|
+|2011|  1877|
+|2012|  2803|
+|2013|  7948|
+|2014| 16279|
+|2015| 36239|
+|2016| 62747|
+|2017| 68035|
+|2018| 72707|
+|2019| 99120|
+|2020|126753|
+|2021|124897|
+|2022| 61581|
+|2023| 14405|
++----+------+
+==============================================================================
+VERIFIED PURCHASE / HELPFULNESS
+==============================================================================
++-----------------+------+
+|verified_purchase| count|
++-----------------+------+
+|             true|634969|
+|            false| 66559|
++-----------------+------+
++------------------+-----------+
+|      mean_helpful|max_helpful|
++------------------+-----------+
+|0.9235882245612435|        646|
++------------------+-----------+
+==============================================================================
+REVIEW VOLUME PER PRODUCT (skew -> partitioning talking point)
+==============================================================================
++------------------+---+---+----+
+|              mean|p50|p99| max|
++------------------+---+---+----+
+|6.2322036156887135|  2| 72|1962|
++------------------+---+---+----+
+products with >= 50 reviews (candidates for trend analysis): 1,902
+==============================================================================
+META COMPLETENESS (join quality)
+==============================================================================
+title          non-null:  112,590 (100.0%)
+price          non-null:   17,704 ( 15.7%)
+store          non-null:  101,259 ( 89.9%)
+description    non-null:  112,590 (100.0%)
+features       non-null:  112,590 (100.0%)
+categories     non-null:  112,590 (100.0%)
+details        non-null:  112,590 (100.0%)
+review products matched in meta: 112,565/112,565 (100.0%)
+==============================================================================
+DUPLICATES (dedupe step in silver)
+==============================================================================
+(user_id, parent_asin, timestamp) collisions: 6,139

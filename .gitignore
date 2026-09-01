@@ -1,0 +1,12 @@
+data/raw/
+data/sample/
+data/warehouse/
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+spark-warehouse/
+checkpoints/
+*.crc
+.ipynb_checkpoints/
