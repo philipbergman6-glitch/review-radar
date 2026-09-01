@@ -7,11 +7,13 @@ source is deterministic and repeatable.
 
 Design notes worth being able to defend:
 
-* key = parent_asin. Kafka guarantees ordering *within a partition*, and the
-  partition is chosen by hashing the key. Keying by product means all reviews for
-  one product land on one partition in arrival order, which is exactly the
-  ordering guarantee the per-product trend analysis needs. Keying by review id
-  would spread them and lose it.
+* key = parent_asin. The partition is chosen by hashing the key, so keying by
+  product co-locates every review for one product on a single partition. That
+  buys locality, not time-ordering: records land in the order this replay sends
+  them, which is the order of lines in the raw file -- not review timestamp
+  order. Anything that depends on event time must sort or window on the
+  timestamp field downstream. Keying by review id would scatter a product's
+  reviews across partitions and lose even the locality.
 * We send the raw JSON line untouched. Parsing belongs in the bronze->silver
   step, so that a parsing bug never destroys data we can no longer recover.
 * Malformed lines are counted and reported, never silently skipped.
