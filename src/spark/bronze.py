@@ -165,6 +165,12 @@ def main() -> None:
               .format("iceberg")
               .outputMode("append")
               .option("checkpointLocation", str(checkpoint))
+              # ingest_date comes from wall-clock time, so a micro-batch that
+              # straddles midnight carries two partition values. Without fanout
+              # the Iceberg sink requires each task's rows to arrive sorted by
+              # partition and fails otherwise; fanout keeps one writer open per
+              # partition instead, which buys that robustness for the price of
+              # at most two open writers per task.
               .option("fanout-enabled", "true"))
 
     if args.trigger == "once":

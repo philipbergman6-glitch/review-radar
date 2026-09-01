@@ -119,9 +119,11 @@ producer before demo, or set topic retention to -1 for the project.
 `ingest_date` partition. Fine for bronze (that is the standard choice), but silver must
 partition by review month or the time-window queries scan everything.
 
-**F11 — `fanout-enabled=true` (`bronze.py:142`) is unexplained.** With one partition value
-it does nothing but hold writers open; an examiner asking "why?" gets no answer from the
-docstring. Explain or remove.
+**F11 — `fanout-enabled=true` was unexplained. [resolved]** Kept, with the reason now
+stated inline at the option in `bronze.py`: `ingest_date` is derived from wall-clock time,
+so a micro-batch straddling midnight carries two partition values, and without fanout the
+Iceberg sink requires each task's rows sorted by partition. Cost is at most two open
+writers per task.
 
 **F12 — Constructs the student must be able to explain in one sentence each (Q&A traps):**
 `bronze.py:10-18` sink dedupe — answer: "Iceberg writes `spark.sql.streaming.queryId` +
