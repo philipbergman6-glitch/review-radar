@@ -24,6 +24,7 @@ Run:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -33,8 +34,31 @@ from src.common.spark import CATALOG, build  # noqa: E402
 
 from pyspark.sql import functions as F  # noqa: E402
 
-TABLE = f"{CATALOG}.bronze.reviews_raw"
-CHECKPOINT = C.CHECKPOINTS / "bronze_reviews"
+# The exactly-once gate kills this process with SIGKILL. stdout redirected to a
+# file is block-buffered by default, so everything printed since the last 4 KB
+# boundary dies with the process and the log ends mid-startup (F7). Line
+# buffering costs nothing here and makes the log a usable post-mortem.
+sys.stdout.reconfigure(line_buffering=True)
+
+
+def names_for(topic: str) -> tuple[str, Path]:
+    """Derive the bronze table and checkpoint directory from the topic name.
+
+    These used to be module constants, which meant `--topic reviews.eos` still
+    wrote to -- and `--reset-only` still dropped -- the production table. The
+    exactly-once gate is destructive by design, so the only safe arrangement is
+    that a different topic can only ever reach a different table and a
+    different checkpoint.
+
+    'reviews.raw' -> ('...bronze.reviews_raw', checkpoints/bronze_reviews_raw),
+    which is the table that already holds the production data.
+    """
+    slug = re.sub(r"[^a-z0-9]+", "_", topic.lower()).strip("_")
+    if not slug or slug[0].isdigit():
+        raise ValueError(
+            f"Topic '{topic}' does not yield a usable table name. "
+            "Topics must contain a letter and start with one.")
+    return f"{CATALOG}.bronze.{slug}", C.CHECKPOINTS / f"bronze_{slug}"
 
 
 _UNITS = {"ms": "milliseconds", "s": "seconds", "m": "minutes", "h": "hours"}
@@ -59,10 +83,10 @@ def normalise_trigger(value: str) -> str:
     return f"{m.group(1)} {_UNITS[m.group(2)]}"
 
 
-def ensure_table(spark) -> None:
+def ensure_table(spark, table: str) -> None:
     spark.sql(f"CREATE NAMESPACE IF NOT EXISTS {CATALOG}.bronze")
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS {TABLE} (
+        CREATE TABLE IF NOT EXISTS {table} (
             payload         STRING   COMMENT 'the raw JSON line, untouched',
             kafka_key       STRING   COMMENT 'parent_asin -- the partition key',
             kafka_topic     STRING,
@@ -96,17 +120,19 @@ def main() -> None:
                     help="drop the table and checkpoint, then exit without streaming")
     args = ap.parse_args()
 
+    table, checkpoint = names_for(args.topic)
+
     spark = build("bronze-reviews")
 
     if args.reset or args.reset_only:
-        print(f"[bronze] RESET: dropping {TABLE} and {CHECKPOINT}")
-        spark.sql(f"DROP TABLE IF EXISTS {TABLE} PURGE")
-        if CHECKPOINT.exists():
+        print(f"[bronze] RESET: dropping {table} and {checkpoint}")
+        spark.sql(f"DROP TABLE IF EXISTS {table} PURGE")
+        if checkpoint.exists():
             import shutil
-            shutil.rmtree(CHECKPOINT)
+            shutil.rmtree(checkpoint)
 
-    ensure_table(spark)
-    CHECKPOINT.mkdir(parents=True, exist_ok=True)
+    ensure_table(spark, table)
+    checkpoint.mkdir(parents=True, exist_ok=True)
 
     if args.reset_only:
         print("[bronze] reset complete, exiting without streaming")
@@ -138,29 +164,29 @@ def main() -> None:
     writer = (shaped.writeStream
               .format("iceberg")
               .outputMode("append")
-              .option("checkpointLocation", str(CHECKPOINT))
+              .option("checkpointLocation", str(checkpoint))
               .option("fanout-enabled", "true"))
 
     if args.trigger == "once":
         writer = writer.trigger(availableNow=True)
-        print(f"[bronze] draining '{args.topic}' into {TABLE} (availableNow)")
+        print(f"[bronze] draining '{args.topic}' into {table} (availableNow)")
     else:
         interval = normalise_trigger(args.trigger)
         writer = writer.trigger(processingTime=interval)
-        print(f"[bronze] streaming '{args.topic}' into {TABLE} every {interval} -- Ctrl-C to stop")
+        print(f"[bronze] streaming '{args.topic}' into {table} every {interval} -- Ctrl-C to stop")
 
-    query = writer.toTable(TABLE)
+    query = writer.toTable(table)
     try:
         query.awaitTermination()
     except KeyboardInterrupt:
         print("\n[bronze] stopping cleanly (checkpoint is safe)...")
         query.stop()
 
-    total = spark.table(TABLE).count()
-    print(f"\n[bronze] {TABLE} now holds {total:,} rows")
+    total = spark.table(table).count()
+    print(f"\n[bronze] {table} now holds {total:,} rows")
     spark.sql(f"""SELECT snapshot_id, committed_at, operation,
                          summary['added-records'] AS added
-                  FROM {TABLE}.snapshots ORDER BY committed_at DESC""").show(5, truncate=False)
+                  FROM {table}.snapshots ORDER BY committed_at DESC""").show(5, truncate=False)
     spark.stop()
 
 
