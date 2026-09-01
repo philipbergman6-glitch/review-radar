@@ -114,6 +114,11 @@ Fix: `docker compose --profile` / stop unrelated stacks in the demo runbook; mea
 `docker-compose.yml:29`, `bronze.py:124`. A restart against a checkpoint whose offsets
 have aged out fails hard (which is the correct choice). Mitigation in runbook: re-run
 producer before demo, or set topic retention to -1 for the project.
+*Mitigation now written up in `docs/DEMO_RUNBOOK.md` §1, with the `retention.ms=-1`
+command verified against the broker. Not yet applied to the live topics — that is a
+manual step in the runbook's T-1 day checklist. The runbook also records that both
+current checkpoints sit at the log end, so the loud `failOnDataLoss` abort is not the
+mode at risk today; the silent one (topic empties, bronze lands 0 rows) is.*
 
 **F10 — Bronze partitioning is inert for a replay. [observed]** All 701,528 rows in one
 `ingest_date` partition. Fine for bronze (that is the standard choice), but silver must

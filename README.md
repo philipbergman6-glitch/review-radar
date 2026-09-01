@@ -26,7 +26,8 @@ stays in this README until it is all in the "built" column.
 | AI: LLM aspect sentiment + validation | *planned* | — |
 | AI: RAG question answering | *planned* | — |
 | Streamlit app | *planned* | `src/serving/` is an empty package |
-| Design doc, slides, demo runbook | *planned* | `docs/` holds the profile and the audit only |
+| Demo runbook | **built** | [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md) — Kafka retention, memory, pre-demo checklist |
+| Design doc, slides | *planned* | `docs/` holds the profile, the audit and the runbook |
 
 ## Dataset
 
