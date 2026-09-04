@@ -30,6 +30,19 @@ dependencies = [
 [dependency-groups]
 dev = ["jupyter>=1.1", "ipykernel>=6.29", "ruff>=0.7", "pytest>=8.3"]
 
+# The repo is an installable package so `src.*` imports resolve from any working
+# directory (spark-submit, cron, CI) without sys.path hacks in the entrypoints.
+# `uv sync` installs it editable into .venv.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.uv]
+package = true
+
 [tool.ruff]
 line-length = 100
 

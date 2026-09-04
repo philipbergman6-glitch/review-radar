@@ -27,16 +27,15 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from src.common.config import CATEGORY, DATA_RAW, KAFKA_BOOTSTRAP, TOPIC_REVIEWS  # noqa: E402
+from confluent_kafka import Producer
+from confluent_kafka.admin import AdminClient, NewTopic
 
-from confluent_kafka import Producer  # noqa: E402
-from confluent_kafka.admin import AdminClient, NewTopic  # noqa: E402
+from src.common.config import CATEGORY, DATA_RAW, KAFKA_BOOTSTRAP, TOPIC_REVIEWS
 
 _stop = False
 
 
-def _handle_sigint(signum, frame):  # noqa: ARG001
+def _handle_sigint(signum, frame):
     global _stop
     _stop = True
     print("\n[producer] stop requested, flushing...", flush=True)
@@ -91,7 +90,7 @@ def main() -> None:
     t0 = time.time()
     interval = 1.0 / args.rate if args.rate > 0 else 0.0
 
-    def on_delivery(err, msg):  # noqa: ARG001
+    def on_delivery(err, msg):
         nonlocal failed
         if err is not None:
             failed += 1

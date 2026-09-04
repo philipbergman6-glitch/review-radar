@@ -35,7 +35,6 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
 
 sys.stdout.reconfigure(line_buffering=True)
 
@@ -59,7 +58,7 @@ def reset_topic(topic: str) -> None:
 
     admin = AdminClient({"bootstrap.servers": KAFKA_BOOTSTRAP})
     if topic in admin.list_topics(timeout=10).topics:
-        for _, fut in admin.delete_topics([topic]).items():
+        for fut in admin.delete_topics([topic]).values():
             fut.result(timeout=30)
         # Deletion is asynchronous inside the broker; wait for it to disappear.
         for _ in range(30):
@@ -67,8 +66,8 @@ def reset_topic(topic: str) -> None:
                     {"bootstrap.servers": KAFKA_BOOTSTRAP}).list_topics(timeout=10).topics:
                 break
             time.sleep(1)
-    for _, fut in admin.create_topics([NewTopic(topic, num_partitions=6,
-                                                replication_factor=1)]).items():
+    for fut in admin.create_topics([NewTopic(topic, num_partitions=6,
+                                             replication_factor=1)]).values():
         fut.result(timeout=30)
     time.sleep(2)
 
@@ -77,12 +76,11 @@ def bronze_count(table: str) -> int:
     """Count bronze rows in a separate short-lived Spark session."""
     out = subprocess.run(
         [PY_BIN, "-c",
-         "import sys; sys.path.insert(0,'.');"
-         "from src.common.spark import build;"
-         "s=build('count', cores='local[2]');"
-         f"print('COUNT=%d' % s.table('{table}').count());"
-         "s.stop()"],
-        env=ENV, cwd=ROOT, capture_output=True, text=True)
+         ("from src.common.spark import build;"
+          "s=build('count', cores='local[2]');"
+          f"print('COUNT=%d' % s.table('{table}').count());"
+          "s.stop()")],
+        env=ENV, cwd=ROOT, capture_output=True, text=True, check=False)
     for line in out.stdout.splitlines():
         if line.startswith("COUNT="):
             return int(line.split("=")[1])
@@ -92,13 +90,12 @@ def bronze_count(table: str) -> int:
 def duplicate_offsets(table: str) -> int:
     out = subprocess.run(
         [PY_BIN, "-c",
-         "import sys; sys.path.insert(0,'.');"
-         "from src.common.spark import build;"
-         "s=build('dupes', cores='local[2]');"
-         f"t=s.table('{table}');"
-         "d=t.groupBy('kafka_partition','kafka_offset').count().filter('count > 1').count();"
-         "print('DUPES=%d' % d); s.stop()"],
-        env=ENV, cwd=ROOT, capture_output=True, text=True)
+         ("from src.common.spark import build;"
+          "s=build('dupes', cores='local[2]');"
+          f"t=s.table('{table}');"
+          "d=t.groupBy('kafka_partition','kafka_offset').count().filter('count > 1').count();"
+          "print('DUPES=%d' % d); s.stop()")],
+        env=ENV, cwd=ROOT, capture_output=True, text=True, check=False)
     for line in out.stdout.splitlines():
         if line.startswith("DUPES="):
             return int(line.split("=")[1])

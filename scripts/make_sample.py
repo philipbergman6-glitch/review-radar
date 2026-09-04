@@ -6,11 +6,9 @@ project (the full files are far too big to commit).
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.common.config import CATEGORY, DATA_RAW, DATA_SAMPLE  # noqa: E402
+from src.common.config import CATEGORY, DATA_RAW, DATA_SAMPLE
 
 
 def head_lines(src: Path, dst: Path, n: int) -> int:

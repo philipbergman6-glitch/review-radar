@@ -28,11 +28,10 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from src.common import config as C  # noqa: E402
-from src.common.spark import CATALOG, build  # noqa: E402
+from pyspark.sql import functions as F
 
-from pyspark.sql import functions as F  # noqa: E402
+from src.common import config as C
+from src.common.spark import CATALOG, build
 
 # The exactly-once gate kills this process with SIGKILL. stdout redirected to a
 # file is block-buffered by default, so everything printed since the last 4 KB

@@ -5,11 +5,7 @@ demonstrates the time-travel capability the demo relies on.
 """
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.common.spark import CATALOG, build  # noqa: E402
+from src.common.spark import CATALOG, build
 
 spark = build("verify-iceberg")
 spark.sql(f"CREATE NAMESPACE IF NOT EXISTS {CATALOG}.smoke")

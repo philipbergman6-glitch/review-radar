@@ -1,6 +1,9 @@
 # Local "cluster" for the Big Data & AI final project.
 # Memory-capped on purpose: this runs alongside Spark on a 16 GB laptop.
 # Spark itself runs on the HOST (not containerised) so it can use the remaining RAM.
+#
+# Credentials come from .env (compose reads it automatically). `${VAR:?}` makes a
+# missing value fail `docker compose up` loudly instead of starting with defaults.
 
 services:
 
@@ -48,8 +51,8 @@ services:
       - "9000:9000"   # S3 API
       - "9001:9001"   # web console
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?S3_ACCESS_KEY missing from .env}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?S3_SECRET_KEY missing from .env}
     volumes:
       - minio-data:/data
     healthcheck:
@@ -63,13 +66,17 @@ services:
   minio-init:
     image: minio/mc:RELEASE.2025-04-16T18-13-26Z
     container_name: bd-minio-init
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?}
+      S3_BUCKET: ${S3_BUCKET:-lakehouse}
     depends_on:
       minio:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      mc alias set local http://minio:9000 minioadmin minioadmin &&
-      mc mb --ignore-existing local/lakehouse &&
+      mc alias set local http://minio:9000 "$$S3_ACCESS_KEY" "$$S3_SECRET_KEY" &&
+      mc mb --ignore-existing local/$$S3_BUCKET &&
       echo 'buckets ready'
       "
     restart: "no"
@@ -108,14 +115,14 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: catalog
-      POSTGRES_USER: bigdata
-      POSTGRES_PASSWORD: bigdata
+      POSTGRES_DB: ${PG_DB:-catalog}
+      POSTGRES_USER: ${PG_USER:?PG_USER missing from .env}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?PG_PASSWORD missing from .env}
     volumes:
       - pg-data:/var/lib/postgresql/data
       - ./conf/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bigdata -d catalog"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 10

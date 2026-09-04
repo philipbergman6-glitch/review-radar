@@ -3,7 +3,7 @@ id: RR-15
 title: Repo professional baseline — CI, secrets, packaging
 type: task
 status: open
-assignee: unassigned
+assignee: philipbergman (claimed 2026-09-04)
 blocked-by: []
 blocks: [RR-14]
 ---

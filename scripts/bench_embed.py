@@ -20,16 +20,16 @@ import statistics
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.common.config import CATEGORY, DATA_SAMPLE, EMBED_MODEL  # noqa: E402
+from src.common.config import CATEGORY, DATA_SAMPLE, EMBED_MODEL
 
 
 def sh(cmd: list[str]) -> str:
     try:
-        return subprocess.run(cmd, capture_output=True, text=True, timeout=30).stdout.strip()
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=30,
+                              check=False).stdout.strip()
     except Exception as exc:  # noqa: BLE001 - conditions are best-effort, never fatal
         return f"<unavailable: {exc}>"
 
@@ -52,7 +52,7 @@ def load_texts(path: Path, n: int) -> list[str]:
 
 def pct(values: list[int], p: float) -> int:
     s = sorted(values)
-    return s[min(len(s) - 1, int(round(p * (len(s) - 1))))]
+    return s[min(len(s) - 1, round(p * (len(s) - 1)))]
 
 
 def length_stats(texts: list[str]) -> dict:
@@ -89,14 +89,14 @@ def main() -> None:
     ap.add_argument("--sample", type=Path, default=DATA_SAMPLE / f"{CATEGORY}.sample.jsonl")
     args = ap.parse_args()
 
-    import torch  # noqa: E402  (imported late so --help is fast)
-    from sentence_transformers import SentenceTransformer  # noqa: E402
+    import torch  # imported late so --help is fast
+    from sentence_transformers import SentenceTransformer
 
     texts = load_texts(args.sample, args.n)
     stats = length_stats(texts)
 
     conditions = {
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "timestamp_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "label": args.label,
         "cpu": sh(["sysctl", "-n", "machdep.cpu.brand_string"]) if sys.platform == "darwin" else platform.processor(),
         "ncpu": sh(["sysctl", "-n", "hw.ncpu"]) if sys.platform == "darwin" else "",

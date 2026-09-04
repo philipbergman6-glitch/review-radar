@@ -32,8 +32,10 @@ TOPIC_REVIEWS = os.getenv("KAFKA_TOPIC_REVIEWS", "reviews.raw")
 
 # ---- MinIO / S3 ----
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localhost:9000")
-S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "minioadmin")
-S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "minioadmin")
+# Credentials have no default on purpose: a missing .env must fail here, not
+# silently connect with a well-known password.
+S3_ACCESS_KEY = _req("S3_ACCESS_KEY")
+S3_SECRET_KEY = _req("S3_SECRET_KEY")
 S3_BUCKET = os.getenv("S3_BUCKET", "lakehouse")
 
 # ---- Elasticsearch ----
@@ -44,7 +46,7 @@ PG_HOST = os.getenv("PG_HOST", "localhost")
 PG_PORT = int(os.getenv("PG_PORT", "5432"))
 PG_DB = os.getenv("PG_DB", "catalog")
 PG_USER = os.getenv("PG_USER", "bigdata")
-PG_PASSWORD = os.getenv("PG_PASSWORD", "bigdata")
+PG_PASSWORD = _req("PG_PASSWORD")
 PG_JDBC_URL = f"jdbc:postgresql://{PG_HOST}:{PG_PORT}/{PG_DB}"
 
 # ---- AI ----

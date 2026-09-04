@@ -10,11 +10,9 @@ from __future__ import annotations
 
 import argparse
 import subprocess
-import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.common.config import CATEGORY, DATA_RAW  # noqa: E402
+from src.common.config import CATEGORY, DATA_RAW
 
 BASE = "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main"
 

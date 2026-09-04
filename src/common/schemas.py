@@ -18,7 +18,14 @@ key space into columns.
 from __future__ import annotations
 
 from pyspark.sql.types import (
-    ArrayType, BooleanType, DoubleType, IntegerType, LongType, StringType, StructField, StructType,
+    ArrayType,
+    BooleanType,
+    DoubleType,
+    IntegerType,
+    LongType,
+    StringType,
+    StructField,
+    StructType,
 )
 
 # ---------------------------------------------------------------- reviews ----

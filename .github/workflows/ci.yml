@@ -1,0 +1,37 @@
+# Lint + unit tests on every push and pull request.
+#
+# No JDK is installed here on purpose: tests/ currently holds pure-function tests
+# only (bronze table naming, exactly-once gate verdict). The first Spark
+# integration test must add `actions/setup-java@v4` (temurin 17) and a Docker
+# service block for the compose stack.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+          enable-cache: true
+
+      - name: Install (locked)
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Test
+        # Config hard-fails without credentials, and tests import src.common.
+        # Dummy values; nothing here talks to a service.
+        env:
+          S3_ACCESS_KEY: ci
+          S3_SECRET_KEY: ci
+          PG_PASSWORD: ci
+        run: uv run pytest -q

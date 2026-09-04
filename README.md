@@ -128,11 +128,16 @@ Requirements: macOS/Linux, Docker (Colima or Docker Desktop), `uv`, JDK 17.
 brew install openjdk@17 docker-compose colima uv     # if not present
 colima start --cpu 6 --memory 8 --disk 80            # if using Colima
 
-cp .env.example .env                                 # fill ANTHROPIC_API_KEY for the LLM steps
-uv sync                                              # Python 3.11 env
-docker compose up -d                                 # Kafka, MinIO, Elasticsearch, Postgres
-docker compose ps                                    # all four should be "healthy"
+cp .env.example .env                                 # set the MinIO/Postgres credentials; ANTHROPIC_API_KEY for the LLM steps
+uv sync                                              # Python 3.11 env + installs the repo as an editable package
+make up                                              # docker compose up -d; all four should be "healthy"
 ```
+
+There are no default credentials. `docker compose` and `src/common/config.py` both read
+`S3_ACCESS_KEY`, `S3_SECRET_KEY` and `PG_PASSWORD` from `.env` and fail loudly if any is
+missing. `make` with no target lists every entrypoint (`up`, `health`, `produce`, `bronze`,
+`verify`, `eos`, `test`, `lint`); the sections below show the underlying commands and their
+flags.
 
 Load the schema (only needed if the Postgres volume already existed):
 
@@ -157,14 +162,14 @@ Check the stack first — it prints one line per component and exits non-zero if
 five (Kafka, MinIO, Elasticsearch, Postgres, Spark) is not reachable:
 
 ```bash
-./run.sh python scripts/healthcheck.py
+make health          # = ./run.sh python scripts/healthcheck.py
 ```
 
 **1 — replay the reviews into Kafka.** Creates the topic if it does not exist (6
 partitions), keys every record by `parent_asin`, and reports throughput as it goes.
 
 ```bash
-./run.sh python -m src.ingest.producer --category All_Beauty
+make produce         # = ./run.sh python -m src.ingest.producer --category All_Beauty
 #  --limit N     stop after N records (0 = the whole file, the default)
 #  --rate R      cap at R records/sec (0 = as fast as the broker accepts, the default)
 #  --topic T     default reviews.raw
@@ -176,7 +181,7 @@ first N lines of each raw file, so `scripts/make_sample.py` reproduces it exactl
 lets you replay step 1 without the 0.54 GB download:
 
 ```bash
-./run.sh python -m src.ingest.producer --source data/sample/All_Beauty.sample.jsonl
+make produce-sample  # = ./run.sh python -m src.ingest.producer --source data/sample/All_Beauty.sample.jsonl
 ```
 
 Everything downstream — bronze, the verify script, the exactly-once gate — then runs
@@ -190,7 +195,7 @@ write to `lake.bronze.reviews_raw` / `checkpoints/bronze_reviews_raw`.
 
 ```bash
 # the command that produced the current 701,528-row table
-./run.sh python -m src.spark.bronze --trigger once --max-per-trigger 150000
+make bronze          # = ./run.sh python -m src.spark.bronze --trigger once --max-per-trigger 150000
 #  --reset             drop the table and checkpoint first (DESTRUCTIVE)
 #  --reset-only        drop them and exit without streaming
 #  --starting-offsets  earliest (default) | latest
@@ -204,7 +209,7 @@ commits and ~10 s wall for the full category on this machine. The code default i
 first snapshot):
 
 ```bash
-./run.sh python scripts/verify_iceberg.py
+make verify          # = ./run.sh python scripts/verify_iceberg.py
 ```
 
 **4 — the exactly-once gate.** Loads a known number of records, starts bronze, `SIGKILL`s
@@ -213,7 +218,7 @@ that the kill actually interrupted work in progress (a run that drained before t
 now fails instead of printing a vacuous PASS).
 
 ```bash
-./run.sh python scripts/prove_exactly_once.py --records 120000 --kill-after 25
+make eos             # = ./run.sh python scripts/prove_exactly_once.py --records 120000 --kill-after 25
 ```
 
 It runs against its own topic (`reviews.eos`) and therefore its own table
@@ -239,9 +244,9 @@ load-dependent, so a single figure is not reproducible.
 | service | endpoint | credentials |
 |---|---|---|
 | Kafka | `localhost:9092` | — |
-| MinIO API / console | `localhost:9000` / `localhost:9001` | `minioadmin` / `minioadmin` |
+| MinIO API / console | `localhost:9000` / `localhost:9001` | `S3_ACCESS_KEY` / `S3_SECRET_KEY` from `.env` |
 | Elasticsearch | `localhost:9200` | security disabled (local only) |
-| PostgreSQL | `localhost:5432` | `bigdata` / `bigdata`, db `catalog` |
+| PostgreSQL | `localhost:5432` | `PG_USER` / `PG_PASSWORD` from `.env`, db `catalog` |
 
 ## Resource envelope
 
@@ -269,6 +274,7 @@ docker ps --format '{{.Names}}'      # expect only bd-* containers
 ## Layout
 
 ```
+.github/workflows/    CI: ruff + pytest on every push (no JDK yet — see the comment in ci.yml)
 conf/postgres-init/   catalogue + audit schema
 data/raw/             downloaded JSONL (git-ignored)
 data/sample/          10k reviews + 5k products, committed (see "Running on the sample")
@@ -280,7 +286,8 @@ src/spark/            bronze job (silver / gold: planned)
 src/ai/               empty package (planned)
 src/serving/          empty package (planned)
 tests/                unit tests for the bronze naming + gate verdict logic
-run.sh                JAVA_HOME + uv wrapper
+Makefile              every entrypoint: up, health, produce, bronze, verify, eos, test, lint
+run.sh                JAVA_HOME + uv wrapper (make targets go through it)
 ```
 
 ## Credits

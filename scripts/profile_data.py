@@ -6,14 +6,12 @@ Run:  ./run.sh python scripts/profile_data.py --category All_Beauty
 from __future__ import annotations
 
 import argparse
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.common.config import CATEGORY, DATA_RAW  # noqa: E402
-from src.common.schemas import META_SCHEMA, REVIEW_SCHEMA  # noqa: E402
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
 
-from pyspark.sql import SparkSession, functions as F  # noqa: E402
+from src.common.config import CATEGORY, DATA_RAW
+from src.common.schemas import META_SCHEMA, REVIEW_SCHEMA
 
 
 def banner(t: str) -> None:
