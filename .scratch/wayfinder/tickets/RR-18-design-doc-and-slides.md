@@ -36,3 +36,17 @@ Decide:
 
 **Resolution:** a section outline for the doc and a slide-by-slide outline, each entry
 naming its figure. Not the doc, not the slides — those are execution.
+
+## Input from RR-09 (closed 2026-09-04)
+
+First three beats are fixed: (1) the opening question on screen, category-manager persona;
+(2) the one line — *"N of M eligible products triggered at least one sustained-decline alert
+during 2020–2023, using a rule developed on pre-2020 data and then applied unchanged"*;
+(3) the hero product: two windows, adjusted theme shift, representative reviews. Then zoom
+out: eligibility and yearly coverage, robustness grades, sensitivity variants, placebo
+calibration and power. Three distinctions must appear in both doc and talk: alerts are not
+causal proof; post-scan bootstrap intervals are descriptive unless the scan is calibrated;
+the taxonomy is held out, or the aspect explanation is exploratory. The provenance result
+(key collisions) is a Q&A answer, not a slide of its own. If the aspect half is unbuilt the
+claim narrows to *"The completed result identifies sustained rating declines; aspect-level
+explanation is preliminary."*

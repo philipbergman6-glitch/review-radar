@@ -46,3 +46,25 @@ precision/recall table, so this ticket must fix:
 
 If `RR-07` put MLlib in scope, say here how the two interact — an MLlib baseline against the
 LLM labels would be a genuine evaluation rather than a bolted-on model.
+
+## Input from RR-09 (closed 2026-09-04)
+
+- **Taxonomy is fixed and held out.** Derive from pre-2020 decline episodes **and their
+  matched controls** (never candidates alone); definitions, inclusion/exclusion examples,
+  prompts, `other/unknown`, abstention, multi-label; tune and validate on pre-2020 hand
+  labels; freeze the complete labelling spec; apply unchanged to post-2020 candidates and
+  controls. Post-2020 human labels never revise the spec. New post-2020 themes → "uncovered
+  holdout content", exploratory appendix.
+- **Budget has four allocations**: pre-2020 discovery; pre-2020 prompt dev/validation;
+  post-2020 candidate + control inference; untouched post-2020 human audit. With 8–12
+  themes use rare-theme enrichment for validation plus a smaller prevalence-representative
+  audit sample, or shrink the taxonomy.
+- **Concentration target**: 3 candidates × (1 + 5 controls) × 2 windows = 36
+  product-windows for the holdout inference. Text eligibility counts non-empty reviews,
+  not only 20+-word ones.
+- **Representative example rule** (per window, per theme): carries the theme → high label
+  confidence → rating near that theme's median → nearest embedding to theme/window
+  centroid if available → helpful votes and stable id as tie-breakers. Label confidence is
+  therefore a required output of the labeller.
+- Bootstrap over reviews captures sampling variation only, not systematic label error; the
+  aspect evaluation table (RR-17) is what covers the latter.

@@ -41,3 +41,12 @@ breadth". Adding a fourth thing to a three-week solo build is a real cost; so is
 double-scoring technology on the table.
 
 The answer changes what the aspect-sentiment phase is for, so it blocks that ticket.
+
+## Input from RR-09 (closed 2026-09-04)
+
+Burst detection is **removed** from scope; do not propose it as the MLlib statistic. The
+statistic that now exists is the decline alert rule (adjacent trailing windows on a calendar
+spine, seeded clustered bootstrap, placebo calibration, injected-decline power check). If
+MLlib enters, the honest framings are: the bootstrap/summary statistics via MLlib
+`Statistics`, or an MLlib baseline classifier scored against the frozen LLM aspect labels
+(RR-08/RR-17). Reframing the drift SQL as "MLlib" without a model would not survive Q&A.

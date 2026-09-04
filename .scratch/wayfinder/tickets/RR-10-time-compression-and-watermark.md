@@ -41,3 +41,17 @@ Decide:
 **Gate.** "Late data visibly handled" is not a number. The resolution must name the printed
 one: e.g. count of events accepted after their window closed vs count dropped beyond the
 watermark, with the expected values for the demo run.
+
+## Input from RR-09 (closed 2026-09-04)
+
+- The replay is a **historical backtest of a frozen monitoring rule**, not a prospective
+  experiment; say so on stage.
+- The demo payoff is the alert firing at `alert_triggered_at` (when persistence P was
+  satisfied), never at the retrospective `condition_started_at`. The streaming gold must
+  therefore emit the per-evaluation-point relation incrementally.
+- The holdout starts 2020-01-01; the pre-2020 stretch is where the rule was developed, so a
+  compression that spends most of the demo window before 2020 wastes the payoff. 2020–2021
+  carry 251,650 reviews `[observed, phase0-profile]`; 2023 is censored at September.
+- Watermark interacts with "unevaluable": a late review that lands after its product-month
+  was evaluated must be handled as a re-evaluation or a documented loss; the printed gate
+  should include how many evaluation points changed flag because of late data.

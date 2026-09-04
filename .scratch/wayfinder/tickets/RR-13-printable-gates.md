@@ -39,3 +39,16 @@ gate** — every threshold here needs a case that would trip it.
 The AI rows take their thresholds from `RR-17`; the silver row may be read from
 `pipeline_runs` per `RR-16`. Blocked on every phase-content decision, because a threshold cannot be set before the phase
 knows what it produces.
+
+## Input from RR-09 (closed 2026-09-04)
+
+Gold row is now two lines, not "three insights":
+
+| phase | printed | pass |
+|---|---|---|
+| Gold — computational | `cohort_ids_match`, `counts_match`, `max_abs_metric_diff`, `rejection_reasons_complete`, `rerun_identical` from the pandas reproduction over raw JSONL | all true, diff ≤ tolerance stated in the freeze config |
+| Gold — analytical (reported, not pass/fail) | `eligible_products`, `holdout_alerts`, `episodes`, `share_of_eligible`, robustness grade counts, `text_characterisable`, `fallback_triggered` (`< 3`) | none — an outcome, printed alongside the frozen config hash |
+
+Plus a calibration line printed once at the freeze: `placebo_triggers_per_eligible_product_year`,
+`detection_rate_0.3_step`, `median_delay_evaluable_points`, against the frozen ceiling
+(≈ 1 trigger/month at the eligible count) and ≥ 80% / ≤ 6 points.

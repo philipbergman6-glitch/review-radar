@@ -43,3 +43,16 @@ decide:
 
 **Resolution:** three filled-in specification rows (everything but the measured value), the
 labelling plan with its hour estimate, and the command that will print each table.
+
+## Input from RR-09 (closed 2026-09-04)
+
+- The aspect gold set splits into a **pre-2020 validation set** (used to tune) and an
+  **untouched post-2020 audit set** (opened only after the labelling spec freezes) so
+  generalisation across the holdout boundary is a reported number.
+- Add one table beyond the three capability rows: the **theme-shift table** per candidate —
+  candidate and control counts, baseline and recent shares, matched-control-adjusted
+  difference (per-control changes averaged, then subtracted), pointwise descriptive
+  interval, label validation quality. Ranked by adjusted change; no significance claims;
+  intervals stated as pointwise, not simultaneous.
+- Injected-decline power results validate the rating alert only, not the theme analysis;
+  the aspect table is the only evidence for the second half of the opening question.

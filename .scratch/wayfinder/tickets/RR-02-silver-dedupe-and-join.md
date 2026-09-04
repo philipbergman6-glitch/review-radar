@@ -44,3 +44,17 @@ catalogue?" — today the honest answer is the latter (audit §3, course technol
 `count(bronze) == count(silver) + count(rejects) + duplicates_removed`, printed by the job.
 Both decisions change what `duplicates_removed` means, so the resolution must state the
 exact printed identity.
+
+## Input from RR-09 (closed 2026-09-04)
+
+- The 6,139 figure counts **key-collision groups**, not rows (`scripts/profile_data.py:99`).
+  Silver must classify collisions: **exact duplicate** (all meaningful fields agree),
+  **conflicting** (content or rating differs), **unresolvable**. Deterministic survivor rule
+  for conflicting; non-survivors kept in an auditable table, not dropped.
+- Print both the number of collision groups and the number of rows removed; the gate
+  identity must name which.
+- Framing is a **provenance result** only: collisions come from the source file;
+  exactly-once says nothing about repetition inside the source. Never "trust",
+  "incentivised", "bursts" — those are out of scope (map, Out of scope).
+- The pandas reproduction (RR-09) re-implements the dedupe from the written rule with no
+  shared code, so the rule must be one paragraph of logic.

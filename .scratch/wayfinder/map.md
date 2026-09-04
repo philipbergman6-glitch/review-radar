@@ -74,14 +74,17 @@ taxonomy and the model that produces it` (`RR-08`).
 - [Reciprocal rank fusion on the Elasticsearch basic licence](tickets/RR-04-hybrid-fusion-rrf-licence.md) — RRF is Enterprise-only in 8.17 (`RRFRankPlugin.java` licence constant); live `bd-es` on basic returns HTTP 403 `security_exception` for both the `retriever.rrf` and legacy `rank.rrf` forms, no fallback. kNN, `retriever.standard/knn`, and `dense_vector` (≤4096 dims, `num_candidates` ≤10000, `index:true`) all work on basic. Fallback for RR-06: two ES calls fused client-side with `Σ 1/(60+rank)`, which is also the more explainable option. Findings: `docs/research/RR-04-rrf-licence-es817.md`.
 - [MiniLM embedding throughput on this host](tickets/RR-05-embedding-throughput.md) — all-MiniLM-L6-v2 on the M5 CPU does ~374 reviews/s at 256 tokens (batch 64, 4 threads), ~906 reviews/s truncated to 64 tokens with 10 threads; peak RSS 0.7–2.0 GB. Supabase running costs only 1.5%, so the runbook's 2× contention figure does not apply to host-side torch. Cohorts: 123,510 reviews (≥20 words, 1,902 products) = 5.5 min; all 349,059 = 15.6 min. Both far under the one-hour bound, so RR-06 turns on index size and memory, not embedding time. Script `scripts/bench_embed.py`; findings `docs/research/RR-05-minilm-embedding-throughput.md`.
 - [LLM access — what is actually provisioned](tickets/RR-03-llm-access-provisioning.md) — Hosted: `ANTHROPIC_API_KEY` declared but empty in `.env`; no other LLM key anywhere; `anthropic` SDK already a dependency. Local: Ollama 0.33.2 now installed, `llama3.2:3b` = 2.0 GB on disk / 2.5 GB RSS, ~54 tok/s generation on Metal, 3.8 s per review, unchanged with the bronze job running. Cost for the 5,000-review subset: hosted Haiku 4.5 ≈ $6 ($3 via Batch API); local ≈ 5.3 h serial. 700k reviews ≈ $859 hosted / 735 h local, so the full corpus is out for either host. Call path: plain HTTP to `/api/generate` from a driver-side batch script. Findings `docs/research/RR-03-llm-access-provisioning.md`. Decides nothing; feeds RR-08.
+- [The question the presentation opens with](tickets/RR-09-opening-question.md) — *"Which products experienced a sustained decline in customer ratings, and which complaint themes increased during that decline?"*, asked by a category manager; committed now, not after gold. Alert rule = adjacent trailing calendar windows on a calendar spine with persistence; thresholds, episode closure, placebo-trigger ceiling (≈ 1/month at the eligible count) and injected-decline power target (≥ 80% on a 0.3★ step within 6 evaluable points) all developed on pre-2020 data and committed in one protocol freeze, then applied unchanged to a 2020-01-01 temporal holdout (ADR-0001). Gate split: computational (pandas over raw JSONL matches Spark, pass/fail) vs analytical outcome (reported). Fallback if < 3 robust text-characterisable candidates: within-product low- vs high-rated period theme contrast; no relaxation ladder. Trust thread demoted to a silver provenance result (key collisions classified, counted); burst detection and near-duplicate discovery removed. Taxonomy held out too (pre-2020 candidates + controls, frozen). Terms in `CONTEXT.md`. Handoffs in RR-02/07/08/10/13/17/18.
 - [Repo professional baseline — CI, secrets, packaging](tickets/RR-15-repo-professional-baseline.md) — landed 2026-09-04, CI green on the first push ([run 33883548702](https://github.com/philipbergman6-glitch/review-radar/actions/runs/33883548702), 1m5s, no JDK). `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `PG_PASSWORD` are `_req()` in config and `${VAR:?}` in compose; no known-credential default anywhere. Repo installs editable via hatchling, all 11 `sys.path.insert` sites gone. `Makefile`: `up down health produce produce-sample bronze verify eos test lint check`; README points at it. 31 ruff findings cleared incidentally. Every later implementation session inherits: `make check` green before push.
 
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
   slide narrative order` (`RR-18`).)*
-- **Burst detection threshold.** The z-score window and cut-off for `gold.bursts` must be
-  chosen against the actual monthly volumes; nothing to decide until gold exists.
+- *(Burst detection threshold removed 2026-09-04 — `gold.bursts` is out of scope, `RR-09`.)*
+- **Decline-rule thresholds (B, R, δ, P, G, K, minimum counts, placebo ceiling).** Set at
+  the protocol freeze from pre-2020 aggregates only, per `RR-09` / ADR-0001; deliberately
+  *not* a map decision.
 - **Which `details` keys silver parses on read.** May graduate out of the silver dedupe and
   join ticket, or may only sharpen once the products load has run.
 - **RAG retrieval depth and question scope.** Product-scoped vs corpus-wide, and `k`.
@@ -98,10 +101,10 @@ taxonomy and the model that produces it` (`RR-08`).
 
 ## Ticket index (updated 2026-09-04)
 
-Closed: `RR-03`, `RR-04`, `RR-05`, `RR-15`. Frontier — open, unblocked: `RR-01`, `RR-02`,
-`RR-07`, `RR-09`, `RR-10`. Blocked: `RR-06` (only on `RR-01` now), `RR-08` (only on `RR-07`
-now), `RR-11`, `RR-12`, `RR-13`, `RR-14`, `RR-16`, `RR-17`, `RR-18`. Suggested order: grill
-`RR-09`, `RR-07`, `RR-01`, `RR-06`, `RR-08`, `RR-12`, `RR-10`, `RR-02`.
+Closed: `RR-03`, `RR-04`, `RR-05`, `RR-09`, `RR-15`. Frontier — open, unblocked: `RR-01`,
+`RR-02`, `RR-07`, `RR-10`. Blocked: `RR-06` (only on `RR-01`), `RR-08` (only on `RR-07`),
+`RR-11`, `RR-12`, `RR-13`, `RR-14`, `RR-16`, `RR-17`, `RR-18` (on `RR-11`, `RR-13`).
+Suggested order: grill `RR-07`, `RR-01`, `RR-06`, `RR-08`, `RR-12`, `RR-10`, `RR-02`.
 
 ## Out of scope
 
@@ -126,4 +129,9 @@ now), `RR-11`, `RR-12`, `RR-13`, `RR-14`, `RR-16`, `RR-17`, `RR-18`. Suggested o
   written in `docs/course-coverage.md` §6–7. Sqoop has the course's own citation
   (`Apache Sqoop moved into the Attic in June 2021`); Oozie's cut is an opinion and must be
   owned as one.
+- **Review-burst detection, near-duplicate review discovery, and any "which reviews should
+  you not trust" framing** — removed by `RR-09` (2026-09-04), not deferred. The data has no
+  ground truth for incentivised reviews, the measurements were never made, and a second
+  insight thread would split a three-week budget. Key collisions survive only as a silver
+  provenance result.
 - **Implementing phases 2–8** — execution, handed off once this map closes.
