@@ -74,6 +74,7 @@ taxonomy and the model that produces it` (`RR-08`).
 - [Reciprocal rank fusion on the Elasticsearch basic licence](tickets/RR-04-hybrid-fusion-rrf-licence.md) — RRF is Enterprise-only in 8.17 (`RRFRankPlugin.java` licence constant); live `bd-es` on basic returns HTTP 403 `security_exception` for both the `retriever.rrf` and legacy `rank.rrf` forms, no fallback. kNN, `retriever.standard/knn`, and `dense_vector` (≤4096 dims, `num_candidates` ≤10000, `index:true`) all work on basic. Fallback for RR-06: two ES calls fused client-side with `Σ 1/(60+rank)`, which is also the more explainable option. Findings: `docs/research/RR-04-rrf-licence-es817.md`.
 - [MiniLM embedding throughput on this host](tickets/RR-05-embedding-throughput.md) — all-MiniLM-L6-v2 on the M5 CPU does ~374 reviews/s at 256 tokens (batch 64, 4 threads), ~906 reviews/s truncated to 64 tokens with 10 threads; peak RSS 0.7–2.0 GB. Supabase running costs only 1.5%, so the runbook's 2× contention figure does not apply to host-side torch. Cohorts: 123,510 reviews (≥20 words, 1,902 products) = 5.5 min; all 349,059 = 15.6 min. Both far under the one-hour bound, so RR-06 turns on index size and memory, not embedding time. Script `scripts/bench_embed.py`; findings `docs/research/RR-05-minilm-embedding-throughput.md`.
 - [LLM access — what is actually provisioned](tickets/RR-03-llm-access-provisioning.md) — Hosted: `ANTHROPIC_API_KEY` declared but empty in `.env`; no other LLM key anywhere; `anthropic` SDK already a dependency. Local: Ollama 0.33.2 now installed, `llama3.2:3b` = 2.0 GB on disk / 2.5 GB RSS, ~54 tok/s generation on Metal, 3.8 s per review, unchanged with the bronze job running. Cost for the 5,000-review subset: hosted Haiku 4.5 ≈ $6 ($3 via Batch API); local ≈ 5.3 h serial. 700k reviews ≈ $859 hosted / 735 h local, so the full corpus is out for either host. Call path: plain HTTP to `/api/generate` from a driver-side batch script. Findings `docs/research/RR-03-llm-access-provisioning.md`. Decides nothing; feeds RR-08.
+- [Repo professional baseline — CI, secrets, packaging](tickets/RR-15-repo-professional-baseline.md) — landed 2026-09-04, CI green on the first push ([run 33883548702](https://github.com/philipbergman6-glitch/review-radar/actions/runs/33883548702), 1m5s, no JDK). `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `PG_PASSWORD` are `_req()` in config and `${VAR:?}` in compose; no known-credential default anywhere. Repo installs editable via hatchling, all 11 `sys.path.insert` sites gone. `Makefile`: `up down health produce produce-sample bronze verify eos test lint check`; README points at it. 31 ruff findings cleared incidentally. Every later implementation session inherits: `make check` green before push.
 
 ## Not yet specified
 
@@ -92,15 +93,15 @@ taxonomy and the model that produces it` (`RR-08`).
   gets a logger, Spark UI screenshots, or a metrics row is not worth deciding until silver
   exists; noted so it is not forgotten at the professional bar.
 - **Integration test strategy.** One test per layer that runs against the compose stack —
-  which fixture, how CI gets a JDK and Docker. Sharpens once `RR-15` has a CI skeleton and
-  silver has something to test.
+  which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
+  workflow comment says what to add); sharpens once silver has something to test.
 
 ## Ticket index (updated 2026-09-04)
 
-Closed: `RR-03`, `RR-04`, `RR-05`. Frontier — open, unblocked: `RR-01`, `RR-02`, `RR-07`,
-`RR-09`, `RR-10`, `RR-15`. Blocked: `RR-06` (only on `RR-01` now), `RR-08` (only on `RR-07`
-now), `RR-11`, `RR-12`, `RR-13`, `RR-14`, `RR-16`, `RR-17`, `RR-18`. Suggested order: land
-`RR-15`; then grill `RR-09`, `RR-07`, `RR-01`, `RR-06`, `RR-08`, `RR-12`, `RR-10`, `RR-02`.
+Closed: `RR-03`, `RR-04`, `RR-05`, `RR-15`. Frontier — open, unblocked: `RR-01`, `RR-02`,
+`RR-07`, `RR-09`, `RR-10`. Blocked: `RR-06` (only on `RR-01` now), `RR-08` (only on `RR-07`
+now), `RR-11`, `RR-12`, `RR-13`, `RR-14`, `RR-16`, `RR-17`, `RR-18`. Suggested order: grill
+`RR-09`, `RR-07`, `RR-01`, `RR-06`, `RR-08`, `RR-12`, `RR-10`, `RR-02`.
 
 ## Out of scope
 
