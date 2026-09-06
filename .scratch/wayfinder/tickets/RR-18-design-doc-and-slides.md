@@ -50,3 +50,10 @@ the taxonomy is held out, or the aspect explanation is exploratory. The provenan
 (key collisions) is a Q&A answer, not a slide of its own. If the aspect half is unbuilt the
 claim narrows to *"The completed result identifies sustained rating declines; aspect-level
 explanation is preliminary."*
+
+## Input from RR-01 (closed 2026-09-06)
+
+Deliverables is a continuous **track**, not P8/P9: design doc, slides, README, runbook and
+recorded backup are developed alongside the phases, with the acceptance criteria in `RR-01`
+log item 11. The design doc's phase narrative uses the eight-line list from the `RR-01`
+answer and must say RAG and Stream were conditional and how the `RR-12` rule resolved them.

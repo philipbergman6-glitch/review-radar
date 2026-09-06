@@ -42,3 +42,10 @@ record.
 - The classifier run's `pipeline_runs` row carries model version, freeze commit, seed,
   chosen `regParam`, per-theme thresholds, `evaluation_status`, and for the full-corpus
   benchmark: rows scored, rows excluded (empty text), wall time, executor config.
+
+## Input from RR-01 (closed 2026-09-06)
+
+Every `product_month` document carries `source_gold_snapshot_id`, and the live alias points
+at `product_month_<gold_snapshot_id>` (ADR-0004). The lineage gate should assert that the
+alias's snapshot id equals the gold snapshot the latest `pipeline_runs` row for the
+projection stage says it read — a second printable identity beside the silver reconciliation.

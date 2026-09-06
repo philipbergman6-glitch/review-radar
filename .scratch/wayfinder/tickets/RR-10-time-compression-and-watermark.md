@@ -55,3 +55,10 @@ watermark, with the expected values for the demo run.
 - Watermark interacts with "unevaluable": a late review that lands after its product-month
   was evaluated must be handled as a re-evaluation or a documented loss; the printed gate
   should include how many evaluation points changed flag because of late data.
+
+## Input from RR-01 (closed 2026-09-06)
+
+Stream is **P8, conditional**: the cut rule is `RR-12`'s, but Philip's standing input is
+"do not rebuild the whole pipeline merely to claim streaming", which bears directly on item 4
+(replace vs sit beside the batch silver). The phase's deliverable is a paced replay,
+event-time watermark demonstration and late-event *metrics* — the gate must print those.

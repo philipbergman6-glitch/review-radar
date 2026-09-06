@@ -54,3 +54,12 @@ comparison earns a slot.
   frozen prompt, with a cached fallback. Requires `ollama serve` in the pre-demo checklist.
 - The evaluation output is a page (per-theme table, coverage counts, disagreement examples),
   not a dashboard tile.
+
+## Input from RR-01 (closed 2026-09-06)
+
+Kibana's home is fixed: container under compose profile `ui` (`make up-ui`), dashboard a
+repo-stored saved-object export over the `product_month` alias only; both are P4 Search
+deliverables and exist before this ticket runs. Whether later panels inspect individual
+reviews from the review search index is this ticket's call. Deliverables is a *track*, not
+"Phase 8": this ticket owns the ordered demo moves and timing; the track owns artefacts,
+rehearsal records and the playable backup (acceptance in `RR-01` log item 11).

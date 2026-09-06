@@ -233,3 +233,22 @@ _Avoid_: trust finding, incentivised reviews, review bursts (all removed from sc
 **Unverified review**:
 A review whose `verified_purchase` flag is false. Unverified means unverified; it does not
 mean false, incentivised, or untrustworthy.
+
+### Search serving
+
+**Review search index**:
+The Elasticsearch index holding every deduplicated, validated silver review with non-empty
+text, supporting BM25 retrieval. It is a serving projection of silver, not a store.
+_Avoid_: search index (too generic), the ES data, the corpus
+
+**Serving projection**:
+A deterministically rebuildable Elasticsearch representation derived from an authoritative
+Iceberg table or snapshot; never the system of record. Embeddings stored in Iceberg are
+derived data, not a projection; a vector-enabled review index is one.
+_Avoid_: mirror, copy, cache, primary index
+
+**Mapping contract**:
+The versioned Elasticsearch settings, mappings and analyzer definitions together with the
+indexer-side required-field validation and the executable tests that enforce them. The
+mapping alone is not the contract, because Elasticsearch does not enforce field presence.
+_Avoid_: schema, the mapping (alone), dynamic mapping

@@ -74,3 +74,15 @@ The complaint-theme gate must print, from cached `gold.review_theme_labels` rows
 
 A test asserts the primary theme-shift job requires `label_source = "hosted_llm"`
 (ADR-0003 value; ADR-0002 wrote `"llm"` — reconcile to one string in RR-14).
+
+## Input from RR-01 (closed 2026-09-06)
+
+Phase numbering to use: P2 Silver, P3 Gold, P4 Search, P5 Embeddings, P6 Themes, P7 RAG,
+P8 Stream, plus the Deliverables track. **Search gate** is decided in substance
+(`scripts/gate_search.py`, constituents in `RR-01` log item 10, final line
+`SEARCH_GATE=PASS|FAIL`); this ticket freezes the exact printed names. Analyzer scores are
+outcomes, not thresholds. **Deliverables track** acceptance replaces "a dry run to someone":
+two consecutive complete rehearsals within the time limit, every move succeeds or uses its
+documented fallback, playable backup within the limit, README/design doc/slides/runbook
+present — turn each into a printed check. Alias-to-gold-snapshot match is a lineage gate
+constituent (`RR-16`).

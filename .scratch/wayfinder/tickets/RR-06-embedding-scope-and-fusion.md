@@ -36,3 +36,17 @@ numbers and brand names; hybrid is the honest claim, not "embeddings are better"
 Also settle here, or hand back to `RR-01`: whether the explicit mapping and custom analyzer
 (lowercase + stop + stemmer, a `.keyword` subfield for aggregations, `dense_vector` as its
 own explicit field) are part of this phase's deliverables and its gate.
+
+## Input from RR-01 (closed 2026-09-06)
+
+The ES phase is split: **P4 Search** (mapping contract, analyzers, review search index over
+*every* validated silver row with non-empty text, `product_month` projection, Kibana) precedes
+**P5 Embeddings**, which this ticket now scopes. Consequences: item 1 is only the *vector*
+cohort — the `dense_vector` field is already declared in the Search mapping contract and is
+simply absent on non-cohort documents; item 4's 20-query judgement set is **built in Search**
+(frozen queries, blind pooled judging, P@5 + MRR@10 or nDCG@10) and reused here — define
+"disagreement" against it rather than building a second set; it is not the RAG gold set. Item
+3 is settled in principle by ADR-0004: ES indices are serving projections, so vectors in
+Iceberg are the rebuild source, and the question left is only the Iceberg table shape. The
+"hand back to RR-01" question is answered: mapping and analyzer are Search's, not this
+phase's.

@@ -55,3 +55,11 @@ picks up and what it already has decided for it.
 - `label_source` string: ADR-0002 says `"llm"`, ADR-0003 says `hosted_llm | local_llm | human`.
   One value must win, in code and both ADRs.
 - The map's "LLM host" note is now decided, not a default to argue with.
+
+## Input from RR-01 (closed 2026-09-06)
+
+`docs/course-coverage.md` Decisions §1–2 "Committed to Phase 2" → **P4 Search**, by name.
+The README status table gains rows for the review search index, the `product_month`
+projection and Kibana (`make up-ui`), and the artifact's phase cards take the eight-line list
+from the `RR-01` answer with Deliverables as a track. The RAG and Stream cards read
+"conditional; rule in `RR-12`".

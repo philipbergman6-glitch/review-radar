@@ -88,3 +88,10 @@ labelling plan with its hour estimate, and the command that will print each tabl
 - **Sentiment weak-label check** is a sanity table only: 3★ excluded, one row per star bucket
   + overall, four predicted-sentiment counts, agreement rate with Wilson 95% interval.
 - Contract in `conf/complaint-theme-label.schema.json`; wire body in `docs/LLM_LABEL_RUNBOOK.md`.
+
+## Input from RR-01 (closed 2026-09-06)
+
+The 20-query relevance judgement set is built in P4 Search (frozen queries, blind pooled
+judging across analyzers, P@5 plus MRR@10 or nDCG@10) and reused for kNN and hybrid. It is
+**not** the RAG evaluation set: RAG needs its own answerability, citation and faithfulness
+judgements. Capability rows now map to phases P5 Embeddings, P6 Themes, P7 RAG.

@@ -61,3 +61,11 @@ Calendar constraints, not just hours:
   four serialised waits unless overlapped; prompt development uses the standard API.
 - ≤ 5 prompt versions; MLlib (1-day cap) only after the training pool is labelled.
 - Console key + $20 workspace limit must be provisioned before the first hosted call.
+
+## Input from RR-01 (closed 2026-09-06)
+
+Phase list is fixed (`RR-01` answer). RAG (P7) and Stream (P8) are marked **conditional**;
+this ticket decides the cut rule. Philip's protected core, verbatim intent: *Silver → Gold →
+Search/Kibana → one evaluated AI capability → numerical insights → polished deliverables.*
+Under schedule pressure, simplify Gold's analytical machinery rather than pull Search ahead
+of Gold. The map's "do not cut yet" still holds; grill this late.
