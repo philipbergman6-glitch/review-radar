@@ -4,7 +4,7 @@ title: Aspect taxonomy and the model that produces it
 type: grilling
 status: open
 assignee: unassigned
-blocked-by: [RR-03, RR-07]
+blocked-by: [RR-03, RR-07]  # both closed
 blocks: [RR-11, RR-13, RR-14, RR-17]
 ---
 
@@ -68,3 +68,19 @@ LLM labels would be a genuine evaluation rather than a bolted-on model.
   therefore a required output of the labeller.
 - Bootstrap over reviews captures sampling variation only, not systematic label error; the
   aspect evaluation table (RR-17) is what covers the latter.
+
+## Input from RR-07 (closed 2026-09-06)
+
+- **MLlib is in scope as a theme classifier baseline** (ADR-0002), trained on LLM labels.
+  Say here how the labelling spec serves it: the LLM output must label `other` explicitly
+  and emit `label_confidence`; the classifier learns named themes only.
+- **Split `other/unknown`**: *other* = out-of-taxonomy complaint (LLM-only output, audit
+  category); *abstention* = the labeller declines. Distinct fields, distinct counts.
+- **Fifth budget line**: an **LLM-labelled training pool** of ~3,000 pre-2020 reviews
+  (2,000 representative core + ≤1,000 targeted from frozen discovery-stage theme terms),
+  disjoint from the discovery sample, the development set and the audit set. Fix the exact
+  count against the RR-03 cost here.
+- The 1–2★/4–5★ weak-label agreement stays as a *sentiment* sanity check only; it is not
+  the per-theme comparator (that is the star-only theme baseline, RR-17).
+- Canonical terms: *development set* (pre-2020 hand labels) and *audit set* (post-2020,
+  opened once). Avoid "gold set".

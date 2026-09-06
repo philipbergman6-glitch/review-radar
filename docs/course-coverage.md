@@ -82,6 +82,11 @@ Also taught: DStream/RDD-based Spark Streaming (the older API), `withWatermark`,
 **Consequence.** An MLlib model scores under BOTH "course technologies" (20%)
 and "AI capability" (25%). A hosted-LLM call scores only under the latter.
 If the AI scope must be cut, cut toward MLlib, not away from it.
+**Resolved 2026-09-06 (RR-07, ADR-0002):** MLlib is in scope as a `spark.ml` theme
+classifier baseline trained on LLM labels, scored beside the LLM labeller and a star-only
+baseline on the post-2020 audit set. Not a fourth capability and never a predictor; the
+deck's own slide 65 (`spark.mllib` in maintenance, `spark.ml` primary) is why it is
+`spark.ml`.
 
 ### 6. Sqoop — the course itself retires it
 > `▪ Apache Sqoop moved into the Attic in June 2021`

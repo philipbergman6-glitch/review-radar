@@ -52,3 +52,10 @@ Gold row is now two lines, not "three insights":
 Plus a calibration line printed once at the freeze: `placebo_triggers_per_eligible_product_year`,
 `detection_rate_0.3_step`, `median_delay_evaluable_points`, against the frozen ceiling
 (≈ 1 trigger/month at the eligible count) and ≥ 80% / ≤ 6 points.
+
+## Input from RR-07 (closed 2026-09-06)
+
+- The classifier gate is the pre-registered pass rule in RR-07 item 17: one command prints
+  the three-system table (LLM labeller · text classifier · star-only baseline) with
+  per-theme support and F1, macro-F1, and PASS/FAIL. A test asserts the primary theme-shift
+  job requires `label_source = "llm"`.

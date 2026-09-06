@@ -76,6 +76,7 @@ taxonomy and the model that produces it` (`RR-08`).
 - [LLM access — what is actually provisioned](tickets/RR-03-llm-access-provisioning.md) — Hosted: `ANTHROPIC_API_KEY` declared but empty in `.env`; no other LLM key anywhere; `anthropic` SDK already a dependency. Local: Ollama 0.33.2 now installed, `llama3.2:3b` = 2.0 GB on disk / 2.5 GB RSS, ~54 tok/s generation on Metal, 3.8 s per review, unchanged with the bronze job running. Cost for the 5,000-review subset: hosted Haiku 4.5 ≈ $6 ($3 via Batch API); local ≈ 5.3 h serial. 700k reviews ≈ $859 hosted / 735 h local, so the full corpus is out for either host. Call path: plain HTTP to `/api/generate` from a driver-side batch script. Findings `docs/research/RR-03-llm-access-provisioning.md`. Decides nothing; feeds RR-08.
 - [The question the presentation opens with](tickets/RR-09-opening-question.md) — *"Which products experienced a sustained decline in customer ratings, and which complaint themes increased during that decline?"*, asked by a category manager; committed now, not after gold. Alert rule = adjacent trailing calendar windows on a calendar spine with persistence; thresholds, episode closure, placebo-trigger ceiling (≈ 1/month at the eligible count) and injected-decline power target (≥ 80% on a 0.3★ step within 6 evaluable points) all developed on pre-2020 data and committed in one protocol freeze, then applied unchanged to a 2020-01-01 temporal holdout (ADR-0001). Gate split: computational (pandas over raw JSONL matches Spark, pass/fail) vs analytical outcome (reported). Fallback if < 3 robust text-characterisable candidates: within-product low- vs high-rated period theme contrast; no relaxation ladder. Trust thread demoted to a silver provenance result (key collisions classified, counted); burst detection and near-duplicate discovery removed. Taxonomy held out too (pre-2020 candidates + controls, frozen). Terms in `CONTEXT.md`. Handoffs in RR-02/07/08/10/13/17/18.
 - [Repo professional baseline — CI, secrets, packaging](tickets/RR-15-repo-professional-baseline.md) — landed 2026-09-04, CI green on the first push ([run 33883548702](https://github.com/philipbergman6-glitch/review-radar/actions/runs/33883548702), 1m5s, no JDK). `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `PG_PASSWORD` are `_req()` in config and `${VAR:?}` in compose; no known-credential default anywhere. Repo installs editable via hatchling, all 11 `sys.path.insert` sites gone. `Makefile`: `up down health produce produce-sample bronze verify eos test lint check`; README points at it. 31 ruff findings cleared incidentally. Every later implementation session inherits: `make check` green before push.
+- [Does MLlib belong in the AI scope](tickets/RR-07-mllib-in-ai-scope.md) — Yes, as a `spark.ml` **theme classifier baseline** (CountVectorizer → IDF → per-theme L2 logistic regression, text only) trained on a ~3,000-review pre-2020 LLM-labelled pool, scored on the untouched post-2020 audit set beside the LLM labeller and a star-only theme baseline. Pre-registered pass rule: macro-F1 > star-only and ≥ 70% of the LLM's. A sub-row under complaint-theme labelling, never a fourth capability, never a predictor; classifier labels never feed primary analysis (`label_source = "llm"` enforced). `pyspark.ml.stat` has no bootstrap, so the "MLlib Statistics" framing is withdrawn. Cap 1 day; cut before RAG only if LLM labels are late. ADR-0002; terms in `CONTEXT.md`.
 
 ## Not yet specified
 
@@ -99,12 +100,12 @@ taxonomy and the model that produces it` (`RR-08`).
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-04)
+## Ticket index (updated 2026-09-06)
 
-Closed: `RR-03`, `RR-04`, `RR-05`, `RR-09`, `RR-15`. Frontier — open, unblocked: `RR-01`,
-`RR-02`, `RR-07`, `RR-10`. Blocked: `RR-06` (only on `RR-01`), `RR-08` (only on `RR-07`),
-`RR-11`, `RR-12`, `RR-13`, `RR-14`, `RR-16`, `RR-17`, `RR-18` (on `RR-11`, `RR-13`).
-Suggested order: grill `RR-07`, `RR-01`, `RR-06`, `RR-08`, `RR-12`, `RR-10`, `RR-02`.
+Closed: `RR-03`, `RR-04`, `RR-05`, `RR-07`, `RR-09`, `RR-15`. Frontier — open, unblocked:
+`RR-01`, `RR-02`, `RR-08`, `RR-10`, `RR-12`. Blocked: `RR-06` (only on `RR-01`), `RR-11`,
+`RR-13`, `RR-14`, `RR-16`, `RR-17`, `RR-18` (on `RR-11`, `RR-13`).
+Suggested order: grill `RR-08`, `RR-01`, `RR-06`, `RR-12`, `RR-10`, `RR-02`.
 
 ## Out of scope
 

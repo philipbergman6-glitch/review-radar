@@ -142,6 +142,67 @@ The question the presentation answers if no decline candidate survives: *which c
 themes distinguish low-rated periods from high-rated periods among sufficiently reviewed
 products?* Same gold table, same aspect pipeline.
 
+### Complaint-theme labelling
+
+**Complaint-theme labelling**:
+The shared task of assigning each review the frozen, multi-label set of complaint themes it
+mentions. Two implementations exist; both must emit the same targets.
+_Avoid_: aspect sentiment (the rubric's phrase, not ours), classification (ambiguous between the two implementations)
+
+**LLM theme labeller**:
+The primary implementation of complaint-theme labelling: a prompted language model applying
+the frozen labelling spec. Its labels are the only ones that feed the theme-shift analysis.
+_Avoid_: the model, the classifier, teacher
+
+**MLlib theme classifier baseline**:
+A Spark ML text classifier trained on LLM-labelled pre-2020 reviews and scored against the
+same human audit sets as the labeller. A baseline and a scale path, never a source of primary
+labels.
+_Avoid_: student model, distilled model (no soft targets are transferred), MLlib model
+
+**LLM-labelled training pool**:
+A pre-2020 sample of reviews labelled by the frozen LLM theme labeller solely to train the
+classifier baseline. Disjoint from the hand-labelled development and audit sets.
+_Avoid_: training data (unqualified), silver labels
+
+**Star-only theme baseline**:
+A per-theme classifier whose only features are rating buckets, trained on the same
+LLM-labelled training pool as the text classifier. The comparator that makes "text adds
+signal beyond stars" a testable claim.
+_Avoid_: star weak label (that is the separate 1–2★/4–5★ sentiment sanity check), naive baseline
+
+**Other / Abstention / No predicted theme**:
+Three distinct labelling outcomes. *Other*: a complaint exists outside the named taxonomy;
+an LLM-only output and human-audit category that the classifier never learns or infers.
+*Abstention*: the LLM labeller declines to label confidently. *No predicted theme*: no
+named-theme classifier score cleared its threshold. Reported as separate coverage counts;
+never compared as equivalents.
+_Avoid_: unknown (ambiguous between other and abstention), empty label, classifier "other"
+
+**Classifier score**:
+The per-theme logistic output of the MLlib theme classifier baseline, used only for ranking
+and the frozen per-theme threshold. Not calibrated and not comparable to the labeller's
+label confidence.
+_Avoid_: confidence, probability, calibrated probability
+
+**Label source**:
+The field on every theme label naming which implementation produced it. Primary analysis
+requires the LLM source; classifier-sourced labels reach only the versioned prediction
+table, the scale benchmark and, if the classifier passes its gate, the exploratory
+prevalence chart.
+
+**Insufficient-support theme**:
+A named theme with fewer than the predeclared minimum of positive training examples
+(about 30). Fitted and reported as exploratory; never removed, and the taxonomy is never
+changed after classifier performance has been seen.
+_Avoid_: dropped theme, failed theme
+
+**Development set / Audit set**:
+The pre-2020 hand-labelled reviews used to tune the labeller and the classifier are the
+*development set*; the untouched post-2020 hand-labelled reviews opened once after the
+freeze are the *audit set*. Development numbers are validation, never final performance.
+_Avoid_: test set (for the development set), gold set (ambiguous)
+
 ### Data quality
 
 **Key collision**:

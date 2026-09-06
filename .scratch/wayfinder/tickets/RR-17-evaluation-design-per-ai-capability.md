@@ -56,3 +56,14 @@ labelling plan with its hour estimate, and the command that will print each tabl
   intervals stated as pointwise, not simultaneous.
 - Injected-decline power results validate the rating alert only, not the theme analysis;
   the aspect table is the only evidence for the second half of the opening question.
+
+## Input from RR-07 (closed 2026-09-06)
+
+- Complaint-theme labelling gets a **three-system sub-row**: LLM theme labeller · text
+  MLlib classifier · star-only theme baseline, all scored on identical audit rows. Pass
+  rule pre-registered in RR-07 item 17 (beats star-only; ≥ 70% of LLM macro-F1).
+- Support floors predeclared: ≈30 training positives, ≥10 audit positives, mechanical, same
+  for all three systems. `other` excluded from headline macro, reported separately.
+- Uncertainty: seeded paired bootstrap **clustered by product** on the two macro-F1
+  differences, pointwise, context only.
+- Classifier output is a *score*, not confidence; no comparability to `label_confidence`.

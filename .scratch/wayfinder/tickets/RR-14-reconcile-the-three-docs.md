@@ -37,3 +37,9 @@ they need not be reopened.
 Then check the whole map: every ticket closed, `Not yet specified` either graduated or
 honestly still foggy, and a short handoff note naming what the first implementation session
 picks up and what it already has decided for it.
+
+## Input from RR-07 (closed 2026-09-06)
+
+- `docs/course-coverage.md` Finding 5 consequence updated to point at ADR-0002. The README
+  and the build-plan register must say the same: MLlib in scope as a baseline classifier,
+  not a fourth capability.

@@ -4,7 +4,7 @@ title: Cut order and drop-dead dates under the three-week budget
 type: grilling
 status: open
 assignee: unassigned
-blocked-by: [RR-07]
+blocked-by: [RR-07]  # closed
 blocks: [RR-13, RR-14]
 ---
 
@@ -41,3 +41,9 @@ before it starts.
 
 **The resolution is a dated schedule, not a preference order** — each phase with a start-by
 date and the cut it triggers if that date passes.
+
+## Input from RR-07 (closed 2026-09-06)
+
+- MLlib theme classifier baseline: **cap 1 focused day** once LLM labels exist. Cut before
+  RAG **only if the LLM labels are late** (it cannot exist without them); otherwise it goes
+  ahead of RAG polish. The timed full-corpus benchmark must fit inside the same day.

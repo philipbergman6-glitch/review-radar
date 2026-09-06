@@ -36,3 +36,9 @@ this table** rather than recomputed, which is what makes it a printable number.
 
 Blocked on the silver decision, because silver is the first stage that has anything to
 record.
+
+## Input from RR-07 (closed 2026-09-06)
+
+- The classifier run's `pipeline_runs` row carries model version, freeze commit, seed,
+  chosen `regParam`, per-theme thresholds, `evaluation_status`, and for the full-corpus
+  benchmark: rows scored, rows excluded (empty text), wall time, executor config.
