@@ -177,3 +177,15 @@ Deliverables track owns rehearsals), RR-12 (protected core, conditional phases),
 (Search gate constituents, Deliverables acceptance), RR-14 (coverage doc "Phase 2" →
 Search), RR-16 (alias-to-snapshot lineage), RR-17 (judgement set is not the RAG gold set),
 RR-18 (Deliverables continuous).
+
+## Addendum from RR-06 (closed 2026-09-06) — requirements on the Search judgement set
+
+Search authors the 20 queries as **10 lexical + 10 descriptive** (naturally phrased; not
+engineered for zero term overlap) and freezes, before any kNN result is seen: query text,
+stratum, information need, per-query binary relevance rule, evaluation population, primary
+metric (macro-average P@5; MRR@10 secondary) and the RR-06 directional hypotheses. Judgement
+states are `relevant · not_relevant · cannot_judge`, plus `unjudged` as a pooling state;
+`cannot_judge` is never coerced. Search judges only its analyzer pool; Embeddings pools the
+new kNN/hybrid top-10 docs later and recomputes everything, so store judgements with pool
+provenance and keep the judging CLI reusable, retriever hidden, presentation randomised.
+The vector field is `similarity: cosine`, `int8_hnsw`, dim 384, in the mapping contract.

@@ -63,3 +63,11 @@ The README status table gains rows for the review search index, the `product_mon
 projection and Kibana (`make up-ui`), and the artifact's phase cards take the eight-line list
 from the `RR-01` answer with Deliverables as a track. The RAG and Stream cards read
 "conditional; rule in `RR-12`".
+
+## Input from RR-06 (closed 2026-09-06)
+
+README row "Elasticsearch index (BM25 + kNN)" becomes BM25 + kNN + **client-side** RRF (RRF
+is Enterprise-only on 8.17, RR-04); "349,059 … the population worth embedding" must read as
+the *raw* ceiling of the vector cohort, the silver count being printed by the gate. The
+coverage doc's BM25-vs-kNN paragraph should state the controlled vs production distinction
+and that hybrid ≥ BM25 is a tested hypothesis, not a claim.

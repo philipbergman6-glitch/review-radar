@@ -95,3 +95,16 @@ The 20-query relevance judgement set is built in P4 Search (frozen queries, blin
 judging across analyzers, P@5 plus MRR@10 or nDCG@10) and reused for kNN and hybrid. It is
 **not** the RAG evaluation set: RAG needs its own answerability, citation and faithfulness
 judgements. Capability rows now map to phases P5 Embeddings, P6 Themes, P7 RAG.
+
+## Input from RR-06 (closed 2026-09-06)
+
+The embeddings/semantic-search row is decided: gold set = the Search 20-query set (10
+lexical + 10 descriptive), binary relevance, one annotator, incremental blind pooling of
+kNN/hybrid top-10s; metric = macro-average P@5 (primary), MRR@10; **two tables** — a
+controlled comparison on the vector cohort (BM25-filtered · kNN · hybrid-filtered) and the
+production rows (unfiltered BM25 · production hybrid). Pre-registered hypotheses: BM25 ≥ kNN
+lexical, kNN ≥ BM25 descriptive, hybrid ≥ BM25 overall — reported, no pass threshold on
+relevance. Disagreements = per-query overlap distribution plus the per-query judged results.
+Supplementary: ANN recall@10 vs exact cosine (no labels). The one-shape table's
+"threshold/pass" cell for this row reads "gate: engineering identities; relevance:
+hypothesis, reported".

@@ -87,6 +87,9 @@ the `RR-01` answer.
 - [Where Kibana and the explicit ES mapping live](tickets/RR-01-kibana-es-mapping-home.md) — Both live in a new **P4 Search** phase, split from **P5 Embeddings**; final list P2 Silver / P3 Gold / P4 Search / P5 Embeddings / P6 Themes / P7 RAG (conditional) / P8 Stream (conditional) + a Deliverables *track*. Kibana = compose profile `ui` (`make up-ui`, 8.17.0 pinned, repo-stored saved-object export, idempotent import) reading only the `product_month` alias. Mapping + analyzer = a *mapping contract* (`dynamic: strict`, indexer required-field validation, contract and analyzer tests), the first Search deliverable, undroppable because the gate cannot pass without it. Review search index = every validated silver row with non-empty text, deterministic ids. `product_month` = serving projection per gold snapshot, alias swap, `source_gold_snapshot_id` on every doc (ADR-0004). Stemmed vs `text.unstemmed` measured on a frozen 20-query blind-pooled set, reused for kNN/hybrid, not for RAG. Gate `scripts/gate_search.py` → `SEARCH_GATE=PASS|FAIL`. Terms in `CONTEXT.md`.
 - [Aspect taxonomy and the model that produces it](tickets/RR-08-aspect-taxonomy-and-host.md) — Complaint-only, pre-2020-discovered taxonomy: 600-review seeded discovery sample, target 8/cap 10 supported themes, merge table committed; 200 development + 200 audit hand labels, 40 repeated after ≥5 days. Haiku 4.5 is primary; local 3B is a development/audit comparison and one cached-input demo move. Only title + text cross the wire. Pass = audit macro-F1 ≥0.70 and no supported-theme recall <0.50; ≤5 prompt versions. Hard ceiling 12,800 hosted calls / $20, Batch for frozen bulk. Strict JSON contract, one identical retry, cached Iceberg attempts and SHA-256 idempotency are in ADR-0003 and `docs/LLM_LABEL_RUNBOOK.md`.
 
+
+- [Embedding scope and how the hybrid retriever fuses](tickets/RR-06-embedding-scope-and-fusion.md) — Vector cohort = every deduplicated silver review with ≥20 whitespace words in `text` (profile predicate frozen verbatim; raw ceiling 349,059, gate compares ID sets not counts); embedded input title + text, 256 tokens; `gold.review_embeddings` keyed by `(review, embedding_spec_hash)` where the hash covers identity settings only, never batch/threads; driver-side batched embedding. Fusion = unweighted client-side RRF (`Σ 1/(60+rank)`, window 50, ties by review id), `int8_hnsw` cosine. Two evaluation tables never merged: controlled (all three on the cohort) and production (unfiltered BM25, production hybrid). 20 queries = 10 lexical + 10 descriptive, binary, incremental blind pooling, pre-registered P@5 hypotheses reported not gated. Gate `scripts/gate_embeddings.py` → `EMBED_GATE=PASS|FAIL` on identities and completeness only; ANN recall@10 vs exact, memory, latency reported. ADR-0005; terms in `CONTEXT.md`.
+
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
@@ -100,8 +103,11 @@ the `RR-01` answer.
   the protocol freeze's minimum-count business (`RR-09`), so this sharpens with it.
 - **Which `details` keys silver parses on read.** May graduate out of the silver dedupe and
   join ticket, or may only sharpen once the products load has run.
-- **RAG retrieval depth and question scope.** Product-scoped vs corpus-wide, and `k`.
-  Hangs on what the ES index actually contains after the embedding-scope decision.
+- **RAG retrieval and question scope.** RAG reuses the P5 production hybrid retriever:
+  product-scoped BM25 over all non-empty indexed reviews fused with kNN over the ≥20-word
+  vector cohort; temporal questions additionally filter to the baseline or recent window.
+  Still open: retrieval depth `k`, fallback when a product has too few vector-bearing
+  reviews, and the separate answerability/citation/faithfulness set (`RR-17`).
 - **Iceberg time travel as a demo move.** Deferred-but-cheap in the artifact; belongs to
   the demo-moves list, which does not exist yet.
 - **Recorded-backup format and rehearsal logistics.** Follows the demo surface.
@@ -114,10 +120,10 @@ the `RR-01` answer.
 
 ## Ticket index (updated 2026-09-06)
 
-Closed: `RR-01`, `RR-03`, `RR-04`, `RR-05`, `RR-07`, `RR-08`, `RR-09`, `RR-15`. Frontier —
-open, unblocked: `RR-02`, `RR-06`, `RR-10`, `RR-12`. Blocked: `RR-11`, `RR-13`, `RR-14`,
-`RR-16`, `RR-17`, `RR-18`.
-Suggested order: grill `RR-06`, `RR-17`, `RR-02`, `RR-10`, `RR-12` (late, per Notes).
+Closed: `RR-01`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`, `RR-15`.
+Frontier — open, unblocked: `RR-02`, `RR-10`, `RR-11`, `RR-12`, `RR-17`. Blocked: `RR-13`,
+`RR-14`, `RR-16`, `RR-18`.
+Suggested order: grill `RR-17`, `RR-02`, `RR-11`, `RR-10`, `RR-12` (late, per Notes).
 
 ## Out of scope
 

@@ -252,3 +252,39 @@ The versioned Elasticsearch settings, mappings and analyzer definitions together
 indexer-side required-field validation and the executable tests that enforce them. The
 mapping alone is not the contract, because Elasticsearch does not enforce field presence.
 _Avoid_: schema, the mapping (alone), dynamic mapping
+
+### Embeddings and retrieval
+
+**Vector cohort**:
+Every deduplicated, validated silver review whose text alone has at least twenty
+whitespace-separated words; the population that carries a vector. Membership never depends
+on the title or on how many reviews the product has.
+_Avoid_: the embedding set, long reviews, the 349,059 (a raw ceiling, not the cohort)
+
+**Embedding identity**:
+The set of settings that can change a vector's value — model, pinned revision, sequence
+length, normalisation, text preparation version, dimension. Two vectors with the same
+identity are comparable; execution settings such as batch size are not part of it.
+_Avoid_: embedding config, model version (alone)
+
+**Controlled retrieval comparison**:
+The evaluation in which BM25, kNN and hybrid search identical documents, the vector cohort,
+so that the retrieval method is the only thing that differs.
+_Avoid_: the benchmark (ambiguous with the production rows), BM25 vs kNN
+
+**Production retriever**:
+The hybrid the endpoint actually serves: lexical retrieval over every indexed review fused
+with vector retrieval over the vector cohort. Evaluated separately from the controlled
+comparison and never substituted for it.
+_Avoid_: the real search, unfiltered BM25 (only one component of it)
+
+**Diagnostic benchmark**:
+The frozen twenty-query set, half lexical and half descriptive, built to show where each
+retriever is strong. It estimates nothing about how often real users ask each kind.
+_Avoid_: test set, representative queries
+
+**ANN fidelity**:
+How closely the approximate, quantised vector index reproduces exact nearest neighbours,
+measured as recall of the exact top ten. It bundles quantisation, graph traversal and
+candidate depth; it does not isolate any one of them.
+_Avoid_: quantisation loss, index accuracy

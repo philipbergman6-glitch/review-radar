@@ -63,3 +63,10 @@ deliverables and exist before this ticket runs. Whether later panels inspect ind
 reviews from the review search index is this ticket's call. Deliverables is a *track*, not
 "Phase 8": this ticket owns the ordered demo moves and timing; the track owns artefacts,
 rehearsal records and the playable backup (acceptance in `RR-01` log item 11).
+
+## Input from RR-06 (closed 2026-09-06)
+
+Candidate demo move: the **hybrid decomposition** — one descriptive query, three columns
+(BM25 rank, kNN rank, fused score `Σ 1/(60+rank)`), showing a review that neither list
+ranks first winning the fusion. Every review the demo can retrieve semantically is in the
+≥ 20-word vector cohort; short reviews are reachable by BM25 only (production hybrid).

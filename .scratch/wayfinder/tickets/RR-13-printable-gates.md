@@ -86,3 +86,13 @@ two consecutive complete rehearsals within the time limit, every move succeeds o
 documented fallback, playable backup within the limit, README/design doc/slides/runbook
 present — turn each into a printed check. Alias-to-gold-snapshot match is a lineage gate
 constituent (`RR-16`).
+
+## Input from RR-06 (closed 2026-09-06)
+
+**Embeddings gate** decided in substance (`scripts/gate_embeddings.py`, constituents in the
+RR-06 answer item 10, final line `EMBED_GATE=PASS|FAIL`); this ticket freezes the printed
+names. Gate = ID-set identities (silver cohort = active-spec Iceberg rows = vector-bearing ES
+docs), vector validity, 20/20 queries × 3 retrievers complete, judgements complete through
+rank 10, no error/OOM/restart. Reported outcomes: P@5/MRR@10 by stratum, hypotheses held or
+not, disagreement distribution, ANN recall@10 vs exact, peak memory beside the 2 GB cap,
+latency (descriptive). Nothing about relevance quality is a pass line.
