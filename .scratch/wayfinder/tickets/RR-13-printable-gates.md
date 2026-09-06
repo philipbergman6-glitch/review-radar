@@ -96,3 +96,16 @@ docs), vector validity, 20/20 queries × 3 retrievers complete, judgements compl
 rank 10, no error/OOM/restart. Reported outcomes: P@5/MRR@10 by stratum, hypotheses held or
 not, disagreement distribution, ANN recall@10 vs exact, peak memory beside the 2 GB cap,
 latency (descriptive). Nothing about relevance quality is a pass line.
+
+## Input from RR-17 (closed 2026-09-06)
+
+- `RAG_GATE=PASS|FAIL` = the citation/scope contract only (30/30: every non-refused answer
+  cites ≥ 1 retrieved-set review in correct scope; refusals carry no claims or citations).
+  The four quality targets (grounded ≥ 16/20, adequate ≥ 14/20, abstention ≥ 8/10, false
+  refusal ≤ 2/20) print PASS/FAIL each but do not fail the phase; they set status `built,
+  evaluated, below target`.
+- Every capability gate script writes `data/eval/<capability>.json` against
+  `conf/eval-artifact.schema.json` (protocol hash, model/prompt identity, population identity,
+  `pipeline_run_id`, status, cut reason). `make eval-table` renders the one-shape table and
+  hard-fails on a missing or invalid artefact unless the capability is declared cut.
+- Verdict vocabulary for every printed gate line: PASS / FAIL / REPORTED / NOT_RUN.

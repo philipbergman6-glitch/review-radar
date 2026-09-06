@@ -70,3 +70,14 @@ Candidate demo move: the **hybrid decomposition** — one descriptive query, thr
 (BM25 rank, kNN rank, fused score `Σ 1/(60+rank)`), showing a review that neither list
 ranks first winning the fusion. Every review the demo can retrieve semantically is in the
 ≥ 20-word vector cohort; short reviews are reachable by BM25 only (production hybrid).
+
+## Input from RR-17 (closed 2026-09-06)
+
+- The evaluation summary table (`make eval-table`: three capability rows, verdicts
+  PASS/FAIL/REPORTED/NOT_RUN) is a demo surface candidate in its own right; RAG's per-claim
+  citation view (claim → cited review ids with verified window) is the RAG demo move.
+- No local-model RAG row exists in the evaluation. A `llama3.2:3b` RAG answer, if wanted, is a
+  demo move only and must be labelled unevaluated.
+- Temporal RAG answers may only contrast cited examples; a live demo must not narrate
+  "complaints about X increased" from a RAG answer — that sentence belongs to the
+  theme-shift table.

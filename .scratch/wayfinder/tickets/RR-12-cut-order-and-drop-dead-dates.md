@@ -69,3 +69,17 @@ this ticket decides the cut rule. Philip's protected core, verbatim intent: *Sil
 Search/Kibana → one evaluated AI capability → numerical insights → polished deliverables.*
 Under schedule pressure, simplify Gold's analytical machinery rather than pull Search ahead
 of Gold. The map's "do not cut yet" still holds; grill this late.
+
+## Input from RR-17 (closed 2026-09-06)
+
+- Hand-labelling range: **≈ 17–21 h** of Philip, un-parallelisable, 17 the optimistic bound
+  (400 theme labels 6.7 h, 40 relabels 1 h, ~600 relevance judgements 3.5 h, RAG authoring +
+  keys 3.3 h, RAG judging 1.5 h, plus taxonomy merge, relevance rules, answerability
+  validation, two adjudication passes). Theme audit set opened last.
+- Cut order inherited: conditional RAG (P7) is the first coherent cut; MLlib sub-row before
+  RAG only if LLM labels are late (RR-07). If P6 must shrink, preserve the 80-row
+  representative audit stratum and redesign taxonomy/support as a unit — never delete audit
+  strata ad hoc.
+- P7 has its own ledger (200 calls / $2); ADR-0003's 12,800 calls are fully allocated.
+- Note: the Question above still says the submission date is *assumed*; the map's Notes record
+  it as **confirmed 2026-09-21** `[observed 2026-09-04, Philip]`. Treat the date as fixed.

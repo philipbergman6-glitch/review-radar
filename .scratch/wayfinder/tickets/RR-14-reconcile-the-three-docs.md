@@ -71,3 +71,13 @@ is Enterprise-only on 8.17, RR-04); "349,059 … the population worth embedding"
 the *raw* ceiling of the vector cohort, the silver count being printed by the gate. The
 coverage doc's BM25-vs-kNN paragraph should state the controlled vs production distinction
 and that hybrid ≥ BM25 is a tested hypothesis, not a claim.
+
+## Input from RR-17 (closed 2026-09-06)
+
+- README's AI status table must use the RR-17 verdict vocabulary (PASS / FAIL / REPORTED /
+  NOT_RUN) and say "evaluation set", never "gold set". RAG row reads "conditional; 30 frozen
+  questions; five integer thresholds" and links ADR-0006.
+- The build-plan artifact's "20 questions, faithfulness spot-check" line is superseded:
+  30 questions, one human judge, grounded/adequate/abstention/false-refusal targets.
+- Coverage doc: the RAG paragraph must state that temporal RAG answers contrast cited
+  examples only; the quantitative theme-shift claim lives in the gold table.

@@ -90,6 +90,8 @@ the `RR-01` answer.
 
 - [Embedding scope and how the hybrid retriever fuses](tickets/RR-06-embedding-scope-and-fusion.md) — Vector cohort = every deduplicated silver review with ≥20 whitespace words in `text` (profile predicate frozen verbatim; raw ceiling 349,059, gate compares ID sets not counts); embedded input title + text, 256 tokens; `gold.review_embeddings` keyed by `(review, embedding_spec_hash)` where the hash covers identity settings only, never batch/threads; driver-side batched embedding. Fusion = unweighted client-side RRF (`Σ 1/(60+rank)`, window 50, ties by review id), `int8_hnsw` cosine. Two evaluation tables never merged: controlled (all three on the cohort) and production (unfiltered BM25, production hybrid). 20 queries = 10 lexical + 10 descriptive, binary, incremental blind pooling, pre-registered P@5 hypotheses reported not gated. Gate `scripts/gate_embeddings.py` → `EMBED_GATE=PASS|FAIL` on identities and completeness only; ANN recall@10 vs exact, memory, latency reported. ADR-0005; terms in `CONTEXT.md`.
 
+- [An evaluation table for every AI capability](tickets/RR-17-evaluation-design-per-ai-capability.md) — Three capability summary rows (P5 search · P6 theme labelling with two sub-rows · P7 RAG) plus a separate theme-shift outcome table; columns `capability · phase · evaluation set · metric · value [interval] · threshold · verdict · evidence path`, verdicts PASS/FAIL (any frozen threshold, code- or human-derived) / REPORTED / NOT_RUN. RAG: 30 frozen questions (20 answerable, 10 unanswerable in three strata), answerability by evidence scan + manual validation never by retriever output, slots from the RR-09 decline ranking, structured answer keys with forbidden prevalence/direction claims, per-window retrieval, claim-level citations, Philip the sole judge, fixed-denominator integer thresholds (contract 30/30 gate; grounded ≥16/20, adequate ≥14/20 with refusal = failure; abstention ≥8/10; false refusal ≤2/20), seven-step disagreement precedence, own 200-call/$2 ledger. `make eval-table` renders per-capability JSON artefacts. Labelling ≈17–21 h → RR-12. ADR-0006; terms in `CONTEXT.md` *Evaluation*.
+
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
@@ -97,17 +99,16 @@ the `RR-01` answer.
 - *(Burst detection threshold removed 2026-09-04 — `gold.bursts` is out of scope, `RR-09`.)*
 - **Decline-rule thresholds (B, R, δ, P, G, K, minimum counts, placebo ceiling).** Set at
   the protocol freeze from pre-2020 aggregates only, per `RR-09` / ADR-0001; deliberately
-  *not* a map decision.
+  *not* a map decision. **Now also includes the low-/high-rated fallback-period
+  rule** (minimum counts, selection, tie-break), which ADR-0001 does not yet define and which
+  RAG's fallback questions inherit unchanged (`RR-17`).
 - **Which gold population `product_month` projects.** `RR-01` says: only what P3
   materialises, never all 112,590 products across their lifetimes. What P3 materialises is
   the protocol freeze's minimum-count business (`RR-09`), so this sharpens with it.
 - **Which `details` keys silver parses on read.** May graduate out of the silver dedupe and
   join ticket, or may only sharpen once the products load has run.
-- **RAG retrieval and question scope.** RAG reuses the P5 production hybrid retriever:
-  product-scoped BM25 over all non-empty indexed reviews fused with kNN over the ≥20-word
-  vector cohort; temporal questions additionally filter to the baseline or recent window.
-  Still open: retrieval depth `k`, fallback when a product has too few vector-bearing
-  reviews, and the separate answerability/citation/faithfulness set (`RR-17`).
+- *(RAG retrieval depth, sparse-vector fallback and the evaluation set graduated 2026-09-06
+  into `RR-17` / ADR-0006 — closed.)*
 - **Iceberg time travel as a demo move.** Deferred-but-cheap in the artifact; belongs to
   the demo-moves list, which does not exist yet.
 - **Recorded-backup format and rehearsal logistics.** Follows the demo surface.
@@ -118,12 +119,12 @@ the `RR-01` answer.
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-06)
+## Ticket index (updated 2026-09-06, RR-17 closed)
 
-Closed: `RR-01`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`, `RR-15`.
-Frontier — open, unblocked: `RR-02`, `RR-10`, `RR-11`, `RR-12`, `RR-17`. Blocked: `RR-13`,
-`RR-14`, `RR-16`, `RR-18`.
-Suggested order: grill `RR-17`, `RR-02`, `RR-11`, `RR-10`, `RR-12` (late, per Notes).
+Closed: `RR-01`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`, `RR-15`,
+`RR-17`. Frontier — open, unblocked: `RR-02`, `RR-10`, `RR-11`, `RR-12`. Blocked: `RR-13`
+(on RR-02, RR-10, RR-11, RR-12, RR-16), `RR-14`, `RR-16`, `RR-18`.
+Suggested order: grill `RR-02`, `RR-11`, `RR-10`, `RR-12` (late, per Notes).
 
 ## Out of scope
 

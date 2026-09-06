@@ -288,3 +288,67 @@ How closely the approximate, quantised vector index reproduces exact nearest nei
 measured as recall of the exact top ten. It bundles quantisation, graph traversal and
 candidate depth; it does not isolate any one of them.
 _Avoid_: quantisation loss, index accuracy
+
+### Evaluation
+
+**Evaluation set**:
+The frozen collection of items an AI capability is scored on — the diagnostic benchmark for
+search, the development and audit sets for theme labelling, the thirty questions for RAG.
+_Avoid_: gold set (implies a truth the single annotator cannot supply), test set
+
+**Answerable question**:
+A RAG question for which the scoped reviews contain enough manually validated
+complaint-bearing evidence to support a grounded answer. Answerability is a property of the
+corpus, never of what the retriever returned.
+_Avoid_: easy question, retrievable question
+
+**Unanswerable question**:
+A RAG question the scoped corpus cannot support: the attribute is never mentioned, the scope
+holds no reviews, or the question is outside the domain. The three kinds are reported
+separately.
+_Avoid_: trick question, negative example
+
+**Evidence scan**:
+Lexical candidate discovery over every review in a question's scope, followed by manual
+semantic validation of each match. The scan alone proves nothing; the validation decides.
+_Avoid_: regex check, keyword proof
+
+**Answer key**:
+The structured record written when a question is authored, before any answer exists: the
+propositions a fully adequate answer must contain, themes it may mention, supporting review
+ids, claims it must not make, and the expected refusal reason if unanswerable.
+_Avoid_: reference answer, expected output
+
+**Material claim**:
+A statement in a RAG answer that asserts something about the product or its reviews and
+therefore needs a citation. Connective or hedging language is not a material claim.
+_Avoid_: sentence, fact
+
+**Groundedness**:
+Whether every material claim in an answer is supported by the reviews it cites. Judged
+fully, partially or unsupported; one unsupported material claim prevents a fully-grounded
+verdict.
+_Avoid_: faithfulness (used loosely elsewhere), hallucination rate
+
+**Adequacy**:
+Whether an answer contains the propositions its answer key requires. Judged fully, partially
+or not adequate; a grounded answer can still be inadequate.
+_Avoid_: correctness, accuracy
+
+**Refusal**:
+A RAG response that declines to answer, carrying no claims and no citations, with a reason.
+A refusal on an answerable question is a failure; on an unanswerable one it is correct
+abstention.
+_Avoid_: no answer, abstention (reserved for theme labelling)
+
+**Engineering gate / Quality target**:
+An engineering gate is a mechanical contract a phase must satisfy to count as built; its
+failure reopens the phase. A quality target is a frozen threshold on an evaluated result;
+its failure ships as *built, evaluated, below target* with the number shown.
+_Avoid_: hard gate / soft gate, must-have / nice-to-have
+
+**Verdict**:
+The one-word outcome in the evaluation summary table: PASS or FAIL against a frozen
+threshold regardless of whether its inputs came from code or human labels; REPORTED for a
+result with no acceptance threshold; NOT_RUN for a capability cut by decision.
+_Avoid_: status (reserved for phase state), result
