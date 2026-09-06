@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "review-radar/complaint-theme-label/v1",
+  "title": "Complaint theme label",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "themes",
+    "other",
+    "abstain",
+    "overall_sentiment",
+    "label_confidence"
+  ],
+  "properties": {
+    "themes": {
+      "type": "array",
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["theme_id", "evidence_quote"],
+        "properties": {
+          "theme_id": {"type": "string", "minLength": 1},
+          "evidence_quote": {
+            "type": "string",
+            "pattern": "^\\S+(?:\\s+\\S+){0,14}$"
+          }
+        }
+      }
+    },
+    "other": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["present", "phrase"],
+      "properties": {
+        "present": {"type": "boolean"},
+        "phrase": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"present": {"const": true}}},
+          "then": {
+            "properties": {
+              "phrase": {
+                "type": "string",
+                "pattern": "^\\S+(?:\\s+\\S+){0,4}$"
+              }
+            }
+          },
+          "else": {"properties": {"phrase": {"type": "null"}}}
+        }
+      ]
+    },
+    "abstain": {"type": "boolean"},
+    "overall_sentiment": {
+      "enum": ["positive", "negative", "mixed", "none"]
+    },
+    "label_confidence": {"enum": ["high", "medium", "low"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"abstain": {"const": true}}},
+      "then": {
+        "properties": {
+          "themes": {"maxItems": 0},
+          "other": {
+            "properties": {
+              "present": {"const": false},
+              "phrase": {"type": "null"}
+            }
+          },
+          "label_confidence": {"const": "low"}
+        }
+      }
+    }
+  ]
+}

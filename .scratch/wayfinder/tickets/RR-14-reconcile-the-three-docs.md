@@ -43,3 +43,15 @@ picks up and what it already has decided for it.
 - `docs/course-coverage.md` Finding 5 consequence updated to point at ADR-0002. The README
   and the build-plan register must say the same: MLlib in scope as a baseline classifier,
   not a fourth capability.
+
+## Input from RR-08 (closed 2026-09-06)
+
+- README status row `AI: LLM aspect sentiment + validation` and the phrase "LLM aspect
+  sentiment" (README lines 9, 26, 120) must become *complaint-theme labelling* — `CONTEXT.md`
+  lists "aspect sentiment" under _Avoid_.
+- New documents to list and keep consistent: ADR-0003, `docs/LLM_LABEL_RUNBOOK.md`,
+  `conf/complaint-theme-label.schema.json`, `docs/theme-taxonomy/merge-table.csv` (created at
+  discovery).
+- `label_source` string: ADR-0002 says `"llm"`, ADR-0003 says `hosted_llm | local_llm | human`.
+  One value must win, in code and both ADRs.
+- The map's "LLM host" note is now decided, not a default to argue with.

@@ -146,7 +146,8 @@ products?* Same gold table, same aspect pipeline.
 
 **Complaint-theme labelling**:
 The shared task of assigning each review the frozen, multi-label set of complaint themes it
-mentions. Two implementations exist; both must emit the same targets.
+mentions negatively. Positive praise is not labelled. Two implementations exist; both must emit
+the same named-theme targets.
 _Avoid_: aspect sentiment (the rubric's phrase, not ours), classification (ambiguous between the two implementations)
 
 **LLM theme labeller**:
@@ -202,6 +203,11 @@ The pre-2020 hand-labelled reviews used to tune the labeller and the classifier 
 *development set*; the untouched post-2020 hand-labelled reviews opened once after the
 freeze are the *audit set*. Development numbers are validation, never final performance.
 _Avoid_: test set (for the development set), gold set (ambiguous)
+
+**Model abstention / Parse failure**:
+An abstention is a valid model decision to decline a label. A parse failure is a technical
+failure after strict validation and one identical retry. They are stored and reported separately.
+_Avoid_: treating an invalid response as abstention, silently repaired label
 
 ### Data quality
 

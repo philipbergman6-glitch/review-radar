@@ -47,3 +47,17 @@ date and the cut it triggers if that date passes.
 - MLlib theme classifier baseline: **cap 1 focused day** once LLM labels exist. Cut before
   RAG **only if the LLM labels are late** (it cannot exist without them); otherwise it goes
   ahead of RAG polish. The timed full-corpus benchmark must fit inside the same day.
+
+## Input from RR-08 (closed 2026-09-06)
+
+Calendar constraints, not just hours:
+
+- **Discovery cannot start until the pre-2020 decline rule has run** (it samples episode +
+  control windows). Protocol freeze → gold pre-2020 run → discovery → taxonomy → prompt dev.
+- **Hand labelling ≈ 7 h** (200 dev + 200 audit at ~1 min each), one person, plus a **40-row
+  relabel ≥ 5 calendar days after the audit labels** — so audit labelling must finish ≥ 5 days
+  before the report is written.
+- **Batch API latency** up to 24 h per bulk line (discovery, training pool, holdout, audit) —
+  four serialised waits unless overlapped; prompt development uses the standard API.
+- ≤ 5 prompt versions; MLlib (1-day cap) only after the training pool is labelled.
+- Console key + $20 workspace limit must be provisioned before the first hosted call.

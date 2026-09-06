@@ -2,8 +2,8 @@
 id: RR-08
 title: Aspect taxonomy and the model that produces it
 type: grilling
-status: open
-assignee: unassigned
+status: closed
+assignee: philipbergman (grilled 2026-09-06)
 blocked-by: [RR-03, RR-07]  # both closed
 blocks: [RR-11, RR-13, RR-14, RR-17]
 ---
@@ -84,3 +84,46 @@ LLM labels would be a genuine evaluation rather than a bolted-on model.
   the per-theme comparator (that is the star-only theme baseline, RR-17).
 - Canonical terms: *development set* (pre-2020 hand labels) and *audit set* (post-2020,
   opened once). Avoid "gold set".
+
+## Grilling log
+
+### Round 1 — 2026-09-06
+
+Settled `[observed, Philip]`:
+
+1. Discover themes with Haiku free-phrase extraction over 600 seeded pre-2020 episode/control
+   reviews, about 70% rated at most 3 stars. Hand-merge with counts; retain only themes present in
+   at least 3% of low-rated discovery reviews and at least two products. Target eight and cap at
+   ten. Record the merge table; MiniLM clustering is only a cheap cross-check.
+2. Complaint-only multi-label output: negative named themes with one at-most-15-word quote each;
+   `other` plus an at-most-five-word phrase; abstention; overall sentiment; label confidence.
+   Omit unmentioned themes and do not label positive praise.
+3. Haiku 4.5 is primary. `llama3.2:3b` runs only on the 200-row development and 200-row audit sets
+   and remains available for one live single-review move. Primary analysis and the demo read
+   cached Iceberg labels; there is never a live hosted demo call.
+4. Send title and review text only. Never send ids, time, rating, product identity/name or
+   metadata. The design-doc concession is: "public is not the same as not sensitive; we sent the
+   minimum field set and no identifier, and cached every response so the demo makes no live call."
+5. One person labels 200 development plus 200 audit reviews (about seven hours). Audit = 120
+   frozen-term-enriched + 80 prevalence-representative rows, reported separately. Relabel 40 audit
+   rows at least five days later and report per-theme intra-annotator kappa.
+6. Pass = audit macro-F1 at least 0.70 and no supported theme recall below 0.50. Show per-theme
+   P/R/F1/support, development macro-F1, separate `other`/abstention/failure coverage and a seeded
+   product-clustered bootstrap interval. Below target still ships with the failed table.
+7. After scoring, adjudicate every disagreement once into `model_missed`, `model_invented`,
+   `definition_boundary`, `human_error`, or `star_misleading`, without changing labels/spec. Show
+   counts and five examples, including a misleading-star case where the model was right.
+8. At most five prompt versions, all committed with development tables; freeze before audit.
+
+Exact budget counts, strict output/failure semantics, the Iceberg cache schema and idempotency key,
+Batch/standard routing and spend cap, and the sentiment weak-label table are frozen in ADR-0003.
+The machine-readable output contract is `conf/complaint-theme-label.schema.json`; the exact wire
+body and operational checks are `docs/LLM_LABEL_RUNBOOK.md`.
+
+## Answer
+
+Closed 2026-09-06. Use the pre-2020-derived, at-most-ten-theme complaint taxonomy and Haiku 4.5
+primary labels under ADR-0003. The hosted ceiling is 12,800 logical calls and $20; frozen bulk work
+uses Batch, while at most 1,000 prompt-development calls use the standard API. Strict failures get
+one identical retry and are never converted to abstentions. Only cached `label_source=hosted_llm`
+rows may feed primary theme shifts.

@@ -67,3 +67,24 @@ labelling plan with its hour estimate, and the command that will print each tabl
 - Uncertainty: seeded paired bootstrap **clustered by product** on the two macro-F1
   differences, pointwise, context only.
 - Classifier output is a *score*, not confidence; no comparability to `label_confidence`.
+
+## Input from RR-08 (closed 2026-09-06)
+
+- **LLM theme labeller pass rule, pre-registered** (ADR-0003): audit macro-F1 over supported
+  named themes ≥ 0.70 **and** no supported theme with recall < 0.50. Supported = ≥ 10 audit
+  positives. Report per-theme P/R/F1/support, development macro-F1 beside audit (the drop is a
+  number), `other`, abstention, `parse_failed`/`api_failed` coverage, seeded product-clustered
+  bootstrap interval as context.
+- **Audit set = 200 rows**: 120 enriched from frozen discovery theme terms + 80
+  prevalence-representative from post-2020 candidate/control windows; the 80 are reported
+  separately as the unbiased number. Development set = 200 enriched pre-2020 rows.
+- **Label-noise ceiling**: 40 audit rows relabelled by the same annotator ≥ 5 days later;
+  per-theme intra-annotator κ reported. No second annotator exists.
+- **Local vs hosted row**: `llama3.2:3b` scored on the identical development and audit rows
+  under the identical frozen prompt; reported as "% of hosted macro-F1 at $0". Never primary.
+- **Disagreement enum** (fixed): `model_missed` · `model_invented` · `definition_boundary` ·
+  `human_error` · `star_misleading`. One row each, adjudicated once after scoring, labels and
+  spec unchanged.
+- **Sentiment weak-label check** is a sanity table only: 3★ excluded, one row per star bucket
+  + overall, four predicted-sentiment counts, agreement rate with Wilson 95% interval.
+- Contract in `conf/complaint-theme-label.schema.json`; wire body in `docs/LLM_LABEL_RUNBOOK.md`.

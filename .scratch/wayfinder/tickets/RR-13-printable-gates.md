@@ -59,3 +59,18 @@ Plus a calibration line printed once at the freeze: `placebo_triggers_per_eligib
   the three-system table (LLM labeller · text classifier · star-only baseline) with
   per-theme support and F1, macro-F1, and PASS/FAIL. A test asserts the primary theme-shift
   job requires `label_source = "llm"`.
+
+## Input from RR-08 (closed 2026-09-06)
+
+The complaint-theme gate must print, from cached `gold.review_theme_labels` rows only:
+
+1. the three-system per-theme table (LLM labeller · text MLlib · star-only) with support,
+   P/R/F1, macro-F1 and **PASS/FAIL** against ADR-0003 (macro-F1 ≥ 0.70, min recall ≥ 0.50)
+   and ADR-0002 (classifier rule);
+2. coverage counts: named theme · `other` · abstention · `parse_failed` · `api_failed`;
+3. the budget ledger: logical hosted calls vs 12,800, estimated spend vs $20, per budget line;
+4. the sentiment weak-label table with Wilson intervals;
+5. the disagreement-cause counts.
+
+A test asserts the primary theme-shift job requires `label_source = "hosted_llm"`
+(ADR-0003 value; ADR-0002 wrote `"llm"` — reconcile to one string in RR-14).

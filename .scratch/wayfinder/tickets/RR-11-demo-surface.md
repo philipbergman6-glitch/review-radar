@@ -45,3 +45,12 @@ Fold in `docs/DEMO_RUNBOOK.md`'s existing live sequence (healthcheck → produce
 Iceberg snapshots → exactly-once proof, ~65 s for the last) and say which of those survive
 once the new phases exist. Also decide whether the deferred-but-cheap Iceberg time-travel
 comparison earns a slot.
+
+## Input from RR-08 (closed 2026-09-06)
+
+- The demo **never makes a hosted call**. Every label shown is a cached
+  `gold.review_theme_labels` row (raw response retained, auditable on stage).
+- One optional live move: `llama3.2:3b` labelling a single review (~4 s, RR-03) under the
+  frozen prompt, with a cached fallback. Requires `ollama serve` in the pre-demo checklist.
+- The evaluation output is a page (per-theme table, coverage counts, disagreement examples),
+  not a dashboard tile.
