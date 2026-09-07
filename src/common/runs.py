@@ -11,8 +11,8 @@ must record and the count identity its numbers must satisfy. Validation returns 
 failures ("identity: records_in 101 != records_out 80 + ...") and hard-fails by default;
 a run whose numbers do not add up is `failed`, never quietly `success`.
 
-Contracts registered here: silver, gold, search_index_reviews, search_index_product_month,
-catalogue_load, bronze_drain, produce. Bronze and
+Contracts registered here: silver, gold, search_index_reviews (v1 text only, v2 with
+vectors), search_index_product_month, embeddings, catalogue_load, bronze_drain, produce. Bronze and
 produce are declared so the CHECK list and the registry agree from day one; their drivers
 are instrumented in their own sessions (ADR-0008 §3), not in silver's.
 """
@@ -41,6 +41,7 @@ SILVER_SPEC_VERSION = "1"
 GOLD_SPEC_VERSION = "1"
 SEARCH_REVIEWS_SPEC_VERSION = "1"
 SEARCH_PRODUCT_MONTH_SPEC_VERSION = "1"
+EMBEDDINGS_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -140,6 +141,12 @@ def _search_reviews_identity(records: dict[str, int | None], counts: dict[str, A
     total, passed = _n(counts, "contract_tests_total"), _n(counts, "contract_tests_passed")
     if total is None or passed != total:
         fails.append(f"contract tests {passed}/{total} not all passed")
+    if "embedding_rows" in counts:  # v2: every embedding row became a vector-bearing document
+        emb, vsent, ves = (_n(counts, k) for k in ("embedding_rows", "vector_docs_sent", "vector_docs_es"))
+        if not (emb == vsent == ves):
+            fails.append(f"embedding_rows {emb} / vector_docs_sent {vsent} / vector_docs_es {ves} disagree")
+        if sent is not None and vsent is not None and vsent > sent:
+            fails.append(f"vector_docs_sent {vsent} > docs_sent {sent}")
     return fails
 
 
@@ -151,6 +158,21 @@ def _search_product_month_identity(records: dict[str, int | None], counts: dict[
     if not (records.get("records_out") == sent == es_count == gold_rows):
         fails.append(f"records_out {records.get('records_out')} / docs_sent {sent} / es_count {es_count} "
                      f"/ gold_rows {gold_rows} disagree")
+    return fails
+
+
+def _embeddings_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    fails: list[str] = []
+    silver_rows, cohort, below = (_n(counts, k) for k in ("silver_rows", "cohort_rows", "below_min_words"))
+    if records.get("records_in") != silver_rows:
+        fails.append(f"records_in {records.get('records_in')} != silver_rows {silver_rows}")
+    if None in (silver_rows, cohort, below) or silver_rows != cohort + below:
+        fails.append(f"silver_rows {silver_rows} != cohort_rows {cohort} + below_min_words {below}")
+    same = [records.get("records_out"), cohort] + [_n(counts, k) for k in
+            ("embedded_rows", "table_rows_for_spec", "review_id_distinct", "dims_ok_rows", "unit_norm_rows")]
+    if None in same or len(set(same)) != 1:
+        fails.append("records_out / cohort_rows / embedded_rows / table_rows_for_spec / review_id_distinct "
+                     f"/ dims_ok_rows / unit_norm_rows disagree: {same}")
     return fails
 
 
@@ -226,6 +248,27 @@ _register(Contract(
             "contract_tests_total", "contract_tests_passed", "analyzers", "contract_hash"),
     identity=_search_reviews_identity))
 
+# v2: the generation also carries `text_vector` for the embedding cohort (P5).
+_register(Contract(
+    "search_index_reviews", "2",
+    inputs={"silver": ("run_id", "table", "snapshot_id"), "contract": ("path", "version", "hash"),
+            "embeddings": ("run_id", "table", "snapshot_id", "spec_hash")},
+    outputs={"es.reviews": ("index", "alias", "doc_count")},
+    counts=("silver_rows", "excluded_empty_text", "docs_sent", "es_count", "previous_generations",
+            "contract_tests_total", "contract_tests_passed", "analyzers", "contract_hash",
+            "embedding_rows", "vector_docs_sent", "vector_docs_es", "embedding_spec_hash"),
+    identity=_search_reviews_identity))
+
+_register(Contract(
+    "embeddings", EMBEDDINGS_SPEC_VERSION,
+    inputs={"silver": ("run_id", "table", "snapshot_id"),
+            "spec": ("path", "version", "hash", "model", "revision")},
+    outputs={"gold.review_embeddings": ("table", "snapshot_id", "spec_hash")},
+    counts=("silver_rows", "cohort_rows", "below_min_words", "embedded_rows", "table_rows_for_spec",
+            "review_id_distinct", "dims_ok_rows", "unit_norm_rows", "min_words", "elapsed_s",
+            "reviews_per_s"),
+    identity=_embeddings_identity))
+
 _register(Contract(
     "search_index_product_month", SEARCH_PRODUCT_MONTH_SPEC_VERSION,
     inputs={"gold": ("run_id", "table", "snapshot_id"), "contract": ("path", "version", "hash")},
@@ -257,8 +300,7 @@ _register(Contract(
 
 # Jobs whose contracts are registered by their own phase (ADR-0008 §2). They exist in the
 # vocabulary now so the CHECK constraint and this registry stay in step.
-for _later in ("embeddings",
-               "theme_labels_llm", "theme_classifier_train", "theme_classifier_score",
+for _later in ("theme_labels_llm", "theme_classifier_train", "theme_classifier_score",
                "rag_answers"):
     _register(Contract(_later, "0", inputs={}, outputs={}, counts=()))
 

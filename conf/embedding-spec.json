@@ -1,0 +1,20 @@
+{
+  "spec_version": "1",
+  "identity": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "max_seq_length": 256,
+    "normalize": true,
+    "dims": 384,
+    "similarity": "cosine",
+    "text_prep_version": "1",
+    "text_prep": "title and text joined by '. ' when the title is non-blank, else text alone; whitespace collapsed",
+    "cohort": "silver.reviews rows with text_word_count >= 20 (len(text.split()) >= 20, ADR-0005)",
+    "cohort_min_words": 20
+  },
+  "execution_defaults": {
+    "batch_size": 64,
+    "device": "cpu",
+    "note": "execution settings are recorded in the run manifest and never hashed (ADR-0005)"
+  }
+}
