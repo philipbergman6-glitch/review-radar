@@ -1,0 +1,60 @@
+# Which reviews the complaint-theme work is allowed to look at (ADR-0003, RR-08, RR-09, RR-19).
+#
+# Read by src/gold/controls.py (matching, pure) and src/spark/theme_samples.py (the job).
+# The SHA-256 of the [matching] and [discovery] tables is printed by every run and stored in
+# the run ledger, so a changed protocol is visible in lineage.
+#
+# status = "provisional" while the sets are being drawn and inspected; "frozen" once the
+# discovery sample has been labelled and the taxonomy is committed. Development, audit,
+# training-pool and inference draws refuse to run while status is "provisional", because
+# their frames depend on frozen theme terms.
+
+[protocol]
+status = "provisional"
+holdout_start = "2020-01"      # must equal conf/decline_rule.toml rule.holdout_start
+seed = 20260907                # one seed for every draw; per-set salts below
+
+[matching]
+# A matched control (CONTEXT.md) is observed over the *same* calendar windows as the
+# candidate episode, is similar in baseline rating and volume, and never alerts under the
+# locked decline rule anywhere on its spine.
+controls_per_candidate = 2
+max_baseline_mean_diff = 0.5   # stars, |control - candidate| at the candidate's alert month
+min_volume_ratio = 0.5         # control baseline_reviews / candidate baseline_reviews
+max_volume_ratio = 2.0
+require_evaluable = true       # the control must have an evaluable point at the same month
+require_condition_false = true # ... and the decline condition must be false there
+# Text-characterisable (CONTEXT.md): both windows must carry enough text for labelling.
+min_nonempty_text_per_window = 10
+min_long_text_per_window = 5   # >= 20 whitespace words, the P5 cohort predicate
+# Ranking is deterministic: |baseline mean difference| asc, |log2 volume ratio| asc,
+# parent_asin asc. Ties therefore never depend on Spark partitioning.
+
+[discovery]
+# ADR-0003: seeded 600-review pre-2020 sample from episode and control windows,
+# oversampling reviews rated <= 3 stars to about 70%.
+size = 600
+low_rated_share = 0.70         # rating <= 3
+low_rated_max_stars = 3
+max_per_product = 15           # no single product may dominate the taxonomy
+min_text_words = 5             # a review with fewer words cannot evidence a theme
+salt = "discovery"
+
+[development]
+size = 200
+salt = "development"
+
+[audit]
+size = 200
+enriched_rows = 120            # drawn by frozen theme terms
+representative_rows = 80       # prevalence-representative, reported separately
+repeat_rows = 40               # relabelled >= 5 days later for intra-annotator kappa
+salt = "audit"
+
+[training_pool]
+size = 3000                    # MLlib classifier training pool (ADR-0002), LLM-labelled
+salt = "training_pool"
+
+[inference]
+max_reviews = 8000             # cap; the real candidate/control set is expected to be smaller
+salt = "inference"

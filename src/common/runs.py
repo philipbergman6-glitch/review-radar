@@ -34,7 +34,7 @@ PROJECT_ROOT = C.PROJECT_ROOT
 JOB_NAMES: tuple[str, ...] = (
     "produce", "catalogue_load", "bronze_drain", "silver", "gold",
     "search_index_reviews", "search_index_product_month", "embeddings",
-    "theme_labels_llm", "theme_classifier_train", "theme_classifier_score", "rag_answers",
+    "theme_samples", "theme_labels_llm", "theme_classifier_train", "theme_classifier_score", "rag_answers",
 )
 
 SILVER_SPEC_VERSION = "1"
@@ -42,6 +42,7 @@ GOLD_SPEC_VERSION = "1"
 SEARCH_REVIEWS_SPEC_VERSION = "1"
 SEARCH_PRODUCT_MONTH_SPEC_VERSION = "1"
 EMBEDDINGS_SPEC_VERSION = "1"
+THEME_SAMPLES_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -297,6 +298,45 @@ _register(Contract(
     outputs={"kafka": ("topic",)},
     counts=("records_attempted", "records_acked"),
     identity=_produce_identity))
+
+def _theme_samples_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Every candidate is either matched, or dropped with a named reason; the draw is exact."""
+    fails: list[str] = []
+    cands, matched = _n(counts, "candidate_episodes"), _n(counts, "matched_candidates")
+    no_ctrl, not_text = _n(counts, "dropped_no_matching_control"), _n(counts, "dropped_not_text_characterisable")
+    if None in (cands, matched, no_ctrl, not_text):
+        fails.append("identity: candidate_episodes/matched_candidates/dropped_* must all be set on success")
+        return fails
+    if cands != matched + no_ctrl + not_text:
+        fails.append(f"identity: candidate_episodes {cands} != matched_candidates {matched} + "
+                     f"dropped_no_matching_control {no_ctrl} + "
+                     f"dropped_not_text_characterisable {not_text}")
+    drawn, low, high = _n(counts, "discovery_rows"), _n(counts, "discovery_low_rated"), _n(counts, "discovery_high_rated")
+    if None in (drawn, low, high):
+        fails.append("identity: discovery_rows/discovery_low_rated/discovery_high_rated must be set on success")
+    elif drawn != low + high:
+        fails.append(f"identity: discovery_rows {drawn} != discovery_low_rated {low} + discovery_high_rated {high}")
+    elif records.get("records_out") != drawn:
+        fails.append(f"identity: records_out {records.get('records_out')} != discovery_rows {drawn}")
+    return fails
+
+
+_register(Contract(
+    "theme_samples", THEME_SAMPLES_SPEC_VERSION,
+    inputs={"gold": ("run_id", "points_table", "points_snapshot_id",
+                     "episodes_table", "episodes_snapshot_id"),
+            "silver": ("run_id", "table", "snapshot_id"),
+            "protocol": ("path", "status", "config_hash"),
+            "rule": ("path", "config_hash", "status")},
+    outputs={"gold.matched_controls": ("table", "snapshot_id"),
+             "gold.theme_sample_assignments": ("table", "snapshot_id", "sample_name")},
+    counts=("candidate_episodes", "matched_candidates", "dropped_not_text_characterisable",
+            "dropped_no_matching_control", "control_rows", "distinct_control_products",
+            "alerting_products_excluded", "window_reviews", "eligible_window_reviews",
+            "discovery_rows", "discovery_low_rated", "discovery_high_rated",
+            "discovery_distinct_products", "discovery_from_candidates", "discovery_from_controls",
+            "protocol_config_hash", "elapsed_s"),
+    identity=_theme_samples_identity))
 
 # Jobs whose contracts are registered by their own phase (ADR-0008 §2). They exist in the
 # vocabulary now so the CHECK constraint and this registry stay in step.
