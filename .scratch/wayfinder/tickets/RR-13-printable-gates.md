@@ -134,3 +134,12 @@ ledger row, not recomputed. Bronze's gate that can fail = the replay fixture tes
 (`records_replayed > 0`, `records_out == 0`, table unchanged) plus rejection of missing
 attribution evidence. Every phase's gate gains the line "run contract registered" for the
 jobs it adds. Cuts and `NOT_RUN` come from `conf/lineage_chain.toml`, shared with RR-17.
+
+## Input from RR-11 (closed 2026-09-07) — second blocker cleared
+
+The Deliverables row now has something to count. Stage = `notebooks/demo.ipynb` + Kibana
+(ADR-0009); a **rehearsal** = an executed export under `docs/demo/<date>/` with every cell
+succeeded and cell timestamps spanning ≤ 300 s. Candidate gate: a script that reads the
+committed exports and prints `DEMO_GATE=PASS|FAIL rehearsals=N max_elapsed_s=…` with
+threshold `rehearsals ≥ 2`. The exactly-once gate is no longer a live move, so its printed
+line is a design-doc figure only. Only RR-10 and RR-12 still block.

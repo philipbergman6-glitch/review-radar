@@ -2,8 +2,9 @@
 id: RR-11
 title: Demo surface — Streamlit, or a notebook plus Kibana
 type: prototype
-status: open
-assignee: unassigned
+status: closed
+assignee: philip
+closed: 2026-09-07
 blocked-by: [RR-01, RR-06, RR-08]
 blocks: [RR-13, RR-14, RR-18]
 ---
@@ -89,3 +90,86 @@ One move to place: **"every run this data went through"** — the ledger query o
 bronze.reviews_raw VERSION AS OF <silver row's bronze snapshot>` matching `records_in`, then
 an early micro-batch snapshot vs the completed drain. 30–45 s; needs a Spark session on the
 surface (psql alone shows only the ledger). Suggested position: right after the silver gate.
+
+## Prototype (2026-09-07)
+
+- File: `src/serving/PROTOTYPE_rr11_demo_surface.html` (throwaway; goes to a `prototype/rr-11` branch on resolution).
+- Published: https://claude.ai/code/artifact/151ee31a-1b45-43b5-a378-34ac417b8b5d — `?variant=A|B|C`, ← → keys.
+- Same eleven candidate moves on each variant; nine on by default (4:40 of 5:00 on B incl. surface switches); exactly-once (65 s) and the live `llama3.2:3b` label are optional and off.
+- A = terminal + Kibana; B = one notebook with a live Spark session + Kibana; C = Streamlit tabs + terminal for pipeline moves + Kibana.
+- Proposed default order: health → replay + incremental bronze → silver gate → lineage (ledger + `VERSION AS OF`) → Kibana decline candidates → hybrid decomposition → theme shift (cached) → eval table → RAG citations.
+- Open for Philip: which surface; does exactly-once keep a slot at 65 s or move to the recorded backup; does the lineage move stay right after silver.
+
+## Resolution (closed 2026-09-07)
+
+Philip reviewed the three variants and took the recommendation: **variant B, a notebook
+plus Kibana**. Detail in [ADR-0009](../../../docs/adr/0009-notebook-is-the-demo-stage.md);
+terms in `CONTEXT.md` *Demo*. Prototype kept on branch `prototype/rr-11`
+(`src/serving/PROTOTYPE_rr11_demo_surface.html`) and at the artifact link above.
+
+### 1. The stage `[decided]`
+
+- **`notebooks/demo.ipynb`** is the stage: one kernel holding one Spark session, one ES
+  client and one psycopg connection for the whole demo, run top to bottom, one move per
+  cell group. Every cell calls a function from the package — helpers live in
+  `src/serving/` (the empty package gets a purpose: `demo.py` with `hybrid_decomposition`,
+  `theme_shift`, `lineage_chain`, `show_citations`) — so the notebook is a thin runbook, not
+  where logic lives. Committed with outputs stripped.
+- **Kibana** (`make up-ui`, RR-01) carries exactly one move, the decline view, as one
+  tab-switch. No review-level panels: individual reviews are shown from the notebook.
+- **A real terminal** carries the first move only: `make health` reads as proof the stack
+  is real in a way a `!` cell does not.
+- **Streamlit is out.** No move on the list needs a query box or a picker; it would add a
+  build, a host process beside the 4 GB driver and torch, and a non-course technology.
+  README status row and architecture box change from "Streamlit app" to "Demo notebook".
+
+### 2. The demo moves, in order `[decided]`
+
+| # | move | surface | what is said out loud | s |
+|---|---|---|---|---|
+| 1 | Stack is real — `make health` | terminal | four services proved usable from Python | 10 |
+| 2 | Replay sample + incremental bronze — `make produce-sample`, `make bronze` | notebook | the checkpoint means only the 10,000 new records are read; 701,528 → 711,528 | 35 |
+| 3 | Silver gate — `make silver` → `SILVER_GATE=PASS` | notebook | every bronze row is accounted for: reject, survive, removed (RR-02 identity) | 15 |
+| 4 | Every run this data went through — ledger query, `VERSION AS OF` silver's bronze snapshot = `records_in`, first micro-batch snapshot | notebook | the silver row names the snapshot it read; time travel reads it back (RR-16) | 35 |
+| 5 | Decline candidates — dashboard over `product_month` | Kibana | the opening question, answered; grade reported, never used to hide a candidate (RR-09) | 45 |
+| 6 | Hybrid decomposition — one descriptive query, BM25 / kNN / fused | notebook | a review neither list ranks first wins the fusion (RR-06) | 35 |
+| 7 | Theme shift for candidate #1 — cached `gold.review_theme_labels` rows | notebook | themes are hypotheses, never a diagnosed cause (RR-08) | 35 |
+| 8 | Evaluation table — `make eval-table` | notebook | one row per capability, threshold set before measurement (RR-17) | 20 |
+| 9 | RAG with per-claim citations — one frozen question | notebook | every claim cites a review inside the asked window; it contrasts, never says "increased" (RR-17) | 30 |
+
+Moves 260 s + ~20 s for two surface switches = **4:40**, 20 s spare. Moves 5–9 are
+conditional on their phases existing; if P7 is cut (RR-12) move 9 goes and its 30 s is
+spare, nothing shifts.
+
+### 3. What is not on the live list `[decided]`
+
+- **Exactly-once proof** (65 s, a fifth of the clock) moves to the **recorded backup** and
+  the design doc: its `EOS_GATE` line is a figure, the recording is played only if asked.
+  Move 2 carries the checkpoint story live.
+- **Live `llama3.2:3b` label** is a **Q&A reserve move**, not on the clock: `ollama serve`
+  stays on the T-30 checklist as optional, with the cached response as fallback (RR-08).
+- **Iceberg time-travel comparison** earns no slot of its own; it lives inside move 4.
+- Of the runbook's old live sequence: healthcheck → move 1; producer + bronze → move 2;
+  `verify_iceberg` snapshots + time travel → folded into move 4; exactly-once → backup.
+
+### 4. Recorded backup and rehearsal record `[decided]` — closes the fog patch
+
+- The **recorded backup** is the executed notebook exported to HTML
+  (`jupyter nbconvert --execute --to html`), plus a PNG export of the Kibana dashboard and
+  the exactly-once run's terminal transcript, under `docs/demo/<date>/` with the git SHA and
+  the run ids the cells printed. No screen recording.
+- A **rehearsal** is one such export whose cells all ran without error and whose cell
+  timestamps span ≤ 300 s. "Run clean twice" = two committed exports. The Deliverables
+  track's acceptance (RR-01 log item 11) is satisfied by those two files; the printed
+  number and threshold are RR-13's to fix.
+
+### 5. Handoffs
+
+- RR-13: the demo gate — command, printed value (rehearsal count, elapsed seconds),
+  threshold.
+- RR-18: slide order takes this move order; exactly-once becomes a figure on the
+  architecture or trade-offs slide, not a demo beat.
+- RR-14: README row 28 and the architecture box say "Demo notebook"; the runbook's live
+  section is replaced by the table above at execution time.
+- Fog (integration tests): CI executing `demo.ipynb` against the compose stack is the
+  natural notebook test; decided there, not here.

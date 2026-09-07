@@ -93,3 +93,11 @@ and that hybrid ≥ BM25 is a tested hypothesis, not a claim.
 - README planned rows for silver and the catalogue name the shape: batch pinned to a
   bronze snapshot, three tables, four reject reasons, three collision classes, `COPY`
   loader with `catalogue_load_id`, ADR-0007.
+
+## Input from RR-11 (closed 2026-09-07)
+
+README status row and architecture box now say "Demo notebook" instead of "Streamlit app"
+(edited in the RR-11 commit). `docs/DEMO_RUNBOOK.md` §3 "Live, in order" is superseded by
+the nine-move table in the RR-11 resolution and must be replaced at execution time; §1–2
+and the checklists stand, with `ollama serve` added as optional at T-30. Coverage doc
+references to Streamlit are to be withdrawn.

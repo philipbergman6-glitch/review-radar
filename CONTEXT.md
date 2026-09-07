@@ -418,3 +418,38 @@ checkpoint, which the sink skips. Replayed records are input, not output, and ar
 separately so per-attempt identities hold.
 _Avoid_: duplicate (reserved for data quality), reprocessing
 
+
+### Demo
+
+**Demo move**:
+One timed beat of the live demo: a command or cell group, the surface it runs on, the one
+sentence said out loud, and its seconds on the clock. Nine moves are live; the list and
+order are the RR-11 resolution.
+_Avoid_: step (a step is inside a move), slide (slides are the talk, not the demo)
+
+**Stage**:
+The surface a move runs on: the demo notebook, Kibana, or a real terminal. The notebook is
+the default stage; Kibana carries one move; the terminal carries the health check.
+_Avoid_: dashboard (only the Kibana move is one), app (nothing is served)
+
+**Demo notebook**:
+`notebooks/demo.ipynb`: a thin runbook whose cells call `src/serving/` functions over one
+Spark session, one ES client and one PostgreSQL connection. Committed with outputs
+stripped.
+_Avoid_: analysis notebook, Streamlit app (withdrawn)
+
+**Recorded backup**:
+The executed demo notebook exported to HTML with the Kibana dashboard PNG and the
+exactly-once transcript, committed under `docs/demo/<date>/` with git SHA and run ids.
+Played only if the live stack fails.
+_Avoid_: screen recording, video
+
+**Rehearsal**:
+One recorded backup whose cells all succeeded with timestamps spanning at most 300 s. Two
+are required before the demo. A rehearsal is evidence; the gate that counts them is RR-13's.
+_Avoid_: dry run (implies nothing is recorded)
+
+**Q&A reserve move**:
+A move prepared with a cached fallback but not on the clock, run only if a question calls
+for it: the live `llama3.2:3b` label, the exactly-once recording.
+_Avoid_: optional move (it is not optional to prepare), bonus

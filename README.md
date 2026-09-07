@@ -25,7 +25,7 @@ stays in this README until it is all in the "built" column.
 | AI: embeddings, semantic search | *planned* | `src/ai/` is an empty package |
 | AI: LLM aspect sentiment + validation | *planned* | — |
 | AI: RAG question answering | *planned* | — |
-| Streamlit app | *planned* | `src/serving/` is an empty package |
+| Demo notebook + Kibana | *planned* | `notebooks/` empty; `src/serving/` will hold its helpers (ADR-0009) |
 | Demo runbook | **built** | [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md) — Kafka retention, memory, pre-demo checklist |
 | Design doc, slides | *planned* | `docs/` holds the profile, the audit and the runbook |
 
@@ -101,7 +101,7 @@ data/raw/*.jsonl
 └──────────────┘              └────────┬─────────┘
                                        ▼
                           ┌────────────────────────┐
-                          │  Streamlit app         │
+                          │  Demo notebook         │
                           │  semantic search · RAG │
                           │       [planned]        │
                           └────────────────────────┘

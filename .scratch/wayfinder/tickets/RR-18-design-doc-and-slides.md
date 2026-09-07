@@ -57,3 +57,11 @@ Deliverables is a continuous **track**, not P8/P9: design doc, slides, README, r
 recorded backup are developed alongside the phases, with the acceptance criteria in `RR-01`
 log item 11. The design doc's phase narrative uses the eight-line list from the `RR-01`
 answer and must say RAG and Stream were conditional and how the `RR-12` rule resolved them.
+
+## Input from RR-11 (closed 2026-09-07) — one blocker cleared
+
+Surface and move order fixed (ADR-0009): health (terminal) → replay + incremental bronze →
+silver gate → lineage → Kibana decline candidates → hybrid decomposition → theme shift →
+evaluation table → RAG citations; 4:40 with 20 s spare. Slide order should follow it. The
+exactly-once proof is a **figure** on the architecture or trade-offs slide, not a demo
+beat; the live local label is a Q&A reserve. Only RR-13 still blocks.

@@ -96,6 +96,8 @@ the `RR-01` answer.
 
 - [What pipeline_runs records, and what the demo shows from it](tickets/RR-16-pipeline-runs-lineage.md) — Keep, as the **run ledger**: one row per execution attempt of every job (`produce · catalogue_load · bronze_drain · silver · gold · search_index_reviews · search_index_product_month · embeddings · theme_labels_llm · theme_classifier_train · theme_classifier_score · rag_answers`), typed core + `inputs/outputs/counts/params` JSONB, UUID `run_id` generated before execution and stamped into every Iceberg snapshot, ES doc and eval artefact; insert `running` → finalize `success|failed`, partial outputs kept, never rolled back; downstream pins to one successful run's complete output set. Contracts keyed `(job_name, spec_version)` in `src/common/runs.py`. Bronze per invocation, snapshot-attributed counts, `records_in == records_out + records_replayed` with two mandated tests; Kafka header `producer_run_id`. Gate `scripts/gate_lineage.py --mode development|publication` prints provenance / completeness / freshness blocks and `LINEAGE_GATE=… chain_clean=… publication_ready=… chain_links_checked=N` from `conf/lineage_chain.toml` (shared with `make eval-table`). Demo move = ledger query + Spark SQL `VERSION AS OF` on silver's bronze snapshot. Migrations with checksummed ledger; sample and full never share a topic. ADR-0008; ADR-0006/0007 amended; terms in `CONTEXT.md` *Lineage*.
 
+- [Demo surface — Streamlit, or a notebook plus Kibana](tickets/RR-11-demo-surface.md) — **Notebook + Kibana** (prototype: three variants, Philip took the recommendation). Stage = `notebooks/demo.ipynb`, one kernel with one Spark session / ES client / psycopg connection, cells calling `src/serving/` helpers only; Kibana carries exactly one move (decline candidates); `make health` runs in a real terminal first. Streamlit withdrawn (README updated). Nine live moves, 4:40 of 5:00: health → replay + incremental bronze → silver gate → lineage (ledger + `VERSION AS OF`) → Kibana decline view → hybrid decomposition → theme shift (cached) → eval table → RAG citations. Exactly-once (65 s) leaves the live list for the recorded backup and a design-doc figure; live `llama3.2:3b` is a Q&A reserve. Recorded backup = executed notebook exported to HTML + Kibana PNG + EOS transcript under `docs/demo/<date>/`; rehearsal = one export, all cells clean, ≤ 300 s; two required. ADR-0009; terms in `CONTEXT.md` *Demo*. Prototype on branch `prototype/rr-11`.
+
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
@@ -114,8 +116,9 @@ the `RR-01` answer.
 - *(RAG retrieval depth, sparse-vector fallback and the evaluation set graduated 2026-09-06
   into `RR-17` / ADR-0006 — closed.)*
 - *(Iceberg time travel as a demo move: graduated 2026-09-07 into `RR-16`'s answer — folded
-  into the lineage move; position on the list is `RR-11`'s.)*
-- **Recorded-backup format and rehearsal logistics.** Follows the demo surface.
+  into the lineage move; placed as move 4 by `RR-11`.)*
+- *(Recorded-backup format and rehearsal logistics: closed 2026-09-07 by `RR-11` — executed
+  notebook export, two rehearsals ≤ 300 s; the counting gate is `RR-13`'s.)*
 - **Structured logging and observability.** `print` everywhere today. The metrics-row half
   is now answered by the run ledger (`RR-16`); whether the pipeline also gets a logger or
   Spark UI screenshots waits until silver exists.
@@ -123,13 +126,12 @@ the `RR-01` answer.
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-07, RR-16 closed)
+## Ticket index (updated 2026-09-07, RR-11 closed)
 
 Closed: `RR-01`, `RR-02`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`,
-`RR-15`, `RR-16`, `RR-17`. Frontier — open, unblocked: `RR-10`, `RR-11`, `RR-12`. Blocked:
-`RR-13` (on RR-10, RR-11, RR-12), `RR-14`, `RR-18`.
-Suggested order: `RR-11` (prototype; the lineage move now needs a place on the list), then
-`RR-10`, then `RR-12` (late, per Notes).
+`RR-11`, `RR-15`, `RR-16`, `RR-17`. Frontier — open, unblocked: `RR-10`, `RR-12`. Blocked:
+`RR-13` (on RR-10, RR-12), `RR-14`, `RR-18` (on RR-13).
+Suggested order: `RR-10`, then `RR-12` (late, per Notes), then `RR-13`.
 
 ## Out of scope
 
