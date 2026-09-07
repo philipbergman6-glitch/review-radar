@@ -1,0 +1,26 @@
+{
+  "label_spec_version": "1",
+  "host": "ollama",
+  "endpoint": "http://localhost:11434",
+  "model_id": "qwen3:8b",
+  "comparison_model_id": "llama3.2:3b",
+  "api_mode": "local",
+  "inference": {
+    "temperature": 0,
+    "num_predict": 512,
+    "think": false,
+    "seed": 20260907
+  },
+  "prompts": {
+    "discovery": {
+      "version": "discovery-v1",
+      "path": "conf/prompts/discovery-v1.txt"
+    }
+  },
+  "limits": {
+    "discovery_max_items": 5,
+    "discovery_quote_max_words": 12,
+    "discovery_aspect_max_words": 3,
+    "max_attempts": 2
+  }
+}

@@ -43,6 +43,7 @@ SEARCH_REVIEWS_SPEC_VERSION = "1"
 SEARCH_PRODUCT_MONTH_SPEC_VERSION = "1"
 EMBEDDINGS_SPEC_VERSION = "1"
 THEME_SAMPLES_SPEC_VERSION = "1"
+THEME_LABELS_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -338,9 +339,45 @@ _register(Contract(
             "protocol_config_hash", "elapsed_s"),
     identity=_theme_samples_identity))
 
+def _theme_labels_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Every selected review is a cache hit or an inference; every inference ends in one status."""
+    fails: list[str] = []
+    sel, hits, ran = (_n(counts, "reviews_selected"), _n(counts, "cache_hits"), _n(counts, "inferences_run"))
+    ok, pf, af = (_n(counts, "succeeded"), _n(counts, "parse_failed"), _n(counts, "api_failed"))
+    if None in (sel, hits, ran, ok, pf, af):
+        fails.append("identity: reviews_selected/cache_hits/inferences_run/succeeded/parse_failed/"
+                     "api_failed must all be set on success")
+        return fails
+    if sel != hits + ran:
+        fails.append(f"identity: reviews_selected {sel} != cache_hits {hits} + inferences_run {ran}")
+    if ran != ok + pf + af:
+        fails.append(f"identity: inferences_run {ran} != succeeded {ok} + parse_failed {pf} + api_failed {af}")
+    if records.get("records_out") != ok:
+        fails.append(f"identity: records_out {records.get('records_out')} != succeeded {ok}")
+    if records.get("records_rejected") != pf + af:
+        fails.append(f"identity: records_rejected {records.get('records_rejected')} != "
+                     f"parse_failed {pf} + api_failed {af}")
+    rows, keys = _n(counts, "table_rows_for_config"), _n(counts, "distinct_keys_for_config")
+    if rows is not None and keys is not None and rows != keys:
+        fails.append(f"identity: table_rows_for_config {rows} != distinct_keys_for_config {keys}")
+    return fails
+
+
+_register(Contract(
+    "theme_labels_llm", THEME_LABELS_SPEC_VERSION,
+    inputs={"samples": ("run_id", "table", "snapshot_id", "sample_name"),
+            "silver": ("run_id", "table", "snapshot_id"),
+            "spec": ("path", "version", "model_id", "prompt_version", "config_hash")},
+    outputs={"gold.discovery_phrases": ("table", "snapshot_id", "budget_line")},
+    counts=("reviews_selected", "cache_hits", "inferences_run", "succeeded", "parse_failed",
+            "api_failed", "retried_inferences", "phrases_total", "distinct_aspects",
+            "empty_complaint_lists", "table_rows_for_config", "distinct_keys_for_config",
+            "inference_config_hash", "seconds_per_review", "elapsed_s"),
+    identity=_theme_labels_identity))
+
 # Jobs whose contracts are registered by their own phase (ADR-0008 §2). They exist in the
 # vocabulary now so the CHECK constraint and this registry stay in step.
-for _later in ("theme_labels_llm", "theme_classifier_train", "theme_classifier_score",
+for _later in ("theme_classifier_train", "theme_classifier_score",
                "rag_answers"):
     _register(Contract(_later, "0", inputs={}, outputs={}, counts=()))
 
