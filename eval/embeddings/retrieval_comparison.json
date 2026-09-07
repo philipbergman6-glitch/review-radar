@@ -1,0 +1,1011 @@
+{
+  "complete": true,
+  "computed_at": "2026-09-07T12:27:39.345739+00:00",
+  "embedding_spec_hash": "b1908a97527f98df2c369e5f28c97c448e7eb83546dabc1b051fb448c674b3dd",
+  "hypotheses": {
+    "H-E1 BM25 >= kNN on lexical": {
+      "baseline": "knn",
+      "baseline_macro_p5": 0.9199999999999999,
+      "macro_p5": 0.8399999999999999,
+      "stratum": "lexical",
+      "system": "bm25_cohort",
+      "table": "controlled",
+      "verdict": "not held"
+    },
+    "H-E2 kNN >= BM25 on descriptive": {
+      "baseline": "bm25_cohort",
+      "baseline_macro_p5": 0.6599999999999999,
+      "macro_p5": 0.78,
+      "stratum": "descriptive",
+      "system": "knn",
+      "table": "controlled",
+      "verdict": "held"
+    },
+    "H-E3 hybrid >= BM25 overall (controlled)": {
+      "baseline": "bm25_cohort",
+      "baseline_macro_p5": 0.7499999999999999,
+      "macro_p5": 0.79,
+      "stratum": "overall",
+      "system": "hybrid_cohort",
+      "table": "controlled",
+      "verdict": "held"
+    },
+    "H-E3 hybrid >= BM25 overall (production)": {
+      "baseline": "bm25_stemmed",
+      "baseline_macro_p5": 0.8100000000000002,
+      "macro_p5": 0.8200000000000001,
+      "stratum": "overall",
+      "system": "hybrid",
+      "table": "production",
+      "verdict": "held"
+    }
+  },
+  "judgement_set_hash": "570f31717e1b3716c195183091baac75dbe1658aa1f19bbd448e10fb1085e291",
+  "judges": {
+    "claude": 575,
+    "philip": 4
+  },
+  "per_query": {
+    "D01": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.4,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      }
+    },
+    "D02": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.16666666666666666,
+        "p5": 0.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.1111111111111111,
+        "p5": 0.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.3333333333333333,
+        "p5": 0.4,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.3333333333333333,
+        "p5": 0.4,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "D03": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.6,
+        "unjudged": 0
+      }
+    },
+    "D04": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "D05": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      }
+    },
+    "D06": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "D07": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      }
+    },
+    "D08": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.25,
+        "p5": 0.4,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "D09": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "D10": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L01": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.4,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L02": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L03": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "L04": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "L05": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "L06": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L07": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L08": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "L09": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L10": {
+      "bm25_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "hybrid": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "hybrid_cohort": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "knn": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    }
+  },
+  "summary": {
+    "bm25_cohort": {
+      "descriptive": {
+        "complete": 10,
+        "macro_p5": 0.6599999999999999,
+        "mrr10": 0.7916666666666667,
+        "queries": 10
+      },
+      "lexical": {
+        "complete": 10,
+        "macro_p5": 0.8399999999999999,
+        "mrr10": 0.95,
+        "queries": 10
+      },
+      "overall": {
+        "complete": 20,
+        "macro_p5": 0.7499999999999999,
+        "mrr10": 0.8708333333333332,
+        "queries": 20
+      }
+    },
+    "bm25_stemmed": {
+      "descriptive": {
+        "complete": 10,
+        "macro_p5": 0.76,
+        "mrr10": 0.861111111111111,
+        "queries": 10
+      },
+      "lexical": {
+        "complete": 10,
+        "macro_p5": 0.86,
+        "mrr10": 1.0,
+        "queries": 10
+      },
+      "overall": {
+        "complete": 20,
+        "macro_p5": 0.8100000000000002,
+        "mrr10": 0.9305555555555556,
+        "queries": 20
+      }
+    },
+    "hybrid": {
+      "descriptive": {
+        "complete": 10,
+        "macro_p5": 0.86,
+        "mrr10": 0.9333333333333332,
+        "queries": 10
+      },
+      "lexical": {
+        "complete": 10,
+        "macro_p5": 0.7799999999999999,
+        "mrr10": 0.95,
+        "queries": 10
+      },
+      "overall": {
+        "complete": 20,
+        "macro_p5": 0.8200000000000001,
+        "mrr10": 0.9416666666666668,
+        "queries": 20
+      }
+    },
+    "hybrid_cohort": {
+      "descriptive": {
+        "complete": 10,
+        "macro_p5": 0.7999999999999999,
+        "mrr10": 0.9333333333333332,
+        "queries": 10
+      },
+      "lexical": {
+        "complete": 10,
+        "macro_p5": 0.7799999999999999,
+        "mrr10": 1.0,
+        "queries": 10
+      },
+      "overall": {
+        "complete": 20,
+        "macro_p5": 0.79,
+        "mrr10": 0.9666666666666668,
+        "queries": 20
+      }
+    },
+    "knn": {
+      "descriptive": {
+        "complete": 10,
+        "macro_p5": 0.78,
+        "mrr10": 0.9,
+        "queries": 10
+      },
+      "lexical": {
+        "complete": 10,
+        "macro_p5": 0.9199999999999999,
+        "mrr10": 1.0,
+        "queries": 10
+      },
+      "overall": {
+        "complete": 20,
+        "macro_p5": 0.85,
+        "mrr10": 0.95,
+        "queries": 20
+      }
+    }
+  },
+  "systems": [
+    "bm25_cohort",
+    "bm25_stemmed",
+    "hybrid",
+    "hybrid_cohort",
+    "knn"
+  ],
+  "tables": {
+    "controlled": [
+      "bm25_cohort",
+      "knn",
+      "hybrid_cohort"
+    ],
+    "production": [
+      "bm25_stemmed",
+      "hybrid",
+      "knn"
+    ]
+  }
+}

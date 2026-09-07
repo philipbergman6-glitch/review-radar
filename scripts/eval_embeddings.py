@@ -92,6 +92,12 @@ def main() -> None:
               "pooling):"), ""]
     lines += [f"- {h}: **{v['verdict']}** ({v['system']} {fmt(v['macro_p5'])} vs {v['baseline']} "
               f"{fmt(v['baseline_macro_p5'])})" for h, v in verdicts.items()]
+    lines += ["", ("Reading the verdicts: with 10 queries per stratum one relevant document moves macro P@5 by 0.020, "
+              "so a margin of a few hundredths is within a single query's noise; verdicts are the sign of the "
+              "difference on this set, not a significance claim, and no confidence interval is computed on n=20. "
+              "The serving default stays `bm25_stemmed` (frozen in P4); `knn` and `hybrid` are additional systems "
+              "exposed by `src/serving/search.py`, and any promotion would need its own frozen hypothesis and a "
+              "fresh judgement round.")]
     judges = ", ".join(f"`{j}` {n}" for j, n in judge_counts(judged).items())
     lines += ["", (f"Judges (labels per judge name in judgements.jsonl): {judges}. Labels under `claude` are "
               "model-generated against the frozen relevance rules, not human judgements; treat every number "
