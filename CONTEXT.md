@@ -217,12 +217,35 @@ is a fact about the source file; it does not by itself prove a duplicate review.
 _Avoid_: duplicate (until classified), dupe
 
 **Exact duplicate**:
-A key collision whose rows also agree on every meaningful review field (rating, title,
-text, verified flag, helpful votes). One row survives; the rest are removed and counted.
+A key collision whose rows also agree on every retained review field (rating, title, text,
+verified flag, helpful votes, child asin, images). One row survives; the rest are removed
+and counted.
 
 **Conflicting collision**:
-A key collision whose rows differ in content or rating. Resolved by a deterministic
-survivor rule; the non-survivors are kept in an auditable table, not dropped.
+A key collision whose rows agree on rating but differ in some other retained field. Resolved
+by a deterministic, content-only survivor rule; the non-survivors are kept in the collision
+table, not dropped.
+
+**Unresolvable collision**:
+A key collision whose rows disagree on rating. No row survives: the whole group goes to the
+collision table and none reaches silver, because the one field the primary analysis depends
+on is unknown.
+
+**Collision table**:
+The auditable silver table holding every row of every key collision group, survivors
+flagged, with the group's class and the fields that differed. It is where the provenance
+result is read from; it is not a reject table.
+
+**Reject**:
+A bronze row that fails silver validation (unparsable, missing a key field, invalid rating,
+timestamp out of range), in that fixed order of precedence. Rejects never enter collision
+classification. Empty title or text is not a reject.
+
+**Review id**:
+The stable identity of a review: a hash of its dedupe key (user, product, timestamp).
+Identical in every engine that computes it; a key collision is a group sharing one review
+id.
+_Avoid_: Kafka offset as identity (not reproducible from the source file)
 
 **Provenance result**:
 The data-quality finding that key collisions originate in the source file, not in the

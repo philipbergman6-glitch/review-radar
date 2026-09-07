@@ -4,7 +4,7 @@ title: What pipeline_runs records, and what the demo shows from it
 type: grilling
 status: open
 assignee: unassigned
-blocked-by: [RR-02]
+blocked-by: []
 blocks: [RR-13, RR-14]
 ---
 
@@ -49,3 +49,16 @@ Every `product_month` document carries `source_gold_snapshot_id`, and the live a
 at `product_month_<gold_snapshot_id>` (ADR-0004). The lineage gate should assert that the
 alias's snapshot id equals the gold snapshot the latest `pipeline_runs` row for the
 projection stage says it read — a second printable identity beside the silver reconciliation.
+
+## Input from RR-02 (closed 2026-09-07) — unblocked
+
+Silver's row is specified; decide the schema around it. Silver records: bronze input
+snapshot id, silver output snapshot id, `catalogue_load_id`, `catalogue_rows_read`, every
+gate count (`bronze_rows`, `reject_rows` per reason, `silver_rows`, collision groups by
+class, `collision_rows_removed`, unmatched counts), status, `SILVER_SPEC_VERSION` (manually
+bumped), `git_commit_sha`, `worktree_dirty`. The catalogue loader writes its **own** row
+whose `run_id` *is* the `catalogue_load_id` stamped on every `products` row — so `products`
+gains a `catalogue_load_id` column and `01_schema.sql` changes. Silver's JDBC read must see
+exactly one distinct load id. Item 1 (keep or drop) is therefore effectively answered:
+keep. Items 2–4 remain: exact columns (JSON `counts` blob vs typed columns), who writes
+(driver-side psycopg after the job returns fits the batch model), and the demo query.

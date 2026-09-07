@@ -62,3 +62,12 @@ Stream is **P8, conditional**: the cut rule is `RR-12`'s, but Philip's standing 
 "do not rebuild the whole pipeline merely to claim streaming", which bears directly on item 4
 (replace vs sit beside the batch silver). The phase's deliverable is a paced replay,
 event-time watermark demonstration and late-event *metrics* — the gate must print those.
+
+## Input from RR-02 (closed 2026-09-07)
+
+- Item 4 is settled: **batch silver is authoritative** (bounded run pinned to a bronze
+  snapshot, atomic replace). A streaming silver, if P8 survives, is a *separate* demo
+  table/path that must reconcile with batch after the bounded replay — same `review_id`,
+  same collision classes, same printed identity — and never replaces it.
+- Dedupe is history-wide (content-only survivor over the whole snapshot); a streaming path
+  cannot reproduce it without holding all state, so its gate is reconciliation, not dedupe.

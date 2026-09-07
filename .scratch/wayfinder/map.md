@@ -92,6 +92,8 @@ the `RR-01` answer.
 
 - [An evaluation table for every AI capability](tickets/RR-17-evaluation-design-per-ai-capability.md) — Three capability summary rows (P5 search · P6 theme labelling with two sub-rows · P7 RAG) plus a separate theme-shift outcome table; columns `capability · phase · evaluation set · metric · value [interval] · threshold · verdict · evidence path`, verdicts PASS/FAIL (any frozen threshold, code- or human-derived) / REPORTED / NOT_RUN. RAG: 30 frozen questions (20 answerable, 10 unanswerable in three strata), answerability by evidence scan + manual validation never by retriever output, slots from the RR-09 decline ranking, structured answer keys with forbidden prevalence/direction claims, per-window retrieval, claim-level citations, Philip the sole judge, fixed-denominator integer thresholds (contract 30/30 gate; grounded ≥16/20, adequate ≥14/20 with refusal = failure; abstention ≥8/10; false refusal ≤2/20), seven-step disagreement precedence, own 200-call/$2 ledger. `make eval-table` renders per-capability JSON artefacts. Labelling ≈17–21 h → RR-12. ADR-0006; terms in `CONTEXT.md` *Evaluation*.
 
+- [Silver dedupe rule and catalogue-join strategy](tickets/RR-02-silver-dedupe-and-join.md) — Silver = bounded batch pinned to a bronze snapshot, atomic replace of `reviews`/`rejects`/`review_collisions`; validate first (four reject reasons, fixed precedence, empty text not a reject), then group valid rows by `review_id = SHA-256(canonical(user, product, timestamp_ms))`. Classes exact / conflicting (same rating; survivor = helpful_vote ↓, text length ↓, canonical hash ↑, content-only) / unresolvable (rating disagreement, no survivor). Measured: 6,139 groups, 13,415 rows, 6,138 exact, 1 conflicting (helpful_vote), 0 rating conflicts → 7,276 rows removed. Catalogue: orjson → psycopg `COPY` → staging → transactional swap under a `catalogue_load_id`; silver reads it over Spark JDBC each run, left broadcast join, four denormalised columns, unmatched must be 0 at full scope. PostgreSQL is in the pipeline twice: Iceberg catalogue and enrichment source. Gate `SILVER_GATE=PASS|FAIL` on `bronze = rejects + silver + removed`, `removed = table_rows − groups + unresolvable`, distinct `review_id`, join cardinality; determinism by `--verify-rerun`. No `details` keys parsed. ADR-0007; terms in `CONTEXT.md` *Data quality*.
+
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
@@ -105,8 +107,8 @@ the `RR-01` answer.
 - **Which gold population `product_month` projects.** `RR-01` says: only what P3
   materialises, never all 112,590 products across their lifetimes. What P3 materialises is
   the protocol freeze's minimum-count business (`RR-09`), so this sharpens with it.
-- **Which `details` keys silver parses on read.** May graduate out of the silver dedupe and
-  join ticket, or may only sharpen once the products load has run.
+- *(`details` keys: closed 2026-09-07 by `RR-02` — silver parses none; they stay in the raw
+  metadata JSONL until a consumer exists.)*
 - *(RAG retrieval depth, sparse-vector fallback and the evaluation set graduated 2026-09-06
   into `RR-17` / ADR-0006 — closed.)*
 - **Iceberg time travel as a demo move.** Deferred-but-cheap in the artifact; belongs to
@@ -119,12 +121,13 @@ the `RR-01` answer.
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-06, RR-17 closed)
+## Ticket index (updated 2026-09-07, RR-02 closed)
 
-Closed: `RR-01`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`, `RR-15`,
-`RR-17`. Frontier — open, unblocked: `RR-02`, `RR-10`, `RR-11`, `RR-12`. Blocked: `RR-13`
-(on RR-02, RR-10, RR-11, RR-12, RR-16), `RR-14`, `RR-16`, `RR-18`.
-Suggested order: grill `RR-02`, `RR-11`, `RR-10`, `RR-12` (late, per Notes).
+Closed: `RR-01`, `RR-02`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`,
+`RR-15`, `RR-17`. Frontier — open, unblocked: `RR-10`, `RR-11`, `RR-12`, `RR-16`. Blocked:
+`RR-13` (on RR-10, RR-11, RR-12, RR-16), `RR-14`, `RR-18`.
+Suggested order: grill `RR-16` (silver row contents now decided), `RR-11`, `RR-10`, `RR-12`
+(late, per Notes).
 
 ## Out of scope
 

@@ -81,3 +81,15 @@ and that hybrid ≥ BM25 is a tested hypothesis, not a claim.
   30 questions, one human judge, grounded/adequate/abstention/false-refusal targets.
 - Coverage doc: the RAG paragraph must state that temporal RAG answers contrast cited
   examples only; the quantitative theme-shift claim lives in the gold table.
+
+## Input from RR-02 (closed 2026-09-07)
+
+- Retire "6,139 duplicates" (README:68, coverage doc Veracity line): 6,139 is the
+  **collision-group** count; the removed-row count is what silver prints (7,276 if every
+  group has one survivor, all `[observed]` on the raw file).
+- The PostgreSQL sentence everywhere: *two roles — Iceberg catalogue (atomic metadata
+  pointer swap) and the relational catalogue source every silver run reads over JDBC.* The
+  README architecture diagram's `JDBC (plan)` arrow becomes the decided shape.
+- README planned rows for silver and the catalogue name the shape: batch pinned to a
+  bronze snapshot, three tables, four reject reasons, three collision classes, `COPY`
+  loader with `catalogue_load_id`, ADR-0007.

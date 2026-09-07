@@ -4,7 +4,7 @@ title: A printed number for every phase gate
 type: grilling
 status: open
 assignee: unassigned
-blocked-by: [RR-01, RR-02, RR-06, RR-08, RR-09, RR-10, RR-12, RR-16, RR-17, RR-11]
+blocked-by: [RR-10, RR-11, RR-12, RR-16]
 blocks: [RR-14, RR-18]
 ---
 
@@ -109,3 +109,18 @@ latency (descriptive). Nothing about relevance quality is a pass line.
   `pipeline_run_id`, status, cut reason). `make eval-table` renders the one-shape table and
   hard-fails on a missing or invalid artefact unless the capability is declared cut.
 - Verdict vocabulary for every printed gate line: PASS / FAIL / REPORTED / NOT_RUN.
+
+## Input from RR-02 (closed 2026-09-07)
+
+Silver row is decided. Command `make silver` (→ `src/spark/silver.py --bronze-snapshot <id>`);
+printed: `SILVER_REJECT_REASON` × 4 (zeros too, `timestamp_out_of_range` split into
+`below_1995` / `after_ingest`), `SILVER_COLLISIONS groups exact_groups conflicting_groups
+unresolvable_groups table_rows removed`, and one `SILVER_GATE … SILVER_GATE=PASS|FAIL` line.
+Pass (full scope): `bronze_rows == reject_rows + silver_rows + collision_rows_removed` with
+`removed = table_rows − groups + unresolvable_groups`; `count(distinct review_id) ==
+silver_rows`; join cardinality preserved; `unmatched_review_rows == 0` and
+`unmatched_parent_asins == 0`. Sample scope prints `gate_scope=sample`, unmatched threshold
+not applied. Two further printed checks: loader gate (`rows_loaded == final_count`, key
+unique) and `--verify-rerun` determinism (same snapshot + load twice → identical ids,
+counts, classes, output digest). Tripping cases exist for each: an unresolvable group,
+a dropped catalogue row, a nondeterministic tie-break.
