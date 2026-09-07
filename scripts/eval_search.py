@@ -63,6 +63,14 @@ def fmt(x) -> str:
     return "n/a" if x is None else f"{x:.3f}"
 
 
+def judge_counts(judged: dict) -> dict[str, int]:
+    """Judgement rows per judge name, most first; the decision doc discloses these."""
+    counts: dict[str, int] = {}
+    for row in judged.values():
+        counts[row["judge"]] = counts.get(row["judge"], 0) + 1
+    return dict(sorted(counts.items(), key=lambda kv: -kv[1]))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--systems", default="bm25_plain,bm25_stemmed")
@@ -72,6 +80,7 @@ def main() -> None:
         if s not in SYSTEMS:
             raise SystemExit(f"unknown system {s}")
     qs, per_query, summary = score(systems)
+    judged = J.load_judgements()
 
     print(f"SEARCH_EVAL_QUERY {'id':4} {'stratum':11} " + " ".join(f"{s:>22}" for s in systems))
     for q in qs.queries:
@@ -106,7 +115,8 @@ def main() -> None:
     OUT_JSON.write_text(json.dumps({
         "computed_at": datetime.now(UTC).isoformat(), "judgement_set_hash": qs.hash,
         "systems": systems, "complete": all_complete, "summary": summary, "per_query": per_query,
-        "hypotheses": verdicts, "frozen_default": default}, indent=2, sort_keys=True))
+        "hypotheses": verdicts, "frozen_default": default,
+        "judges": judge_counts(judged)}, indent=2, sort_keys=True))
     if all_complete and default:
         DECISION.parent.mkdir(parents=True, exist_ok=True)
         measured = (f"Measured {datetime.now(UTC):%Y-%m-%d} on judgement set `{qs.hash[:12]}` "
@@ -121,7 +131,12 @@ def main() -> None:
         lines += [f"- {h}: **{v}**" for h, v in verdicts.items()]
         rule = (f"Rule: higher overall macro P@5 wins, tie -> bm25_plain. Result: `{default}` "
                 "is the analyzer family the production BM25 leg uses from here on.")
-        lines += ["", rule, "", "Source: `eval/search/analyzer_comparison.json`, `eval/search/judgements.jsonl`."]
+        judges = ", ".join(f"`{j}` {n}" for j, n in judge_counts(judged).items())
+        provenance = (f"Judges (labels per judge name in judgements.jsonl): {judges}. Labels under `claude` are "
+                      "model-generated against the frozen relevance rules, not human judgements; treat every "
+                      "number above as model-judged relevance. Human labels under `philip` are the audit set.")
+        lines += ["", rule, "", provenance,
+                  "", "Source: `eval/search/analyzer_comparison.json`, `eval/search/judgements.jsonl`."]
         DECISION.write_text("\n".join(lines) + "\n")
 
 

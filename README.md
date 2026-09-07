@@ -24,7 +24,7 @@ stays in this README until it is all in the "built" column.
 | Product catalogue + JDBC enrichment | **built** | `src/catalogue/load_products.py` (COPY under a `catalogue_load_id`, 112,590 rows); silver broadcast-joins it over Spark JDBC |
 | Elasticsearch review search index (BM25) | **built** | mapping contract `conf/es/reviews.contract.json` (strict, two analyzers, vector field declared); `src/serving/index_reviews.py`; 693,547 docs behind alias `reviews`; 7/7 analyzer cases |
 | Elasticsearch `product_month` projection + Kibana | **built** | `src/serving/index_product_month.py` (473,268 docs, alias swap, `source_gold_snapshot_id` lineage); Kibana under `make up-ui`; dashboard `conf/kibana/product_month_dashboard.ndjson` ([screenshot](docs/assets/kibana-product-month.png)) |
-| Search judgement set + analyzer decision | **awaiting judging** | 20 frozen queries `conf/search/queries.json`; pool of 273 docs in `eval/search/pool.jsonl`; `make judge-search` then `make eval-search`; `scripts/gate_search.py` prints SEARCH_GATE |
+| Search judgement set + analyzer decision | **built** (SEARCH_GATE=PASS; labels model-judged, see docs/decisions/search-analyzer.md) | 20 frozen queries `conf/search/queries.json`; pool of 273 docs in `eval/search/pool.jsonl`; `make judge-search` then `make eval-search`; `scripts/gate_search.py` prints SEARCH_GATE |
 | AI: embeddings, semantic search | *planned* | `src/ai/` is an empty package |
 | AI: LLM aspect sentiment + validation | *planned* | — |
 | AI: RAG question answering | *planned* | — |

@@ -1,0 +1,422 @@
+{
+  "complete": true,
+  "computed_at": "2026-09-07T11:42:15.118218+00:00",
+  "frozen_default": "bm25_stemmed",
+  "hypotheses": {
+    "H-A1 stemmed >= plain on descriptive": "held",
+    "H-A2 |stemmed - plain| <= 0.1 on lexical": "held"
+  },
+  "judgement_set_hash": "570f31717e1b3716c195183091baac75dbe1658aa1f19bbd448e10fb1085e291",
+  "judges": {
+    "claude": 269,
+    "philip": 4
+  },
+  "per_query": {
+    "D01": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "D02": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.0,
+        "p5": 0.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.1111111111111111,
+        "p5": 0.0,
+        "unjudged": 0
+      }
+    },
+    "D03": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "D04": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "D05": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      }
+    },
+    "D06": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.4,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "D07": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "D08": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "D09": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "D10": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "L01": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "L02": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L03": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L04": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L05": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L06": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 0.5,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      }
+    },
+    "L07": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      }
+    },
+    "L08": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      }
+    },
+    "L09": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.6,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    },
+    "L10": {
+      "bm25_plain": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 1.0,
+        "unjudged": 0
+      },
+      "bm25_stemmed": {
+        "cannot_judge": 0,
+        "complete": true,
+        "hits": 10,
+        "mrr10": 1.0,
+        "p5": 0.8,
+        "unjudged": 0
+      }
+    }
+  },
+  "summary": {
+    "bm25_plain": {
+      "descriptive": {
+        "complete": 10,
+        "macro_p5": 0.7,
+        "mrr10": 0.8,
+        "queries": 10
+      },
+      "lexical": {
+        "complete": 10,
+        "macro_p5": 0.82,
+        "mrr10": 0.95,
+        "queries": 10
+      },
+      "overall": {
+        "complete": 20,
+        "macro_p5": 0.76,
+        "mrr10": 0.875,
+        "queries": 20
+      }
+    },
+    "bm25_stemmed": {
+      "descriptive": {
+        "complete": 10,
+        "macro_p5": 0.76,
+        "mrr10": 0.861111111111111,
+        "queries": 10
+      },
+      "lexical": {
+        "complete": 10,
+        "macro_p5": 0.86,
+        "mrr10": 1.0,
+        "queries": 10
+      },
+      "overall": {
+        "complete": 20,
+        "macro_p5": 0.8100000000000002,
+        "mrr10": 0.9305555555555556,
+        "queries": 20
+      }
+    }
+  },
+  "systems": [
+    "bm25_plain",
+    "bm25_stemmed"
+  ]
+}
