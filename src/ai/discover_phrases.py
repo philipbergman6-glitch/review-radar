@@ -104,7 +104,7 @@ def run_discovery(spark: SparkSession, *, scope: str, category: str, limit: int 
     table = table_name(scope)
     ensure_table(spark, table)
 
-    run = runs.start("theme_labels_llm", runs.THEME_LABELS_SPEC_VERSION, category=category, data_scope=scope,
+    run = runs.start("theme_labels_llm", runs.THEME_DISCOVERY_SPEC_VERSION, category=category, data_scope=scope,
                      inputs={"samples": {"run_id": sample_run["run_id"],
                                          "table": sample_run["outputs"]["gold.theme_sample_assignments"]["table"],
                                          "snapshot_id": sample_run["outputs"]["gold.theme_sample_assignments"]["snapshot_id"],

@@ -34,7 +34,8 @@ PROJECT_ROOT = C.PROJECT_ROOT
 JOB_NAMES: tuple[str, ...] = (
     "produce", "catalogue_load", "bronze_drain", "silver", "gold",
     "search_index_reviews", "search_index_product_month", "embeddings",
-    "theme_samples", "theme_labels_llm", "theme_classifier_train", "theme_classifier_score", "rag_answers",
+    "theme_samples", "theme_labels_llm", "theme_labels_reference",
+    "theme_classifier_train", "theme_classifier_score", "rag_answers",
 )
 
 SILVER_SPEC_VERSION = "1"
@@ -43,7 +44,11 @@ SEARCH_REVIEWS_SPEC_VERSION = "1"
 SEARCH_PRODUCT_MONTH_SPEC_VERSION = "1"
 EMBEDDINGS_SPEC_VERSION = "1"
 THEME_SAMPLES_SPEC_VERSION = "2"   # v2 generalises the discovery-only counts to any frame (RR-22)
-THEME_LABELS_SPEC_VERSION = "1"
+# `theme_labels_llm` carries two contracts: v1 is the taxonomy-free discovery job,
+# v2 the frozen-taxonomy labeller. Same job name, different outputs and counts.
+THEME_DISCOVERY_SPEC_VERSION = "1"
+THEME_LABELS_SPEC_VERSION = "2"
+THEME_REFERENCE_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -383,7 +388,7 @@ def _theme_labels_identity(records: dict[str, int | None], counts: dict[str, Any
 
 
 _register(Contract(
-    "theme_labels_llm", THEME_LABELS_SPEC_VERSION,
+    "theme_labels_llm", THEME_DISCOVERY_SPEC_VERSION,
     inputs={"samples": ("run_id", "table", "snapshot_id", "sample_name"),
             "silver": ("run_id", "table", "snapshot_id"),
             "spec": ("path", "version", "model_id", "prompt_version", "config_hash")},
@@ -393,6 +398,94 @@ _register(Contract(
             "empty_complaint_lists", "table_rows_for_config", "distinct_keys_for_config",
             "inference_config_hash", "seconds_per_review", "elapsed_s"),
     identity=_theme_labels_identity))
+
+
+def _theme_reference_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Ground truth is accepted or rejected; nothing is repaired on the way in (RR-21).
+
+    A rejected reference label is a *hard failure* of the import, not a stored row: the agent
+    re-labels the review and resubmits. So `accepted` must equal both `labels_submitted` and
+    `reviews_selected` on success -- a partial ground-truth set would silently shrink the
+    denominator of every metric that rests on it.
+    """
+    fails: list[str] = []
+    sel, sub = _n(counts, "reviews_selected"), _n(counts, "labels_submitted")
+    acc, rej = _n(counts, "accepted"), _n(counts, "rejected")
+    if None in (sel, sub, acc, rej):
+        fails.append("identity: reviews_selected/labels_submitted/accepted/rejected must be set")
+        return fails
+    if sub != acc + rej:
+        fails.append(f"identity: labels_submitted {sub} != accepted {acc} + rejected {rej}")
+    if rej:
+        fails.append(f"identity: {rej} reference label(s) failed validation; ground truth is "
+                     "never partially imported")
+    if acc != sel:
+        fails.append(f"identity: accepted {acc} != reviews_selected {sel}: the frame is not "
+                     "fully labelled")
+    if records.get("records_out") != acc:
+        fails.append(f"identity: records_out {records.get('records_out')} != accepted {acc}")
+    rows, keys = _n(counts, "table_rows_for_config"), _n(counts, "distinct_keys_for_config")
+    if rows is not None and keys is not None and rows != keys:
+        fails.append(f"identity: table_rows_for_config {rows} != distinct_keys_for_config {keys}")
+    return fails
+
+
+def _theme_label_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Same accounting as discovery, plus abstention -- which is an answer, not a failure.
+
+    ADR-0003: `abstain=true` means the model deliberately declined; it is neither a transport
+    nor a parse failure. Folding it into either would misreport the failure coverage, so it
+    is its own terminal status and counts toward `records_out`.
+    """
+    fails: list[str] = []
+    sel, hits, ran = (_n(counts, "reviews_selected"), _n(counts, "cache_hits"), _n(counts, "inferences_run"))
+    ok, ab = _n(counts, "succeeded"), _n(counts, "model_abstained")
+    pf, af = _n(counts, "parse_failed"), _n(counts, "api_failed")
+    if None in (sel, hits, ran, ok, ab, pf, af):
+        fails.append("identity: reviews_selected/cache_hits/inferences_run/succeeded/"
+                     "model_abstained/parse_failed/api_failed must all be set on success")
+        return fails
+    if sel != hits + ran:
+        fails.append(f"identity: reviews_selected {sel} != cache_hits {hits} + inferences_run {ran}")
+    if ran != ok + ab + pf + af:
+        fails.append(f"identity: inferences_run {ran} != succeeded {ok} + model_abstained {ab} + "
+                     f"parse_failed {pf} + api_failed {af}")
+    if records.get("records_out") != ok + ab:
+        fails.append(f"identity: records_out {records.get('records_out')} != succeeded {ok} + "
+                     f"model_abstained {ab}")
+    if records.get("records_rejected") != pf + af:
+        fails.append(f"identity: records_rejected {records.get('records_rejected')} != "
+                     f"parse_failed {pf} + api_failed {af}")
+    rows, keys = _n(counts, "table_rows_for_config"), _n(counts, "distinct_keys_for_config")
+    if rows is not None and keys is not None and rows != keys:
+        fails.append(f"identity: table_rows_for_config {rows} != distinct_keys_for_config {keys}")
+    return fails
+
+
+_register(Contract(
+    "theme_labels_llm", THEME_LABELS_SPEC_VERSION,
+    inputs={"samples": ("run_id", "table", "snapshot_id", "sample_name"),
+            "silver": ("run_id", "table", "snapshot_id"),
+            "spec": ("path", "version", "model_id", "prompt_version", "config_hash")},
+    outputs={"gold.review_theme_labels": ("table", "snapshot_id", "budget_line", "label_source")},
+    counts=("reviews_selected", "cache_hits", "inferences_run", "succeeded", "model_abstained",
+            "parse_failed", "api_failed", "retried_inferences", "theme_hits", "other_present",
+            "no_theme_labels", "table_rows_for_config", "distinct_keys_for_config",
+            "inference_config_hash", "taxonomy_hash", "seconds_per_review", "elapsed_s"),
+    identity=_theme_label_identity))
+
+
+_register(Contract(
+    "theme_labels_reference", THEME_REFERENCE_SPEC_VERSION,
+    inputs={"samples": ("run_id", "table", "snapshot_id", "sample_name"),
+            "silver": ("run_id", "table", "snapshot_id"),
+            "blind_export": ("path", "map_path", "rows", "sha256"),
+            "taxonomy": ("path", "version", "file_hash")},
+    outputs={"gold.review_theme_labels": ("table", "snapshot_id", "budget_line", "label_source")},
+    counts=("reviews_selected", "labels_submitted", "accepted", "rejected", "abstained",
+            "theme_hits", "other_present", "no_theme_labels", "table_rows_for_config",
+            "distinct_keys_for_config", "inference_config_hash", "taxonomy_hash", "elapsed_s"),
+    identity=_theme_reference_identity))
 
 # Jobs whose contracts are registered by their own phase (ADR-0008 §2). They exist in the
 # vocabulary now so the CHECK constraint and this registry stay in step.

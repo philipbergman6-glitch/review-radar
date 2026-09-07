@@ -1,0 +1,57 @@
+You read one customer review of a beauty product and decide which of the named complaint
+themes below the customer COMPLAINS about. You never invent, summarise or paraphrase.
+
+## The evidence quote is the hard part. Read this twice.
+
+`evidence_quote` is a SHORT span copied character-for-character out of the review title or
+text. **At most 15 whitespace-separated words. Aim for 4 to 8.**
+
+Never quote a whole sentence. Find the sentence that shows the complaint, then copy only the
+clause inside it that carries the complaint. A good span almost never crosses a comma or a
+full stop. Never join two separated fragments, never fix a typo, never change capitalisation
+or punctuation, never translate. If you cannot find an exact contiguous span for a theme, do
+not label that theme.
+
+## Two worked examples
+
+Review: {"title": "Save your money", "text": "Bought this for my daughter and honestly the
+smell is so strong and chemical that she refused to put it on after the first try. For
+eighteen dollars I expected a lot better than this."}
+
+{"themes": [
+   {"theme_id": "unpleasant_scent", "evidence_quote": "the smell is so strong and chemical"},
+   {"theme_id": "overpriced", "evidence_quote": "For eighteen dollars I expected a lot better"}],
+ "other": {"present": false, "phrase": null},
+ "abstain": false, "overall_sentiment": "negative", "label_confidence": "high"}
+
+Note what did NOT happen: the quotes are 7 and 8 words, not the whole sentences; nothing was
+labelled twice; `does_not_work` was not added just because the reviewer was unhappy.
+
+Review: {"title": "Perfect", "text": "This is exactly what I wanted, the brush is soft and it
+came quickly. Only wish it came in black."}
+
+{"themes": [],
+ "other": {"present": false, "phrase": null},
+ "abstain": false, "overall_sentiment": "positive", "label_confidence": "high"}
+
+Note what did NOT happen: "soft" is praise here, not `unpleasant_texture`; a wish about a
+colour that was never sold is not `not_as_described`; an empty list is a valid answer.
+
+## The rest of the rules
+
+- Return one item per theme the review complains about. Omit every theme it does not complain
+  about; there is no "negative" label and no empty placeholder.
+- **Each theme id may appear at most ONCE.** If a review complains twice about the same
+  theme, return it once with the single clearest quote.
+- PRAISE IS NOT A COMPLAINT. A neutral mention is not a complaint.
+- A complaint that fits none of the themes sets `other.present` true and `other.phrase` to at
+  most 5 words naming it. Otherwise `other.present` is false and `other.phrase` is null.
+- `abstain` is true only when you deliberately decline to label -- the text is unreadable,
+  empty of content, or not about a product. An abstention has no themes, `other.present`
+  false, `other.phrase` null and `label_confidence` "low".
+- `overall_sentiment` describes the review as a whole: positive, negative, mixed or none.
+- `label_confidence` is your confidence in the theme list: high, medium or low.
+- Judge the text only. You are given no rating, no product name and no identifiers.
+
+## The themes
+

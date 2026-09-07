@@ -82,7 +82,7 @@ def test_validate_discovery_names_every_failure(spec):
 
 
 def test_theme_labels_contract_identity_balances_cache_and_status():
-    c = runs.contract_for("theme_labels_llm", runs.THEME_LABELS_SPEC_VERSION)
+    c = runs.contract_for("theme_labels_llm", runs.THEME_DISCOVERY_SPEC_VERSION)
     assert c is not None
     counts = {"reviews_selected": 100, "cache_hits": 40, "inferences_run": 60, "succeeded": 55,
               "parse_failed": 4, "api_failed": 1, "table_rows_for_config": 95,
@@ -93,6 +93,32 @@ def test_theme_labels_contract_identity_balances_cache_and_status():
     assert any("distinct_keys_for_config" in f for f in
                c.identity({"records_out": 55, "records_rejected": 5},
                           {**counts, "distinct_keys_for_config": 94}))
+
+
+def test_the_labelling_contract_counts_an_abstention_as_an_answer_not_a_failure():
+    """ADR-0003: `abstain=true` is a deliberate decline, neither a parse nor an API failure."""
+    c = runs.contract_for("theme_labels_llm", runs.THEME_LABELS_SPEC_VERSION)
+    assert c is not None
+    counts = {"reviews_selected": 100, "cache_hits": 40, "inferences_run": 60, "succeeded": 50,
+              "model_abstained": 5, "parse_failed": 4, "api_failed": 1,
+              "table_rows_for_config": 95, "distinct_keys_for_config": 95}
+    assert c.identity({"records_out": 55, "records_rejected": 5}, counts) == []
+    # An abstention folded into the failures would misreport the failure coverage.
+    assert any("records_out" in f for f in
+               c.identity({"records_out": 50, "records_rejected": 10}, counts))
+
+
+def test_the_reference_contract_refuses_a_partially_labelled_frame():
+    """RR-21: a rejected reference label is re-labelled, never stored as a gap in ground truth."""
+    c = runs.contract_for("theme_labels_reference", runs.THEME_REFERENCE_SPEC_VERSION)
+    assert c is not None
+    good = {"reviews_selected": 200, "labels_submitted": 200, "accepted": 200, "rejected": 0,
+            "table_rows_for_config": 200, "distinct_keys_for_config": 200}
+    assert c.identity({"records_out": 200}, good) == []
+    short = {**good, "labels_submitted": 199, "accepted": 199}
+    assert any("reviews_selected" in f for f in c.identity({"records_out": 199}, short))
+    bad = {**good, "accepted": 198, "rejected": 2}
+    assert any("failed validation" in f for f in c.identity({"records_out": 198}, bad))
 
 
 def test_agent_reference_is_a_distinct_label_source_from_human_and_local_llm():

@@ -57,12 +57,22 @@ class LabelSpec:
     prompts: dict[str, Prompt]
     raw: dict[str, Any]
 
-    def config_hash(self, prompt_name: str, schema: dict[str, Any]) -> str:
-        """Identity of one inference configuration: settings + system prompt + output schema."""
+    def config_hash(self, prompt_name: str, schema: dict[str, Any], *,
+                    extra: dict[str, Any] | None = None, model_id: str | None = None) -> str:
+        """Identity of one inference configuration: settings + system prompt + output schema.
+
+        `extra` carries identity material that lives outside this file -- the theme taxonomy's
+        file hash, which is half of what a theme label *means* and is rendered into the system
+        prompt at run time rather than copied into the prompt file. ADR-0003 requires it in the
+        hash. `model_id` overrides the primary model, so the `llama3.2:3b` comparison row
+        cannot collide with `qwen3:8b` on an idempotency key.
+        """
         p = self.prompts[prompt_name]
         payload = {"inference": self.inference, "system": p.text, "prompt_version": p.version,
-                   "schema": schema, "model_id": self.model_id, "limits": self.limits,
+                   "schema": schema, "model_id": model_id or self.model_id, "limits": self.limits,
                    "label_spec_version": self.label_spec_version}
+        if extra:
+            payload["extra"] = extra
         return _sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False))
 
 
@@ -169,3 +179,176 @@ DISCOVERY_SCHEMA: dict[str, Any] = {
         }
     },
 }
+
+
+# ------------------------------------------------------- the frozen label contract ----
+LABEL_SCHEMA_PATH = PROJECT_ROOT / "conf" / "complaint-theme-label.schema.json"
+TAXONOMY_PATH = PROJECT_ROOT / "conf" / "theme-taxonomy.json"
+SENTIMENTS = ("positive", "negative", "mixed", "none")
+CONFIDENCES = ("high", "medium", "low")
+
+
+@dataclass(frozen=True)
+class Taxonomy:
+    version: str
+    themes: list[dict[str, Any]]
+    file_hash: str
+
+    @property
+    def ids(self) -> list[str]:
+        return [t["id"] for t in self.themes]
+
+
+def load_taxonomy(path: Path = TAXONOMY_PATH) -> Taxonomy:
+    raw = path.read_bytes()
+    doc = json.loads(raw)
+    ids = [t["id"] for t in doc["themes"]]
+    if len(set(ids)) != len(ids):
+        raise ValueError("the frozen taxonomy repeats a theme id")
+    return Taxonomy(version=str(doc["taxonomy_version"]), themes=doc["themes"],
+                    file_hash=_sha256(raw.decode()))
+
+
+def render_taxonomy(tax: Taxonomy) -> str:
+    """The taxonomy as prompt text, rendered deterministically from the frozen file.
+
+    The definitions live in one place. Copying them into a prompt file would let the two
+    drift, and a labeller reading a stale definition is a silent measurement error, so the
+    prompt is assembled at run time and the taxonomy's file hash goes into the inference
+    config hash beside the system prompt and the output schema.
+    """
+    out = []
+    for t in tax.themes:
+        out.append(f"### {t['id']}  ({t['name']})")
+        out.append(t["definition"])
+        out.append("Counts as this theme:")
+        out.extend(f"  - {x}" for x in t["includes"])
+        out.append("Does NOT count as this theme:")
+        out.extend(f"  - {x}" for x in t["excludes"])
+        if t.get("boundary_note"):
+            out.append(f"Boundary: {t['boundary_note']}")
+        out.append("")
+    return "\n".join(out).rstrip()
+
+
+def decoding_schema(theme_ids: list[str], *, max_themes: int | None = None) -> dict[str, Any]:
+    """What Ollama constrains decoding to. Deliberately weaker than the validation contract.
+
+    Two things in `conf/complaint-theme-label.schema.json` are dropped here on purpose:
+
+    * **the quote-length `pattern`.** Measured on the discovery run: enforcing an 8-word
+      limit as a decoding pattern made `qwen3:8b` paraphrase the review to fit the pattern,
+      and the evidence check then correctly rejected the paraphrase as invented. A length
+      rule belongs to validation, where a violation is a recorded failure, not to decoding,
+      where it silently deforms the answer.
+    * **the `if`/`then` conditionals** (the abstention rules and `other.phrase` required iff
+      `other.present`). Constrained decoding over conditional subschemas is not something the
+      server promises; the validator enforces them exactly, and a breach is a named failure.
+
+    The theme-id enum is kept: membership in the frozen taxonomy is what the labels *mean*,
+    and constraining it cannot deform an answer the way a length rule can. The `description`
+    strings are guidance the server passes through to the model, not constraints: nothing is
+    rejected or truncated by them, so they cannot deform an answer either.
+
+    `max_themes` caps the array length. Unlike a length rule on a quote it cannot deform what
+    the model writes -- it can only stop it adding a fourth theme, which the prompt already
+    asks it not to do. Default None leaves the cap at the taxonomy size, so every prompt
+    version that ran before the cap existed keeps exactly the config hash it ran under.
+    """
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["themes", "other", "abstain", "overall_sentiment", "label_confidence"],
+        "properties": {
+            "themes": {
+                "type": "array", "maxItems": max_themes or len(theme_ids), "uniqueItems": True,
+                "items": {"type": "object", "additionalProperties": False,
+                          "required": ["theme_id", "evidence_quote"],
+                          "properties": {
+                              "theme_id": {
+                                  "enum": list(theme_ids),
+                                  "description": "A theme id from the frozen taxonomy. Use each "
+                                                 "id at most once in this array."},
+                              "evidence_quote": {
+                                  "type": "string",
+                                  "description": "A short span copied character-for-character "
+                                                 "from the review title or text. 4 to 8 words "
+                                                 "is right; more than 15 words is rejected. "
+                                                 "Copy the fragment that carries the complaint, "
+                                                 "not the whole sentence."}}},
+            },
+            "other": {"type": "object", "additionalProperties": False,
+                      "required": ["present", "phrase"],
+                      "properties": {"present": {"type": "boolean"},
+                                     "phrase": {"type": ["string", "null"]}}},
+            "abstain": {"type": "boolean"},
+            "overall_sentiment": {"enum": list(SENTIMENTS)},
+            "label_confidence": {"enum": list(CONFIDENCES)},
+        },
+    }
+
+
+def validate_label(obj: Any, *, title: str | None, text: str | None, theme_ids: list[str],
+                   limits: dict[str, Any]) -> list[str]:
+    """Every semantic rule of ADR-0003's output contract. Returns named failures; never repairs."""
+    fails: list[str] = []
+    required = {"themes", "other", "abstain", "overall_sentiment", "label_confidence"}
+    if not isinstance(obj, dict) or set(obj) != required:
+        got = sorted(obj) if isinstance(obj, dict) else type(obj).__name__
+        return [f"top level must be an object with exactly {sorted(required)}, got {got}"]
+    if not isinstance(obj["abstain"], bool):
+        fails.append("abstain must be a boolean")
+    if obj["overall_sentiment"] not in SENTIMENTS:
+        fails.append(f"overall_sentiment {obj['overall_sentiment']!r} is not one of {list(SENTIMENTS)}")
+    if obj["label_confidence"] not in CONFIDENCES:
+        fails.append(f"label_confidence {obj['label_confidence']!r} is not one of {list(CONFIDENCES)}")
+
+    items = obj["themes"]
+    if not isinstance(items, list):
+        fails.append("themes must be a list")
+        items = []
+    seen: set[str] = set()
+    for i, it in enumerate(items):
+        if not isinstance(it, dict) or set(it) != {"theme_id", "evidence_quote"}:
+            fails.append(f"themes[{i}] must have exactly 'theme_id' and 'evidence_quote'")
+            continue
+        tid, quote = it["theme_id"], it["evidence_quote"]
+        if tid not in theme_ids:
+            fails.append(f"themes[{i}] theme_id {tid!r} is not in the frozen taxonomy")
+        if tid in seen:
+            fails.append(f"themes[{i}] repeats theme_id {tid!r}")
+        seen.add(tid)
+        if not isinstance(quote, str) or not quote.strip():
+            fails.append(f"themes[{i}] evidence_quote must be a non-empty string")
+            continue
+        limit = int(limits["label_quote_max_words"])
+        if word_count(quote) > limit:
+            fails.append(f"themes[{i}] evidence_quote has {word_count(quote)} words, limit {limit}")
+        if not quote_is_evidence(quote, title, text):
+            fails.append(f"themes[{i}] evidence_quote is not present in the review: {quote[:60]!r}")
+
+    other = obj["other"]
+    if not isinstance(other, dict) or set(other) != {"present", "phrase"}:
+        fails.append("other must be an object with exactly 'present' and 'phrase'")
+    elif not isinstance(other["present"], bool):
+        fails.append("other.present must be a boolean")
+    elif other["present"]:
+        phrase = other["phrase"]
+        limit = int(limits["other_phrase_max_words"])
+        if not isinstance(phrase, str) or not phrase.strip():
+            fails.append("other.phrase is required when other.present is true")
+        elif word_count(phrase) > limit:
+            fails.append(f"other.phrase has {word_count(phrase)} words, limit {limit}")
+    elif other["phrase"] is not None:
+        fails.append("other.phrase must be null when other.present is false")
+
+    if obj["abstain"] is True:
+        # An abstention is a deliberate refusal to label, not a failure: it must be *empty*,
+        # or a partial answer would be counted as one.
+        if items:
+            fails.append("an abstention must carry no themes")
+        if isinstance(other, dict) and (other.get("present") or other.get("phrase") is not None):
+            fails.append("an abstention must have other={present: false, phrase: null}")
+        if obj["label_confidence"] != "low":
+            fails.append("an abstention must have label_confidence 'low'")
+    return fails

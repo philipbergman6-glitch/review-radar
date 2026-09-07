@@ -6,8 +6,10 @@ RUN := ./run.sh python
 CATEGORY ?= All_Beauty
 SAMPLE ?= data/sample/$(CATEGORY).sample.jsonl
 TOPIC ?= reviews.raw
+SAMPLE_NAME ?= development
+PROMPT ?= label_v4
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases discovery-failures propose-taxonomy score-taxonomy verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes import-reference discovery-failures propose-taxonomy score-taxonomy verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -131,6 +133,15 @@ theme-frames:  ## draw the development, audit and training-pool frames, in that 
 
 discover-phrases:  ## free complaint phrases from the 600-review discovery sample (local qwen3:8b)
 	$(RUN) -m src.ai.discover_phrases --scope full
+
+blind-export:  ## write eval/themes/blind-<SAMPLE>.jsonl + .map.json for blind labelling (RR-21)
+	$(RUN) scripts/blind_export.py --sample $(SAMPLE_NAME)
+
+label-themes:  ## run the labeller over a frame (SAMPLE_NAME, PROMPT, MODEL) -> gold.review_theme_labels
+	$(RUN) -m src.ai.label_themes --sample $(SAMPLE_NAME) --prompt $(PROMPT) $(if $(MODEL),--model $(MODEL),)
+
+import-reference:  ## import the agent's blind ground truth (label_source=agent_reference)
+	$(RUN) scripts/import_reference_labels.py --sample $(SAMPLE_NAME)
 
 discovery-failures:  ## characterise the discovery parse failures by named validation cause
 	$(RUN) scripts/discovery_failures.py --scope full

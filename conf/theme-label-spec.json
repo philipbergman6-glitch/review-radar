@@ -15,12 +15,34 @@
     "discovery": {
       "version": "discovery-v1",
       "path": "conf/prompts/discovery-v1.txt"
+    },
+    "label_v1": {
+      "version": "label-v1",
+      "path": "conf/prompts/label-v1.txt"
+    },
+    "label_v2": {
+      "version": "label-v2",
+      "path": "conf/prompts/label-v2.txt"
+    },
+    "label_v3": {
+      "version": "label-v3",
+      "path": "conf/prompts/label-v3.txt"
+    },
+    "label_v4": {
+      "version": "label-v4",
+      "path": "conf/prompts/label-v4.txt"
+    },
+    "label_v5": {
+      "version": "label-v5",
+      "path": "conf/prompts/label-v5.txt"
     }
   },
   "limits": {
     "discovery_max_items": 5,
     "discovery_quote_max_words": 12,
     "discovery_aspect_max_words": 3,
-    "max_attempts": 2
+    "max_attempts": 2,
+    "label_quote_max_words": 15,
+    "other_phrase_max_words": 5
   }
 }
