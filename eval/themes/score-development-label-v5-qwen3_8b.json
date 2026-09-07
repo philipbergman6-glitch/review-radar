@@ -1,0 +1,178 @@
+{
+ "sample": "development",
+ "scope": "full",
+ "label_source": "local_llm",
+ "model_id": "qwen3:8b",
+ "prompt_version": "label-v5",
+ "inference_config_hash": "b84a2ce22193cb7911d388ae5d34935369f5499937dc348385d7f90f2f07ad4b",
+ "taxonomy_version": "1",
+ "taxonomy_hash": "0cc29c374779e8ee33a6a1aaa02435d03e3b4ec62b473671a6a4302427ee5173",
+ "min_support": 10,
+ "reference_source": "agent_reference",
+ "reference_rows": 200,
+ "system_rows": 24,
+ "seed": 20260907,
+ "bootstrap_draws": 100,
+ "overall": {
+  "subset": "all",
+  "reviews": 200,
+  "macro_f1": 0.12079606625258799,
+  "bootstrap_95": [
+   0.052659471623956,
+   0.16496776005088026
+  ],
+  "supported_themes": [
+   "does_not_work",
+   "poor_build_quality",
+   "overpriced",
+   "wrong_size_or_fit",
+   "unpleasant_texture",
+   "hard_to_use",
+   "unpleasant_scent",
+   "not_as_described",
+   "irritation_or_harm",
+   "arrived_damaged"
+  ],
+  "min_supported_recall": 0.0,
+  "per_theme": [
+   {
+    "theme_id": "does_not_work",
+    "support": 43,
+    "predicted": 3,
+    "tp": 0,
+    "fp": 3,
+    "fn": 43,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "supported": true
+   },
+   {
+    "theme_id": "poor_build_quality",
+    "support": 28,
+    "predicted": 2,
+    "tp": 2,
+    "fp": 0,
+    "fn": 26,
+    "precision": 1.0,
+    "recall": 0.07142857142857142,
+    "f1": 0.13333333333333333,
+    "supported": true
+   },
+   {
+    "theme_id": "overpriced",
+    "support": 32,
+    "predicted": 5,
+    "tp": 0,
+    "fp": 5,
+    "fn": 32,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "supported": true
+   },
+   {
+    "theme_id": "wrong_size_or_fit",
+    "support": 26,
+    "predicted": 2,
+    "tp": 0,
+    "fp": 2,
+    "fn": 26,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "supported": true
+   },
+   {
+    "theme_id": "unpleasant_texture",
+    "support": 17,
+    "predicted": 4,
+    "tp": 2,
+    "fp": 2,
+    "fn": 15,
+    "precision": 0.5,
+    "recall": 0.11764705882352941,
+    "f1": 0.19047619047619047,
+    "supported": true
+   },
+   {
+    "theme_id": "hard_to_use",
+    "support": 41,
+    "predicted": 5,
+    "tp": 4,
+    "fp": 1,
+    "fn": 37,
+    "precision": 0.8,
+    "recall": 0.0975609756097561,
+    "f1": 0.1739130434782609,
+    "supported": true
+   },
+   {
+    "theme_id": "unpleasant_scent",
+    "support": 16,
+    "predicted": 5,
+    "tp": 1,
+    "fp": 4,
+    "fn": 15,
+    "precision": 0.2,
+    "recall": 0.0625,
+    "f1": 0.09523809523809523,
+    "supported": true
+   },
+   {
+    "theme_id": "not_as_described",
+    "support": 19,
+    "predicted": 10,
+    "tp": 0,
+    "fp": 10,
+    "fn": 19,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "supported": true
+   },
+   {
+    "theme_id": "irritation_or_harm",
+    "support": 22,
+    "predicted": 3,
+    "tp": 3,
+    "fp": 0,
+    "fn": 19,
+    "precision": 1.0,
+    "recall": 0.13636363636363635,
+    "f1": 0.24000000000000002,
+    "supported": true
+   },
+   {
+    "theme_id": "arrived_damaged",
+    "support": 13,
+    "predicted": 3,
+    "tp": 3,
+    "fp": 0,
+    "fn": 10,
+    "precision": 1.0,
+    "recall": 0.23076923076923078,
+    "f1": 0.375,
+    "supported": true
+   }
+  ],
+  "other": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 16,
+   "tn": 184,
+   "agreement": 0.92,
+   "reference_present": 16,
+   "system_present": 0
+  },
+  "coverage": {
+   "succeeded": 19,
+   "model_abstained": 0,
+   "parse_failed": 5,
+   "api_failed": 0,
+   "absent": 176,
+   "failure_rate": 0.905,
+   "abstention_rate": 0.0
+  }
+ }
+}
