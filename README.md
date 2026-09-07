@@ -22,11 +22,13 @@ stays in this README until it is all in the "built" column.
 | Silver transformation | **built** | `src/spark/silver.py`; 701,528 → 694,252 rows, 0 rejects, 6,139 collision groups (7,276 rows removed); `scripts/gate_silver.py`, `scripts/reproduce_silver.py` (pandas, no shared code) |
 | Gold transformation | **built** | `src/spark/gold.py` + `src/gold/rule.py` (`conf/decline_rule.toml`, provisional, holdout from 2020-01); 13,122 products materialised on a 473,268 product-month spine, 1,599 evaluable, 964 alerts = 964 episodes; GOLD_GATE=PASS, rerun identical |
 | Product catalogue + JDBC enrichment | **built** | `src/catalogue/load_products.py` (COPY under a `catalogue_load_id`, 112,590 rows); silver broadcast-joins it over Spark JDBC |
-| Elasticsearch index (BM25 + kNN) | *planned* | cluster is up and healthy; **no indices** |
+| Elasticsearch review search index (BM25) | **built** | mapping contract `conf/es/reviews.contract.json` (strict, two analyzers, vector field declared); `src/serving/index_reviews.py`; 693,547 docs behind alias `reviews`; 7/7 analyzer cases |
+| Elasticsearch `product_month` projection + Kibana | **built** | `src/serving/index_product_month.py` (473,268 docs, alias swap, `source_gold_snapshot_id` lineage); Kibana under `make up-ui`; dashboard `conf/kibana/product_month_dashboard.ndjson` ([screenshot](docs/assets/kibana-product-month.png)) |
+| Search judgement set + analyzer decision | **awaiting judging** | 20 frozen queries `conf/search/queries.json`; pool of 273 docs in `eval/search/pool.jsonl`; `make judge-search` then `make eval-search`; `scripts/gate_search.py` prints SEARCH_GATE |
 | AI: embeddings, semantic search | *planned* | `src/ai/` is an empty package |
 | AI: LLM aspect sentiment + validation | *planned* | — |
 | AI: RAG question answering | *planned* | — |
-| Demo notebook + Kibana | *planned* | `notebooks/` empty; `src/serving/` will hold its helpers (ADR-0009) |
+| Demo notebook | *planned* | `notebooks/` empty (ADR-0009) |
 | Demo runbook | **built** | [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md) — Kafka retention, memory, pre-demo checklist |
 | Design doc, slides | *planned* | `docs/` holds the profile, the audit and the runbook |
 
@@ -94,12 +96,12 @@ data/raw/*.jsonl
 │  silver            [built]                  │        │  112,590 rows│
 │  gold              [built]                  │        │              │
 └──────┬──────────────────────────────┬───────┘        └──────────────┘
-       │ Iceberg tables               │ enriched docs (planned)
+       │ Iceberg tables               │ serving projections (silver, gold)
        ▼                              ▼
 ┌──────────────┐              ┌──────────────────┐
 │ MinIO (S3)   │              │  Elasticsearch   │
-│  lakehouse   │              │  BM25 + kNN      │
-│    [built]   │              │    [planned]     │
+│  lakehouse   │              │  BM25 [built]    │
+│    [built]   │              │  kNN [planned]   │
 └──────────────┘              └────────┬─────────┘
                                        ▼
                           ┌────────────────────────┐
@@ -109,14 +111,15 @@ data/raw/*.jsonl
                           └────────────────────────┘
 ```
 
-Solid today: producer → Kafka → bronze → Iceberg/MinIO, with Postgres as the Iceberg
-catalogue. Everything marked `[planned]` is architecture, not code.
+Solid today: producer → Kafka → bronze → silver → gold on Iceberg/MinIO, with Postgres as
+the Iceberg catalogue, and two Elasticsearch serving projections (`reviews`, `product_month`)
+with a Kibana dashboard over the gold one. Everything marked `[planned]` is architecture, not code.
 
 **Course technologies — in use now:** Kafka (streaming) · Spark (Structured Streaming) ·
 Iceberg (table format) · MinIO (object store) · PostgreSQL (Iceberg JDBC catalogue) ·
-Docker (containers) · JSON (semi-structured) · free text (unstructured).
-**Planned:** Elasticsearch (NoSQL + vector search), PostgreSQL in its second role as the
-SQL enrichment source.
+Docker (containers) · JSON (semi-structured) · free text (unstructured) · Elasticsearch
+(inverted index, custom analyzers, BM25) · Kibana · PostgreSQL as the SQL enrichment source.
+**Planned:** Elasticsearch dense_vector kNN (field declared, populated in Embeddings).
 
 **AI capabilities** (brief §6.2) — *none built yet*. Planned, in this order:
 (b) embeddings + semantic search, (a) LLM aspect sentiment with a measured validation,
@@ -188,6 +191,7 @@ make bronze-sample   # -> lake.bronze.reviews_raw_sample
 make silver-sample   # -> lake.silver.reviews_sample / rejects_sample / review_collisions_sample
 ./run.sh python scripts/reproduce_silver.py --scope sample
 make gold-sample     # -> lake.gold.product_month_sample / evaluation_points_sample / decline_episodes_sample
+make index-reviews-sample index-product-month-sample   # -> ES aliases reviews_sample / product_month_sample
 ```
 
 The sample flows through its own topic and tables, so it runs against 10k rows without
@@ -254,6 +258,7 @@ load-dependent, so a single figure is not reproducible.
 | MinIO API / console | `localhost:9000` / `localhost:9001` | `S3_ACCESS_KEY` / `S3_SECRET_KEY` from `.env` |
 | Elasticsearch | `localhost:9200` | security disabled (local only) |
 | PostgreSQL | `localhost:5432` | `PG_USER` / `PG_PASSWORD` from `.env`, db `catalog` |
+| Kibana (`make up-ui`) | `localhost:5601` | security disabled (local only) |
 
 ## Resource envelope
 
@@ -264,6 +269,7 @@ Everything here shares one 16 GB laptop, and the budget is tighter than it looks
 | Colima VM | 8 GB / 6 CPU | `colima start --cpu 6 --memory 8` |
 | Kafka container | 2 GB (`-Xmx1G` heap) | `docker-compose.yml` |
 | Elasticsearch container | 2 GB (1 GB heap) | `docker-compose.yml` |
+| Kibana container (profile `ui`, optional) | 1 GB | `docker-compose.yml` |
 | MinIO container | 1 GB | `docker-compose.yml` |
 | Postgres container | 512 MB | `docker-compose.yml` |
 | Spark driver (on the host, not in the VM) | 4 GB | `src/common/spark.py` |
@@ -286,15 +292,15 @@ conf/postgres-init/   catalogue + audit schema
 data/raw/             downloaded JSONL (git-ignored)
 data/sample/          10k reviews + 5k products, committed (see "Running on the sample")
 docs/                 profiling output, audit report
-scripts/              download, sample, profile, healthcheck, verify, EOS gate, silver gate + pandas reproduction
+scripts/              download, sample, profile, healthcheck, verify, EOS gate, silver gate + reproduction, kibana import, search pool/judge/eval/gate
 src/common/           config, Spark schemas, canonical review identity, run ledger
 src/catalogue/        product catalogue loader (Postgres)
 src/ingest/           Kafka producer
 src/spark/            bronze + silver + gold jobs
 src/ai/               empty package (planned)
-src/serving/          empty package (planned)
+src/serving/          ES mapping contracts, projections (reviews, product_month), retrieval systems, judgements
 tests/                unit tests for the bronze naming + gate verdict logic
-Makefile              every entrypoint: up, health, catalogue, produce, bronze, silver, gate-silver, reproduce-silver, gold, verify, eos, test, lint
+Makefile              every entrypoint: up, health, catalogue, produce, bronze, silver, gate-silver, reproduce-silver, gold, index-reviews, index-product-month, up-ui, kibana-import, pool-search, judge-search, eval-search, gate-search, verify, eos, test, lint
 run.sh                JAVA_HOME + uv wrapper (make targets go through it)
 ```
 

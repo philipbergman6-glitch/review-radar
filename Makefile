@@ -7,7 +7,7 @@ CATEGORY ?= All_Beauty
 SAMPLE ?= data/sample/$(CATEGORY).sample.jsonl
 TOPIC ?= reviews.raw
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample gate-search verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -72,6 +72,18 @@ index-product-month:  ## gold snapshot -> ES product_month generation -> alias `
 
 index-product-month-sample:  ## same, over the sample gold table
 	$(RUN) -m src.serving.index_product_month --scope sample --prune
+
+kibana-import:  ## import conf/kibana/*.ndjson into Kibana (idempotent), prints KIBANA_DASHBOARD
+	$(RUN) scripts/kibana_import.py
+
+pool-search:  ## pool top-10 of every Search system for the 20 frozen queries -> eval/search/pool.jsonl
+	$(RUN) scripts/judge_search.py --pool --round search
+
+judge-search:  ## interactive judging of the unjudged pool (retriever hidden, order randomised)
+	$(RUN) scripts/judge_search.py --judge --judge-name philip
+
+eval-search:  ## P@5 / MRR@10 per system and stratum on complete judgements; freezes the analyzer default
+	$(RUN) scripts/eval_search.py
 
 gate-search:  ## re-derive every Search constituent from ES, the ledger and the judgements; prints SEARCH_GATE
 	$(RUN) scripts/gate_search.py
