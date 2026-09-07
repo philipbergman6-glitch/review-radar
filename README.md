@@ -19,8 +19,9 @@ stays in this README until it is all in the "built" column.
 | Iceberg JDBC catalogue in Postgres | **built** | `iceberg_tables` row for `bronze.reviews_raw` |
 | Exactly-once proof (kill + restart) | **built** | `scripts/prove_exactly_once.py` — see below |
 | Data profiling | **built** | [`docs/phase0-profile.txt`](docs/phase0-profile.txt) |
-| Silver / gold transformation | *planned* | nothing written yet |
-| Product catalogue + JDBC enrichment | *planned* | `products` table exists and is **empty**; no loader script |
+| Silver transformation | **built** | `src/spark/silver.py`; 701,528 → 694,252 rows, 0 rejects, 6,139 collision groups (7,276 rows removed); `scripts/gate_silver.py`, `scripts/reproduce_silver.py` (pandas, no shared code) |
+| Gold transformation | *planned* | nothing written yet |
+| Product catalogue + JDBC enrichment | **built** | `src/catalogue/load_products.py` (COPY under a `catalogue_load_id`, 112,590 rows); silver broadcast-joins it over Spark JDBC |
 | Elasticsearch index (BM25 + kNN) | *planned* | cluster is up and healthy; **no indices** |
 | AI: embeddings, semantic search | *planned* | `src/ai/` is an empty package |
 | AI: LLM aspect sentiment + validation | *planned* | — |
@@ -89,8 +90,9 @@ data/raw/*.jsonl
        ▼
 ┌─────────────────────────────────────────────┐        ┌──────────────┐
 │      Spark Structured Streaming             │◀──JDBC─│  PostgreSQL  │
-│  bronze            [built]                  │ (plan) │  products    │
-│  silver → gold     [planned]                │        │  (empty)     │
+│  bronze            [built]                  │ [built]│  products    │
+│  silver            [built]                  │        │  112,590 rows│
+│  gold              [planned]                │        │              │
 └──────┬──────────────────────────────┬───────┘        └──────────────┘
        │ Iceberg tables               │ enriched docs (planned)
        ▼                              ▼
@@ -181,11 +183,15 @@ first N lines of each raw file, so `scripts/make_sample.py` reproduces it exactl
 lets you replay step 1 without the 0.54 GB download:
 
 ```bash
-make produce-sample  # = ./run.sh python -m src.ingest.producer --source data/sample/All_Beauty.sample.jsonl
+make produce-sample  # -> topic reviews.raw.sample (never the production topic)
+make bronze-sample   # -> lake.bronze.reviews_raw_sample
+make silver-sample   # -> lake.silver.reviews_sample / rejects_sample / review_collisions_sample
+./run.sh python scripts/reproduce_silver.py --scope sample
 ```
 
-Everything downstream — bronze, the verify script, the exactly-once gate — then runs
-against 10k rows instead of 701,528. `scripts/download_data.py` and
+The sample flows through its own topic and tables, so it runs against 10k rows without
+touching the 701,528-row production tables. Silver's catalogue join still reads the full
+`products` table (`make catalogue`), and `scripts/download_data.py` /
 `scripts/profile_data.py` still need the full raw files.
 
 **2 — drain the topic into the bronze Iceberg table.** `--trigger once` processes
@@ -279,14 +285,15 @@ conf/postgres-init/   catalogue + audit schema
 data/raw/             downloaded JSONL (git-ignored)
 data/sample/          10k reviews + 5k products, committed (see "Running on the sample")
 docs/                 profiling output, audit report
-scripts/              download, sample, profile, healthcheck, verify, EOS gate
-src/common/           config + explicit Spark schemas
+scripts/              download, sample, profile, healthcheck, verify, EOS gate, silver gate + pandas reproduction
+src/common/           config, Spark schemas, canonical review identity, run ledger
+src/catalogue/        product catalogue loader (Postgres)
 src/ingest/           Kafka producer
-src/spark/            bronze job (silver / gold: planned)
+src/spark/            bronze + silver jobs (gold: planned)
 src/ai/               empty package (planned)
 src/serving/          empty package (planned)
 tests/                unit tests for the bronze naming + gate verdict logic
-Makefile              every entrypoint: up, health, produce, bronze, verify, eos, test, lint
+Makefile              every entrypoint: up, health, catalogue, produce, bronze, silver, gate-silver, reproduce-silver, verify, eos, test, lint
 run.sh                JAVA_HOME + uv wrapper (make targets go through it)
 ```
 
