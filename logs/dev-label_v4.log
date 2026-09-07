@@ -59,3 +59,4 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [label] 50/176 done, 10.3s/review, ok=33 abstained=0 parse_failed=17 api_failed=0, eta 22 min
 [Stage 31:>                                                         (0 + 4) / 4]                                                                                [label] 75/176 done, 11.2s/review, ok=51 abstained=0 parse_failed=24 api_failed=0, eta 19 min
 [label] 100/176 done, 11.1s/review, ok=69 abstained=0 parse_failed=31 api_failed=0, eta 14 min
+[label] 125/176 done, 10.4s/review, ok=88 abstained=0 parse_failed=37 api_failed=0, eta 9 min

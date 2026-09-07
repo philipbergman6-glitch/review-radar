@@ -49,6 +49,7 @@ THEME_SAMPLES_SPEC_VERSION = "2"   # v2 generalises the discovery-only counts to
 THEME_DISCOVERY_SPEC_VERSION = "1"
 THEME_LABELS_SPEC_VERSION = "2"
 THEME_REFERENCE_SPEC_VERSION = "1"
+THEME_CLASSIFIER_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -487,11 +488,59 @@ _register(Contract(
             "distinct_keys_for_config", "inference_config_hash", "taxonomy_hash", "elapsed_s"),
     identity=_theme_reference_identity))
 
-# Jobs whose contracts are registered by their own phase (ADR-0008 §2). They exist in the
-# vocabulary now so the CHECK constraint and this registry stay in step.
-for _later in ("theme_classifier_train", "theme_classifier_score",
-               "rag_answers"):
-    _register(Contract(_later, "0", inputs={}, outputs={}, counts=()))
+def _classifier_train_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """The pool splits into what trained the model and what was dropped for having no label."""
+    fails: list[str] = []
+    pool, used, dropped = (_n(counts, "pool_rows"), _n(counts, "training_rows"),
+                           _n(counts, "dropped_failed_rows"))
+    if None in (pool, used, dropped):
+        fails.append("identity: pool_rows/training_rows/dropped_failed_rows must be set on success")
+        return fails
+    if pool != used + dropped:
+        fails.append(f"identity: pool_rows {pool} != training_rows {used} + "
+                     f"dropped_failed_rows {dropped}")
+    if records.get("records_out") != used:
+        fails.append(f"identity: records_out {records.get('records_out')} != training_rows {used}")
+    if records.get("records_rejected") != dropped:
+        fails.append(f"identity: records_rejected {records.get('records_rejected')} != "
+                     f"dropped_failed_rows {dropped}")
+    return fails
+
+
+_register(Contract(
+    "theme_classifier_train", THEME_CLASSIFIER_SPEC_VERSION,
+    inputs={"labels": ("table", "budget_line", "label_source", "inference_config_hash"),
+            "taxonomy": ("path", "version", "file_hash")},
+    outputs={"theme_classifier_model": ("path", "spec_hash", "themes", "vocabulary")},
+    counts=("pool_rows", "training_rows", "dropped_failed_rows", "theme_positives",
+            "vocabulary", "spec_hash", "elapsed_s"),
+    identity=_classifier_train_identity))
+
+
+def _classifier_score_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Scoring is total: every review of the frame gets a prediction, empty or not."""
+    scored = _n(counts, "reviews_scored")
+    if scored is None:
+        return ["identity: reviews_scored must be set on success"]
+    fails = []
+    if records.get("records_in") != scored or records.get("records_out") != scored:
+        fails.append(f"identity: records_in/records_out must both equal reviews_scored {scored}")
+    empty = _n(counts, "no_predicted_theme")
+    if empty is not None and empty > scored:
+        fails.append(f"identity: no_predicted_theme {empty} > reviews_scored {scored}")
+    return fails
+
+
+_register(Contract(
+    "theme_classifier_score", THEME_CLASSIFIER_SPEC_VERSION,
+    inputs={"model": ("path", "spec_hash"), "taxonomy": ("path", "version", "file_hash")},
+    outputs={"gold.review_theme_labels": ("table", "snapshot_id", "budget_line", "label_source")},
+    counts=("reviews_scored", "theme_hits", "no_predicted_theme", "spec_hash", "elapsed_s"),
+    identity=_classifier_score_identity))
+
+# Registered by its own phase (ADR-0008 §2); in the vocabulary now so the CHECK constraint and
+# this registry stay in step.
+_register(Contract("rag_answers", "0", inputs={}, outputs={}, counts=()))
 
 
 def contract_for(job_name: str, spec_version: str | None = None) -> Contract | None:

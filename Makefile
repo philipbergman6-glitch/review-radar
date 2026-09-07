@@ -9,7 +9,7 @@ TOPIC ?= reviews.raw
 SAMPLE_NAME ?= development
 PROMPT ?= label_v4
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes import-reference score-themes gate-themes adjudicate-export adjudicate-import sentiment-check discovery-failures propose-taxonomy score-taxonomy verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes import-reference score-themes gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score discovery-failures propose-taxonomy score-taxonomy verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -157,6 +157,21 @@ adjudicate-import:  ## validate the filled causes and write docs/theme-taxonomy/
 
 sentiment-check:  ## overall_sentiment vs stars, 3-star excluded, Wilson intervals (ADR-0003)
 	$(RUN) scripts/sentiment_check.py --sample $(SAMPLE_NAME) --prompt $(PROMPT)
+
+star-baseline-fit:  ## fit the per-theme star thresholds on development and freeze them (RR-23)
+	$(RUN) scripts/baseline_star_only.py --fit
+
+star-baseline-score:  ## apply the frozen star thresholds to SAMPLE_NAME
+	$(RUN) scripts/baseline_star_only.py --score --sample $(SAMPLE_NAME)
+
+classifier-train:  ## train the MLlib theme baseline on the frozen-prompt training pool (ADR-0002)
+	$(RUN) -m src.spark.theme_classifier --train --source-config-hash $(CONFIG_HASH)
+
+classifier-thresholds:  ## sweep the per-theme probability cuts on development and freeze them
+	$(RUN) -m src.spark.theme_classifier --fit-thresholds
+
+classifier-score:  ## apply the frozen classifier to SAMPLE_NAME -> label_source=classifier
+	$(RUN) -m src.spark.theme_classifier --score --sample $(SAMPLE_NAME)
 
 discovery-failures:  ## characterise the discovery parse failures by named validation cause
 	$(RUN) scripts/discovery_failures.py --scope full
