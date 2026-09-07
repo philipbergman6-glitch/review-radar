@@ -23,7 +23,7 @@ from src.common.canonical import (
 
 def test_length_prefix_is_four_byte_big_endian_utf8():
     assert encode_field("ab") == b"\x00\x00\x00\x02ab"
-    assert encode_field("é") == b"\x00\x00\x00\x02" + "é".encode("utf-8")
+    assert encode_field("é") == b"\x00\x00\x00\x02" + "é".encode()
 
 
 def test_null_and_empty_are_different_things():
@@ -62,8 +62,8 @@ def test_images_json_is_compact_sorted_keys_nulls_dropped_order_kept():
 
 
 def test_survivor_hash_preserves_title_and_text_exactly():
-    base = dict(rating=5, title="T", text=" spaced ", verified_purchase=True,
-                helpful_vote=3, asin="A1", images=None)
+    base = {"rating": 5, "title": "T", "text": " spaced ", "verified_purchase": True,
+                "helpful_vote": 3, "asin": "A1", "images": None}
     assert survivor_hash(**base) != survivor_hash(**{**base, "text": "spaced"})
     assert survivor_hash(**base) != survivor_hash(**{**base, "rating": 4})
     assert survivor_hash(**base) != survivor_hash(**{**base, "helpful_vote": None})
@@ -83,13 +83,13 @@ def test_golden_review_ids(key, expected):
 
 
 GOLDEN_SURVIVOR_HASHES = [
-    (dict(rating=1, title="", text=None, verified_purchase=False, helpful_vote=0,
-          asin="X", images=[]),
+    ({"rating": 1, "title": "", "text": None, "verified_purchase": False, "helpful_vote": 0,
+          "asin": "X", "images": []},
      "cfb7a986a6e7f4f9e6eb95c0c7b8e01482f8019de0b249dedd5b73ae9d54e1c6"),
-    (dict(rating=5, title="Löve it 💄", text="tab\tand  double space nbsp",
-          verified_purchase=True, helpful_vote=12, asin="B0000001",
-          images=[{"small_image_url": "s", "medium_image_url": "m",
-                   "large_image_url": "l", "attachment_type": "IMAGE"}]),
+    ({"rating": 5, "title": "Löve it 💄", "text": "tab\tand  double space nbsp",
+          "verified_purchase": True, "helpful_vote": 12, "asin": "B0000001",
+          "images": [{"small_image_url": "s", "medium_image_url": "m",
+                   "large_image_url": "l", "attachment_type": "IMAGE"}]},
      "22ce17fa60c3d413ed2dd9f26cc8252a26ad49368f3b58a5920e70a20dc46091"),
 ]
 

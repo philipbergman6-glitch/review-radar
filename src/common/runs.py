@@ -20,9 +20,10 @@ from __future__ import annotations
 import json
 import subprocess
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Callable
+from datetime import UTC, datetime
+from typing import Any
 
 from src.common import config as C
 from src.common.pg import connect
@@ -263,7 +264,7 @@ def start(job_name: str, spec_version: str, *, category: str, data_scope: str,
     validate_start(job_name, spec_version, inputs=inputs, params=params)
     run_id = str(uuid.uuid4())
     sha, dirty = git_state()
-    started = datetime.now(timezone.utc)
+    started = datetime.now(UTC)
     with connect() as conn:
         conn.execute(
             """INSERT INTO pipeline_runs (run_id, job_name, spec_version, status, category,
@@ -294,7 +295,7 @@ def success(run: Run, *, records_in: int, records_out: int, records_rejected: in
             """UPDATE pipeline_runs SET status='success', finished_at=%s, records_in=%s,
                    records_out=%s, records_rejected=%s, outputs=%s::jsonb, counts=%s::jsonb
                WHERE run_id=%s AND status='running'""",
-            (datetime.now(timezone.utc), records_in, records_out, records_rejected,
+            (datetime.now(UTC), records_in, records_out, records_rejected,
              _json(outputs), _json(counts), run.run_id))
     print(f"[ledger] {run.job_name} run {run.run_id} success", flush=True)
 
@@ -310,7 +311,7 @@ def failed(run: Run, *, notes: str, outputs: dict[str, Any] | None = None,
                    outputs=%s::jsonb, counts=%s::jsonb, records_in=%s, records_out=%s,
                    records_rejected=%s
                WHERE run_id=%s AND status='running'""",
-            (datetime.now(timezone.utc), notes[:4000], _json(outputs or {}), _json(counts or {}),
+            (datetime.now(UTC), notes[:4000], _json(outputs or {}), _json(counts or {}),
              records.get("records_in"), records.get("records_out"),
              records.get("records_rejected"), run.run_id))
     print(f"[ledger] {run.job_name} run {run.run_id} FAILED: {notes}", flush=True)

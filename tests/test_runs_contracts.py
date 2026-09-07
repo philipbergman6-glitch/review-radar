@@ -8,7 +8,13 @@ from __future__ import annotations
 import pytest
 
 from src.common import runs
-from src.common.runs import JOB_NAMES, ContractViolation, contract_for, validate_finish, validate_start
+from src.common.runs import (
+    JOB_NAMES,
+    ContractViolation,
+    contract_for,
+    validate_finish,
+    validate_start,
+)
 
 SILVER_OK_INPUTS = {
     "bronze": {"table": "lake.bronze.reviews_raw", "snapshot_id": 123},

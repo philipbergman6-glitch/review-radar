@@ -13,7 +13,7 @@ from src.catalogue.load_products import PriceParse, parse_price, shape_row
     ("", PriceParse(None, "missing")),
     ("   ", PriceParse(None, "missing")),
     (9.99, PriceParse(Decimal("9.99"), "parsed")),
-    (12, PriceParse(Decimal("12"), "parsed")),
+    (12, PriceParse(Decimal(12), "parsed")),
     ("9.99", PriceParse(Decimal("9.99"), "parsed")),
     ("$9.99", PriceParse(Decimal("9.99"), "parsed")),
     (" $1,299.50 ", PriceParse(Decimal("1299.50"), "parsed")),
