@@ -1,0 +1,76 @@
+theme,aspect,phrases,reviews,low_rated_reviews,distinct_products
+arrived_damaged,broken product,3,3,3,3
+arrived_damaged,damaged packaging,5,5,5,5
+arrived_damaged,damaged product,3,3,3,3
+arrived_damaged,leaks in transit,4,3,3,3
+arrived_damaged,product damage,8,6,5,6
+breaks_or_wears_out,durability,2,2,2,2
+breaks_or_wears_out,longevity,2,2,2,2
+breaks_or_wears_out,product durability,16,15,15,15
+breaks_or_wears_out,product longevity,2,2,1,2
+breaks_or_wears_out,short lifespan,3,3,3,2
+breaks_or_wears_out,sprayer durability,2,2,2,2
+breaks_or_wears_out,zipper durability,2,2,2,2
+does_not_work,brush effectiveness,3,2,2,1
+does_not_work,brushing effectiveness,4,3,3,2
+does_not_work,effectiveness,5,5,5,5
+does_not_work,heat output,2,2,2,2
+does_not_work,heating function,2,2,2,2
+does_not_work,not effective,19,17,17,17
+does_not_work,product effectiveness,30,24,23,23
+does_not_work,product functionality,7,7,7,7
+does_not_work,product not usable,2,2,2,2
+does_not_work,product performance,14,13,13,13
+does_not_work,product purpose,2,2,2,2
+hard_to_use,application,3,3,3,3
+hard_to_use,application difficulty,2,2,1,2
+hard_to_use,ease of use,3,3,3,3
+hard_to_use,messiness,2,2,2,2
+hard_to_use,missing instructions,3,3,3,3
+hard_to_use,product design,5,3,3,3
+hard_to_use,product usability,5,5,5,5
+hard_to_use,product usage,3,3,3,3
+hard_to_use,time required,2,2,2,2
+irritation_or_harm,eye irritation,3,3,3,3
+irritation_or_harm,hair damage,4,4,4,4
+irritation_or_harm,overheating,2,2,2,2
+irritation_or_harm,product safety,2,2,2,2
+irritation_or_harm,skin irritation,14,9,8,9
+irritation_or_harm,skin reaction,2,2,2,2
+not_as_described,appearance,2,2,2,2
+not_as_described,color accuracy,2,2,2,2
+not_as_described,color change,2,2,2,2
+not_as_described,color mismatch,3,3,3,3
+not_as_described,product appearance,9,8,6,8
+not_as_described,product description,3,3,3,3
+not_as_described,product mismatch,3,3,3,3
+not_as_described,product suitability,5,4,3,4
+overpriced,money wasted,2,2,2,2
+overpriced,price,20,15,13,14
+overpriced,product value,3,2,2,2
+overpriced,value for money,18,18,18,17
+poor_build_quality,brush quality,2,2,2,2
+poor_build_quality,low quality,4,4,4,4
+poor_build_quality,packaging quality,2,2,2,2
+poor_build_quality,poor quality,2,2,2,2
+poor_build_quality,product defect,4,4,4,3
+poor_build_quality,product quality,36,34,32,33
+unpleasant_scent,chemical smell,3,3,2,3
+unpleasant_scent,scent,24,22,19,20
+unpleasant_scent,scent strength,2,2,2,2
+unpleasant_texture,bristle stiffness,3,3,3,3
+unpleasant_texture,comfort,2,2,2,2
+unpleasant_texture,hair texture,2,2,2,2
+unpleasant_texture,product consistency,3,2,2,2
+unpleasant_texture,product texture,3,3,1,3
+unpleasant_texture,residue,2,2,2,2
+unpleasant_texture,softness,2,2,2,2
+unpleasant_texture,texture,17,15,14,13
+wrong_size_or_fit,brush size,3,3,3,3
+wrong_size_or_fit,fit,2,2,2,2
+wrong_size_or_fit,handle length,2,2,1,2
+wrong_size_or_fit,product fit,6,4,4,4
+wrong_size_or_fit,product size,4,4,3,4
+wrong_size_or_fit,size,9,8,8,8
+wrong_size_or_fit,small size,13,12,12,11
+wrong_size_or_fit,weight,2,2,2,2

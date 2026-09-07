@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS pipeline_runs (
                                     'produce', 'catalogue_load', 'bronze_drain', 'silver',
                                     'gold', 'search_index_reviews',
                                     'search_index_product_month', 'embeddings',
-                                    'theme_labels_llm', 'theme_classifier_train',
+                                    'theme_samples', 'theme_labels_llm', 'theme_classifier_train',
                                     'theme_classifier_score', 'rag_answers')),
     spec_version                TEXT NOT NULL,
     status                      TEXT NOT NULL CHECK (status IN ('running', 'success', 'failed')),
@@ -71,5 +71,5 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
     checksum    TEXT,
     applied_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-INSERT INTO schema_migrations (name, checksum) VALUES ('baseline', '0001')
+INSERT INTO schema_migrations (name, checksum) VALUES ('baseline', '0002')
     ON CONFLICT (name) DO NOTHING;

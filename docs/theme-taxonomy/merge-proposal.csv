@@ -1,0 +1,76 @@
+aspect,proposed_theme
+product effectiveness,does_not_work
+not effective,does_not_work
+effectiveness,does_not_work
+product performance,does_not_work
+product functionality,does_not_work
+brush effectiveness,does_not_work
+brushing effectiveness,does_not_work
+heating function,does_not_work
+heat output,does_not_work
+product not usable,does_not_work
+product purpose,does_not_work
+product quality,poor_build_quality
+low quality,poor_build_quality
+poor quality,poor_build_quality
+brush quality,poor_build_quality
+product defect,poor_build_quality
+packaging quality,poor_build_quality
+product durability,breaks_or_wears_out
+durability,breaks_or_wears_out
+short lifespan,breaks_or_wears_out
+longevity,breaks_or_wears_out
+product longevity,breaks_or_wears_out
+zipper durability,breaks_or_wears_out
+sprayer durability,breaks_or_wears_out
+damaged packaging,arrived_damaged
+product damage,arrived_damaged
+damaged product,arrived_damaged
+broken product,arrived_damaged
+leaks in transit,arrived_damaged
+scent,unpleasant_scent
+chemical smell,unpleasant_scent
+scent strength,unpleasant_scent
+value for money,overpriced
+price,overpriced
+money wasted,overpriced
+product value,overpriced
+small size,wrong_size_or_fit
+size,wrong_size_or_fit
+product size,wrong_size_or_fit
+brush size,wrong_size_or_fit
+product fit,wrong_size_or_fit
+fit,wrong_size_or_fit
+handle length,wrong_size_or_fit
+weight,wrong_size_or_fit
+skin irritation,irritation_or_harm
+skin reaction,irritation_or_harm
+eye irritation,irritation_or_harm
+hair damage,irritation_or_harm
+product safety,irritation_or_harm
+overheating,irritation_or_harm
+product appearance,not_as_described
+appearance,not_as_described
+color mismatch,not_as_described
+color accuracy,not_as_described
+color change,not_as_described
+product description,not_as_described
+product mismatch,not_as_described
+product suitability,not_as_described
+product usability,hard_to_use
+ease of use,hard_to_use
+application,hard_to_use
+application difficulty,hard_to_use
+missing instructions,hard_to_use
+product usage,hard_to_use
+messiness,hard_to_use
+time required,hard_to_use
+product design,hard_to_use
+texture,unpleasant_texture
+product texture,unpleasant_texture
+softness,unpleasant_texture
+product consistency,unpleasant_texture
+residue,unpleasant_texture
+hair texture,unpleasant_texture
+comfort,unpleasant_texture
+bristle stiffness,unpleasant_texture

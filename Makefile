@@ -7,7 +7,7 @@ CATEGORY ?= All_Beauty
 SAMPLE ?= data/sample/$(CATEGORY).sample.jsonl
 TOPIC ?= reviews.raw
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample discover-phrases verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample discover-phrases discovery-failures propose-taxonomy score-taxonomy verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -123,6 +123,15 @@ theme-samples-sample:  ## same, over the sample gold/silver tables
 
 discover-phrases:  ## free complaint phrases from the 600-review discovery sample (local qwen3:8b)
 	$(RUN) -m src.ai.discover_phrases --scope full
+
+discovery-failures:  ## characterise the discovery parse failures by named validation cause
+	$(RUN) scripts/discovery_failures.py --scope full
+
+propose-taxonomy:  ## count the raw complaint aspects (input to the hand merge, never the merge)
+	$(RUN) scripts/propose_taxonomy.py --scope full
+
+score-taxonomy:  ## apply the ADR-0003 support rule to the hand-written merge proposal
+	$(RUN) scripts/score_taxonomy.py --scope full
 
 verify:  ## row count, snapshot history, time-travel read
 	$(RUN) scripts/verify_iceberg.py
