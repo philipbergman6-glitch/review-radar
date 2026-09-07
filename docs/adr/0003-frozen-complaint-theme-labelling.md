@@ -134,3 +134,31 @@ labels to agree with stars.
   complaints remain an exploratory appendix.
 - Rating remains available locally for the weak-label check and star-only baseline but cannot
   contaminate the hosted text labeller.
+
+## Amendment 2026-09-07 — local `qwen3:8b` replaces hosted Haiku as the primary labeller
+
+Decided in `RR-19` after `ANTHROPIC_API_KEY` was confirmed empty and hosted access declined.
+Everything above stands except the host, the execution mode and the budget:
+
+- **Primary labeller** is `qwen3:8b` served by Ollama 0.33.2 on this host, with
+  schema-constrained decoding (`format` = the output schema), `temperature 0`, `think:false`.
+  Only its labels feed the theme-shift table. Measured 6.7 s/review; client concurrency does
+  not help (6.08 s/review at 3 threads), so P6 plans serially.
+- `llama3.2:3b` keeps the comparison-row and single-demo-call role. It was measured
+  degenerate on a v0 prompt (all 8 candidate themes on 5 of 8 reviews) and is not primary.
+  `qwen3:14b` is ruled out on 16 GB RAM beside an 8 GB Colima stack.
+- **Hosted Haiku** is reported in the evaluation table as `NOT_RUN`, reason "no hosted access
+  provisioned". It is never silently dropped.
+- **`api_mode`** takes the value `local` for every P6 row; Batch and standard modes are unused.
+  The 12,800-call ceiling and the $20 cap lapse and are replaced by the time budget in `RR-19`.
+  `model_id = "qwen3:8b"`; the idempotency key, MERGE semantics and
+  `gold.review_theme_labels` schema are unchanged.
+- **Ground truth** is hand-labelled by Philip: 200 development, 200 audit, 40 audit rows
+  repeated after at least five days. Agent-generated labels (the P4/P5 `judge=claude`
+  compromise) are not admissible as P6 ground truth.
+- **The pass rule does not move.** `audit macro-F1 >= 0.70` and `no supported-theme recall
+  < 0.50` were frozen before any measurement and stay frozen under the weaker labeller. A
+  failure is reported as `FAIL` with the per-theme table, and the theme-shift table inherits
+  the caveat; no threshold is re-tuned after seeing the host.
+- Data minimisation is unchanged and strictly stronger: only `title` and `text` are sent, and
+  inference is local, so no review text leaves the machine.

@@ -102,6 +102,8 @@ the `RR-01` answer.
 
 - [Cut order and drop-dead dates under the three-week budget](tickets/RR-12-cut-order-and-drop-dead-dates.md) — **No contingency schedule.** Philip's call 2026-09-07: no drop-dead dates, no pre-committed cut order, work every day; build P2→P8 in the RR-01 order and ship whatever is reached by 2026-09-21, stating the rest as not built. "Conditional" = built if reached. Sort + pacing (1 h) kept; deliverables assembled alongside each phase, not ring-fenced. Arithmetic record (≈ 96 h demand vs 46–84 h supply) kept in the ticket, binds nothing. Implementation sessions start now with P2 Silver.
 
+- [P6 labeller host under no hosted access, and who hand-labels](tickets/RR-19-p6-labeller-host-and-ground-truth.md) — Hosted Haiku is not provisioned (`ANTHROPIC_API_KEY` empty), so P6's primary labeller is local **`qwen3:8b`** via Ollama, chosen on a measured smoke test: `llama3.2:3b` emitted all 8 candidate themes on 5 of 8 reviews (degenerate) at 4.3 s/review, `qwen3:8b` produced discriminating labels at 6.7 s/review; concurrency does not help (6.08 s/review at 3 threads), so P6 plans serially and `qwen3:14b` is out on 16 GB. `llama3.2:3b` stays the comparison row and demo call; hosted Haiku becomes a stated `NOT_RUN` row. **Philip hand-labels both 200-row sets** (+40 repeats for kappa) — agent labels are not admissible as P6 ground truth, unlike the P4/P5 `judge=claude` compromise; the labelling tool ships before the taxonomy freezes. The 0.70 macro-F1 bar **does not move** under the weaker labeller: a miss is reported FAIL and the theme-shift table carries the caveat. Hosted call ceiling and $20 cap lapse, replaced by a time budget (~6.7 s/review; discovery 1.1 h, prompt dev 1.9 h, training pool 5.6 h, holdout inference ≤15 h, audit 0.4 h); `api_mode="local"`, `model_id="qwen3:8b"`, table schema unchanged. ADR-0003 amended.
+
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
@@ -130,10 +132,10 @@ the `RR-01` answer.
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-07, RR-12 closed)
+## Ticket index (updated 2026-09-07, RR-19 closed)
 
 Closed: `RR-01`, `RR-02`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`,
-`RR-10`, `RR-11`, `RR-12`, `RR-15`, `RR-16`, `RR-17`. Frontier — open, unblocked: `RR-13`.
+`RR-10`, `RR-11`, `RR-12`, `RR-15`, `RR-16`, `RR-17`, `RR-19`. Frontier — open, unblocked: `RR-13`.
 Blocked: `RR-18` (on RR-13), `RR-14` (on RR-13, RR-18).
 Philip's instruction 2026-09-07: implementation starts now (P2 Silver); the three remaining
 map tickets are worked alongside, not before.
