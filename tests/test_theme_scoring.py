@@ -1,6 +1,8 @@
 """Scoring the theme labeller (ADR-0003, RR-21): what the headline number is allowed to mean."""
 from __future__ import annotations
 
+import pytest
+
 from src.ai.theme_scoring import (
     bootstrap_macro_f1,
     failure_coverage,
@@ -67,3 +69,20 @@ def test_other_agreement_treats_a_missing_system_row_as_absent_not_as_agreement(
     ref = {"r1": True, "r2": False}
     assert other_agreement(ref, {"r1": True, "r2": False}, ["r1", "r2"])["agreement"] == 1.0
     assert other_agreement(ref, {}, ["r1", "r2"])["agreement"] == 0.5
+
+
+# ------------------------------------------------------------------ intervals ----
+def test_wilson_is_asymmetric_at_the_ends_where_the_normal_approximation_fails():
+    from src.ai.wilson import wilson
+    lo, hi = wilson(50, 50)
+    assert lo < 1.0 and hi == 1.0            # a perfect rate still has a lower bound
+    lo0, hi0 = wilson(0, 50)
+    assert lo0 == pytest.approx(0.0, abs=1e-12) and 0 < hi0 < 0.1
+    assert wilson(0, 0) == (0.0, 1.0)        # no data is the whole range, not a crash
+
+
+def test_cohens_kappa_is_none_when_both_annotators_always_agree_on_the_same_value():
+    from src.ai.wilson import cohens_kappa
+    assert cohens_kappa([True] * 10, [True] * 10) is None      # not 0.0
+    assert cohens_kappa([True, False] * 5, [True, False] * 5) == 1.0
+    assert cohens_kappa([True, False] * 5, [False, True] * 5) == -1.0
