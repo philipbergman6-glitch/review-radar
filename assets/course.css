@@ -1,0 +1,80 @@
+/* Review Radar course — shared stylesheet. Every lesson and reference links this. */
+:root {
+  --ink: #1a1a1a;
+  --muted: #666;
+  --rule: #d9d4c7;
+  --paper: #fffdf7;
+  --accent: #8b2500;
+  --built: #2e6b3a;
+  --planned: #8a6d00;
+  --code-bg: #f3f0e8;
+  --ok: #2e6b3a;
+  --bad: #a12d1e;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --mono: "SF Mono", Menlo, Consolas, monospace;
+}
+html { background: var(--paper); }
+body {
+  max-width: 44rem; margin: 0 auto; padding: 3rem 1.5rem 6rem;
+  color: var(--ink); font-family: var(--serif); font-size: 18px; line-height: 1.55;
+}
+h1 { font-size: 2rem; font-weight: 400; line-height: 1.15; margin: 0 0 .25rem; }
+h2 { font-size: 1.35rem; font-weight: 400; margin: 2.5rem 0 .75rem; font-style: italic; }
+h3 { font-size: 1.05rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+p { margin: 0 0 1rem; }
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--rule); }
+a:hover { border-bottom-color: var(--accent); }
+.kicker { color: var(--muted); font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; }
+.lede { font-size: 1.15rem; color: #333; margin-bottom: 2rem; }
+.side { color: var(--muted); font-size: .9rem; border-left: 2px solid var(--rule); padding-left: .8rem; margin: 1rem 0; }
+code { font-family: var(--mono); font-size: .82em; background: var(--code-bg); padding: .1em .3em; border-radius: 3px; }
+pre { font-family: var(--mono); font-size: .8rem; background: var(--code-bg); padding: .9rem 1rem; overflow-x: auto; border-radius: 4px; line-height: 1.45; }
+pre code { background: none; padding: 0; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; margin: 1rem 0 1.5rem; }
+th, td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.tag { display: inline-block; font-family: var(--mono); font-size: .7rem; padding: .1em .45em; border-radius: 3px; color: #fff; vertical-align: middle; }
+.tag.built { background: var(--built); }
+.tag.planned { background: var(--planned); }
+.cite { font-size: .8rem; color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
+nav.lesson-nav { font-size: .85rem; color: var(--muted); display: flex; gap: 1.5rem; margin-bottom: 2rem; }
+
+/* pipeline stations */
+.stations { display: grid; gap: .5rem; margin: 1.5rem 0; }
+.station { border: 1px solid var(--rule); border-radius: 6px; padding: .7rem .9rem; background: #fff; }
+.station .name { font-weight: 600; }
+.station .what { color: #333; font-size: .95rem; }
+.station .why { color: var(--muted); font-size: .88rem; font-style: italic; }
+.arrow { text-align: center; color: var(--muted); font-size: .85rem; }
+
+/* quiz */
+.quiz { border: 1px solid var(--rule); border-radius: 6px; padding: 1rem 1.2rem; margin: 1.5rem 0; background: #fff; }
+.quiz .q { font-weight: 600; margin-bottom: .6rem; }
+.quiz .opt { display: block; width: 100%; text-align: left; font: inherit; font-size: .95rem; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: .5rem .7rem; margin: .3rem 0; cursor: pointer; color: var(--ink); }
+.quiz .opt:hover { border-color: var(--accent); }
+.quiz .opt.right { border-color: var(--ok); background: #eaf3ec; }
+.quiz .opt.wrong { border-color: var(--bad); background: #f7e9e6; }
+.quiz .fb { margin-top: .6rem; font-size: .9rem; color: var(--muted); min-height: 1.3em; }
+.quiz .fb.ok { color: var(--ok); }
+.quiz .fb.bad { color: var(--bad); }
+.score { font-size: .9rem; color: var(--muted); margin-top: 1rem; }
+
+/* ordering widget */
+.order { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
+.order .chip { font: inherit; font-size: .9rem; padding: .35rem .7rem; border: 1px solid var(--rule); border-radius: 999px; background: var(--paper); cursor: pointer; color: var(--ink); }
+.order .chip:disabled { opacity: .35; cursor: default; }
+.order-picked { font-family: var(--mono); font-size: .85rem; min-height: 1.6em; color: #333; }
+
+/* recall box: hides text until clicked */
+.recall { border: 1px dashed var(--rule); border-radius: 6px; padding: .8rem 1rem; margin: 1rem 0; cursor: pointer; }
+.recall .prompt { font-weight: 600; }
+.recall .answer { display: none; margin-top: .6rem; color: #333; }
+.recall.open .answer { display: block; }
+.recall .hint { font-size: .8rem; color: var(--muted); }
+
+@media print {
+  body { max-width: none; padding: 0; font-size: 11pt; }
+  .quiz, .order, nav.lesson-nav { display: none; }
+  .recall .answer { display: block; }
+}

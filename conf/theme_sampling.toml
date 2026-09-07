@@ -8,9 +8,16 @@
 # discovery sample has been labelled and the taxonomy is committed. Development, audit,
 # training-pool and inference draws refuse to run while status is "provisional", because
 # their frames depend on frozen theme terms.
+#
+# Frozen 2026-09-07: the discovery sample is labelled (run a4a62ffd), the taxonomy is
+# committed (conf/theme-taxonomy.json v1, RR-20) and the enrichment terms are frozen
+# (conf/theme-terms.json v1, RR-22). The [protocol] table is inside `config_hash`, so the
+# already-assigned discovery rows carry the pre-freeze hash e45424802e38 and every later
+# frame carries the post-freeze one -- the change is visible in lineage, which is what the
+# hash is for. The discovery *draw* is unaffected: it is a function of (seed, salt, ids).
 
 [protocol]
-status = "provisional"
+status = "frozen"
 holdout_start = "2020-01"      # must equal conf/decline_rule.toml rule.holdout_start
 seed = 20260907                # one seed for every draw; per-set salts below
 
@@ -40,18 +47,36 @@ max_per_product = 15           # no single product may dominate the taxonomy
 min_text_words = 5             # a review with fewer words cannot evidence a theme
 salt = "discovery"
 
+# --- post-discovery frames (RR-22) -------------------------------------------------------
+# Each frame carries its own config hash over its own table plus [protocol], recorded in the
+# run ledger. `discovery.min_text_words` applies to every frame: a review too short to
+# evidence a theme is not labellable, whichever frame would have offered it.
+#
+# "Enriched" means drawn by `conf/theme-terms.json`, rarest theme first, ordered within a
+# theme by how many distinct terms of it the review carries. Enrichment offers a review; it
+# never labels one. There is no rating stratification outside [discovery]: a frame skewed to
+# 1-2 stars would inflate every theme's prevalence and make the representative subset
+# incomparable to the enriched one.
+
 [development]
+# Pre-2020, fully enriched (ADR-0003: "200 enriched pre-2020 development reviews").
 size = 200
 salt = "development"
 
 [audit]
+# Post-2020: every review at or after protocol.holdout_start on a product that appears in
+# gold.matched_controls as a candidate or a control. No decline rule is evaluated post-2020
+# and none is needed -- the *products* were selected pre-2020, and the holdout side of their
+# spine is the untouched material ADR-0003 asks for (RR-22).
 size = 200
 enriched_rows = 120            # drawn by frozen theme terms
 representative_rows = 80       # prevalence-representative, reported separately
-repeat_rows = 40               # relabelled >= 5 days later for intra-annotator kappa
+repeat_rows = 40               # NOT_RUN under RR-21: undefined for a deterministic labeller
+adjudication_rows = 50         # Philip's blind stratified subset (RR-21), drawn by draw_key
 salt = "audit"
 
 [training_pool]
+# Pre-2020 prevalence draw, disjoint from discovery and development by the left-anti join.
 size = 3000                    # MLlib classifier training pool (ADR-0002), LLM-labelled
 salt = "training_pool"
 

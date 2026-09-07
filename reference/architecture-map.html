@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review Radar — architecture map</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<div class="kicker">Reference · Review Radar</div>
+<h1>Architecture map</h1>
+<p class="lede">Every station, what flows through it, why it is there, and where it stands. Print this. Source of truth: <code>README.md</code> status table and <code>docker-compose.yml</code>, checked 2026-09-04.</p>
+
+<h2>The flow in one line</h2>
+<pre>data/raw/*.jsonl ─replay→ Kafka ─readStream→ Spark bronze ─append→ Iceberg on MinIO
+                                                            (catalogue rows in Postgres)
+     …then, planned: silver → gold → Elasticsearch (BM25 + kNN) → Streamlit / RAG</pre>
+
+<h2>Stations</h2>
+<table>
+<tr><th>station</th><th>state</th><th>carries</th><th>why it exists</th><th>where</th></tr>
+<tr><td>Replay producer</td><td><span class="tag built">built</span></td><td>one raw JSON line per review, key = <code>parent_asin</code></td><td>deterministic firehose; demo cannot depend on a live API; controllable <code>--rate</code></td><td><code>src/ingest/producer.py</code></td></tr>
+<tr><td>Kafka <code>reviews.raw</code></td><td><span class="tag built">built</span></td><td>6 partitions, retention 168 h, KRaft single broker</td><td>decouples ingest from processing; replayable buffer; taught as the course's streaming tech</td><td><code>docker-compose.yml</code></td></tr>
+<tr><td>Spark bronze</td><td><span class="tag built">built</span></td><td>payload string + Kafka coordinates + ingest timestamps</td><td>land bytes untouched so a parsing bug can never destroy data; exactly-once via checkpoint + Iceberg sink</td><td><code>src/spark/bronze.py</code></td></tr>
+<tr><td>Iceberg table on MinIO</td><td><span class="tag built">built</span></td><td>Parquet (zstd), partitioned by <code>ingest_date</code>, format v2</td><td>ACID snapshots, time travel; MinIO stands in for HDFS on the 16 GB budget</td><td>bucket <code>lakehouse</code>, <code>lake.bronze.reviews_raw</code></td></tr>
+<tr><td>Postgres as Iceberg catalogue</td><td><span class="tag built">built</span></td><td>one <code>iceberg_tables</code> row per table → pointer to current metadata file</td><td>the JDBC catalogue: who says which snapshot is current</td><td><code>conf/postgres-init/01_schema.sql</code></td></tr>
+<tr><td>Silver</td><td><span class="tag planned">planned</span></td><td>parsed, typed, deduped reviews; parsed <code>price</code>; <code>details</code> on read</td><td>fix the measured dirt: 6,139 dup keys, 720 empty texts, price 15.7% populated</td><td><code>src/spark/</code></td></tr>
+<tr><td>Postgres as product catalogue</td><td><span class="tag planned">planned</span></td><td><code>products</code> table, JDBC join into Spark</td><td>the SQL enrichment the brief asks for; table exists and is empty</td><td><code>products</code> in db <code>catalog</code></td></tr>
+<tr><td>Gold</td><td><span class="tag planned">planned</span></td><td>aggregates: per-product trends, bursts, aspect scores</td><td>the "insights" 15%; each gate prints a number</td><td>—</td></tr>
+<tr><td>Elasticsearch</td><td><span class="tag planned">planned</span></td><td>enriched review docs, explicit mapping + analyzer, <code>dense_vector</code></td><td>BM25 taught in deck 5 and its "no semantic understanding" line; kNN closes that gap</td><td><code>bd-es</code>, 8.17, basic licence</td></tr>
+<tr><td>AI layer</td><td><span class="tag planned">planned</span></td><td>MiniLM embeddings; LLM aspect sentiment; RAG</td><td>25% AI capability; order is (b) embeddings, (a) sentiment, (c) RAG</td><td><code>src/ai/</code> (empty)</td></tr>
+<tr><td>Streamlit app</td><td><span class="tag planned">planned</span></td><td>BM25 vs kNN side by side, RAG answers</td><td>demo surface</td><td><code>src/serving/</code> (empty)</td></tr>
+</table>
+
+<h2>Resource envelope</h2>
+<table>
+<tr><th>what</th><th>budget</th></tr>
+<tr><td>Colima VM</td><td>8 GB / 6 CPU</td></tr>
+<tr><td>Kafka / ES / MinIO / Postgres containers</td><td>2 / 2 / 1 / 0.5 GB</td></tr>
+<tr><td>Spark driver, on the host</td><td>4 GB</td></tr>
+</table>
+<p class="side">Spark runs on the host, not in the VM. That is why HDFS was dropped and why <code>--max-per-trigger</code> is the memory throttle.</p>
+
+<h2>Deliberate deviations from the course stack</h2>
+<table>
+<tr><th>course taught</th><th>project runs</th><th>one-breath defence</th></tr>
+<tr><td>HDFS, hands-on</td><td>MinIO (S3 API)</td><td>8 GB VM shared by four services; Iceberg wants S3-style storage anyway. Concede they are not equivalent.</td></tr>
+<tr><td>Kafka on ZooKeeper</td><td>KRaft</td><td>KRaft is Kafka's own metadata quorum; ZooKeeper mode is being removed. Verify the 4.0 claim before saying it.</td></tr>
+<tr><td>Bronze/silver/gold slide, no Iceberg</td><td>Iceberg tables</td><td>"The course's lakehouse diagram, implemented with a table format that gives it ACID snapshots."</td></tr>
+<tr><td>Kafka Connect (43 mentions)</td><td>hand-rolled producer, no ES sink</td><td>Producer shows <code>acks</code>/idempotence the deck teaches; the sink was dropped for time, said out loud.</td></tr>
+</table>
+
+<p class="cite">Sources: <code>README.md</code>; <code>docs/course-coverage.md</code> §1, §5, §9, Addition A; <code>.scratch/wayfinder/map.md</code> "Out of scope".</p>
+<p><a href="glossary.html">Glossary</a> · <a href="../lessons/0001-trace-one-review.html">Lesson 1</a></p>
+</body>
+</html>

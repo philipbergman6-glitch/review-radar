@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1 — Trace one review through Review Radar</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<nav class="lesson-nav">
+  <span>Lesson 1 of 8</span>
+  <a href="../reference/architecture-map.html">Architecture map</a>
+  <a href="../reference/glossary.html">Glossary</a>
+  <a href="../MISSION.md">Mission</a>
+</nav>
+
+<div class="kicker">Review Radar · Lesson 1 · ~12 minutes</div>
+<h1>Trace one review from disk to the lakehouse</h1>
+<p class="lede">The skill: pick any single review and say, from memory, every station it passes through, what it looks like at each one, and why that station exists. This is the spine of the design doc and of the first minute of any Q&A answer.</p>
+
+<h2>Why this first</h2>
+<p>The brief says "the single most important factor is understanding" (brief, line 152). Everything downstream, silver, gold, Elasticsearch, the AI layer, hangs off the five stations that already run today. If you can narrate one review's journey without notes, the rest of the course has somewhere to attach.</p>
+
+<h2>The review we will follow</h2>
+<p>Line 1 of <code>data/sample/All_Beauty.sample.jsonl</code> is a real record. Its fields, per <code>src/common/schemas.py</code>:</p>
+<pre>{"rating": 5.0, "title": "…", "text": "…", "images": [], "asin": "B0…",
+ "parent_asin": "B0…", "user_id": "AF…", "timestamp": 1588687728923,
+ "helpful_vote": 0, "verified_purchase": true}</pre>
+<p class="side">Nothing in the built pipeline ever parses this. It travels as a string until silver exists. Hold that thought; it is the answer to two quiz questions.</p>
+
+<h2>Five stations</h2>
+<div class="stations">
+  <div class="station">
+    <div class="name">1 · Replay producer <span class="tag built">built</span></div>
+    <div class="what">Reads the JSONL line by line, sends each line untouched to Kafka. Key = <code>parent_asin</code>. <code>acks=all</code>, idempotent.</div>
+    <div class="why">Why: the demo must not depend on a live API. A deterministic replay is still a genuine stream to everything downstream. Keying by product puts all of one product's reviews on one partition. <span class="cite"><code>src/ingest/producer.py</code> docstring</span></div>
+  </div>
+  <div class="arrow">↓ bytes + key</div>
+  <div class="station">
+    <div class="name">2 · Kafka topic <code>reviews.raw</code> <span class="tag built">built</span></div>
+    <div class="what">Six partitions, single KRaft broker, 168 h retention. The review now has an address: (partition, offset).</div>
+    <div class="why">Why: decouples ingest rate from processing rate, and lets Spark re-read from any offset after a crash. <span class="cite"><code>docker-compose.yml</code>; deck 4</span></div>
+  </div>
+  <div class="arrow">↓ readStream, micro-batches of ≤150,000 offsets</div>
+  <div class="station">
+    <div class="name">3 · Spark Structured Streaming, bronze job <span class="tag built">built</span></div>
+    <div class="what">Selects <code>value</code> as <code>payload</code> string, plus key, topic, partition, offset, Kafka timestamp, and two wall-clock columns. Writes with <code>outputMode("append")</code> to the Iceberg table, checkpointing offsets per batch.</div>
+    <div class="why">Why unparsed: "a transformation bug should never be able to destroy data." Why checkpoint: after a kill, resume from the last committed batch. <span class="cite"><code>src/spark/bronze.py</code> lines 1–20, 160–175</span></div>
+  </div>
+  <div class="arrow">↓ one Iceberg commit per micro-batch</div>
+  <div class="station">
+    <div class="name">4 · Iceberg table on MinIO <span class="tag built">built</span></div>
+    <div class="what"><code>lake.bronze.reviews_raw</code>: Parquet files, zstd, partitioned by <code>ingest_date</code>, in bucket <code>lakehouse</code>. Each commit is a snapshot you can time-travel to.</div>
+    <div class="why">Why Iceberg over plain Parquet: ACID commits, and the sink remembers the last committed batch id, which is the other half of exactly-once. Why MinIO: HDFS does not fit an 8 GB VM shared by four services. <span class="cite"><code>ensure_table()</code>; <code>docs/course-coverage.md</code> §5</span></div>
+  </div>
+  <div class="arrow">↓ "which metadata file is current?"</div>
+  <div class="station">
+    <div class="name">5 · Postgres as the Iceberg catalogue <span class="tag built">built</span></div>
+    <div class="what">One row in <code>iceberg_tables</code> pointing at the table's current metadata JSON. Postgres does <em>not</em> hold review data.</div>
+    <div class="why">Why: some single authority has to say which snapshot is the truth. Postgres will also play a second, separate role later as the product catalogue for the SQL join. <span class="cite"><code>README.md</code> status table</span></div>
+  </div>
+</div>
+
+<h2>What the review looks like at station 4</h2>
+<table>
+<tr><th>column</th><th>value for our review</th><th>came from</th></tr>
+<tr><td><code>payload</code></td><td>the whole JSON line, as a string</td><td>Kafka <code>value</code></td></tr>
+<tr><td><code>kafka_key</code></td><td>its <code>parent_asin</code></td><td>producer key</td></tr>
+<tr><td><code>kafka_partition</code>, <code>kafka_offset</code></td><td>e.g. 3, 41,207</td><td>Kafka</td></tr>
+<tr><td><code>kafka_timestamp</code></td><td>when the producer sent it, not the 2020 review date</td><td>Kafka</td></tr>
+<tr><td><code>ingested_at</code>, <code>ingest_date</code></td><td>Spark wall clock at the micro-batch</td><td>bronze job</td></tr>
+</table>
+<p class="side">The review's own <code>timestamp</code> (2020) is still inside the payload string. Anything that needs event time must parse it in silver. The Kafka timestamp is the replay time.</p>
+
+<h2>The half that does not exist yet</h2>
+<p>From station 4 onward the map is design, not code: silver parses and dedupes, joins products from Postgres by JDBC, gold aggregates, Elasticsearch indexes enriched documents with an explicit mapping and a <code>dense_vector</code>, and the AI layer adds embeddings, LLM aspect sentiment, and RAG. Each gets its own lesson. The full table is in the <a href="../reference/architecture-map.html">architecture map</a>.</p>
+
+<hr>
+
+<h2>Practice: retrieval, not recognition</h2>
+<p>Do these without scrolling up. The score counts first-try answers only.</p>
+
+<h3>1. Put the stations in order</h3>
+<div class="order" data-order="replay producer,Kafka topic,Spark bronze job,Iceberg on MinIO,Postgres catalogue"></div>
+<div class="order-picked"></div>
+<div class="fb"></div>
+
+<h3>2. Recall before you reveal</h3>
+<div class="recall">
+  <div class="prompt">Why does bronze store the review as an unparsed string?</div>
+  <div class="hint">say it aloud, then click</div>
+  <div class="answer">So a parsing bug in silver can never destroy data. Bronze keeps the original bytes; silver can be re-run from bronze without going back to Kafka or the source file.</div>
+</div>
+<div class="recall">
+  <div class="prompt">What two things together give exactly-once across a kill?</div>
+  <div class="hint">say it aloud, then click</div>
+  <div class="answer">Spark's checkpoint of the Kafka offsets per micro-batch, and the Iceberg sink recording the last committed batch id so a replayed batch is skipped, not appended twice.</div>
+</div>
+<div class="recall">
+  <div class="prompt">What does Postgres do in the pipeline today, and what will it do later?</div>
+  <div class="hint">say it aloud, then click</div>
+  <div class="answer">Today: the Iceberg JDBC catalogue, one row per table pointing at the current metadata. Later: the product catalogue that silver joins by JDBC. Two roles, one database.</div>
+</div>
+
+<h3>3. Check yourself</h3>
+<div class="quiz" data-answer="0">
+  <div class="q">Keying Kafka records by <code>parent_asin</code> guarantees which of these?</div>
+  <button class="opt">All reviews of one product share one partition</button>
+  <button class="opt">All reviews of one product arrive in time order</button>
+  <button class="opt">All reviews of one product fit in one batch</button>
+  <button class="opt">All reviews of one product get one same offset</button>
+  <div class="fb" data-why="Hashing the key picks the partition, so it buys locality. Order within the partition is the order of lines in the file, not review time."></div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <div class="q">Which column in the bronze table holds the date the customer wrote the review?</div>
+  <button class="opt">kafka_timestamp, set at the moment of send</button>
+  <button class="opt">ingest_date, set when the batch commits</button>
+  <button class="opt">None yet; it is still inside the payload</button>
+  <button class="opt">ingested_at, set when the batch commits</button>
+  <div class="fb" data-why="Bronze never parses. The 2020 epoch-millis timestamp lives in the payload string until silver extracts it."></div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <div class="q">The bronze job is killed with SIGKILL halfway through batch 3 and restarted. What happens to batch 3?</div>
+  <button class="opt">Batch 3 is skipped and batch 4 begins</button>
+  <button class="opt">Batch 3 is re-read from the checkpoint</button>
+  <button class="opt">Batch 3 is appended twice to the table</button>
+  <button class="opt">Batch 3 is lost since retention expires</button>
+  <div class="fb" data-why="The checkpoint says batch 3 started but did not commit. Spark re-reads those offsets. Had it committed, the Iceberg sink would recognise the batch id and skip it."></div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <div class="q">Why does the project run MinIO instead of the HDFS the course demonstrated?</div>
+  <button class="opt">HDFS cannot store Parquet files at all</button>
+  <button class="opt">HDFS is retired, like Sqoop, per deck two</button>
+  <button class="opt">MinIO is the course's stated storage choice</button>
+  <button class="opt">Memory budget, and Iceberg wants S3-style storage</button>
+  <div class="fb" data-why="Colima has 8 GB shared by Kafka, ES, Postgres and MinIO. Concede out loud that HDFS and MinIO are not equivalent; that is the honest answer the grader respects."></div>
+</div>
+
+<div class="score" id="score"></div>
+
+<hr>
+<h2>Read next</h2>
+<p><b>Primary source.</b> The bronze job's own docstring, <code>src/spark/bronze.py</code> lines 1–24, is the most precise statement of the exactly-once argument in existence for this project, and it is yours. Then the fault-tolerance section of the <a href="https://spark.apache.org/docs/3.5.3/structured-streaming-programming-guide.html#fault-tolerance-semantics">Spark Structured Streaming guide</a> for the general model it relies on.</p>
+<p><b>Do one real thing.</b> Run <code>make verify</code> and match each printed snapshot to a micro-batch. Then say aloud how many snapshots the 701,528-row load produced and why that number.</p>
+<p><b>Next lesson.</b> Exactly-once: what the checkpoint and the Iceberg sink each remember, and what <code>make eos</code> actually proves.</p>
+<p class="side">Anything unclear, or a claim you think is wrong: ask your teacher in the terminal. Lessons are corrected, not defended.</p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

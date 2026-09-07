@@ -7,7 +7,9 @@ from src.common import runs
 from src.gold.controls import (
     Discovery,
     draw_discovery,
+    draw_enriched,
     draw_key,
+    draw_representative,
     load_protocol,
     match_controls,
     text_characterisable,
@@ -103,9 +105,79 @@ def test_theme_samples_contract_identity_catches_a_lost_candidate():
     c = runs.contract_for("theme_samples", runs.THEME_SAMPLES_SPEC_VERSION)
     assert c is not None
     good = {"candidate_episodes": 10, "matched_candidates": 7, "dropped_no_matching_control": 1,
-            "dropped_not_text_characterisable": 2, "discovery_rows": 5, "discovery_low_rated": 3,
-            "discovery_high_rated": 2}
-    assert c.identity({"records_out": 5}, good) == []
+            "dropped_not_text_characterisable": 2, "drawn_rows": 5, "eligible_reviews": 40,
+            "low_rated_rows": 3, "high_rated_rows": 2}
+    assert c.identity({"records_out": 5, "records_in": 40}, good) == []
     bad = {**good, "matched_candidates": 6}
-    assert any("candidate_episodes" in f for f in c.identity({"records_out": 5}, bad))
-    assert any("discovery_rows" in f for f in c.identity({"records_out": 4}, good))
+    assert any("candidate_episodes" in f for f in c.identity({"records_out": 5, "records_in": 40}, bad))
+    assert any("drawn_rows" in f for f in c.identity({"records_out": 4, "records_in": 40}, good))
+
+
+def test_theme_samples_identity_accepts_an_enriched_frame_and_rejects_a_bad_split():
+    """v2 must validate a frame with no low/high strata at all (RR-22)."""
+    c = runs.contract_for("theme_samples", runs.THEME_SAMPLES_SPEC_VERSION)
+    base = {"candidate_episodes": 10, "matched_candidates": 7, "dropped_no_matching_control": 1,
+            "dropped_not_text_characterisable": 2, "eligible_reviews": 900, "drawn_rows": 200,
+            "enriched_rows": 120, "representative_rows": 80}
+    assert c.identity({"records_out": 200, "records_in": 900}, base) == []
+    bad = {**base, "representative_rows": 70}
+    assert any("representative_rows" in f for f in c.identity({"records_out": 200, "records_in": 900}, bad))
+    # A drawn row that no eligible row could have supplied is a lost-frame bug, not a rounding one.
+    over = {**base, "eligible_reviews": 100}
+    assert any("eligible_reviews" in f for f in c.identity({"records_out": 200, "records_in": 100}, over))
+
+
+# --------------------------------------------------------------- the RR-22 frames ----
+def _rows(n: int, matched=None):
+    return [{"review_id": f"r{i}", "parent_asin": f"p{i % 7}", "role": "candidate",
+             "episode_id": "e", "rating": (i % 5) + 1, "text_word_count": 30,
+             "matched": (matched or {})(i) if matched else {}} for i in range(n)]
+
+
+def test_draw_enriched_fills_the_rarest_theme_first_and_never_reuses_a_review():
+    """A review matching two themes is consumed by whichever theme picks first."""
+    rows = _rows(40, matched=lambda i: {"rare": 2, "common": 1} if i < 5 else {"common": 1})
+    picked, fill = draw_enriched(rows, theme_order=["rare", "common"], per_theme=5, total=10,
+                                 seed=1, salt="development")
+    assert fill == {"rare": 5, "common": 5}
+    assert len(picked) == 10
+    assert len({r["review_id"] for r in picked}) == 10
+    assert {r["stratum"] for r in picked} == {"enriched_rare", "enriched_common"}
+
+
+def test_draw_enriched_prefers_reviews_matching_more_of_the_theme_terms():
+    rows = _rows(20, matched=lambda i: {"t": 3 if i < 2 else 1})
+    picked, _ = draw_enriched(rows, theme_order=["t"], per_theme=2, total=2, seed=1, salt="s")
+    assert {r["review_id"] for r in picked} == {"r0", "r1"}
+
+
+def test_draw_enriched_reports_a_short_theme_and_backfills_the_frame():
+    rows = _rows(30, matched=lambda i: {"rare": 1} if i < 2 else {"common": 1})
+    picked, fill = draw_enriched(rows, theme_order=["rare", "common"], per_theme=5, total=10,
+                                 seed=1, salt="s")
+    assert fill["rare"] == 2                       # the shortfall is visible, not absorbed
+    assert len(picked) == 10
+    assert sum(1 for r in picked if r["stratum"] == "enriched_backfill") == 3
+
+
+def test_draw_representative_is_seeded_and_excludes_the_enriched_rows():
+    rows = _rows(50)
+    first = draw_representative(rows, size=10, seed=7, salt="audit", exclude=set())
+    assert first == draw_representative(list(reversed(rows)), size=10, seed=7, salt="audit",
+                                        exclude=set())
+    taken = {r["review_id"] for r in first[:4]}
+    second = draw_representative(rows, size=10, seed=7, salt="audit", exclude=taken)
+    assert not taken & {r["review_id"] for r in second}
+    assert all(r["stratum"] == "representative" for r in second)
+
+
+def test_the_protocol_declares_every_frame_and_each_carries_its_own_hash():
+    p = load_protocol()
+    assert p.frozen, "the post-discovery frames may only be drawn from a frozen protocol"
+    assert sorted(p.frames) == ["audit", "development", "training_pool"]
+    assert p.frames["audit"].enriched_rows + p.frames["audit"].representative_rows == 200
+    assert p.frames["development"].representative_rows == 0
+    assert p.frames["training_pool"].enriched_rows == 0
+    hashes = {f.config_hash for f in p.frames.values()} | {p.config_hash}
+    assert len(hashes) == 4, "a frame that shares another's hash cannot be told apart in lineage"
+    assert p.frames["audit"].per_theme_quota(10) == 12

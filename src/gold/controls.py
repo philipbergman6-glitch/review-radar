@@ -50,12 +50,37 @@ class Discovery:
 
 
 @dataclass(frozen=True)
+class Frame:
+    """One post-discovery frame: how many rows, how they are enriched, and its own salt.
+
+    `enriched_rows + representative_rows == size`. A frame with `enriched_rows == 0` is a
+    pure prevalence draw (the training pool); one with `representative_rows == 0` is purely
+    enriched (development). The audit set is the only frame that carries both, and ADR-0003
+    requires its representative rows to be scored and reported separately, which is why the
+    two counts are kept apart rather than summed into one number.
+    """
+    name: str
+    size: int
+    enriched_rows: int
+    representative_rows: int
+    salt: str
+    config_hash: str
+    extras: dict[str, Any]
+
+    def per_theme_quota(self, themes: int) -> int:
+        if themes <= 0:
+            raise ValueError("a frame cannot be enriched over zero themes")
+        return self.enriched_rows // themes
+
+
+@dataclass(frozen=True)
 class SamplingProtocol:
     status: str
     holdout_start: str
     seed: int
     matching: Matching
     discovery: Discovery
+    frames: dict[str, Frame]
     config_hash: str
     raw: dict[str, Any]
 
@@ -78,8 +103,28 @@ def load_protocol(path: Path = SAMPLING_PATH) -> SamplingProtocol:
         raise ValueError("matching volume ratios must satisfy 0 < min <= max")
     if int(m["controls_per_candidate"]) < 1:
         raise ValueError("matching.controls_per_candidate must be >= 1")
+    # Unchanged on purpose: this hash is stamped on every already-assigned discovery row, so
+    # it covers what discovery depended on and nothing else. Each later frame carries its own
+    # `config_hash` over its own table plus [protocol] (RR-22), recorded in the run ledger.
     config_hash = hashlib.sha256(
         json.dumps({"matching": m, "discovery": d, "protocol": p}, sort_keys=True).encode()).hexdigest()
+    frames: dict[str, Frame] = {}
+    for name, enriched_key, repr_key in (("development", None, None), ("audit", "enriched_rows",
+                                          "representative_rows"), ("training_pool", None, None)):
+        t = doc[name]
+        size = int(t["size"])
+        enriched = int(t[enriched_key]) if enriched_key else (0 if name == "training_pool" else size)
+        representative = int(t[repr_key]) if repr_key else (size if name == "training_pool" else 0)
+        if enriched + representative != size:
+            raise ValueError(f"{name}: enriched {enriched} + representative {representative} != size {size}")
+        if min(enriched, representative) < 0:
+            raise ValueError(f"{name}: row counts must not be negative")
+        frames[name] = Frame(
+            name=name, size=size, enriched_rows=enriched, representative_rows=representative,
+            salt=str(t["salt"]),
+            config_hash=hashlib.sha256(
+                json.dumps({name: t, "protocol": p}, sort_keys=True).encode()).hexdigest(),
+            extras={k: v for k, v in t.items() if k not in ("size", "salt")})
     return SamplingProtocol(
         status=p["status"], holdout_start=p["holdout_start"], seed=int(p["seed"]),
         matching=Matching(
@@ -94,7 +139,7 @@ def load_protocol(path: Path = SAMPLING_PATH) -> SamplingProtocol:
             size=int(d["size"]), low_rated_share=float(d["low_rated_share"]),
             low_rated_max_stars=int(d["low_rated_max_stars"]), max_per_product=int(d["max_per_product"]),
             min_text_words=int(d["min_text_words"]), salt=str(d["salt"])),
-        config_hash=config_hash, raw=doc)
+        frames=frames, config_hash=config_hash, raw=doc)
 
 
 # ------------------------------------------------------------- text characterisable ----
@@ -186,3 +231,52 @@ def draw_discovery(rows: list[dict[str, Any]], d: Discovery, seed: int) -> list[
             picked.append({**r, "stratum": stratum})
             taken += 1
     return picked
+
+
+def draw_enriched(rows: list[dict[str, Any]], *, theme_order: list[str], per_theme: int,
+                  total: int, seed: int, salt: str) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Fill a per-theme quota from term-matched reviews, rarest theme first (RR-22).
+
+    Each row carries `matched`: theme id -> how many distinct terms of that theme it holds.
+    `theme_order` is the caller's ordering -- ascending discovery support, so `arrived_damaged`
+    picks before `does_not_work` and is not crowded out. Within a theme, rows are ordered by
+    the number of matched terms descending, then by the seeded draw key: an enriched frame is
+    meant to be *dense* in its theme, and a review matching three of a theme's terms is a far
+    better offer than one matching only its noisiest single term.
+
+    A review is consumed by the first theme that takes it and is never offered again. Any
+    shortfall (a theme with too few matches) is released to one final pass over whatever
+    matched any theme, by draw key alone, so the frame still reaches `total` -- and the
+    per-theme fill is returned so the shortfall is reported, never silently absorbed.
+    """
+    taken: set[str] = set()
+    picked: list[dict[str, Any]] = []
+    fill: dict[str, int] = {}
+    for theme in theme_order:
+        pool = [r for r in rows if r["review_id"] not in taken and r["matched"].get(theme)]
+        pool.sort(key=lambda r, th=theme: (-r["matched"][th], draw_key(r["review_id"], seed, salt),
+                                           r["review_id"]))
+        chosen = pool[:per_theme]
+        fill[theme] = len(chosen)
+        for r in chosen:
+            taken.add(r["review_id"])
+            picked.append({**r, "stratum": f"enriched_{theme}"})
+    if len(picked) < total:
+        rest = [r for r in rows if r["review_id"] not in taken and r["matched"]]
+        rest.sort(key=lambda r: (draw_key(r["review_id"], seed, salt), r["review_id"]))
+        for r in rest[:total - len(picked)]:
+            taken.add(r["review_id"])
+            picked.append({**r, "stratum": "enriched_backfill"})
+    return picked, fill
+
+
+def draw_representative(rows: list[dict[str, Any]], *, size: int, seed: int, salt: str,
+                        exclude: set[str]) -> list[dict[str, Any]]:
+    """A prevalence draw: no term filter, no rating stratification, seeded order only.
+
+    These are the rows that tell you what the labeller meets in the wild, so nothing about
+    them may be selected for. ADR-0003 scores them separately from the enriched rows.
+    """
+    pool = [r for r in rows if r["review_id"] not in exclude]
+    pool.sort(key=lambda r: (draw_key(r["review_id"], seed, salt), r["review_id"]))
+    return [{**r, "stratum": "representative"} for r in pool[:size]]

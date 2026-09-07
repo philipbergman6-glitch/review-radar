@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review Radar — glossary</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<div class="kicker">Reference · Review Radar</div>
+<h1>Glossary</h1>
+<p class="lede">The words every lesson uses, defined once. Terms are the project's own; where a term is the course's, the deck is named.</p>
+
+<h2>Data</h2>
+<table>
+<tr><th>term</th><th>meaning here</th></tr>
+<tr><td><b>review</b></td><td>One JSON object from <code>All_Beauty.jsonl</code>: rating, title, text, images[], asin, parent_asin, user_id, timestamp (epoch ms), helpful_vote, verified_purchase. Schema: <code>src/common/schemas.py</code>.</td></tr>
+<tr><td><b>parent_asin</b></td><td>Product identifier shared by all variants of one product. The Kafka key and the review→product join key. Match rate 100%.</td></tr>
+<tr><td><b>product meta</b></td><td>One JSON object per product from <code>meta_All_Beauty.jsonl</code>. Contains the dirty <code>price</code> string and the free-form <code>details</code> dict.</td></tr>
+<tr><td><b>schema-on-read</b></td><td>Keep <code>details</code> as a raw JSON string in the table; parse the keys you need at query time. Chosen because the keys collide under Spark's case-insensitive resolution.</td></tr>
+<tr><td><b>dev category / full category</b></td><td><code>All_Beauty</code> (701,528 reviews, what everything runs on) vs <code>Beauty_and_Personal_Care</code> (~23M, ruled out).</td></tr>
+<tr><td><b>the profile</b></td><td><code>docs/phase0-profile.txt</code>: measured numbers for the dev category. Quote it, do not recall it.</td></tr>
+</table>
+
+<h2>Streaming</h2>
+<table>
+<tr><th>term</th><th>meaning here</th></tr>
+<tr><td><b>replay producer</b></td><td>Reads the JSONL from disk and sends each line untouched to Kafka at a controllable rate. Simulates a firehose deterministically.</td></tr>
+<tr><td><b>topic / partition / offset</b></td><td>Kafka's log. <code>reviews.raw</code> has 6 partitions; (partition, offset) uniquely identifies a record and is stored in bronze. Deck 4.</td></tr>
+<tr><td><b>key</b></td><td>The bytes Kafka hashes to pick a partition. Here <code>parent_asin</code>, so one product's reviews land on one partition. Buys locality, not time order.</td></tr>
+<tr><td><b>acks=all, idempotence</b></td><td>Producer settings: wait for all in-sync replicas; no duplicates on internal retry. Both taught verbatim in deck 4.</td></tr>
+<tr><td><b>KRaft</b></td><td>Kafka's built-in metadata quorum replacing ZooKeeper. Zero mentions in the decks.</td></tr>
+<tr><td><b>micro-batch</b></td><td>Spark Structured Streaming's unit of work: a bounded slice of offsets processed as one batch. Deck 3.</td></tr>
+<tr><td><b>trigger</b></td><td>When the next micro-batch starts. <code>once</code> (availableNow: drain and stop) or an interval like <code>5s</code>.</td></tr>
+<tr><td><b>maxOffsetsPerTrigger</b></td><td>Records per micro-batch. The memory throttle: 150,000 for the bulk load.</td></tr>
+<tr><td><b>checkpoint</b></td><td>Directory where Spark records which offsets each batch covered. Survives a kill; on restart the job resumes from it. <code>checkpoints/bronze_reviews_raw</code>.</td></tr>
+<tr><td><b>exactly-once (EOS)</b></td><td>No loss and no duplicates across a restart. Held by checkpoint offsets plus the Iceberg sink skipping an already-committed batch id. Proven by <code>make eos</code>.</td></tr>
+<tr><td><b>failOnDataLoss</b></td><td>Bronze option: crash if needed offsets aged out of Kafka rather than skip silently.</td></tr>
+</table>
+
+<h2>Lakehouse</h2>
+<table>
+<tr><th>term</th><th>meaning here</th></tr>
+<tr><td><b>bronze / silver / gold</b></td><td>Raw as landed / cleaned and typed / aggregated for use. On the deck-3 lakehouse slide verbatim; "medallion" is not.</td></tr>
+<tr><td><b>Iceberg</b></td><td>Open table format: metadata files + manifests over Parquet, giving ACID snapshots, schema evolution, time travel. Not a course technology.</td></tr>
+<tr><td><b>snapshot</b></td><td>One committed state of an Iceberg table. Listed via <code>table.snapshots</code>; each streaming micro-batch commit is one.</td></tr>
+<tr><td><b>catalogue (JDBC)</b></td><td>Where Iceberg stores "which metadata file is current" per table. Here a Postgres table <code>iceberg_tables</code>.</td></tr>
+<tr><td><b>MinIO</b></td><td>S3-compatible object store holding the bucket <code>lakehouse</code>. Substitute for HDFS.</td></tr>
+<tr><td><b>fanout</b></td><td>Iceberg writer mode keeping one open writer per partition so unsorted rows across a midnight boundary do not fail.</td></tr>
+<tr><td><b>time travel</b></td><td>Reading an earlier snapshot: <code>VERSION AS OF</code>. Shown by <code>make verify</code>.</td></tr>
+</table>
+
+<h2>Search and AI (planned)</h2>
+<table>
+<tr><th>term</th><th>meaning here</th></tr>
+<tr><td><b>BM25</b></td><td>Elasticsearch's default lexical ranking. Deck 5 teaches it and says "no semantic understanding".</td></tr>
+<tr><td><b>analyzer / inverted index</b></td><td>How text becomes searchable terms. 54 analyzer mentions in deck 5; an explicit mapping earns full credit.</td></tr>
+<tr><td><b>embedding</b></td><td>384-dim vector from <code>all-MiniLM-L6-v2</code> per review text. ~374 reviews/s on this host.</td></tr>
+<tr><td><b>kNN / dense_vector</b></td><td>ES vector field and nearest-neighbour query. Available on the basic licence.</td></tr>
+<tr><td><b>hybrid search / RRF</b></td><td>Fuse BM25 and kNN rankings. Server-side RRF is Enterprise-only in 8.17, so fuse client-side: Σ 1/(60+rank).</td></tr>
+<tr><td><b>aspect sentiment</b></td><td>LLM labels each review by aspect (e.g. scent, price) with a polarity; validated against a labelled subset with a threshold set in advance.</td></tr>
+<tr><td><b>RAG</b></td><td>Retrieve relevant reviews (kNN) then have the LLM answer a question grounded in them.</td></tr>
+<tr><td><b>gate</b></td><td>A phase's pass check. Must print a number.</td></tr>
+</table>
+
+<p><a href="architecture-map.html">Architecture map</a> · <a href="../lessons/0001-trace-one-review.html">Lesson 1</a></p>
+</body>
+</html>
