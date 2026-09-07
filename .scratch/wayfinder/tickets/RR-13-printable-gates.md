@@ -143,3 +143,24 @@ succeeded and cell timestamps spanning ≤ 300 s. Candidate gate: a script that 
 committed exports and prints `DEMO_GATE=PASS|FAIL rehearsals=N max_elapsed_s=…` with
 threshold `rehearsals ≥ 2`. The exactly-once gate is no longer a live move, so its printed
 line is a design-doc figure only. Only RR-10 and RR-12 still block.
+
+## Input from RR-10 (closed 2026-09-07) — last blocker cleared
+
+**Stream row** decided. Command `scripts/gate_stream.py --run <run_id>`; printed
+`STREAM_LATE late_accepted late_dropped natural_dropped spark_dropped_by_watermark`,
+`STREAM_RECON product_months_equal product_months_differ differ_explained_by_dropped`,
+`STREAM_ALERTS alerts_stream alerts_batch alerts_touched_by_dropped`, and
+`STREAM_GATE=PASS|FAIL run_kind=control|demo`. Two runs required: control (no injection) passes
+on `natural_dropped == 0`, `product_months_differ == 0`, equal alerts; demo passes on
+`late_accepted == |near|`, `late_dropped == |far| == spark_dropped_by_watermark`, every
+differing product-month explained by dropped rows, alerts equal outside touched products.
+Tripping cases: watermark delay 0 drops the near slice; the unsorted file makes
+`natural_dropped > 0`; a diverged validation function breaks reconciliation. Expected slice
+sizes are frozen in `conf/stream_replay.toml` before any run.
+
+**Deliverables row** changes: move 2 is now "start paced replay + streaming query", a new
+move 10 prints `STREAM_GATE` and the alerts table; the 701,528 → 711,528 claim is gone. The
+rehearsal gate's ≤ 300 s must hold with the stream running in the background; if not, the
+documented fallback (pre-run) applies and the gate counts that variant.
+
+Every blocker of this ticket is now closed; it is on the frontier once RR-12 closes.

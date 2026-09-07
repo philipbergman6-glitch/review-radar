@@ -419,6 +419,54 @@ separately so per-attempt identities hold.
 _Avoid_: duplicate (reserved for data quality), reprocessing
 
 
+### Streaming
+
+**Paced replay**:
+The sorted review history sent into its own stream topic at a constant record rate, so
+twenty-three years of event time pass in a few minutes of wall clock. It is a historical
+backtest replayed as if live, and is said to be one on stage.
+_Avoid_: live feed, simulation (implies invented data), the stream (ambiguous with the topic)
+
+**Event-time clock**:
+The latest review timestamp the stream has processed, printed as the replay runs, so the
+audience sees how far through history the stream has advanced.
+_Avoid_: progress, wall clock
+
+**Streaming projection**:
+The per-product, per-month aggregates and alerts the streaming job produces. A demonstration
+of the mechanism that must reconcile with the batch gold snapshot; never a second source of
+truth.
+_Avoid_: streaming gold, streaming silver, real-time results
+
+**Watermark delay**:
+How far behind the latest event time the stream still accepts a review, in event time.
+Independent of replay pacing: pacing changes what a micro-batch contains, not what is late.
+_Avoid_: lateness threshold, timeout
+
+**Held-back slice**:
+A deterministically chosen set of reviews the producer withholds and releases at a fixed
+event-time lag. The *near* slice is released inside the watermark delay and must be
+accepted; the *far* slice is released beyond it and must be dropped. Lateness in this data
+is injected this way and is announced as injected.
+_Avoid_: late data (unqualified), out-of-order events (the file is sorted), noise
+
+**Natural lateness**:
+Reviews that arrive behind the watermark without having been held back — possible only
+through partition interleaving inside a micro-batch. The control run must show none.
+_Avoid_: jitter, skew (reserved for partition skew as a cause)
+
+**Control run / Demo run**:
+Two required runs of the streaming job: the control run replays with no held-back slices and
+must reconcile exactly with zero drops; the demo run injects both slices and must match the
+predeclared counts. One without the other proves nothing.
+_Avoid_: dry run, baseline run
+
+**Stream reconciliation**:
+The check that every product-month and every alert in the streaming projection equals the
+batch gold snapshot, except those explained exactly by dropped held-back rows, which are
+listed.
+_Avoid_: validation (reserved for silver's reject rules), comparison
+
 ### Demo
 
 **Demo move**:

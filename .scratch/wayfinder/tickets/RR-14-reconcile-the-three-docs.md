@@ -101,3 +101,15 @@ README status row and architecture box now say "Demo notebook" instead of "Strea
 the nine-move table in the RR-11 resolution and must be replaced at execution time; §1–2
 and the checklists stand, with `ollama serve` added as optional at T-30. Coverage doc
 references to Streamlit are to be withdrawn.
+
+## Input from RR-10 (closed 2026-09-07)
+
+- RR-11's move table is amended by ADR-0010: move 2 = start paced replay into `reviews.stream`
+  + streaming query in the notebook session; move 10 (20 s) = `STREAM_GATE` line and
+  `stream.alerts`. The sample-replay beat and "701,528 → 711,528" are withdrawn.
+- `docs/DEMO_RUNBOOK.md` and README streaming rows: "paced replay of the sorted file, injected
+  lateness (near accepted / far dropped), reconciled projection beside batch". `make
+  produce-sample` stays for local development only, on its own topic.
+- `docs/AUDIT_REPORT_2026-09-01.md` F4 → addressed by decision (ADR-0010), implementation in P8.
+- `docs/course-coverage.md` §4: cite `withWatermark` / `dropDuplicatesWithinWatermark` /
+  "event-time windows" (deck 3, 2026 part 3, lines 447/450/870) as the taught API P8 uses.

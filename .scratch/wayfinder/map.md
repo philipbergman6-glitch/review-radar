@@ -98,6 +98,8 @@ the `RR-01` answer.
 
 - [Demo surface — Streamlit, or a notebook plus Kibana](tickets/RR-11-demo-surface.md) — **Notebook + Kibana** (prototype: three variants, Philip took the recommendation). Stage = `notebooks/demo.ipynb`, one kernel with one Spark session / ES client / psycopg connection, cells calling `src/serving/` helpers only; Kibana carries exactly one move (decline candidates); `make health` runs in a real terminal first. Streamlit withdrawn (README updated). Nine live moves, 4:40 of 5:00: health → replay + incremental bronze → silver gate → lineage (ledger + `VERSION AS OF`) → Kibana decline view → hybrid decomposition → theme shift (cached) → eval table → RAG citations. Exactly-once (65 s) leaves the live list for the recorded backup and a design-doc figure; live `llama3.2:3b` is a Q&A reserve. Recorded backup = executed notebook exported to HTML + Kibana PNG + EOS transcript under `docs/demo/<date>/`; rehearsal = one export, all cells clean, ≤ 300 s; two required. ADR-0009; terms in `CONTEXT.md` *Demo*. Prototype on branch `prototype/rr-11`.
 
+- [Replay pacing, time compression and the watermark](tickets/RR-10-time-compression-and-watermark.md) — Stream = a **reconciled projection beside batch**, own topic `reviews.stream`, one Structured Streaming job (shared silver validation → `withWatermark` 30 days → `dropDuplicatesWithinWatermark(review_id)`, exact for key collisions because the id carries the timestamp → append-mode product-month aggregates → `foreachBatch` frozen decline rule → `stream.alerts`). Whole sorted file (`sort_replay` job, SHA-256 in the ledger) at a constant record rate (3,500 rec/s, 5 s trigger, both in `conf/stream_replay.toml`), event-time clock printed; event-time-linear rejected. Lateness **injected**: two held-back slices from 2015+ (~0.5% each), near lag 7 d must be accepted, far lag 730 d must be dropped, expected counts known before the run; a control run must print zero natural drops. Gate `scripts/gate_stream.py` → `STREAM_LATE / STREAM_RECON / STREAM_ALERTS / STREAM_GATE=PASS|FAIL run_kind=control|demo`. Stage: background stream started at move 2 in the notebook's session, new move 10 prints the gate; pre-run is the fallback. Sample replay withdrawn from the live list (ADR-0008 conflict). P8 capped at 2 days, sort + pacing unconditional. ADR-0010; terms in `CONTEXT.md` *Streaming*.
+
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
@@ -126,12 +128,13 @@ the `RR-01` answer.
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-07, RR-11 closed)
+## Ticket index (updated 2026-09-07, RR-10 closed)
 
 Closed: `RR-01`, `RR-02`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`,
-`RR-11`, `RR-15`, `RR-16`, `RR-17`. Frontier — open, unblocked: `RR-10`, `RR-12`. Blocked:
-`RR-13` (on RR-10, RR-12), `RR-14`, `RR-18` (on RR-13).
-Suggested order: `RR-10`, then `RR-12` (late, per Notes), then `RR-13`.
+`RR-10`, `RR-11`, `RR-15`, `RR-16`, `RR-17`. Frontier — open, unblocked: `RR-12`. Blocked:
+`RR-13` (on RR-12 only), `RR-14`, `RR-18` (on RR-13).
+Suggested order: `RR-12` (late, per Notes — but it is now the only open frontier ticket),
+then `RR-13`, `RR-18`, `RR-14`.
 
 ## Out of scope
 

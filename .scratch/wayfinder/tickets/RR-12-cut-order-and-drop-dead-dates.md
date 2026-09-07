@@ -83,3 +83,16 @@ of Gold. The map's "do not cut yet" still holds; grill this late.
 - P7 has its own ledger (200 calls / $2); ADR-0003's 12,800 calls are fully allocated.
 - Note: the Question above still says the submission date is *assumed*; the map's Notes record
   it as **confirmed 2026-09-21** `[observed 2026-09-04, Philip]`. Treat the date as fixed.
+
+## Input from RR-10 (closed 2026-09-07)
+
+- **P8 Stream is capped at 2 focused days** (watermark job, held-back injection,
+  `gate_stream.py`, reconciliation) and stays conditional — yours to cut.
+- **Unconditional, ≈ 1 h**: the `sort_replay` job and the producer's `--rate` pacing; they
+  answer audit F4's ordering half and feed the recorded backup whether or not P8 exists.
+- **Dependency on P3**: the decline rule must be a pure function over one product's calendar
+  spine for the stream's `foreachBatch` alerts (ADR-0010). The pandas reproduction needs the
+  same factoring, so this costs P3 nothing extra — but if P3 ships without it, P8 degrades
+  to product-months only and loses the "alert fires live" beat.
+- The 10k sample replay is withdrawn from the live demo (ADR-0008 conflict); no hours saved,
+  none added.
