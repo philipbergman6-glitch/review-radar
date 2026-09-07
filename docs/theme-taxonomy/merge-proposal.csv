@@ -16,13 +16,13 @@ poor quality,poor_build_quality
 brush quality,poor_build_quality
 product defect,poor_build_quality
 packaging quality,poor_build_quality
-product durability,breaks_or_wears_out
-durability,breaks_or_wears_out
-short lifespan,breaks_or_wears_out
-longevity,breaks_or_wears_out
-product longevity,breaks_or_wears_out
-zipper durability,breaks_or_wears_out
-sprayer durability,breaks_or_wears_out
+product durability,poor_build_quality
+durability,poor_build_quality
+short lifespan,poor_build_quality
+longevity,poor_build_quality
+product longevity,poor_build_quality
+zipper durability,poor_build_quality
+sprayer durability,poor_build_quality
 damaged packaging,arrived_damaged
 product damage,arrived_damaged
 damaged product,arrived_damaged

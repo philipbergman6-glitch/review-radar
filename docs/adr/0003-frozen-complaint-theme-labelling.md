@@ -162,3 +162,40 @@ Everything above stands except the host, the execution mode and the budget:
   the caveat; no threshold is re-tuned after seeing the host.
 - Data minimisation is unchanged and strictly stronger: only `title` and `text` are sent, and
   inference is local, so no review text leaves the machine.
+
+## Amendment 2026-09-07 (b) — the taxonomy is frozen at ten by merging, not dropping (`RR-20`)
+
+All eleven candidate themes cleared the support rule, so the rule could not reach the
+ceiling. `breaks_or_wears_out` was merged into `poor_build_quality`; nothing was dropped.
+The frozen artifact is `conf/theme-taxonomy.json` v1, ten themes, hashed into the label
+prompt's `inference_config_hash`. `poor_build_quality` now covers 67 of the 313 low-rated
+discovery reviews (21.4%, 64 products, 13 merged aspects), and durability is no longer
+separable from cheap build — a stated cost, not a silent one. At least one theme covers
+70.0% of low-rated discovery reviews; the remaining 30% and the 424-aspect long tail are
+`other` and are reported as such.
+
+## Amendment 2026-09-07 (c) — the agent produces the ground truth; Philip adjudicates 50 (`RR-21`)
+
+This supersedes the **Ground truth** bullet of amendment (a) only; the host, model and pass
+rule from that amendment stand. Philip reversed the RR-19 decision after the correlated-error
+concern was put to him once.
+
+- **Both 200-row sets are labelled by the agent**, blind: only `title`, `text` and the frozen
+  taxonomy are visible. Never `qwen3:8b`'s output, the star rating, the product, or the
+  window. A labelling run with access to the system under test is void.
+- **Provenance.** Agent ground truth is `label_source="agent_reference"` — a value distinct
+  from `local_llm` (the system under test) and from `human` (reserved for Philip). No output
+  may present agent labels as human labels.
+- **Philip hand-labels a stratified 50 of the audit set**, drawn by the seeded `draw_key`
+  before he sees any agent label, blind to them. Reported as a measured row: per-theme and
+  overall agreement, Cohen's kappa, Wilson 95% interval. These labels never overwrite the
+  agent's and never re-tune anything.
+- **The 40 five-day-apart repeats become `NOT_RUN`**, reason "intra-annotator stability is
+  not defined for a deterministic labeller". They measured human annotator stability, which
+  was the justification for treating one person's labels as a reference standard; re-running
+  them at temperature 0 would yield a near-perfect kappa that means nothing. It is reported
+  as not run rather than replaced by a number that resembles the original.
+- **The 0.70 macro-F1 bar and the 0.50 recall floor do not move**, for the third time.
+- **The evaluation table carries the limitation in its verdict column**, not a footnote: the
+  P6 row states that ground truth is agent-generated and prints the Philip-agreement figure
+  beside it. If agreement is weak, the theme-shift table inherits the caveat.

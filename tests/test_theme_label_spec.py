@@ -93,3 +93,12 @@ def test_theme_labels_contract_identity_balances_cache_and_status():
     assert any("distinct_keys_for_config" in f for f in
                c.identity({"records_out": 55, "records_rejected": 5},
                           {**counts, "distinct_keys_for_config": 94}))
+
+
+def test_agent_reference_is_a_distinct_label_source_from_human_and_local_llm():
+    """RR-21: agent ground truth must never be indistinguishable from Philip's labels."""
+    keys = {src: idempotency_key(source_review_id="r1", label_source=src, model_id="m",
+                                 label_spec_version="1", prompt_version="v1",
+                                 inference_config_hash="h")
+            for src in ("agent_reference", "human", "local_llm")}
+    assert len(set(keys.values())) == 3

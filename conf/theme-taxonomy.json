@@ -1,0 +1,108 @@
+{
+  "taxonomy_version": "1",
+  "frozen_at": "2026-09-07",
+  "frozen_by": "philip",
+  "decided_in": "RR-20",
+  "source": {
+    "discovery_run_id": "a4a62ffd-61d0-434d-bdcf-fcc2b2b400fd",
+    "inference_config_hash": "af22cf44df76065221d7baa3537bf5aeb3e3805c71018098d4bd22d46b5adffb",
+    "merge_table": "docs/theme-taxonomy/merge-table.csv",
+    "support_table": "docs/theme-taxonomy/theme-support.csv",
+    "low_rated_discovery_reviews": 313,
+    "support_rule": {"min_low_rated_share": 0.03, "min_distinct_products": 2},
+    "note": "All 11 candidate themes cleared the support rule; ADR-0003 caps the taxonomy at ten, so breaks_or_wears_out was merged into poor_build_quality rather than dropped. Nothing was discarded."
+  },
+  "rules": {
+    "complaint_only": "Label a theme only when the review complains about it. Praise is never labelled, and a theme mentioned neutrally is not a complaint.",
+    "evidence_required": "Every labelled theme carries an exact contiguous quote from the review title or text, at most 15 whitespace-delimited words. Never paraphrase, never repair, never invent.",
+    "uniqueness": "Each theme id may appear at most once per review.",
+    "unmentioned": "Themes the review does not complain about are omitted, not labelled negative.",
+    "other": "A complaint that fits none of the ten themes sets other.present=true with a phrase of at most five words. other.phrase is required iff other.present."
+  },
+  "themes": [
+    {
+      "id": "does_not_work",
+      "name": "Does not work",
+      "definition": "The product fails to produce the effect it is sold for, or one of its functions does not operate at all.",
+      "includes": ["no effect or a much weaker effect than claimed", "a powered function that does not run, heat, or hold a charge", "the product does the job worse than the thing it replaced"],
+      "excludes": ["it worked and then failed or wore out later -> poor_build_quality", "it works but is awkward or messy to use -> hard_to_use", "it works but the result looks wrong -> not_as_described"],
+      "discovery_support": {"low_rated_reviews": 71, "low_rated_share": 0.2268, "distinct_products": 59, "phrases": 90}
+    },
+    {
+      "id": "poor_build_quality",
+      "name": "Poor build quality or durability",
+      "definition": "The item is cheaply made, defective from manufacture, or breaks and wears out under normal use.",
+      "includes": ["flimsy, thin, or cheap-feeling materials", "a manufacturing defect present on an otherwise intact item", "breaking, cracking, shedding, or dying after a short period of use", "a short lifespan relative to the price or the claim"],
+      "excludes": ["damage caused in transit or on arrival -> arrived_damaged", "an intact item that never worked at all -> does_not_work"],
+      "boundary_note": "The test against arrived_damaged is cause, not state: manufacture or wear belongs here, shipping belongs there. If the review does not say which, prefer arrived_damaged only when it mentions delivery, packaging, or the moment of unboxing.",
+      "discovery_support": {"low_rated_reviews": 67, "low_rated_share": 0.2141, "distinct_products": 64, "phrases": 79},
+      "merged_from": ["poor_build_quality", "breaks_or_wears_out"]
+    },
+    {
+      "id": "overpriced",
+      "name": "Overpriced or poor value",
+      "definition": "The complaint is about price or value for money, not about the product's behaviour.",
+      "includes": ["too expensive for what it is", "money wasted", "worse than a cheaper alternative at this price"],
+      "excludes": ["the product is bad and price is not mentioned -> the relevant product theme"],
+      "discovery_support": {"low_rated_reviews": 33, "low_rated_share": 0.1054, "distinct_products": 32, "phrases": 43}
+    },
+    {
+      "id": "wrong_size_or_fit",
+      "name": "Wrong size, weight or fit",
+      "definition": "The product's physical dimensions, weight, or fit are wrong for the buyer or for the thing it attaches to.",
+      "includes": ["too small or too large", "too heavy or too light to handle", "does not fit the device, hair type, or body part it is meant for"],
+      "excludes": ["the size differs from the listing's stated size -> not_as_described"],
+      "boundary_note": "Against not_as_described: this theme is the buyer's fit problem; not_as_described is a mismatch with what was advertised. A review can hold both.",
+      "discovery_support": {"low_rated_reviews": 32, "low_rated_share": 0.1022, "distinct_products": 31, "phrases": 41}
+    },
+    {
+      "id": "unpleasant_texture",
+      "name": "Unpleasant texture or feel",
+      "definition": "How the product feels in use or on the body is unpleasant.",
+      "includes": ["rough, scratchy, stiff, or hard where softness is expected", "sticky, greasy, or leaves a residue", "inconsistent or lumpy consistency", "uncomfortable to wear or hold"],
+      "excludes": ["the feel causes a physical reaction such as burning or a rash -> irritation_or_harm"],
+      "discovery_support": {"low_rated_reviews": 27, "low_rated_share": 0.0863, "distinct_products": 28, "phrases": 34}
+    },
+    {
+      "id": "hard_to_use",
+      "name": "Hard to use",
+      "definition": "The product works, but using it is difficult, messy, slow, or unexplained.",
+      "includes": ["difficult to apply, assemble, open, or operate", "messy in use", "takes an unreasonable amount of time", "no instructions, or instructions that do not help", "a design choice that makes it awkward"],
+      "excludes": ["it cannot be used because it does not function -> does_not_work"],
+      "discovery_support": {"low_rated_reviews": 23, "low_rated_share": 0.0735, "distinct_products": 24, "phrases": 28}
+    },
+    {
+      "id": "unpleasant_scent",
+      "name": "Unpleasant scent",
+      "definition": "The product smells bad, chemical, or too strong.",
+      "includes": ["a bad or off smell", "a chemical or synthetic smell", "a scent so strong it is objectionable", "a scent that does not match the one advertised, when the complaint is the smell itself"],
+      "excludes": ["the smell causes a headache, nausea, or a reaction -> irritation_or_harm as well"],
+      "discovery_support": {"low_rated_reviews": 23, "low_rated_share": 0.0735, "distinct_products": 24, "phrases": 29}
+    },
+    {
+      "id": "not_as_described",
+      "name": "Not as described or pictured",
+      "definition": "What arrived does not match the listing, the photograph, or the stated purpose.",
+      "includes": ["wrong or mismatched colour", "looks different from the picture", "the description is inaccurate, confusing, or oversells", "sold for a use it is not suited to"],
+      "excludes": ["it matches the listing but is badly made -> poor_build_quality"],
+      "discovery_support": {"low_rated_reviews": 22, "low_rated_share": 0.0703, "distinct_products": 24, "phrases": 29}
+    },
+    {
+      "id": "irritation_or_harm",
+      "name": "Irritation or harm",
+      "definition": "The product hurt the user or damaged their skin, eyes, or hair, or behaved unsafely.",
+      "includes": ["burning, stinging, itching, redness, or a rash", "eye irritation", "hair breakage, pulling, or loss caused by the product", "overheating or another safety hazard"],
+      "excludes": ["merely unpleasant to touch with no reaction -> unpleasant_texture"],
+      "discovery_support": {"low_rated_reviews": 21, "low_rated_share": 0.0671, "distinct_products": 22, "phrases": 27}
+    },
+    {
+      "id": "arrived_damaged",
+      "name": "Arrived damaged",
+      "definition": "The item or its packaging was damaged, broken, or leaking on arrival.",
+      "includes": ["broken, cracked, scratched, or crushed in transit", "leaked or spilled in the box", "damaged or opened packaging"],
+      "excludes": ["broke later during normal use -> poor_build_quality"],
+      "boundary_note": "See the boundary note on poor_build_quality. The distinguishing signal is a mention of delivery, packaging, or unboxing.",
+      "discovery_support": {"low_rated_reviews": 18, "low_rated_share": 0.0575, "distinct_products": 19, "phrases": 23}
+    }
+  ]
+}

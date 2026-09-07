@@ -45,47 +45,60 @@ doubled inference cost of the retry is the price of not editing a protocol mid-r
 The failures are not silently dropped: all 116 rows are stored with both raw responses and
 both validation errors, and 19.3% is the discovery-stage failure coverage.
 
-## The proposed merge
+## The merge, and the frozen taxonomy
 
 `scripts/propose_taxonomy.py` counted the 499 raw aspects into `aspect-counts.csv`. The merge
-in `merge-proposal.csv` (aspect → theme) groups 75 aspects into **11 candidate themes**;
-the remaining 424 aspects are a long tail of singletons and product-specific phrasings and fall
-to `other`. `scripts/score_taxonomy.py` applies the ADR support rule to the *merged* theme over
+in `merge-proposal.csv` (aspect → theme) groups 75 aspects into named themes; the remaining
+424 aspects are a long tail of singletons and product-specific phrasings and fall to `other`.
+`scripts/score_taxonomy.py` applies the ADR-0003 support rule to the *merged* theme over
 **distinct** reviews and products (summing per-aspect counts would double-count a review that
 produced two aspects in the same theme) and writes `merge-table.csv` (every merge, with phrase
 counts preserved) and `theme-support.csv`.
 
-Measured over the 313 low-rated discovery reviews:
+The first pass produced **11** candidate themes and every one of them cleared the rule, while
+ADR-0003 caps the taxonomy at ten. The rule cannot break that tie, so the script reported
+`over_ceiling=yes` and refused to trim. Philip resolved it in `RR-20` on 2026-09-07 by
+**merging `breaks_or_wears_out` into `poor_build_quality`** — ten themes, nothing dropped.
+Dropping `arrived_damaged` (the lowest-support theme) was rejected because it is the only
+fulfilment theme and therefore the one most likely to shift post-2020; blurring texture into
+scent was rejected as compressing two physically distinct failures.
 
-| Theme | Aspects | Phrases | Low-rated reviews | Share | Products | Meets rule |
-|---|---:|---:|---:|---:|---:|---|
-| `does_not_work` | 11 | 90 | 71 | 22.7% | 59 | yes |
-| `poor_build_quality` | 6 | 50 | 45 | 14.4% | 43 | yes |
-| `overpriced` | 4 | 43 | 33 | 10.5% | 32 | yes |
-| `wrong_size_or_fit` | 8 | 41 | 32 | 10.2% | 31 | yes |
-| `unpleasant_texture` | 8 | 34 | 27 | 8.6% | 28 | yes |
-| `breaks_or_wears_out` | 7 | 29 | 25 | 8.0% | 24 | yes |
-| `unpleasant_scent` | 3 | 29 | 23 | 7.4% | 24 | yes |
-| `hard_to_use` | 9 | 28 | 23 | 7.4% | 24 | yes |
-| `not_as_described` | 8 | 29 | 22 | 7.0% | 24 | yes |
-| `irritation_or_harm` | 6 | 27 | 21 | 6.7% | 22 | yes |
-| `arrived_damaged` | 5 | 23 | 18 | 5.8% | 19 | yes |
+The frozen artifact is **`conf/theme-taxonomy.json` v1**, with definitions, inclusions,
+exclusions and boundary notes per theme. Measured over the 313 low-rated discovery reviews:
 
-At least one of these themes covers **219 of 313 low-rated reviews (70.0%)**; the other 30% are
-covered only by `other`.
+| Theme | Aspects | Phrases | Low-rated reviews | Share | Products |
+|---|---:|---:|---:|---:|---:|
+| `does_not_work` | 11 | 90 | 71 | 22.7% | 59 |
+| `poor_build_quality` | 13 | 79 | 67 | 21.4% | 64 |
+| `overpriced` | 4 | 43 | 33 | 10.5% | 32 |
+| `wrong_size_or_fit` | 8 | 41 | 32 | 10.2% | 31 |
+| `unpleasant_texture` | 8 | 34 | 27 | 8.6% | 28 |
+| `unpleasant_scent` | 3 | 29 | 23 | 7.4% | 24 |
+| `hard_to_use` | 9 | 28 | 23 | 7.4% | 24 |
+| `not_as_described` | 8 | 29 | 22 | 7.0% | 24 |
+| `irritation_or_harm` | 6 | 27 | 21 | 6.7% | 22 |
+| `arrived_damaged` | 5 | 23 | 18 | 5.8% | 19 |
 
-## Open decision for Philip, blocking the freeze
+At least one of these themes covers **219 of 313 low-rated reviews (70.0%)**; the other 30%
+are covered only by `other`.
 
-**All 11 candidate themes clear the 3%-and-two-products support rule, but ADR-0003 sets a hard
-ceiling of ten and targets eight.** The rule cannot break the tie, so the cut is a hand
-decision and this script will not make it. Three ways to reach ten or fewer:
+**Stated cost of the merge.** `poor_build_quality` absorbed the wear-over-time signal, so a
+product that was cheaply made and one that failed after six months are no longer separable in
+the theme-shift table. Recorded here so no later reader infers durability was tracked alone.
 
-1. Drop `arrived_damaged` (lowest support, 5.8%). Cleanest single cut, but it is the only theme
-   about fulfilment rather than the product, so it is the one most likely to shift post-2020.
-2. Merge `breaks_or_wears_out` into `poor_build_quality` (cheap build and early failure are
-   adjacent) → 10 themes with a 19–20% combined theme. Loses the wear-over-time signal.
-3. Merge `unpleasant_texture` and `unpleasant_scent` into one `unpleasant_sensory` → 10 themes.
-   Blurs two physically distinct complaints.
+## Ground truth
 
-Nothing downstream — the hand-labelling tool, prompt development, the audit set — can start
-until this is settled, because the frozen taxonomy is on screen while labelling.
+`RR-21` (2026-09-07) supersedes `RR-19`: the **agent** labels both 200-row sets, blind — only
+`title`, `text` and the frozen taxonomy are visible, never `qwen3:8b`'s output, the star
+rating, the product or the window. Those rows carry `label_source="agent_reference"`, a value
+distinct from both `local_llm` and `human`.
+
+Because ground truth written by one LLM to evaluate another has correlated errors, the risk is
+**measured rather than caveated**: Philip hand-labels a stratified 50 of the audit set, drawn
+by the seeded `draw_key` before he sees any agent label, and the Claude-vs-Philip agreement is
+published as a number (per-theme and overall, Cohen's kappa, Wilson 95% interval) in the
+evaluation table's verdict column. His labels never overwrite the agent's and never re-tune
+anything. The 40 five-day-apart repeats are reported `NOT_RUN` — intra-annotator stability is
+not defined for a deterministic labeller, and is not replaced with a number that resembles it.
+
+The 0.70 macro-F1 bar and the 0.50 recall floor, frozen before any measurement, do not move.

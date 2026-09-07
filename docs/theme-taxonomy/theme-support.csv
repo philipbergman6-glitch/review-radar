@@ -1,10 +1,9 @@
 theme,aspects_merged,phrases,reviews,low_rated_reviews,low_rated_share,distinct_products,meets_support_rule
 does_not_work,11,90,72,71,0.2268,59,yes
-poor_build_quality,6,50,47,45,0.1438,43,yes
+poor_build_quality,13,79,70,67,0.2141,64,yes
 overpriced,4,43,35,33,0.1054,32,yes
 wrong_size_or_fit,8,41,34,32,0.1022,31,yes
 unpleasant_texture,8,34,30,27,0.0863,28,yes
-breaks_or_wears_out,7,29,26,25,0.0799,24,yes
 hard_to_use,9,28,24,23,0.0735,24,yes
 unpleasant_scent,3,29,27,23,0.0735,24,yes
 not_as_described,8,29,25,22,0.0703,24,yes

@@ -23,7 +23,10 @@ from typing import Any
 from src.common.config import PROJECT_ROOT
 
 SPEC_PATH = PROJECT_ROOT / "conf" / "theme-label-spec.json"
-LABEL_SOURCES = ("local_llm", "hosted_llm", "human", "classifier")
+# `agent_reference` is ground truth written by the in-session agent (RR-21). It is kept
+# distinct from `local_llm` (the system under test) and from `human` (reserved for Philip)
+# so no query can mistake agent labels for hand labels.
+LABEL_SOURCES = ("local_llm", "hosted_llm", "agent_reference", "human", "classifier")
 LABEL_STATUSES = ("succeeded", "model_abstained", "parse_failed", "api_failed")
 BUDGET_LINES = ("discovery", "development", "training_pool", "audit", "inference")
 

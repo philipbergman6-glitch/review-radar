@@ -4,13 +4,6 @@ arrived_damaged,damaged packaging,5,5,5,5
 arrived_damaged,damaged product,3,3,3,3
 arrived_damaged,leaks in transit,4,3,3,3
 arrived_damaged,product damage,8,6,5,6
-breaks_or_wears_out,durability,2,2,2,2
-breaks_or_wears_out,longevity,2,2,2,2
-breaks_or_wears_out,product durability,16,15,15,15
-breaks_or_wears_out,product longevity,2,2,1,2
-breaks_or_wears_out,short lifespan,3,3,3,2
-breaks_or_wears_out,sprayer durability,2,2,2,2
-breaks_or_wears_out,zipper durability,2,2,2,2
 does_not_work,brush effectiveness,3,2,2,1
 does_not_work,brushing effectiveness,4,3,3,2
 does_not_work,effectiveness,5,5,5,5
@@ -50,11 +43,18 @@ overpriced,price,20,15,13,14
 overpriced,product value,3,2,2,2
 overpriced,value for money,18,18,18,17
 poor_build_quality,brush quality,2,2,2,2
+poor_build_quality,durability,2,2,2,2
+poor_build_quality,longevity,2,2,2,2
 poor_build_quality,low quality,4,4,4,4
 poor_build_quality,packaging quality,2,2,2,2
 poor_build_quality,poor quality,2,2,2,2
 poor_build_quality,product defect,4,4,4,3
+poor_build_quality,product durability,16,15,15,15
+poor_build_quality,product longevity,2,2,1,2
 poor_build_quality,product quality,36,34,32,33
+poor_build_quality,short lifespan,3,3,3,2
+poor_build_quality,sprayer durability,2,2,2,2
+poor_build_quality,zipper durability,2,2,2,2
 unpleasant_scent,chemical smell,3,3,2,3
 unpleasant_scent,scent,24,22,19,20
 unpleasant_scent,scent strength,2,2,2,2
