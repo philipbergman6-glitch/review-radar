@@ -2,8 +2,8 @@
 id: RR-12
 title: Cut order and drop-dead dates under the three-week budget
 type: grilling
-status: open
-assignee: unassigned
+status: closed
+assignee: philip
 blocked-by: [RR-07]  # closed
 blocks: [RR-13, RR-14]
 ---
@@ -96,3 +96,65 @@ of Gold. The map's "do not cut yet" still holds; grill this late.
   to product-months only and loses the "alert fires live" beat.
 - The 10k sample replay is withdrawn from the live demo (ADR-0008 conflict); no hours saved,
   none added.
+
+## Working draft (2026-09-07 — SUPERSEDED by the resolution below; kept as the arithmetic record)
+
+**Supply.** Today 2026-09-07; submission 2026-09-21 `[observed]`. Calendar `[inferred, verify]`:
+Rosh Hashanah 5787 = sunset Fri 09-11 → nightfall Sun 09-13; Yom Kippur = sunset Sun 09-20 →
+nightfall Mon 09-21, i.e. the submission date is Yom Kippur. Working days if holidays are
+off: 09-07…09-11 (5, Fri short), 09-14…09-19 (6, Sat?), 09-20 half → ≈ 11.5 days ≈ 46–69 h
+at 4–6 h/day. Without holidays off: 14 days ≈ 56–84 h.
+
+**Demand `[assumed, my estimates]`.** Map tickets RR-13/18/14 ≈ 4 h · P2 Silver 8 · P3 Gold
+14 (spine, pure-function rule, freeze, placebo, injected declines, holdout, controls, pandas
+gate) · P4 Search 10 · P5 Embeddings 5 · P6 Themes 20 (incl. Philip 7.7 h labels, MLlib 1 day)
+· P7 RAG 8 (incl. Philip ≈ 5 h) · P8 Stream 10 + 1 unconditional · Deliverables 16 (notebook
+helpers 6, design doc 4, slides 3, 2 rehearsals 2, backup 1). **Total ≈ 96 h** vs 46–84 h.
+
+**Hard calendar chain.** 40-row relabel ≥ 5 days after audit labels (ADR-0003) and before the
+report → audit labels by 09-14 → taxonomy frozen by 09-14 morning → discovery Batch submitted
+by 09-11 → gold pre-2020 run by 09-11 → silver green by 09-09. Batch waits (≤ 24 h) overlap RH.
+
+**Draft dated schedule (5 h/day).**
+| date | build | Philip-only hours | drop-dead / trigger |
+|---|---|---|---|
+| 09-07 | RR-12, RR-13 | — | — |
+| 09-08–09 | P2 Silver + catalogue loader, `SILVER_GATE` | — | silver not green by 09-10 EOD → Gold simplification (fixed thresholds, no injected-decline power check, documented deviation) |
+| 09-10–11 | P3 Gold pre-2020, protocol freeze, discovery sample → Batch | — | discovery not submitted by 09-11 → P6 becomes exploratory-only, P5 hybrid search is the evaluated capability |
+| 09-12–13 | RH; Batch returns | — | — |
+| 09-14 | P3 holdout + pandas gate | taxonomy merge 1.5 h, **audit labels 3.3 h** | audit labels not done by 09-15 → κ row NOT_RUN (relabel dropped), audit itself kept |
+| 09-15 | P4 Search build | dev labels 3.3 h | — |
+| 09-16 | P4 gate, P5 Embeddings | — | `EMBED_GATE` not green by 09-17 EOD → **P7 RAG cut** |
+| 09-17 | P6 prompt dev (≤5), pool + holdout Batch; design-doc skeleton | relevance judgements 3.5 h | — |
+| 09-18 | P6 theme shift, eval table; MLlib only if pool labels back | — | labels not back by 09-18 morning → MLlib cut |
+| 09-19 | P6 audit scoring; P7 RAG **only if** eval table PASS by 09-18 EOD | RAG authoring/judging 5 h | — |
+| 09-19–20 | **Deliverables ring-fence ≥ 10 h**: notebook, design doc, slides, 2 rehearsals, backup | relabel 40 rows 1 h (09-20) | submit before sunset 09-20 |
+
+**Cut order (draft).** P8 Stream cut now (sort + pacing 1 h kept) → P7 RAG (drop-dead 09-17)
+→ MLlib sub-row (09-18) → intra-annotator κ (09-15) → Gold calibration machinery (09-10).
+**Floor** = P2 + P3 (computational gate) + P4 + P5 with its 20-query eval table + deliverables.
+
+## Resolution (closed 2026-09-07, Philip)
+
+**No contingency schedule.** Philip, verbatim intent: *"Forget about if the schedule slips
+… Doesn't matter what happens. I work every day. So stop procrastinating and let's get to
+work and build this thing."* `[observed 2026-09-07]`
+
+- **Drop-dead dates:** none. **Pre-committed cut order:** none. The draft table above is
+  the arithmetic record only (≈ 96 h demand vs 46–84 h supply, holiday dates unverified) and
+  binds nothing.
+- **The only rule is order.** Build P2 Silver → P3 Gold → P4 Search → P5 Embeddings →
+  P6 Themes → P7 RAG → P8 Stream, in the RR-01 sequence, every day until 2026-09-21.
+  Whatever is reached by the date ships; whatever is not is stated in the design doc as
+  not built. "Conditional" (P7, P8, MLlib sub-row) now means exactly *built if reached*.
+- **Kept regardless of position:** the 1 h `sort_replay` + `--rate` pacing (RR-10); the
+  Deliverables track runs alongside every phase (each phase ships its `src/serving/` demo
+  cell and its gate), so the doc, slides and recorded backup are assembled from what exists
+  rather than ring-fenced by date.
+- **Labelling chain** (audit labels → ≥ 5-day relabel, discovery Batch → taxonomy) is
+  scheduled by P6 itself when it starts, not by this ticket.
+- **Floor:** not defined. There is no floor because there is no cut decision; the protected
+  core order (RR-01) already puts the highest-grade items first.
+
+Unblocks `RR-13`. Planning after this point is limited to the three remaining map tickets;
+implementation sessions begin now with P2 Silver (spec: RR-02 / ADR-0007, RR-16 / ADR-0008).
