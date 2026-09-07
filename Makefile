@@ -7,7 +7,7 @@ CATEGORY ?= All_Beauty
 SAMPLE ?= data/sample/$(CATEGORY).sample.jsonl
 TOPIC ?= reviews.raw
 
-.PHONY: help up down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample gate-search verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample gate-search verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -15,6 +15,9 @@ help:  ## list targets
 up:  ## start Kafka, MinIO, Elasticsearch, Postgres (reads credentials from .env)
 	docker compose up -d
 	docker compose ps
+
+up-ui:  ## also start Kibana (compose profile ui) on :5601
+	docker compose --profile ui up -d
 
 down:  ## stop the stack, keep the volumes
 	docker compose down

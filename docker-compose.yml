@@ -106,6 +106,30 @@ services:
       start_period: 30s
     mem_limit: 2g
 
+  # --------------------------------------------------------------- Kibana ----
+  # Dashboard over the `product_month` alias (ADR-0004). Behind the `ui` profile so the
+  # default stack stays within the VM memory budget: `make up-ui` starts it.
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.0
+    container_name: bd-kibana
+    profiles: ["ui"]
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      TELEMETRY_ENABLED: "false"
+      NODE_OPTIONS: "--max-old-space-size=768"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5601/api/status | grep -q '\"level\":\"available\"' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    mem_limit: 1g
+
   # -------------------------------------------------------------- Postgres ---
   # Relational side of the project: product catalogue (OLTP-style, ACID).
   # Spark joins the streaming reviews against this via JDBC = SQL enrichment.
