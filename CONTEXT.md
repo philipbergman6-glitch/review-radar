@@ -375,3 +375,46 @@ The one-word outcome in the evaluation summary table: PASS or FAIL against a fro
 threshold regardless of whether its inputs came from code or human labels; REPORTED for a
 result with no acceptance threshold; NOT_RUN for a capability cut by decision.
 _Avoid_: status (reserved for phase state), result
+
+### Lineage
+
+**Job**:
+An independently rerunnable command that produces data: producing, catalogue loading,
+draining bronze, silver, gold, each index build, embedding, labelling, classifier training
+and scoring, RAG answering. Gates, evaluations and frozen hand-made assets are not jobs.
+_Avoid_: stage (a stage is a phase-level grouping; Themes contains several jobs), step
+
+**Run**:
+One execution attempt of a job, identified before it starts and recorded as one row in the
+run ledger whether it succeeds or fails. A run's success means its execution completed with
+its complete output set; it says nothing about evaluation verdicts.
+_Avoid_: batch (reserved for a micro-batch), execution (Spark's own term)
+
+**Run ledger**:
+The record of every run, its inputs, outputs, counts and configuration. The ledger names
+its outputs and the outputs name their run; it is the project's lineage.
+_Avoid_: audit table, log
+
+**Run contract**:
+What a given job at a given specification version must record: required inputs, outputs,
+counts and the identity its counts must satisfy. Violations are named, never boolean.
+_Avoid_: schema (reserved for the database), validation rules
+
+**Published chain**:
+The selected, validated set of runs and their exact outputs that downstream consumers and
+the demo use. It is chosen, not inferred: it is never simply the newest row per job.
+_Avoid_: current pipeline, latest run
+
+**Provenance check / Completeness check / Freshness check**:
+Provenance: every recorded input and output identity resolves to something that exists.
+Completeness: a fully drained producer run's acknowledged records all appear in a pinned
+bronze snapshot. Freshness: the published chain uses the expected current outputs, judged
+by identity mismatch only, never by age. Three checks, printed separately.
+_Avoid_: lineage check (ambiguous across the three), staleness (implies time)
+
+**Replay**:
+A micro-batch that Spark re-presents after a crash between a committed write and its
+checkpoint, which the sink skips. Replayed records are input, not output, and are counted
+separately so per-attempt identities hold.
+_Avoid_: duplicate (reserved for data quality), reprocessing
+

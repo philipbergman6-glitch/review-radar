@@ -81,3 +81,11 @@ ranks first winning the fusion. Every review the demo can retrieve semantically 
 - Temporal RAG answers may only contrast cited examples; a live demo must not narrate
   "complaints about X increased" from a RAG answer — that sentence belongs to the
   theme-shift table.
+
+## Input from RR-16 (closed 2026-09-07)
+
+One move to place: **"every run this data went through"** — the ledger query over
+`pipeline_runs` ordered by `started_at`, then Spark SQL `SELECT count(*) FROM
+bronze.reviews_raw VERSION AS OF <silver row's bronze snapshot>` matching `records_in`, then
+an early micro-batch snapshot vs the completed drain. 30–45 s; needs a Spark session on the
+surface (psql alone shows only the ledger). Suggested position: right after the silver gate.

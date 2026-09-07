@@ -57,3 +57,6 @@ theme-shift table remains the only quantitative authority on the opening questio
   code or from human labels.
 - Roughly 17–21 hours of single-annotator labelling across P4–P7 are now committed; RAG is
   the first coherent cut if that budget fails.
+- The RAG evaluation artefact's `pipeline_run_id` is the `rag_answers` run that produced the
+  thirty answers; `participating_run_ids[]` lists every run it consumed (RR-16 amendment,
+  2026-09-07, contract owned by RR-17).

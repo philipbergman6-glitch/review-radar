@@ -5,8 +5,10 @@ date: 2026-09-07
 
 # Silver is a snapshot-pinned batch with content-only dedupe and a JDBC catalogue join
 
-Silver runs as a bounded Spark batch over one named bronze Iceberg snapshot and atomically
-replaces its three tables (`reviews`, `rejects`, `review_collisions`). Rows are validated
+Silver runs as a bounded Spark batch over one named bronze Iceberg snapshot and replaces its
+three tables (`reviews`, `rejects`, `review_collisions`). Each output table commits
+atomically; the three-table stage does not. A successful run records the complete output
+set (amended 2026-09-07, ADR-0008). Rows are validated
 first, under a fixed precedence of four reject reasons, and only valid rows are grouped by
 `review_id = SHA-256(canonical(user_id, parent_asin, timestamp_ms))`. Groups are classified
 exact / conflicting / unresolvable; a conflicting group's survivor is chosen by content
@@ -52,4 +54,7 @@ left-broadcast-joins it, denormalising four columns. The gate prints
   is what silver prints (7,276 if every group has one survivor).
 - `pipeline_runs` becomes load-bearing: the catalogue load id and the silver run row are
   how lineage is shown, with `SILVER_SPEC_VERSION`, commit SHA and a dirty-worktree flag.
+  Downstream jobs pin reads to all three snapshots of one successful silver run, never to
+  the tables' current snapshots; a partially committed run is `failed` with its partial
+  outputs preserved and never rolled back (ADR-0008).
 - No `details` keys are parsed; they stay in the raw metadata JSONL until a consumer exists.

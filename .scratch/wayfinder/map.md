@@ -94,6 +94,8 @@ the `RR-01` answer.
 
 - [Silver dedupe rule and catalogue-join strategy](tickets/RR-02-silver-dedupe-and-join.md) — Silver = bounded batch pinned to a bronze snapshot, atomic replace of `reviews`/`rejects`/`review_collisions`; validate first (four reject reasons, fixed precedence, empty text not a reject), then group valid rows by `review_id = SHA-256(canonical(user, product, timestamp_ms))`. Classes exact / conflicting (same rating; survivor = helpful_vote ↓, text length ↓, canonical hash ↑, content-only) / unresolvable (rating disagreement, no survivor). Measured: 6,139 groups, 13,415 rows, 6,138 exact, 1 conflicting (helpful_vote), 0 rating conflicts → 7,276 rows removed. Catalogue: orjson → psycopg `COPY` → staging → transactional swap under a `catalogue_load_id`; silver reads it over Spark JDBC each run, left broadcast join, four denormalised columns, unmatched must be 0 at full scope. PostgreSQL is in the pipeline twice: Iceberg catalogue and enrichment source. Gate `SILVER_GATE=PASS|FAIL` on `bronze = rejects + silver + removed`, `removed = table_rows − groups + unresolvable`, distinct `review_id`, join cardinality; determinism by `--verify-rerun`. No `details` keys parsed. ADR-0007; terms in `CONTEXT.md` *Data quality*.
 
+- [What pipeline_runs records, and what the demo shows from it](tickets/RR-16-pipeline-runs-lineage.md) — Keep, as the **run ledger**: one row per execution attempt of every job (`produce · catalogue_load · bronze_drain · silver · gold · search_index_reviews · search_index_product_month · embeddings · theme_labels_llm · theme_classifier_train · theme_classifier_score · rag_answers`), typed core + `inputs/outputs/counts/params` JSONB, UUID `run_id` generated before execution and stamped into every Iceberg snapshot, ES doc and eval artefact; insert `running` → finalize `success|failed`, partial outputs kept, never rolled back; downstream pins to one successful run's complete output set. Contracts keyed `(job_name, spec_version)` in `src/common/runs.py`. Bronze per invocation, snapshot-attributed counts, `records_in == records_out + records_replayed` with two mandated tests; Kafka header `producer_run_id`. Gate `scripts/gate_lineage.py --mode development|publication` prints provenance / completeness / freshness blocks and `LINEAGE_GATE=… chain_clean=… publication_ready=… chain_links_checked=N` from `conf/lineage_chain.toml` (shared with `make eval-table`). Demo move = ledger query + Spark SQL `VERSION AS OF` on silver's bronze snapshot. Migrations with checksummed ledger; sample and full never share a topic. ADR-0008; ADR-0006/0007 amended; terms in `CONTEXT.md` *Lineage*.
+
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
@@ -111,23 +113,23 @@ the `RR-01` answer.
   metadata JSONL until a consumer exists.)*
 - *(RAG retrieval depth, sparse-vector fallback and the evaluation set graduated 2026-09-06
   into `RR-17` / ADR-0006 — closed.)*
-- **Iceberg time travel as a demo move.** Deferred-but-cheap in the artifact; belongs to
-  the demo-moves list, which does not exist yet.
+- *(Iceberg time travel as a demo move: graduated 2026-09-07 into `RR-16`'s answer — folded
+  into the lineage move; position on the list is `RR-11`'s.)*
 - **Recorded-backup format and rehearsal logistics.** Follows the demo surface.
-- **Structured logging and observability.** `print` everywhere today. Whether the pipeline
-  gets a logger, Spark UI screenshots, or a metrics row is not worth deciding until silver
-  exists; noted so it is not forgotten at the professional bar.
+- **Structured logging and observability.** `print` everywhere today. The metrics-row half
+  is now answered by the run ledger (`RR-16`); whether the pipeline also gets a logger or
+  Spark UI screenshots waits until silver exists.
 - **Integration test strategy.** One test per layer that runs against the compose stack —
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-07, RR-02 closed)
+## Ticket index (updated 2026-09-07, RR-16 closed)
 
 Closed: `RR-01`, `RR-02`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`,
-`RR-15`, `RR-17`. Frontier — open, unblocked: `RR-10`, `RR-11`, `RR-12`, `RR-16`. Blocked:
-`RR-13` (on RR-10, RR-11, RR-12, RR-16), `RR-14`, `RR-18`.
-Suggested order: grill `RR-16` (silver row contents now decided), `RR-11`, `RR-10`, `RR-12`
-(late, per Notes).
+`RR-15`, `RR-16`, `RR-17`. Frontier — open, unblocked: `RR-10`, `RR-11`, `RR-12`. Blocked:
+`RR-13` (on RR-10, RR-11, RR-12), `RR-14`, `RR-18`.
+Suggested order: `RR-11` (prototype; the lineage move now needs a place on the list), then
+`RR-10`, then `RR-12` (late, per Notes).
 
 ## Out of scope
 

@@ -269,3 +269,12 @@ that configuration's identity and reuses its windows unchanged.
 **Handoffs:** RR-11 (evaluation page is a demo surface; no local RAG row, local RAG is a
 demo move at most), RR-12 (17–21 h range; RAG first cut; P7 ledger), RR-13 (`RAG_GATE` =
 row 1; `make eval-table`), RR-14 (README AI table must show the verdict vocabulary).
+
+## Amendment from RR-16 (2026-09-07)
+
+Eval artefacts carry `pipeline_run_id` (the primary subject being judged) **and**
+`participating_run_ids[]` — the complete, deduplicated set of runs whose outputs the
+comparison consumed, including the primary — plus the concrete snapshot/artefact identities
+consumed. RR-17 owns this general contract; ADR-0006 references its application to RAG
+(`rag_answers` is the run that produces the answers). Declared cuts are read from
+`conf/lineage_chain.toml`, shared with `scripts/gate_lineage.py`.

@@ -4,7 +4,7 @@ title: A printed number for every phase gate
 type: grilling
 status: open
 assignee: unassigned
-blocked-by: [RR-10, RR-11, RR-12, RR-16]
+blocked-by: [RR-10, RR-11, RR-12]
 blocks: [RR-14, RR-18]
 ---
 
@@ -124,3 +124,13 @@ not applied. Two further printed checks: loader gate (`rows_loaded == final_coun
 unique) and `--verify-rerun` determinism (same snapshot + load twice → identical ids,
 counts, classes, output digest). Tripping cases exist for each: an unresolvable group,
 a dropped catalogue row, a nondeterministic tie-break.
+
+## Input from RR-16 (closed 2026-09-07) — one blocker cleared
+
+Lineage row: `scripts/gate_lineage.py --mode publication`; printed `LINEAGE_GATE=PASS|FAIL
+gate_mode chain_clean publication_ready chain_links_checked=N`; pass = `PASS` with
+`publication_ready=true` and `N > 0`. Silver's reconciliation identity is read from its
+ledger row, not recomputed. Bronze's gate that can fail = the replay fixture test
+(`records_replayed > 0`, `records_out == 0`, table unchanged) plus rejection of missing
+attribution evidence. Every phase's gate gains the line "run contract registered" for the
+jobs it adds. Cuts and `NOT_RUN` come from `conf/lineage_chain.toml`, shared with RR-17.
