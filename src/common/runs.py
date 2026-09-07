@@ -11,7 +11,8 @@ must record and the count identity its numbers must satisfy. Validation returns 
 failures ("identity: records_in 101 != records_out 80 + ...") and hard-fails by default;
 a run whose numbers do not add up is `failed`, never quietly `success`.
 
-Contracts registered here: silver, catalogue_load, bronze_drain, produce. Bronze and
+Contracts registered here: silver, gold, search_index_reviews, search_index_product_month,
+catalogue_load, bronze_drain, produce. Bronze and
 produce are declared so the CHECK list and the registry agree from day one; their drivers
 are instrumented in their own sessions (ADR-0008 §3), not in silver's.
 """
@@ -38,6 +39,8 @@ JOB_NAMES: tuple[str, ...] = (
 
 SILVER_SPEC_VERSION = "1"
 GOLD_SPEC_VERSION = "1"
+SEARCH_REVIEWS_SPEC_VERSION = "1"
+SEARCH_PRODUCT_MONTH_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -124,6 +127,33 @@ def _gold_identity(records: dict[str, int | None], counts: dict[str, Any]) -> li
     return fails
 
 
+def _search_reviews_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    fails: list[str] = []
+    silver_rows, excluded = _n(counts, "silver_rows"), _n(counts, "excluded_empty_text")
+    sent, es_count = _n(counts, "docs_sent"), _n(counts, "es_count")
+    if records.get("records_in") != silver_rows:
+        fails.append(f"records_in {records.get('records_in')} != silver_rows {silver_rows}")
+    if not (records.get("records_out") == sent == es_count):
+        fails.append(f"records_out {records.get('records_out')} / docs_sent {sent} / es_count {es_count} disagree")
+    if None not in (silver_rows, sent, excluded) and silver_rows != sent + excluded:
+        fails.append(f"silver_rows {silver_rows} != docs_sent {sent} + excluded_empty_text {excluded}")
+    total, passed = _n(counts, "contract_tests_total"), _n(counts, "contract_tests_passed")
+    if total is None or passed != total:
+        fails.append(f"contract tests {passed}/{total} not all passed")
+    return fails
+
+
+def _search_product_month_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    fails: list[str] = []
+    gold_rows, sent, es_count = (_n(counts, k) for k in ("gold_rows", "docs_sent", "es_count"))
+    if records.get("records_in") != gold_rows:
+        fails.append(f"records_in {records.get('records_in')} != gold_rows {gold_rows}")
+    if not (records.get("records_out") == sent == es_count == gold_rows):
+        fails.append(f"records_out {records.get('records_out')} / docs_sent {sent} / es_count {es_count} "
+                     f"/ gold_rows {gold_rows} disagree")
+    return fails
+
+
 def _catalogue_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
     fails: list[str] = []
     src, loaded, final = _n(counts, "source_rows"), _n(counts, "rows_loaded"), _n(counts, "final_count")
@@ -189,6 +219,21 @@ _register(Contract(
     identity=_gold_identity))
 
 _register(Contract(
+    "search_index_reviews", SEARCH_REVIEWS_SPEC_VERSION,
+    inputs={"silver": ("run_id", "table", "snapshot_id"), "contract": ("path", "version", "hash")},
+    outputs={"es.reviews": ("index", "alias", "doc_count")},
+    counts=("silver_rows", "excluded_empty_text", "docs_sent", "es_count", "previous_generations",
+            "contract_tests_total", "contract_tests_passed", "analyzers", "contract_hash"),
+    identity=_search_reviews_identity))
+
+_register(Contract(
+    "search_index_product_month", SEARCH_PRODUCT_MONTH_SPEC_VERSION,
+    inputs={"gold": ("run_id", "table", "snapshot_id"), "contract": ("path", "version", "hash")},
+    outputs={"es.product_month": ("index", "alias", "doc_count")},
+    counts=("gold_rows", "docs_sent", "es_count", "previous_generations", "contract_hash"),
+    identity=_search_product_month_identity))
+
+_register(Contract(
     "catalogue_load", CATALOGUE_LOAD_SPEC_VERSION,
     inputs={"source": ("path", "sha256")},
     outputs={"products": ("table", "catalogue_load_id")},
@@ -212,7 +257,7 @@ _register(Contract(
 
 # Jobs whose contracts are registered by their own phase (ADR-0008 §2). They exist in the
 # vocabulary now so the CHECK constraint and this registry stay in step.
-for _later in ("search_index_reviews", "search_index_product_month", "embeddings",
+for _later in ("embeddings",
                "theme_labels_llm", "theme_classifier_train", "theme_classifier_score",
                "rag_answers"):
     _register(Contract(_later, "0", inputs={}, outputs={}, counts=()))

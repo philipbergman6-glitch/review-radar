@@ -1,0 +1,81 @@
+{
+  "contract_version": "1",
+  "alias": "reviews",
+  "id_field": "review_id",
+  "required": [
+    "review_id", "parent_asin", "user_id", "event_ts", "review_month", "rating", "text",
+    "text_word_count", "verified_purchase", "source_silver_snapshot_id", "source_silver_run_id",
+    "source_run_id"
+  ],
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "filter": {
+        "english_possessive": {"type": "stemmer", "language": "possessive_english"},
+        "english_stop": {"type": "stop", "stopwords": "_english_"},
+        "english_stemmer": {"type": "stemmer", "language": "english"}
+      },
+      "analyzer": {
+        "review_plain": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding"]
+        },
+        "review_english": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["english_possessive", "lowercase", "asciifolding", "english_stop", "english_stemmer"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "review_id": {"type": "keyword"},
+      "parent_asin": {"type": "keyword"},
+      "asin": {"type": "keyword"},
+      "user_id": {"type": "keyword"},
+      "event_ts": {"type": "date"},
+      "review_month": {"type": "date", "format": "yyyy-MM-dd"},
+      "rating": {"type": "byte"},
+      "title": {
+        "type": "text", "analyzer": "review_plain",
+        "fields": {"stemmed": {"type": "text", "analyzer": "review_english"}}
+      },
+      "text": {
+        "type": "text", "analyzer": "review_plain",
+        "fields": {"stemmed": {"type": "text", "analyzer": "review_english"}}
+      },
+      "text_word_count": {"type": "integer"},
+      "verified_purchase": {"type": "boolean"},
+      "helpful_vote": {"type": "integer"},
+      "image_count": {"type": "integer"},
+      "product_title": {
+        "type": "text", "analyzer": "review_plain",
+        "fields": {"keyword": {"type": "keyword", "ignore_above": 512}}
+      },
+      "main_category": {"type": "keyword"},
+      "store": {"type": "keyword"},
+      "price": {"type": "scaled_float", "scaling_factor": 100},
+      "text_vector": {
+        "type": "dense_vector", "dims": 384, "index": true, "similarity": "cosine",
+        "index_options": {"type": "int8_hnsw", "m": 16, "ef_construction": 100}
+      },
+      "embedding_spec_hash": {"type": "keyword"},
+      "source_silver_snapshot_id": {"type": "long"},
+      "source_silver_run_id": {"type": "keyword"},
+      "source_run_id": {"type": "keyword"}
+    }
+  },
+  "analyzer_tests": [
+    {"analyzer": "review_plain", "text": "Moisturizing creams", "tokens": ["moisturizing", "creams"]},
+    {"analyzer": "review_english", "text": "Moisturizing creams", "tokens": ["moistur", "cream"]},
+    {"analyzer": "review_plain", "text": "Lancôme's Génifique", "tokens": ["lancome's", "genifique"]},
+    {"analyzer": "review_english", "text": "Lancôme's Génifique", "tokens": ["lancom", "genifiqu"]},
+    {"analyzer": "review_english", "text": "the brushes were shedding", "tokens": ["brush", "were", "shed"]},
+    {"analyzer": "review_plain", "text": "the brushes were shedding", "tokens": ["the", "brushes", "were", "shedding"]},
+    {"analyzer": "review_plain", "text": "SPF 50 sunscreen", "tokens": ["spf", "50", "sunscreen"]}
+  ]
+}

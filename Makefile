@@ -7,7 +7,7 @@ CATEGORY ?= All_Beauty
 SAMPLE ?= data/sample/$(CATEGORY).sample.jsonl
 TOPIC ?= reviews.raw
 
-.PHONY: help up down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample verify eos test lint check
+.PHONY: help up down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample gate-search verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -57,6 +57,21 @@ gold:  ## silver snapshot -> gold.product_month/evaluation_points/decline_episod
 
 gold-sample:  ## same, over the sample silver tables
 	$(RUN) -m src.spark.gold --scope sample --verify-rerun
+
+index-reviews:  ## silver snapshot -> ES review search index generation -> alias `reviews`
+	$(RUN) -m src.serving.index_reviews --scope full --prune
+
+index-reviews-sample:  ## same, over the sample silver table -> alias `reviews_sample`
+	$(RUN) -m src.serving.index_reviews --scope sample --prune
+
+index-product-month:  ## gold snapshot -> ES product_month generation -> alias `product_month`
+	$(RUN) -m src.serving.index_product_month --scope full --prune
+
+index-product-month-sample:  ## same, over the sample gold table
+	$(RUN) -m src.serving.index_product_month --scope sample --prune
+
+gate-search:  ## re-derive every Search constituent from ES, the ledger and the judgements; prints SEARCH_GATE
+	$(RUN) scripts/gate_search.py
 
 verify:  ## row count, snapshot history, time-travel read
 	$(RUN) scripts/verify_iceberg.py

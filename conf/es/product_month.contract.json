@@ -1,0 +1,35 @@
+{
+  "contract_version": "1",
+  "alias": "product_month",
+  "id_field": "product_month_id",
+  "required": [
+    "product_month_id", "parent_asin", "month", "month_date", "review_count",
+    "source_gold_snapshot_id", "source_gold_run_id", "source_silver_snapshot_id", "source_run_id"
+  ],
+  "settings": {"number_of_shards": 1, "number_of_replicas": 0},
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "product_month_id": {"type": "keyword"},
+      "parent_asin": {"type": "keyword"},
+      "month": {"type": "keyword"},
+      "month_date": {"type": "date", "format": "yyyy-MM-dd"},
+      "review_count": {"type": "integer"},
+      "rating_sum": {"type": "double"},
+      "mean_rating": {"type": "float"},
+      "neg_count": {"type": "integer"},
+      "neg_share": {"type": "float"},
+      "verified_count": {"type": "integer"},
+      "verified_rating_sum": {"type": "double"},
+      "verified_mean": {"type": "float"},
+      "nonempty_text_count": {"type": "integer"},
+      "long_text_count": {"type": "integer"},
+      "distinct_users": {"type": "integer"},
+      "source_gold_snapshot_id": {"type": "long"},
+      "source_gold_run_id": {"type": "keyword"},
+      "source_silver_snapshot_id": {"type": "long"},
+      "source_run_id": {"type": "keyword"}
+    }
+  },
+  "analyzer_tests": []
+}
