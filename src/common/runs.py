@@ -37,6 +37,7 @@ JOB_NAMES: tuple[str, ...] = (
 )
 
 SILVER_SPEC_VERSION = "1"
+GOLD_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -98,6 +99,31 @@ def _silver_identity(records: dict[str, int | None], counts: dict[str, Any]) -> 
     return fails
 
 
+def _gold_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    fails: list[str] = []
+    pm, expected = _n(counts, "product_months"), _n(counts, "product_months_expected")
+    if records.get("records_out") != pm:
+        fails.append(f"records_out {records.get('records_out')} != product_months {pm}")
+    if pm != expected:
+        fails.append(f"product_months {pm} != calendar span {expected} (spine incomplete)")
+    on_spine, silver_rows = _n(counts, "reviews_on_spine"), _n(counts, "silver_rows")
+    if records.get("records_in") != silver_rows:
+        fails.append(f"records_in {records.get('records_in')} != silver_rows {silver_rows}")
+    if None not in (on_spine, silver_rows) and on_spine > silver_rows:
+        fails.append(f"reviews_on_spine {on_spine} > silver_rows {silver_rows}")
+    total, mat, below = (_n(counts, k) for k in ("products_total", "products_materialised",
+                                                 "products_below_min_reviews"))
+    if None not in (total, mat, below) and total != mat + below:
+        fails.append(f"products_total {total} != materialised {mat} + below_min_reviews {below}")
+    alerts, episodes = _n(counts, "alerts"), _n(counts, "episodes")
+    if alerts != episodes:
+        fails.append(f"alerts {alerts} != episodes {episodes} (one episode per alert)")
+    closure = counts.get("episodes_by_closure") or {}
+    if episodes is not None and sum(int(v) for v in closure.values()) != episodes:
+        fails.append(f"episodes_by_closure sum {sum(int(v) for v in closure.values())} != episodes {episodes}")
+    return fails
+
+
 def _catalogue_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
     fails: list[str] = []
     src, loaded, final = _n(counts, "source_rows"), _n(counts, "rows_loaded"), _n(counts, "final_count")
@@ -149,6 +175,20 @@ _register(Contract(
     identity=_silver_identity))
 
 _register(Contract(
+    "gold", GOLD_SPEC_VERSION,
+    inputs={"silver": ("run_id", "table", "snapshot_id"), "rule": ("path", "config_hash", "status")},
+    outputs={"gold.product_month": ("table", "snapshot_id"),
+             "gold.evaluation_points": ("table", "snapshot_id"),
+             "gold.decline_episodes": ("table", "snapshot_id")},
+    counts=("products_total", "products_materialised", "products_below_min_reviews", "product_months",
+            "product_months_expected", "active_product_months", "reviews_on_spine", "silver_rows",
+            "points", "evaluable", "condition_true", "alerts", "evaluable_products",
+            "unevaluable_reasons", "episodes", "episodes_by_closure", "holdout_points",
+            "holdout_evaluable", "holdout_alerts", "holdout_eligible_products",
+            "holdout_alerted_products", "holdout_episodes"),
+    identity=_gold_identity))
+
+_register(Contract(
     "catalogue_load", CATALOGUE_LOAD_SPEC_VERSION,
     inputs={"source": ("path", "sha256")},
     outputs={"products": ("table", "catalogue_load_id")},
@@ -172,7 +212,7 @@ _register(Contract(
 
 # Jobs whose contracts are registered by their own phase (ADR-0008 §2). They exist in the
 # vocabulary now so the CHECK constraint and this registry stay in step.
-for _later in ("gold", "search_index_reviews", "search_index_product_month", "embeddings",
+for _later in ("search_index_reviews", "search_index_product_month", "embeddings",
                "theme_labels_llm", "theme_classifier_train", "theme_classifier_score",
                "rag_answers"):
     _register(Contract(_later, "0", inputs={}, outputs={}, counts=()))

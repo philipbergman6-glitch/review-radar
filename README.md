@@ -20,7 +20,7 @@ stays in this README until it is all in the "built" column.
 | Exactly-once proof (kill + restart) | **built** | `scripts/prove_exactly_once.py` — see below |
 | Data profiling | **built** | [`docs/phase0-profile.txt`](docs/phase0-profile.txt) |
 | Silver transformation | **built** | `src/spark/silver.py`; 701,528 → 694,252 rows, 0 rejects, 6,139 collision groups (7,276 rows removed); `scripts/gate_silver.py`, `scripts/reproduce_silver.py` (pandas, no shared code) |
-| Gold transformation | *planned* | nothing written yet |
+| Gold transformation | **built** | `src/spark/gold.py` + `src/gold/rule.py` (`conf/decline_rule.toml`, provisional, holdout from 2020-01); 13,122 products materialised on a 473,268 product-month spine, 1,599 evaluable, 964 alerts = 964 episodes; GOLD_GATE=PASS, rerun identical |
 | Product catalogue + JDBC enrichment | **built** | `src/catalogue/load_products.py` (COPY under a `catalogue_load_id`, 112,590 rows); silver broadcast-joins it over Spark JDBC |
 | Elasticsearch index (BM25 + kNN) | *planned* | cluster is up and healthy; **no indices** |
 | AI: embeddings, semantic search | *planned* | `src/ai/` is an empty package |
@@ -92,7 +92,7 @@ data/raw/*.jsonl
 │      Spark Structured Streaming             │◀──JDBC─│  PostgreSQL  │
 │  bronze            [built]                  │ [built]│  products    │
 │  silver            [built]                  │        │  112,590 rows│
-│  gold              [planned]                │        │              │
+│  gold              [built]                  │        │              │
 └──────┬──────────────────────────────┬───────┘        └──────────────┘
        │ Iceberg tables               │ enriched docs (planned)
        ▼                              ▼
@@ -187,6 +187,7 @@ make produce-sample  # -> topic reviews.raw.sample (never the production topic)
 make bronze-sample   # -> lake.bronze.reviews_raw_sample
 make silver-sample   # -> lake.silver.reviews_sample / rejects_sample / review_collisions_sample
 ./run.sh python scripts/reproduce_silver.py --scope sample
+make gold-sample     # -> lake.gold.product_month_sample / evaluation_points_sample / decline_episodes_sample
 ```
 
 The sample flows through its own topic and tables, so it runs against 10k rows without
@@ -289,11 +290,11 @@ scripts/              download, sample, profile, healthcheck, verify, EOS gate, 
 src/common/           config, Spark schemas, canonical review identity, run ledger
 src/catalogue/        product catalogue loader (Postgres)
 src/ingest/           Kafka producer
-src/spark/            bronze + silver jobs (gold: planned)
+src/spark/            bronze + silver + gold jobs
 src/ai/               empty package (planned)
 src/serving/          empty package (planned)
 tests/                unit tests for the bronze naming + gate verdict logic
-Makefile              every entrypoint: up, health, catalogue, produce, bronze, silver, gate-silver, reproduce-silver, verify, eos, test, lint
+Makefile              every entrypoint: up, health, catalogue, produce, bronze, silver, gate-silver, reproduce-silver, gold, verify, eos, test, lint
 run.sh                JAVA_HOME + uv wrapper (make targets go through it)
 ```
 

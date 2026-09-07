@@ -7,7 +7,7 @@ CATEGORY ?= All_Beauty
 SAMPLE ?= data/sample/$(CATEGORY).sample.jsonl
 TOPIC ?= reviews.raw
 
-.PHONY: help up down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver verify eos test lint check
+.PHONY: help up down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -51,6 +51,12 @@ gate-silver:  ## re-derive SILVER_GATE from the ledger row and the pinned tables
 
 reproduce-silver:  ## independent pandas reproduction over raw JSONL vs the pinned silver tables
 	$(RUN) scripts/reproduce_silver.py --scope full
+
+gold:  ## silver snapshot -> gold.product_month/evaluation_points/decline_episodes, prints GOLD_GATE
+	$(RUN) -m src.spark.gold --scope full --verify-rerun
+
+gold-sample:  ## same, over the sample silver tables
+	$(RUN) -m src.spark.gold --scope sample --verify-rerun
 
 verify:  ## row count, snapshot history, time-travel read
 	$(RUN) scripts/verify_iceberg.py

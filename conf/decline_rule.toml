@@ -1,0 +1,29 @@
+# Decline rule configuration (ADR-0001, RR-09). Read by src/gold/rule.py.
+#
+# status = "provisional" : values are placeholders while the rule is developed on pre-2020
+#                          data only; the gold job refuses to evaluate any point on or after
+#                          holdout_start.
+# status = "frozen"      : the protocol freeze. Set in one commit, after the calibration
+#                          lines (placebo trigger rate, injected-decline power) are printed
+#                          from pre-2020 data; never edited afterwards.
+#
+# The SHA-256 of this file's [rule] table is printed by every gold run and stored in the
+# run ledger, so a changed rule is visible in lineage.
+
+[rule]
+status = "provisional"
+holdout_start = "2020-01"          # first holdout evaluation point (month)
+
+baseline_months = 6                # B: trailing window ending at the evaluation point
+recent_months = 6                  # R: window starting the month after the point
+delta = 0.3                        # alert if recent_mean <= baseline_mean - delta (stars)
+persistence = 2                    # P: consecutive evaluable points with the condition true
+max_gap = 3                        # G: > G consecutive unevaluable points close an episode
+recovery_points = 2                # K: consecutive evaluable false points close an episode
+
+min_reviews = 10                   # per window
+min_active_months = 3              # per window (months with >= 1 review)
+unevaluable_resets_persistence = true
+
+[reproduction]
+metric_tolerance = 1e-9            # pandas reproduction vs Spark, absolute, on means/shares
