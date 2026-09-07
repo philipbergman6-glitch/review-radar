@@ -70,6 +70,10 @@ def count(es: Elasticsearch, index: str) -> int:
     return int(es.count(index=index)["count"])
 
 
+def count_with_vector(es: Elasticsearch, index: str, field: str = "text_vector") -> int:
+    return int(es.count(index=index, query={"exists": {"field": field}})["count"])
+
+
 def swap_alias(es: Elasticsearch, alias: str, new_index: str) -> list[str]:
     """Atomically point `alias` at `new_index`; returns the generations it left."""
     previous = alias_targets(es, alias)

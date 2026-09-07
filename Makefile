@@ -7,7 +7,7 @@ CATEGORY ?= All_Beauty
 SAMPLE ?= data/sample/$(CATEGORY).sample.jsonl
 TOPIC ?= reviews.raw
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -87,6 +87,33 @@ eval-search:  ## P@5 / MRR@10 per system and stratum on complete judgements; fre
 
 gate-search:  ## re-derive every Search constituent from ES, the ledger and the judgements; prints SEARCH_GATE
 	$(RUN) scripts/gate_search.py
+
+embed:  ## silver snapshot -> MiniLM vectors for the >=20-word cohort -> gold.review_embeddings (spec conf/embedding-spec.json)
+	$(RUN) -m src.ai.embed --scope full
+
+embed-sample:  ## same, over the sample silver table
+	$(RUN) -m src.ai.embed --scope sample
+
+index-reviews-vectors:  ## rebuild the `reviews` generation with text_vector from the latest embeddings run, alias swap
+	$(RUN) -m src.serving.index_reviews --scope full --prune --with-embeddings
+
+index-reviews-vectors-sample:  ## same, for alias reviews_sample
+	$(RUN) -m src.serving.index_reviews --scope sample --prune --with-embeddings
+
+pool-embeddings:  ## pool top-10 of knn, hybrid, bm25_cohort, hybrid_cohort for the 20 frozen queries
+	$(RUN) scripts/judge_search.py --pool --round embeddings
+
+export-judgements:  ## dump the unjudged pool (retriever hidden) to eval/search/unjudged.jsonl for judging outside the terminal
+	$(RUN) scripts/judge_search.py --export eval/search/unjudged.jsonl
+
+ann-recall:  ## ANN recall@10 of knn vs exact cosine on the live alias -> eval/embeddings/ann_recall.json
+	$(RUN) scripts/ann_recall.py
+
+eval-embeddings:  ## controlled + production tables, H-E1..3 verdicts -> docs/decisions/embeddings-retrieval.md
+	$(RUN) scripts/eval_embeddings.py
+
+gate-embeddings:  ## re-derive every Embeddings constituent (spec, table, index, recall, judgements); prints EMBED_GATE
+	$(RUN) scripts/gate_embeddings.py
 
 verify:  ## row count, snapshot history, time-travel read
 	$(RUN) scripts/verify_iceberg.py
