@@ -9,7 +9,7 @@ TOPIC ?= reviews.raw
 SAMPLE_NAME ?= development
 PROMPT ?= label_v4
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes import-reference score-themes gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score discovery-failures propose-taxonomy score-taxonomy verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes import-reference score-themes gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score diagnose-failures discovery-failures propose-taxonomy score-taxonomy verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -145,6 +145,9 @@ import-reference:  ## import the agent's blind ground truth (label_source=agent_
 
 score-themes:  ## per-theme table for one configuration (SAMPLE_NAME, PROMPT, MODEL)
 	$(RUN) scripts/score_themes.py --sample $(SAMPLE_NAME) --prompt $(PROMPT) $(if $(MODEL),--model $(MODEL),)
+
+diagnose-failures:  ## why a labelling configuration failed to parse (SAMPLE_NAME, PROMPT, MODEL)
+	$(RUN) scripts/diagnose_label_failures.py --sample $(SAMPLE_NAME) --prompt $(PROMPT) $(if $(MODEL),--model $(MODEL),)
 
 gate-themes:  ## re-derive every P6 constituent from the spec, the ledger and Iceberg; prints THEMES_GATE
 	$(RUN) scripts/gate_themes.py --scope full
