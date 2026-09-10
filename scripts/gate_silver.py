@@ -5,6 +5,10 @@ snapshot the row names, recounts, and prints the same lines the job printed -- f
 stored data, not from the job's memory. `--verify-rerun` also compares the two most recent
 successful runs on the same bronze snapshot and catalogue load (counts and digests).
 
+The decision is pure and lives in `src/gates/silver.py`; everything here is the I/O that
+feeds it. On the way out it writes `eval/silver/gate.json` so `make eval-table` can render
+P2 without anyone reading this output by hand.
+
 Exit 0 on SILVER_GATE=PASS, 1 otherwise.
 
 Run:  ./run.sh python scripts/gate_silver.py [--scope full|sample] [--verify-rerun]
@@ -17,10 +21,12 @@ import sys
 from pyspark.sql import functions as F
 
 from src.common import config as C
+from src.common import evaluation as E
 from src.common import runs
 from src.common.pg import connect
 from src.common.spark import build
-from src.spark.silver import REJECT_REASONS, gate_line
+from src.gates import silver as gate
+from src.gates.silver import REJECT_REASONS
 
 
 def main() -> None:
@@ -74,24 +80,7 @@ def main() -> None:
     finally:
         spark.stop()
 
-    for r in REJECT_REASONS:
-        extra = (f" below_1995={counts.get('timestamp_below_1995')} after_ingest={counts.get('timestamp_after_ingest')}"
-                 if r == "timestamp_out_of_range" else "")
-        print(f"SILVER_REJECT_REASON reason={r} rows={reason_counts[r]}{extra}")
-    print(f"SILVER_COLLISIONS groups={groups} exact_groups={exact} conflicting_groups={conflicting} "
-          f"unresolvable_groups={unresolvable} table_rows={table_rows} removed={removed}")
-    ledger_agrees = (row["records_in"], row["records_out"], row["records_rejected"],
-                     int(counts["collision_rows_removed"])) == (bronze_rows, silver_rows, reject_rows, removed)
-    print(f"SILVER_LEDGER run_id={row['run_id']} snapshots_stamped={str(stamped_ok).lower()} "
-          f"ledger_matches_tables={str(ledger_agrees).lower()} commit={row['git_commit_sha']} "
-          f"dirty={str(row['worktree_dirty']).lower()}")
-    line = gate_line(scope=args.scope, bronze_snapshot=snapshot_id, load_id=load_id,
-                     catalogue_rows=int(counts["catalogue_rows_read"]), records_in=bronze_rows,
-                     records_rejected=reject_rows, records_out=silver_rows, counts=recounted)
-    if not (stamped_ok and ledger_agrees):
-        line = line.replace("SILVER_GATE=PASS", "SILVER_GATE=FAIL")
-    print(line)
-
+    rerun = None
     if args.verify_rerun:
         with connect() as conn:
             prev = conn.execute(
@@ -101,15 +90,33 @@ def main() -> None:
                      AND inputs->'catalogue'->>'catalogue_load_id' = %s
                    ORDER BY started_at DESC LIMIT 1""",
                 (args.category, args.scope, row["run_id"], snapshot_id, load_id)).fetchone()
-        if prev is None:
-            print("SILVER_RERUN previous_run=none identical=n/a")
-        else:
-            same = (prev[4].get("digests") == counts.get("digests")
-                    and (prev[1], prev[2], prev[3]) == (row["records_in"], row["records_out"], row["records_rejected"]))
-            print(f"SILVER_RERUN previous_run={prev[0]} identical={str(same).lower()}")
-            if not same:
-                sys.exit(1)
-    sys.exit(0 if line.endswith("SILVER_GATE=PASS") else 1)
+        rerun = {"previous_run": None, "identical": None} if prev is None else {
+            "previous_run": prev[0],
+            "identical": (prev[4].get("digests") == counts.get("digests")
+                          and (prev[1], prev[2], prev[3]) == (row["records_in"], row["records_out"],
+                                                              row["records_rejected"]))}
+
+    ledger_agrees = (row["records_in"], row["records_out"], row["records_rejected"],
+                     int(counts["collision_rows_removed"])) == (bronze_rows, silver_rows, reject_rows, removed)
+    v = gate.verdict(
+        scope=args.scope, bronze_snapshot=snapshot_id, load_id=load_id,
+        catalogue_rows=int(counts["catalogue_rows_read"]), records_in=bronze_rows,
+        records_rejected=reject_rows, records_out=silver_rows, counts=recounted,
+        reason_counts=reason_counts,
+        collisions={"groups": groups, "exact": exact, "conflicting": conflicting,
+                    "unresolvable": unresolvable, "table_rows": table_rows, "removed": removed},
+        ledger={"run_id": row["run_id"], "snapshots_stamped": stamped_ok,
+                "ledger_matches_tables": ledger_agrees, "commit": row["git_commit_sha"],
+                "dirty": row["worktree_dirty"]},
+        rerun=rerun)
+    v.emit()
+    E.record(v, capability="silver", phase="P2 Silver", kind="reproducibility",
+             protocol_hash=row["git_commit_sha"] or "uncommitted-worktree",
+             population={"name": f"{args.category}/silver.reviews", "n": silver_rows,
+                         "bronze_snapshot_id": snapshot_id, "catalogue_load_id": load_id,
+                         "silver_snapshot_id": outputs["silver.reviews"]["snapshot_id"]},
+             pipeline_run_id=row["run_id"], scope=args.scope)
+    sys.exit(0 if v.passed else 1)
 
 
 if __name__ == "__main__":

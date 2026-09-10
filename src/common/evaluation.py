@@ -19,12 +19,20 @@ The rules the join enforces, and why each exists:
 
 The functions here are pure over already-loaded artefacts -- no Spark, no Elasticsearch, no
 Postgres, no filesystem beyond the two config files. `scripts/eval_table.py` does the I/O.
+
+The writer side lives here too. `Verdict` is what a gate decided plus the exact lines it
+prints saying so; `src/gates/*.py` holds one pure verdict function per capability, taking
+already-loaded facts and returning that. `build_artifact` turns a verdict into a document
+and `write_artifact` validates it before it reaches disk -- an artefact that does not match
+the contract is a crash at the gate, never a bad row in the table.
 """
 from __future__ import annotations
 
 import json
 import tomllib
+from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -62,6 +70,128 @@ def validate_artifact(doc: Any) -> list[str]:
         where = ".".join(str(p) for p in err.absolute_path) or "<root>"
         fails.append(f"{where}: {err.message}")
     return fails
+
+
+# ------------------------------------------------------------------ verdicts ----
+@dataclass(frozen=True)
+class Verdict:
+    """What a gate decided, and the exact lines it prints saying so.
+
+    Built by a pure function over already-loaded facts -- no services, no clock, no
+    filesystem. `constituents` are the gate's named lines verbatim and `terminal` is its
+    single `<NAME>_GATE=PASS|FAIL` line, so `emit()` reproduces the gate's output byte for
+    byte. That is what makes the split a prefactor rather than a rewrite, and what lets a
+    unit test assert the printed shape with nothing running.
+
+    `checks` is the named constituent verdicts the terminal line summarises. A gate with no
+    checks cannot return a verdict at all: a gate that cannot fail is not a gate (audit F3).
+    """
+    gate_name: str
+    status: str
+    constituents: tuple[str, ...]
+    terminal: str
+    metric: dict[str, Any]
+    checks: tuple[tuple[str, bool], ...] = ()
+    cut_reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.status not in VERDICTS:
+            raise ValueError(f"{self.gate_name}: status must be one of {VERDICTS}, "
+                             f"got {self.status!r}")
+        if not self.terminal.strip():
+            raise ValueError(f"{self.gate_name}: a verdict must print a terminal line")
+        if self.status == "NOT_RUN" and not str(self.cut_reason or "").strip():
+            raise ValueError(f"{self.gate_name}: NOT_RUN must carry a written reason")
+
+    @property
+    def passed(self) -> bool:
+        return self.status == "PASS"
+
+    @property
+    def failed(self) -> tuple[str, ...]:
+        """The names of the constituents that did not hold, in declaration order."""
+        return tuple(name for name, ok in self.checks if not ok)
+
+    @property
+    def lines(self) -> tuple[str, ...]:
+        return (*self.constituents, self.terminal)
+
+    def emit(self) -> None:
+        for line in self.lines:
+            print(line)
+
+
+def constituent_metric(checks: Sequence[tuple[str, bool]]) -> dict[str, Any]:
+    """A reproducibility gate's number is its constituent count (ADR-0011).
+
+    Hard-fails on an empty constituent list rather than reporting a vacuous 0/0: the
+    exactly-once gate once printed PASS for runs that tested nothing, and that is the
+    failure mode this refuses to reproduce.
+    """
+    if not checks:
+        raise ValueError("a gate with no constituents cannot print a verdict")
+    return {"name": "constituents_ok", "value": sum(1 for _, ok in checks if ok),
+            "threshold": len(checks), "direction": "eq"}
+
+
+def repro_verdict(gate_name: str, checks: Sequence[tuple[str, bool]], terminal: str,
+                  *, constituents: Sequence[str] = ()) -> Verdict:
+    """The common reproducibility shape: every named constituent must hold, or the gate fails."""
+    checks = tuple(checks)
+    metric = constituent_metric(checks)
+    return Verdict(gate_name=gate_name,
+                   status="PASS" if metric["value"] == metric["threshold"] else "FAIL",
+                   constituents=tuple(constituents), terminal=terminal, metric=metric,
+                   checks=checks)
+
+
+# ----------------------------------------------------------------- artefacts ----
+def build_artifact(v: Verdict, *, capability: str, phase: str, kind: str, protocol_hash: str,
+                   population: dict[str, Any], pipeline_run_id: str, scope: str,
+                   model: str | None = None, prompt: str | None = None,
+                   notes: Sequence[str] = (), created_at: str | None = None) -> dict[str, Any]:
+    """One capability's result as the contract describes it. Does no I/O and no validation."""
+    doc: dict[str, Any] = {
+        "artifact_version": ARTIFACT_VERSION,
+        "capability": capability,
+        "phase": phase,
+        "kind": kind,
+        "gate_name": v.gate_name,
+        "protocol_hash": protocol_hash,
+        "model": model,
+        "prompt": prompt,
+        "population": population,
+        "pipeline_run_id": pipeline_run_id,
+        "scope": scope,
+        "status": v.status,
+        "constituents": list(v.lines),
+        "created_at": created_at or datetime.now(UTC).isoformat(timespec="seconds"),
+    }
+    # A capability that did not run publishes its reason instead of a number (ADR-0011).
+    if v.status == "NOT_RUN":
+        doc["cut_reason"] = v.cut_reason
+    else:
+        doc["metric"] = v.metric
+    if notes:
+        doc["notes"] = list(notes)
+    return doc
+
+
+def write_artifact(doc: dict[str, Any], *, root: Path = EVAL_ROOT) -> Path:
+    """Validate, then write `eval/<capability>/gate.json`. Never writes an invalid artefact."""
+    fails = validate_artifact(doc)
+    if fails:
+        raise ValueError(f"{doc.get('capability')}: evaluation artefact does not match "
+                         f"{SCHEMA_PATH.name}: " + "; ".join(fails))
+    path = root / doc["capability"] / "gate.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n")
+    return path
+
+
+def record(v: Verdict, *, root: Path = EVAL_ROOT, **kw: Any) -> Path:
+    """Build and write in one step -- what every gate script calls after it prints."""
+    return write_artifact(build_artifact(v, **kw), root=root)
 
 
 # ---------------------------------------------------------------------- chain ----

@@ -42,6 +42,8 @@ from pyspark.sql.types import (
 from src.common import config as C
 from src.common import runs
 from src.common.spark import CATALOG, build
+from src.gates import silver as gate
+from src.gates.silver import REJECT_REASONS
 from src.spark.bronze import names_for
 
 sys.stdout.reconfigure(line_buffering=True)
@@ -52,7 +54,6 @@ TS_MIN_UTC = "1995-01-01T00:00:00Z"
 TS_MIN_MS = 788_918_400_000
 NULL_MARKER_HEX = "FFFFFFFF"
 
-REJECT_REASONS = ("unparsable_json", "missing_key_field", "invalid_rating", "timestamp_out_of_range")
 RETAINED_FIELDS = ("rating", "title", "text", "verified_purchase", "helpful_vote", "asin", "images")
 
 # Python's str.split() whitespace, as a Java regex class: \s plus the Unicode spaces
@@ -422,17 +423,18 @@ def run_silver(spark: SparkSession, *, topic: str, scope: str, category: str,
                  outputs=outputs, counts=counts)
 
     # ---- the printed gate (ADR-0007 §7) ----
-    for r in REJECT_REASONS:
-        extra = (f" below_1995={counts['timestamp_below_1995']} after_ingest={counts['timestamp_after_ingest']}"
-                 if r == "timestamp_out_of_range" else "")
-        print(f"SILVER_REJECT_REASON reason={r} rows={reason_counts[r]}{extra}")
-    print(f"SILVER_COLLISIONS groups={counts['collision_groups']} exact_groups={counts['exact_groups']} "
-          f"conflicting_groups={counts['conflicting_groups']} "
-          f"unresolvable_groups={counts['unresolvable_groups']} "
-          f"table_rows={counts['collision_table_rows']} removed={counts['collision_rows_removed']}")
-    print(gate_line(scope=scope, bronze_snapshot=snapshot_id, load_id=load_id, catalogue_rows=catalogue_rows,
-                    records_in=bronze_rows, records_rejected=reject_rows, records_out=silver_rows,
-                    counts=counts))
+    # The verdict is pure (src/gates/silver.py); the job only hands it what it counted. The
+    # artefact is written by `make gate-silver`, which re-derives all of this from the pinned
+    # snapshots -- a job must not publish a reproducibility claim about itself.
+    gate.verdict(
+        scope=scope, bronze_snapshot=snapshot_id, load_id=load_id, catalogue_rows=catalogue_rows,
+        records_in=bronze_rows, records_rejected=reject_rows, records_out=silver_rows,
+        counts=counts, reason_counts=reason_counts,
+        collisions={"groups": counts["collision_groups"], "exact": counts["exact_groups"],
+                    "conflicting": counts["conflicting_groups"],
+                    "unresolvable": counts["unresolvable_groups"],
+                    "table_rows": counts["collision_table_rows"],
+                    "removed": counts["collision_rows_removed"]}).emit()
 
     if verify_rerun:
         prev = previous_matching_run(run.run_id, snapshot_id, load_id, category, scope)
@@ -445,24 +447,6 @@ def run_silver(spark: SparkSession, *, topic: str, scope: str, category: str,
                 (bronze_rows, silver_rows, reject_rows)
             print(f"SILVER_RERUN previous_run={prev['run_id']} identical={'true' if same else 'false'}")
     return {"run_id": run.run_id, "outputs": outputs, "counts": counts}
-
-
-def gate_line(*, scope: str, bronze_snapshot: int, load_id: str, catalogue_rows: int, records_in: int,
-              records_rejected: int, records_out: int, counts: dict[str, Any]) -> str:
-    removed = counts["collision_rows_removed"]
-    identity = records_in == records_rejected + records_out + removed
-    unique = counts["review_id_distinct"] == records_out
-    unmatched_ok = scope != "full" or (counts["unmatched_review_rows"] == 0
-                                       and counts["unmatched_parent_asins"] == 0)
-    ok = identity and unique and counts["join_cardinality_ok"] and unmatched_ok
-    return (f"SILVER_GATE bronze_snapshot={bronze_snapshot} catalogue_load_id={load_id} "
-            f"catalogue_rows_read={catalogue_rows} bronze_rows={records_in} reject_rows={records_rejected} "
-            f"silver_rows={records_out} collision_rows_removed={removed} "
-            f"unmatched_review_rows={counts['unmatched_review_rows']} "
-            f"unmatched_parent_asins={counts['unmatched_parent_asins']} "
-            f"join_cardinality_ok={str(counts['join_cardinality_ok']).lower()} "
-            f"review_id_unique={str(unique).lower()} identity={'PASS' if identity else 'FAIL'} "
-            f"gate_scope={scope} SILVER_GATE={'PASS' if ok else 'FAIL'}")
 
 
 def previous_matching_run(this_run_id: str, snapshot_id: int, load_id: str, category: str,

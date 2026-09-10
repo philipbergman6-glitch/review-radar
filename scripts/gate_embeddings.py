@@ -15,6 +15,10 @@ Constituents, each on its own line, then `EMBED_GATE=PASS|FAIL`:
   EMBED_HYPOTHESES  comparison recorded on the current set and spec, decision file present
                     (verdicts are outcomes, printed, not gated)
 
+Every `check_*` below is I/O that returns facts; the lines and the verdict are formatted by
+`src/gates/embeddings.py`, which is pure and unit-tested with nothing running. On the way out
+the gate writes `eval/embeddings/gate.json` for `make eval-table`.
+
 Exit 0 on PASS, 1 otherwise.  Run:  ./run.sh python scripts/gate_embeddings.py [--scope full]
 """
 from __future__ import annotations
@@ -22,14 +26,17 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from typing import Any
 
 from pyspark.sql import functions as F
 
 from src.ai.embed import NORM_TOL, table_name
 from src.ai.spec import load_spec
 from src.common import config as C
+from src.common import evaluation as E
 from src.common import runs
 from src.common.spark import build
+from src.gates import embeddings as gate
 from src.serving import judgements as J
 from src.serving import projection as P
 from src.serving import search as S
@@ -37,33 +44,30 @@ from src.serving import search as S
 RECALL = C.PROJECT_ROOT / "eval" / "embeddings" / "ann_recall.json"
 COMPARISON = C.PROJECT_ROOT / "eval" / "embeddings" / "retrieval_comparison.json"
 DECISION = C.PROJECT_ROOT / "docs" / "decisions" / "embeddings-retrieval.md"
+REQUIRED_QUERIES = 20
 
 
-def b(x) -> str:
-    return str(bool(x)).lower()
-
-
-def check_spec(scope: str, category: str):
+def check_spec(scope: str, category: str) -> tuple[dict[str, Any], Any, dict | None]:
     spec = load_spec()
     emb = runs.latest_success("embeddings", category=category, data_scope=scope)
     silver = runs.latest_success("silver", category=category, data_scope=scope)
     if emb is None or silver is None:
-        print(f"EMBED_SPEC embeddings_run={'none' if emb is None else 'present'} "
-              f"silver_run={'none' if silver is None else 'present'} ok=false")
-        return False, spec, None
+        return {"present": False, "ok": False,
+                "embeddings_run": "none" if emb is None else "present",
+                "silver_run": "none" if silver is None else "present"}, spec, None
     rec = emb["inputs"]["spec"]
+    latest_silver = silver["outputs"]["silver.reviews"]["snapshot_id"]
     same = rec["hash"] == spec.hash and rec["model"] == spec.model and rec["revision"] == spec.identity["revision"]
-    fresh = int(emb["inputs"]["silver"]["snapshot_id"]) == int(silver["outputs"]["silver.reviews"]["snapshot_id"])
-    ok = same and fresh
-    print(f"EMBED_SPEC run_id={emb['run_id']} path={spec.rel_path()} hash={spec.hash[:12]} "
-          f"ledger_hash={rec['hash'][:12]} model={spec.model} revision={spec.identity['revision'][:12]} "
-          f"unchanged_since_run={b(same)} silver_snapshot={emb['inputs']['silver']['snapshot_id']} "
-          f"latest_silver_snapshot={silver['outputs']['silver.reviews']['snapshot_id']} reads_latest_silver={b(fresh)} "
-          f"ok={b(ok)}")
-    return ok, spec, emb
+    fresh = int(emb["inputs"]["silver"]["snapshot_id"]) == int(latest_silver)
+    return {
+        "present": True, "run_id": emb["run_id"], "path": spec.rel_path(), "hash": spec.hash,
+        "ledger_hash": rec["hash"], "model": spec.model, "revision": spec.identity["revision"],
+        "unchanged": same, "silver_snapshot": emb["inputs"]["silver"]["snapshot_id"],
+        "latest_silver_snapshot": latest_silver, "fresh": fresh, "ok": same and fresh,
+    }, spec, emb
 
 
-def check_table(spark, spec, emb: dict, scope: str) -> tuple[bool, set[str]]:
+def check_table(spark, spec, emb: dict, scope: str) -> tuple[dict[str, Any], set[str]]:
     out = emb["outputs"]["gold.review_embeddings"]
     table = table_name(scope)
     silver_in = emb["inputs"]["silver"]
@@ -84,12 +88,13 @@ def check_table(spark, spec, emb: dict, scope: str) -> tuple[bool, set[str]]:
     n = int(agg["rows"])
     ok = (missing == 0 and extra == 0 and n == int(agg["distinct"]) == emb["records_out"] == cohort_n
           and n == int(agg["dims_ok"]) == int(agg["unit_norm"]))
-    print(f"EMBED_TABLE table={out['table']} snapshot={out['snapshot_id']} spec_hash={spec.hash[:12]} rows={n} "
-          f"distinct={agg['distinct']} records_out={emb['records_out']} silver_cohort={cohort_n} "
-          f"cohort_not_embedded={missing} embedded_not_in_cohort={extra} dims_ok={agg['dims_ok']} "
-          f"unit_norm={agg['unit_norm']} ok={b(ok)}")
-    table_ids = {r[0] for r in ids.collect()} if ok else set()
-    return ok, table_ids
+    facts = {
+        "present": True, "table": out["table"], "snapshot": out["snapshot_id"],
+        "spec_hash": spec.hash, "rows": n, "distinct": agg["distinct"],
+        "records_out": emb["records_out"], "cohort": cohort_n, "missing": missing,
+        "extra": extra, "dims_ok": agg["dims_ok"], "unit_norm": agg["unit_norm"], "ok": ok,
+    }
+    return facts, ({r[0] for r in ids.collect()} if ok else set())
 
 
 def es_vector_ids(es, index: str) -> set[str]:
@@ -105,66 +110,69 @@ def es_vector_ids(es, index: str) -> set[str]:
         after = hits[-1]["sort"]
 
 
-def check_index(es, emb: dict, table_ids: set[str], scope: str, category: str) -> bool:
+def check_index(es, emb: dict, table_ids: set[str], scope: str, category: str) -> dict[str, Any]:
     row = runs.latest_success("search_index_reviews", category=category, data_scope=scope)
     if row is None:
-        print("EMBED_INDEX ledger_row=none ok=false")
-        return False
+        return {"present": False, "ok": False}
     out = row["outputs"]["es.reviews"]
     alias, index = out["alias"], out["index"]
     targets = P.alias_targets(es, alias)
     v2 = row["spec_version"] == "2" and row["inputs"].get("embeddings", {}).get("run_id") == emb["run_id"]
     es_ids = es_vector_ids(es, alias) if targets == [index] and v2 else set()
     same = es_ids == table_ids and bool(table_ids)
-    ok = targets == [index] and v2 and same
-    print(f"EMBED_INDEX run_id={row['run_id']} spec_version={row['spec_version']} alias={alias} "
-          f"alias_targets={','.join(targets) or 'none'} ledger_index={index} alias_matches_ledger={b(targets == [index])} "
-          f"built_from_embeddings_run={b(v2)} es_vector_docs={len(es_ids)} table_rows={len(table_ids)} "
-          f"es_only={len(es_ids - table_ids)} table_only={len(table_ids - es_ids)} id_sets_equal={b(same)} ok={b(ok)}")
-    return ok
+    matches = targets == [index]
+    return {
+        "present": True, "run_id": row["run_id"], "spec_version": row["spec_version"],
+        "alias": alias, "alias_targets": targets, "index": index,
+        "alias_matches_ledger": matches, "built_from_embeddings_run": v2,
+        "es_docs": len(es_ids), "table_rows": len(table_ids),
+        "es_only": len(es_ids - table_ids), "table_only": len(table_ids - es_ids),
+        "id_sets_equal": same, "ok": matches and v2 and same,
+    }
 
 
-def check_recall(es, spec) -> bool:
+def check_recall(es, spec) -> dict[str, Any]:
     if not RECALL.exists():
-        print("EMBED_RECALL artefact=missing ok=false")
-        return False
+        return {"present": False, "ok": False}
     r = json.loads(RECALL.read_text())
     targets = P.alias_targets(es, "reviews")
-    ok = r["index"] in targets and r["embedding_spec_hash"] == spec.hash and r["document_queries"]["n"] > 0
     d, fq = r["document_queries"], r["frozen_queries"]
-    print(f"EMBED_RECALL index={r['index']} on_live_generation={b(r['index'] in targets)} "
-          f"spec_matches={b(r['embedding_spec_hash'] == spec.hash)} k={r['knn']['k']} "
-          f"num_candidates={r['knn']['num_candidates']} doc_queries={d['n']} doc_recall10_mean={d['mean']} "
-          f"doc_recall10_min={d['min']} frozen_recall10_mean={fq['mean']} frozen_recall10_min={fq['min']} ok={b(ok)}")
-    return bool(ok)
+    return {
+        "present": True, "index": r["index"], "on_live": r["index"] in targets,
+        "spec_matches": r["embedding_spec_hash"] == spec.hash, "k": r["knn"]["k"],
+        "num_candidates": r["knn"]["num_candidates"], "doc_queries": d["n"],
+        "doc_mean": d["mean"], "doc_min": d["min"],
+        "frozen_mean": fq["mean"], "frozen_min": fq["min"],
+        "ok": bool(r["index"] in targets and r["embedding_spec_hash"] == spec.hash and d["n"] > 0),
+    }
 
 
-def check_judgements() -> tuple[bool, J.JudgementSet]:
+def check_judgements() -> tuple[dict[str, Any], J.JudgementSet]:
     qs = J.load_queries()
     systems = S.systems_in("embeddings")
     comp = J.completeness(J.load_pool(), J.load_judgements(), systems=systems)
     complete = [q.id for q in qs.queries if comp.get(q.id, {}).get("complete")]
-    pooled = sum(v["pooled"] for v in comp.values())
-    judged = sum(v["judged"] for v in comp.values())
-    ok = len(complete) == 20
-    print(f"EMBED_JUDGEMENTS set_version={qs.version} hash={qs.hash[:12]} systems={','.join(systems)} "
-          f"pooled={pooled} judged={judged} complete_queries={len(complete)}/20 ok={b(ok)}")
-    return ok, qs
+    return {
+        "set_version": qs.version, "hash": qs.hash, "systems": systems,
+        "pooled": sum(v["pooled"] for v in comp.values()),
+        "judged": sum(v["judged"] for v in comp.values()), "complete": len(complete),
+        "required": REQUIRED_QUERIES, "ok": len(complete) == REQUIRED_QUERIES,
+    }, qs
 
 
-def check_hypotheses(qs: J.JudgementSet, spec) -> bool:
+def check_hypotheses(qs: J.JudgementSet, spec) -> dict[str, Any]:
     if not COMPARISON.exists():
-        print("EMBED_HYPOTHESES comparison=missing ok=false")
-        return False
+        return {"present": False, "ok": False}
     r = json.loads(COMPARISON.read_text())
-    ok = (r.get("complete") and r.get("judgement_set_hash") == qs.hash
-          and r.get("embedding_spec_hash") == spec.hash and DECISION.exists())
     cells = " ".join(f"{h.split()[0]}{'' if '(' not in h else h[h.index('(') + 1:-1][:4]}={v['verdict']}"
                      for h, v in r["hypotheses"].items())
-    print(f"EMBED_HYPOTHESES complete={b(r.get('complete'))} set_hash_matches={b(r.get('judgement_set_hash') == qs.hash)} "
-          f"spec_matches={b(r.get('embedding_spec_hash') == spec.hash)} decision_file={b(DECISION.exists())} "
-          f"{cells} judges={r.get('judges')} ok={b(ok)}")
-    return bool(ok)
+    set_ok, spec_ok = r.get("judgement_set_hash") == qs.hash, r.get("embedding_spec_hash") == spec.hash
+    return {
+        "present": True, "complete": bool(r.get("complete")), "set_hash_matches": set_ok,
+        "spec_matches": spec_ok, "decision_file": DECISION.exists(), "cells": cells,
+        "judges": r.get("judges"),
+        "ok": bool(r.get("complete") and set_ok and spec_ok and DECISION.exists()),
+    }
 
 
 def main() -> None:
@@ -173,22 +181,36 @@ def main() -> None:
     ap.add_argument("--category", default=C.CATEGORY)
     args = ap.parse_args()
     es = P.client()
-    s_ok, spec, emb = check_spec(args.scope, args.category)
-    t_ok, i_ok = False, False
+    spec_facts, spec, emb = check_spec(args.scope, args.category)
+    table_facts: dict[str, Any] = {"present": False, "ok": False}
+    index_facts: dict[str, Any] = {"present": False, "ok": False}
     if emb is not None:
         spark = build("gate-embeddings", cores="local[4]", driver_memory="2g")
         try:
-            t_ok, table_ids = check_table(spark, spec, emb, args.scope)
+            table_facts, table_ids = check_table(spark, spec, emb, args.scope)
         finally:
             spark.stop()
-        i_ok = check_index(es, emb, table_ids, args.scope, args.category)
-    r_ok = check_recall(es, spec)
-    j_ok, qs = check_judgements()
-    h_ok = check_hypotheses(qs, spec)
-    ok = all((s_ok, t_ok, i_ok, r_ok, j_ok, h_ok))
-    print(f"EMBED_GATE scope={args.scope} spec={b(s_ok)} table={b(t_ok)} index={b(i_ok)} recall={b(r_ok)} "
-          f"judgements={b(j_ok)} hypotheses={b(h_ok)} EMBED_GATE={'PASS' if ok else 'FAIL'}")
-    sys.exit(0 if ok else 1)
+        index_facts = check_index(es, emb, table_ids, args.scope, args.category)
+    judgements, qs = check_judgements()
+    facts = {
+        "spec": spec_facts, "table": table_facts, "index": index_facts,
+        "recall": check_recall(es, spec), "judgements": judgements,
+        "hypotheses": check_hypotheses(qs, spec),
+    }
+    v = gate.verdict(facts, scope=args.scope)
+    v.emit()
+    if emb is None:
+        sys.exit(1)   # no ledger row: nothing to attribute the result to, so nothing to publish
+    E.record(v, capability="embeddings", phase="P5 Embeddings", kind="reproducibility",
+             protocol_hash=spec.hash, model=spec.model,
+             population={"name": table_facts.get("table", "gold.review_embeddings"),
+                         "n": table_facts.get("rows", 0),
+                         "silver_cohort": table_facts.get("cohort"),
+                         "embeddings_snapshot_id": table_facts.get("snapshot")},
+             pipeline_run_id=emb["run_id"], scope=args.scope,
+             notes=[(f"spec revision {spec.identity['revision']}; judgement set "
+                     f"{judgements['set_version']} ({judgements['hash'][:12]})")])
+    sys.exit(0 if v.passed else 1)
 
 
 if __name__ == "__main__":

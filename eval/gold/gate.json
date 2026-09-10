@@ -1,0 +1,32 @@
+{
+  "artifact_version": "1",
+  "capability": "gold",
+  "constituents": [
+    "GOLD_SPINE products_total=112565 products_materialised=13122 below_min_reviews=99443 product_months=473268 active_product_months=193939 reviews_on_spine=456041",
+    "GOLD_POINTS points=217325 evaluable=15835 condition_true=4524 alerts=964 evaluable_products=1599 unevaluable_baseline_reviews=189052 unevaluable_baseline_active_months=47 unevaluable_recent_reviews=12379 unevaluable_recent_active_months=12",
+    "GOLD_EPISODES episodes=964 recovery=555 gap=275 end_of_data=134",
+    "GOLD_GATE run_id=6e1c0d3a-85e8-4458-8109-57b76331ad38 scope=full spine_complete=true reviews_on_spine=456041 silver_rows=694252 alerts_equal_episodes=true rule_status=provisional GOLD_GATE=PASS"
+  ],
+  "created_at": "2026-09-10T12:05:08+00:00",
+  "gate_name": "GOLD_GATE",
+  "kind": "reproducibility",
+  "metric": {
+    "direction": "eq",
+    "name": "constituents_ok",
+    "threshold": 3,
+    "value": 3
+  },
+  "model": null,
+  "phase": "P3 Gold",
+  "pipeline_run_id": "6e1c0d3a-85e8-4458-8109-57b76331ad38",
+  "population": {
+    "n": 473268,
+    "name": "All_Beauty/gold.product_month",
+    "products_materialised": 13122,
+    "silver_rows": 694252
+  },
+  "prompt": null,
+  "protocol_hash": "cbe5400be465a92245b147f6d4b3f0635cce827bc223ad3b3d6a24e113f8dc26",
+  "scope": "full",
+  "status": "PASS"
+}

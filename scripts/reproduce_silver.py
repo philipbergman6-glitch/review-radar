@@ -14,7 +14,9 @@ What must agree exactly:
     review_month, product_title, main_category, store, price;
   * the set of collision rows (group id, row hash), each row's class and survivor flag.
 
-Prints one SILVER_REPRO line per check and a final SILVER_REPRO_GATE; exit 0 on PASS.
+Prints one SILVER_REPRO line per check and a final SILVER_REPRO_GATE; exit 0 on PASS. The
+verdict itself is pure (`src/gates/silver.py:repro`), and is published to
+`eval/silver_repro/gate.json` for `make eval-table`.
 
 Run:  ./run.sh python scripts/reproduce_silver.py [--scope full|sample]
 """
@@ -33,8 +35,10 @@ from typing import Any
 import pandas as pd
 
 from src.common import config as C
+from src.common import evaluation as E
 from src.common import runs
 from src.common.spark import build
+from src.gates import silver as gate
 
 sys.stdout.reconfigure(line_buffering=True)
 
@@ -328,10 +332,18 @@ def main() -> None:
         print(f"SILVER_REPRO class={c} groups_mine={int((groups == c).sum())} "
               f"groups_theirs={row['counts'][f'{c}_groups']}")
 
-    failed = [k for k, ok in checks.items() if not ok]
-    print(f"SILVER_REPRO_GATE scope={args.scope} checks={len(checks)} failed={','.join(failed) or 'none'} "
-          f"SILVER_REPRO_GATE={'PASS' if not failed else 'FAIL'}")
-    sys.exit(0 if not failed else 1)
+    v = gate.repro(scope=args.scope, checks=list(checks.items()))
+    print(v.terminal)
+    E.record(v, capability="silver_repro", phase="P2 Silver", kind="reproducibility",
+             protocol_hash=row["git_commit_sha"] or "uncommitted-worktree",
+             population={"name": f"{reviews_path.as_posix()} vs silver.reviews",
+                         "n": raw_lines,
+                         "silver_snapshot_id": row["outputs"]["silver.reviews"]["snapshot_id"],
+                         "survivors_compared": len(common)},
+             pipeline_run_id=row["run_id"], scope=args.scope,
+             notes=[("re-derived in pandas from the raw JSONL, importing nothing from "
+                     "src/spark/silver.py or src/common/canonical.py (ADR-0007)")])
+    sys.exit(0 if v.passed else 1)
 
 
 if __name__ == "__main__":

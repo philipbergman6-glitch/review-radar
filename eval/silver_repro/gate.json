@@ -1,0 +1,32 @@
+{
+  "artifact_version": "1",
+  "capability": "silver_repro",
+  "constituents": [
+    "SILVER_REPRO_GATE scope=full checks=13 failed=none SILVER_REPRO_GATE=PASS"
+  ],
+  "created_at": "2026-09-10T12:06:05+00:00",
+  "gate_name": "SILVER_REPRO_GATE",
+  "kind": "reproducibility",
+  "metric": {
+    "direction": "eq",
+    "name": "constituents_ok",
+    "threshold": 13,
+    "value": 13
+  },
+  "model": null,
+  "notes": [
+    "re-derived in pandas from the raw JSONL, importing nothing from src/spark/silver.py or src/common/canonical.py (ADR-0007)"
+  ],
+  "phase": "P2 Silver",
+  "pipeline_run_id": "4447727f-ee66-48eb-be9e-8a23e061d708",
+  "population": {
+    "n": 701528,
+    "name": "data/raw/All_Beauty.jsonl vs silver.reviews",
+    "silver_snapshot_id": 8507728480475534879,
+    "survivors_compared": 694252
+  },
+  "prompt": null,
+  "protocol_hash": "3c3162ac66c8869c6192fbc2a38cba29062853c4",
+  "scope": "full",
+  "status": "PASS"
+}

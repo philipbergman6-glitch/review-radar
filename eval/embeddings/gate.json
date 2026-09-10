@@ -1,0 +1,38 @@
+{
+  "artifact_version": "1",
+  "capability": "embeddings",
+  "constituents": [
+    "EMBED_SPEC run_id=273e0939-d9f6-4169-b643-bc14aa75bac2 path=conf/embedding-spec.json hash=b1908a97527f ledger_hash=b1908a97527f model=sentence-transformers/all-MiniLM-L6-v2 revision=1110a243fdf4 unchanged_since_run=true silver_snapshot=8507728480475534879 latest_silver_snapshot=8507728480475534879 reads_latest_silver=true ok=true",
+    "EMBED_TABLE table=lake.gold.review_embeddings snapshot=8168244129296210072 spec_hash=b1908a97527f rows=345418 distinct=345418 records_out=345418 silver_cohort=345418 cohort_not_embedded=0 embedded_not_in_cohort=0 dims_ok=345418 unit_norm=345418 ok=true",
+    "EMBED_INDEX run_id=d2e56c46-6e05-40d5-9c8b-e24415ab92f9 spec_version=2 alias=reviews alias_targets=reviews_s8507728480475534879_d2e56c46 ledger_index=reviews_s8507728480475534879_d2e56c46 alias_matches_ledger=true built_from_embeddings_run=true es_vector_docs=345418 table_rows=345418 es_only=0 table_only=0 id_sets_equal=true ok=true",
+    "EMBED_RECALL index=reviews_s8507728480475534879_d2e56c46 on_live_generation=true spec_matches=true k=50 num_candidates=200 doc_queries=200 doc_recall10_mean=0.9595 doc_recall10_min=0.4 frozen_recall10_mean=0.955 frozen_recall10_min=0.7 ok=true",
+    "EMBED_JUDGEMENTS set_version=1 hash=570f31717e1b systems=knn,hybrid,bm25_cohort,hybrid_cohort pooled=457 judged=457 complete_queries=20/20 ok=true",
+    "EMBED_HYPOTHESES complete=true set_hash_matches=true spec_matches=true decision_file=true H-E1=not held H-E2=held H-E3cont=held H-E3prod=held judges={'claude': 575, 'philip': 4} ok=true",
+    "EMBED_GATE scope=full spec=true table=true index=true recall=true judgements=true hypotheses=true EMBED_GATE=PASS"
+  ],
+  "created_at": "2026-09-10T12:04:13+00:00",
+  "gate_name": "EMBED_GATE",
+  "kind": "reproducibility",
+  "metric": {
+    "direction": "eq",
+    "name": "constituents_ok",
+    "threshold": 6,
+    "value": 6
+  },
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "notes": [
+    "spec revision 1110a243fdf4706b3f48f1d95db1a4f5529b4d41; judgement set 1 (570f31717e1b)"
+  ],
+  "phase": "P5 Embeddings",
+  "pipeline_run_id": "273e0939-d9f6-4169-b643-bc14aa75bac2",
+  "population": {
+    "embeddings_snapshot_id": 8168244129296210072,
+    "n": 345418,
+    "name": "lake.gold.review_embeddings",
+    "silver_cohort": 345418
+  },
+  "prompt": null,
+  "protocol_hash": "b1908a97527f98df2c369e5f28c97c448e7eb83546dabc1b051fb448c674b3dd",
+  "scope": "full",
+  "status": "PASS"
+}

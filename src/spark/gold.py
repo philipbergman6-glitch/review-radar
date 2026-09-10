@@ -40,8 +40,10 @@ from pyspark.sql.types import (
 )
 
 from src.common import config as C
+from src.common import evaluation as E
 from src.common import runs
 from src.common.spark import CATALOG, build
+from src.gates import gold as gate
 from src.gold.rule import CLOSED_BY, RULE_PATH, Rule, evaluate, load_rule
 from src.spark.silver import digest, write_replace
 
@@ -297,7 +299,7 @@ def run_gold(spark: SparkSession, *, scope: str, category: str, verify_rerun: bo
 
     runs.success(run, records_in=silver_rows, records_out=counts["product_months"],
                  records_rejected=0, outputs=outputs, counts=counts)
-    print_lines(rule, counts, run_id=run.run_id, scope=scope)
+    print_lines(rule, counts, run_id=run.run_id, scope=scope, category=category)
 
     if verify_rerun:
         prev = previous_matching_run(run.run_id, silver_run["run_id"], rule.config_hash, category, scope)
@@ -309,37 +311,31 @@ def run_gold(spark: SparkSession, *, scope: str, category: str, verify_rerun: bo
     return {"run_id": run.run_id, "outputs": outputs, "counts": counts}
 
 
-def print_lines(rule: Rule, c: dict[str, Any], *, run_id: str, scope: str) -> None:
-    print(f"GOLD_SPINE products_total={c['products_total']} products_materialised={c['products_materialised']} "
-          f"below_min_reviews={c['products_below_min_reviews']} product_months={c['product_months']} "
-          f"active_product_months={c['active_product_months']} reviews_on_spine={c['reviews_on_spine']}")
-    r = c["unevaluable_reasons"]
-    print(f"GOLD_POINTS points={c['points']} evaluable={c['evaluable']} condition_true={c['condition_true']} "
-          f"alerts={c['alerts']} evaluable_products={c['evaluable_products']} "
-          + " ".join(f"unevaluable_{k}={r.get(k, 0)}" for k in
-                     ("baseline_reviews", "baseline_active_months", "recent_reviews", "recent_active_months")))
-    e = c["episodes_by_closure"]
-    print(f"GOLD_EPISODES episodes={c['episodes']} recovery={e['recovery']} gap={e['gap']} "
-          f"end_of_data={e['end_of_data']}")
-    if rule.frozen:
-        share = (c["holdout_alerted_products"] / c["holdout_eligible_products"]
-                 if c["holdout_eligible_products"] else 0.0)
-        print(f"GOLD_ANALYTICAL period=holdout eligible_products={c['holdout_eligible_products']} "
-              f"alerted_products={c['holdout_alerted_products']} share_of_eligible={share:.4f} "
-              f"holdout_alerts={c['holdout_alerts']} holdout_episodes={c['holdout_episodes']} "
-              f"rule_status=frozen rule_config_hash={rule.config_hash[:12]} verdict=REPORTED")
-    else:
-        print(f"GOLD_ANALYTICAL period=development(before {rule.holdout_start}) "
-              f"evaluable_products={c['evaluable_products']} alerts={c['alerts']} episodes={c['episodes']} "
-              f"rule_status=provisional rule_config_hash={rule.config_hash[:12]} verdict=REPORTED")
-    spine_ok = c["product_months"] == c["product_months_expected"]
-    reviews_ok = c["reviews_on_spine"] <= c["silver_rows"]
-    alerts_ok = c["alerts"] == c["episodes"]
-    ok = spine_ok and reviews_ok and alerts_ok
-    print(f"GOLD_GATE run_id={run_id} scope={scope} spine_complete={str(spine_ok).lower()} "
-          f"reviews_on_spine={c['reviews_on_spine']} silver_rows={c['silver_rows']} "
-          f"alerts_equal_episodes={str(alerts_ok).lower()} rule_status={rule.status} "
-          f"GOLD_GATE={'PASS' if ok else 'FAIL'}")
+def print_lines(rule: Rule, c: dict[str, Any], *, run_id: str, scope: str,
+                category: str = C.CATEGORY) -> None:
+    """Print gold's constituent lines and both verdicts, then publish them to `eval/`.
+
+    Gold's gate lives in the job rather than in a separate script because it re-derives
+    nothing: every constituent is a count the job just made over data it just wrote. The
+    decisions themselves are pure and testable in `src/gates/gold.py`.
+    """
+    analytical = gate.analytical(c, rule_status=rule.status, holdout_start=rule.holdout_start,
+                                 config_hash=rule.config_hash)
+    v = gate.verdict(c, run_id=run_id, scope=scope, rule_status=rule.status)
+    for line in gate.constituent_lines(c):
+        print(line)
+    print(analytical.terminal)
+    print(v.terminal)
+
+    common = {"protocol_hash": rule.config_hash, "pipeline_run_id": run_id, "scope": scope}
+    E.record(v, capability="gold", phase="P3 Gold", kind="reproducibility",
+             population={"name": f"{category}/gold.product_month", "n": c["product_months"],
+                         "products_materialised": c["products_materialised"],
+                         "silver_rows": c["silver_rows"]}, **common)
+    E.record(analytical, capability="gold_analytical", phase="P3 Gold", kind="quality",
+             population=gate.analytical_population(c, rule_status=rule.status),
+             notes=[(f"decline rule {rule.status} at {RULE_PATH.name}; holdout starts "
+                     f"{rule.holdout_start}")], **common)
 
 
 def previous_matching_run(this_run_id: str, silver_run_id: str, config_hash: str, category: str,
