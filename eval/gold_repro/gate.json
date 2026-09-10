@@ -1,0 +1,41 @@
+{
+  "artifact_version": "1",
+  "capability": "gold_repro",
+  "constituents": [
+    "GOLD_REPRO run_id=6e1c0d3a-85e8-4458-8109-57b76331ad38 silver_run_id=4447727f-ee66-48eb-be9e-8a23e061d708 silver_snapshot=8507728480475534879 rule_status=provisional rule_config_hash_mine=cbe5400be465 rule_config_hash_run=cbe5400be465 tolerance=1e-09",
+    "GOLD_REPRO products total_mine=112565 total_run=112565 materialised_mine=13122 materialised_run=13122",
+    "GOLD_REPRO compare=product_month compared=473268 only_mine=0 only_theirs=0 fields=11 mismatched=none",
+    "GOLD_REPRO compare=evaluation_points compared=217325 only_mine=0 only_theirs=0 fields=27 mismatched=none",
+    "GOLD_REPRO compare=decline_episodes compared=964 only_mine=0 only_theirs=0 fields=12 mismatched=none",
+    "GOLD_REPRO MAX_DROP_SPAN episodes=964 differing=257 verdict=REPORTED",
+    "GOLD_REPRO_GATE scope=full checks=10 failed=none GOLD_REPRO_GATE=PASS"
+  ],
+  "created_at": "2026-09-10T12:25:53+00:00",
+  "gate_name": "GOLD_REPRO_GATE",
+  "kind": "reproducibility",
+  "metric": {
+    "direction": "eq",
+    "name": "constituents_ok",
+    "threshold": 10,
+    "value": 10
+  },
+  "model": null,
+  "notes": [
+    "re-derived in plain Python from the pinned silver snapshot, importing nothing from the gold job or the rule module (ADR-0001)",
+    "persistence_run is not compared: it is the reference's loop counter, not a property of an evaluation point",
+    "max_drop is reconciled over the published span (alert to close); the MAX_DROP_SPAN line counts where the documented span would differ"
+  ],
+  "phase": "P3 Gold",
+  "pipeline_run_id": "6e1c0d3a-85e8-4458-8109-57b76331ad38",
+  "population": {
+    "episodes_compared": 964,
+    "n": 473268,
+    "name": "All_Beauty/gold.product_month re-derived from lake.silver.reviews",
+    "points_compared": 217325,
+    "silver_snapshot_id": 8507728480475534879
+  },
+  "prompt": null,
+  "protocol_hash": "cbe5400be465a92245b147f6d4b3f0635cce827bc223ad3b3d6a24e113f8dc26",
+  "scope": "full",
+  "status": "PASS"
+}

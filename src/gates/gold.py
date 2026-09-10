@@ -1,7 +1,13 @@
-"""P3 Gold's two verdicts: the identity gate, and the analytical result it reports beside it.
+"""P3 Gold's three verdicts: the identity gate, the independent reproduction, and the
+analytical result reported beside them.
 
 `GOLD_GATE` is reproducibility -- the spine is complete, no review lands off it, and every
-alert opened exactly one episode. It blocks.
+alert opened exactly one episode. It blocks. It is, however, a claim gold makes about itself
+using the code that produced it, which is why `GOLD_REPRO_GATE` exists beside it:
+`scripts/reproduce_gold.py` re-derives the aggregates, the evaluation points and the episodes
+from the pinned silver snapshot by an independent route and reconciles them against the
+published tables. Its verdict is pure over the named comparisons that reconciliation made,
+exactly as silver's is.
 
 `GOLD_ANALYTICAL` is quality -- how much of the eligible product population the frozen
 decline rule actually alerts on. It has no bar to clear here: the rule's thresholds were
@@ -13,7 +19,7 @@ Pure over the counts the gold job already computed: no Spark, no Postgres.
 """
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from src.common.evaluation import Verdict, repro_verdict
@@ -67,6 +73,24 @@ def verdict(c: Mapping[str, Any], *, run_id: str, scope: str, rule_status: str) 
                          gate_line(c, run_id=run_id, scope=scope, rule_status=rule_status,
                                    checks=checks),
                          constituents=constituent_lines(c))
+
+
+def repro_gate_line(*, scope: str, checks: Sequence[tuple[str, bool]]) -> str:
+    failed = [name for name, ok in checks if not ok]
+    return (f"GOLD_REPRO_GATE scope={scope} checks={len(checks)} "
+            f"failed={','.join(failed) or 'none'} "
+            f"GOLD_REPRO_GATE={'PASS' if not failed else 'FAIL'}")
+
+
+def repro(*, scope: str, checks: Sequence[tuple[str, bool]],
+          constituents: Sequence[str] = ()) -> Verdict:
+    """`GOLD_REPRO_GATE` over the named comparisons the independent re-derivation made.
+
+    Same shape as silver's: the reproduction owns the comparing, this owns the deciding. The
+    constituent lines are passed in verbatim, one per reconciled table.
+    """
+    return repro_verdict("GOLD_REPRO_GATE", checks,
+                         repro_gate_line(scope=scope, checks=checks), constituents=constituents)
 
 
 def analytical(c: Mapping[str, Any], *, rule_status: str, holdout_start: str,
