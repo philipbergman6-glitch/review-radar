@@ -501,3 +501,35 @@ _Avoid_: dry run (implies nothing is recorded)
 A move prepared with a cached fallback but not on the clock, run only if a question calls
 for it: the live `llama3.2:3b` label, the exactly-once recording.
 _Avoid_: optional move (it is not optional to prepare), bonus
+
+### Gates
+
+**Phase gate**:
+The single command that decides whether a phase is finished, ending in one
+`<NAME>_GATE=PASS|FAIL` line. Its verdict carries **only reproducibility claims**. Complete
+only at `scope=full`.
+_Avoid_: check, smoke test, acceptance criteria (none of them fail anything)
+
+**Blocking constituent**:
+A gate check whose failure reopens the phase: counts that must reconcile, ID sets that must
+be identical, a rerun that must agree, an artefact that must exist and validate,
+`run_contract_registered`. Every one has a named case that would trip it.
+_Avoid_: hard check, critical check
+
+**Quality target**:
+A pre-registered number a capability is measured against — macro-F1 ≥ 0.70, grounded ≥ 16/20.
+It prints its own `verdict=PASS|FAIL` on its own line and **never blocks the phase**; a miss
+sets the capability's status to `built, evaluated, below target` and is published as a FAIL.
+Targets do not move once frozen.
+_Avoid_: soft gate (it is not a gate), goal, aspiration
+
+**Tripping case**:
+The concrete input or state that would make a given constituent print FAIL, named when the
+constituent is written. A constituent with no tripping case is decoration — the audit's F3.
+_Avoid_: negative test, edge case
+
+**Declared deviation**:
+A phase that shipped without its full-scope PASS, rendered `REPORTED scope=sample` or
+`NOT_RUN` with a written `cut_reason` in `conf/lineage_chain.toml`. `make eval-table`
+hard-fails on an artefact that is missing and not declared, so silence is impossible.
+_Avoid_: known issue, caveat, footnote

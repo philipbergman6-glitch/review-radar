@@ -2,8 +2,8 @@
 id: RR-13
 title: A printed number for every phase gate
 type: grilling
-status: open
-assignee: unassigned
+status: closed
+assignee: philip
 blocked-by: [RR-10, RR-11, RR-12]
 blocks: [RR-14, RR-18]
 ---
@@ -164,3 +164,72 @@ rehearsal gate's ≤ 300 s must hold with the stream running in the background; 
 documented fallback (pre-run) applies and the gate counts that variant.
 
 Every blocker of this ticket is now closed; it is on the frontier once RR-12 closes.
+
+## Resolution (closed 2026-09-10, Philip took the recommendations)
+
+**ADR-0011** — `docs/adr/0011-phase-gates-print-a-number-and-only-reproducibility-blocks.md`
+carries the canonical table. The decisions:
+
+1. **Failure policy (the ticket's item 4, previously unanswered anywhere).** Two classes.
+   A gate's `PASS|FAIL` contains **only reproducibility claims** — counts that reconcile, ID
+   sets that are identical, reruns that agree, artefacts that exist and validate; a FAIL
+   reopens the phase. **Every quality target prints its own `verdict=PASS|FAIL` on its own
+   line and never blocks**; a miss sets the capability's status to `built, evaluated, below
+   target`. Rationale: reopening a phase over a quality miss means tuning against a held-out
+   set, which ADR-0001, ADR-0003 and RR-21 all forbid — the two failures need opposite
+   responses, so they cannot share a verdict.
+2. **Scope.** A phase is complete only at `scope=full`. Sample runs print `gate_scope=sample`
+   and render `NOT_RUN`, never PASS. Full scope infeasible before 2026-09-21 → the row ships
+   `REPORTED scope=sample` with the reason: a declared deviation.
+3. **Not reached vs cut.** One verdict, `NOT_RUN`, plus a mandatory `cut_reason` in
+   `conf/lineage_chain.toml` (`"not reached by submission date"` is a legitimate reason).
+   `make eval-table` hard-fails on an artefact missing *and* not declared cut — a capability
+   is either a number or a written reason, never silence.
+4. **Five of nine rows were already built** `[observed at 5f8f907]`: `SILVER_GATE`
+   (`src/spark/silver.py:465`), `GOLD_GATE` (`src/spark/gold.py:339`), `SEARCH_GATE`
+   (`scripts/gate_search.py:166`), `EMBED_GATE` (`scripts/gate_embeddings.py:189`),
+   `THEMES_GATE` (`scripts/gate_themes.py:206`). This ticket cites RR-02 / RR-01 / RR-06 /
+   RR-10 / RR-16 for their printed names rather than re-deciding them, and freezes only what
+   nothing had decided.
+5. **Newly frozen lines.** `RAG_GATE=PASS|FAIL` (30/30 citation and scope contract only) with
+   `RAG_QUALITY grounded= adequate= abstention= false_refusal=` non-blocking;
+   `DEMO_GATE=PASS|FAIL rehearsals=N max_elapsed_s= all_cells_ok= stream_running=
+   backup_playable= docs_present=`, threshold `rehearsals ≥ 2`, `docs_present` a blocking
+   four-file check; `GOLD_REPRO_GATE` (independent pandas reproduction, mirroring
+   `SILVER_REPRO_GATE`) and `GOLD_CALIBRATION … verdict=PASS|FAIL`, which **blocks the
+   protocol freeze** — a rule that fails calibration must not be frozen. Its thresholds stay
+   the freeze's business, not this ticket's.
+6. **Two universal constituents.** Every phase gate prints
+   `run_contract_registered=true|false` for the jobs it adds (ADR-0008), blocking. Every
+   capability gate writes `eval/<capability>/gate.json`, which must exist and validate.
+7. **P6 corrections** (RR-08's gate had drifted from RR-19/21/23): the hosted budget ledger
+   is withdrawn (the 12,800-call / $20 ceiling lapsed with the move to local `qwen3:8b`) and
+   replaced by `THEMES_BUDGET labelled_reviews= elapsed_s= model=qwen3:8b api_mode=local`;
+   the repeat-kappa rows stay `NOT_RUN` and the published agreement number is
+   `THEMES_AGREEMENT … verdict=REPORTED` (the Philip-50, per-theme and overall kappa with
+   Wilson intervals); the 0.70 macro-F1 and 0.50 minimum-recall bars move out of
+   `THEMES_GATE` into `THEMES_QUALITY` — **the bars do not move**, they stop blocking P7.
+8. **`label_source` enum reconciled here, not in RR-14.** RR-14 reconciles documents; this
+   ticket owns what prints. Canonical set, one enum in `src/ai/labels.py`: `llm` (primary
+   labels, whatever the host) · `agent_reference` (blind ground truth) · `classifier` (MLlib
+   baseline). ADR-0003's `"hosted_llm"` and ADR-0002's `"llm"` collapse to `llm`; the primary
+   theme-shift job asserts it. RR-14 propagates the string, it no longer decides it.
+9. **Evaluation-artefact path corrected.** RR-17 / ADR-0006 froze
+   `data/eval/<capability>.json`; the built layout is `eval/<capability>/` `[observed]`. The
+   artefact is `eval/<capability>/gate.json` against `conf/eval-artifact.schema.json`, which
+   does not exist yet and is P7's first deliverable. ADR-0006's contract is otherwise
+   unchanged.
+10. **The repo-baseline row is dropped.** RR-15 landed and CI runs `ruff check` + `pytest -q`
+    on every push `[observed: .github/workflows/ci.yml:28,37]`. `make check` green is a
+    standing invariant, not a phase completion check; restating it as a gate adds a line
+    nothing consumes. `run_contract_registered` is the per-phase invariant that replaces it.
+
+**Every constituent carries a tripping case** (ADR-0011's table, right-hand column) — the
+audit's F3 rule: a gate that cannot fail is not a gate.
+
+**Not decided here, deliberately:** the decline-rule thresholds and the calibration ceiling
+(protocol freeze, `Not yet specified`); writing `gate_rag.py`, `gate_stream.py`,
+`gate_demo.py`, `gate_lineage.py`, `reproduce_gold.py`, `conf/eval-artifact.schema.json` and
+`conf/lineage_chain.toml` — execution, inherited by the P7/P8 implementation sessions.
+
+Unblocks `RR-18` and (with RR-18) `RR-14`.

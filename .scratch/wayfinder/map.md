@@ -108,6 +108,8 @@ the `RR-01` answer.
 - [How the development, audit and training-pool frames are drawn](tickets/RR-22-development-audit-frames.md) — ADR-0003's sampling clause was not executable as written. **Theme terms become a derived frozen artifact** `conf/theme-terms.json` v1 (`scripts/freeze_theme_terms.py`): whole-word uni/bigrams mined from the discovery *evidence quotes* of each theme's merged aspects, kept on ≥2 distinct reviews and a fixed theme-vs-rest odds ratio, each term owned by one theme. It never enters a prompt and never touches a label — it only decides which reviews are *offered*, so it is not an `RR-21` blindness breach. **The audit population is the pre-2020 candidate and control products observed at/after `holdout_start`** — post-2020 *windows* cannot exist while `conf/decline_rule.toml` is provisional (`holdout_eligible_products=0`), and a rule-selected window would not be untouched. Quotas: development 200 = 20/theme; audit 120 = 12/theme + 80 prevalence rows scored separately; training pool 3,000 prevalence; filled rarest-theme-first by seeded `draw_key`, shortfalls released to a final pass and printed, never topped up. **No rating stratification outside `discovery`.** `inference` stays `NotImplementedError`, blocked on the protocol freeze.
 - [What the star-only baseline predicts, and when the two baselines' thresholds freeze](tickets/RR-23-baseline-definitions-and-thresholds.md) — ADR-0002 names a "star-only per-theme baseline" without a rule, and "thresholds freeze together" without saying what fits them. **Star-only = per-theme star threshold** `predict t iff rating <= k_t`, `k_t` chosen from {1..5} to maximise that theme's F1 **on development** against `agent_reference`; a theme whose best F1 is 0 everywhere gets `k_t = 0` and predicts nothing, reported not smoothed. **Both baselines' thresholds are fitted on development, frozen, applied unchanged to the audit set**, which is opened once for all three systems. The classifier trains on the 3,000-row pool labelled by the *frozen* prompt; `parse_failed`/`api_failed` pool rows are dropped from **training** (a row with no label is not a row with no themes) and the count reported — but on the **evaluation** sets a failure still scores as an empty prediction for every system. Classifier rows carry `label_source="classifier"` so they can never be aggregated into the primary labels.
 
+- [A printed number for every phase gate](tickets/RR-13-printable-gates.md) — **Only reproducibility blocks.** A gate's `PASS|FAIL` carries counts that reconcile, ID sets that match, reruns that agree, artefacts that validate; a FAIL reopens the phase. Every quality target prints its own `verdict=PASS|FAIL` on its own line and never blocks — a miss sets status `built, evaluated, below target`, because reopening on a quality miss means tuning against a held-out set (ADR-0001/0003/RR-21 forbid it). Phase complete only at `scope=full`; sample renders `NOT_RUN`. Never-reached and cut-on-merits share `NOT_RUN` plus a mandatory `cut_reason` in `conf/lineage_chain.toml`; `make eval-table` hard-fails on an artefact missing *and* not declared cut. Five rows were already built and are cited, not re-decided; newly frozen are `RAG_GATE` + `RAG_QUALITY`, `DEMO_GATE … rehearsals≥2 docs_present=`, `GOLD_REPRO_GATE`, and `GOLD_CALIBRATION` which **blocks the protocol freeze**. Universal constituents: `run_contract_registered=` on every phase gate, `eval/<capability>/gate.json` on every capability gate. P6 corrected — hosted budget ledger withdrawn for `THEMES_BUDGET`, repeat-kappa stays `NOT_RUN` with `THEMES_AGREEMENT` reported instead, and the 0.70/0.50 bars move out of `THEMES_GATE` into `THEMES_QUALITY` **without moving**. `label_source` enum settled here: `llm` · `agent_reference` · `classifier`. ADR-0006's artefact path corrected to `eval/<cap>/gate.json`. Repo-baseline row dropped — CI is not a phase gate. ADR-0011.
+
 ## Not yet specified
 
 - *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
@@ -117,7 +119,9 @@ the `RR-01` answer.
   the protocol freeze from pre-2020 aggregates only, per `RR-09` / ADR-0001; deliberately
   *not* a map decision. **Now also includes the low-/high-rated fallback-period
   rule** (minimum counts, selection, tie-break), which ADR-0001 does not yet define and which
-  RAG's fallback questions inherit unchanged (`RR-17`).
+  RAG's fallback questions inherit unchanged (`RR-17`). **`RR-13` adds a constraint, not a
+  number:** the freeze must print `GOLD_CALIBRATION … verdict=PASS|FAIL` against the ceiling
+  and the ≥ 80% / ≤ 6-point targets, and a rule that fails calibration **must not be frozen**.
 - **Which gold population `product_month` projects.** `RR-01` says: only what P3
   materialises, never all 112,590 products across their lifetimes. What P3 materialises is
   the protocol freeze's minimum-count business (`RR-09`), so this sharpens with it.
@@ -136,11 +140,12 @@ the `RR-01` answer.
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-07, RR-20 through RR-23 closed)
+## Ticket index (updated 2026-09-10, RR-13 closed)
 
 Closed: `RR-01`, `RR-02`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`,
-`RR-10`, `RR-11`, `RR-12`, `RR-15`, `RR-16`, `RR-17`, `RR-19`, `RR-20`, `RR-21`, `RR-22`, `RR-23`. Frontier — open, unblocked: `RR-13`.
-Blocked: `RR-18` (on RR-13), `RR-14` (on RR-13, RR-18).
+`RR-10`, `RR-11`, `RR-12`, `RR-13`, `RR-15`, `RR-16`, `RR-17`, `RR-19`, `RR-20`, `RR-21`,
+`RR-22`, `RR-23`. Frontier — open, unblocked: `RR-18`.
+Blocked: `RR-14` (on RR-18).
 Philip's instruction 2026-09-07: implementation starts now (P2 Silver); the three remaining
 map tickets are worked alongside, not before.
 
