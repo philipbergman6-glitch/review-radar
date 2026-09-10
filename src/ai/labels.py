@@ -328,6 +328,27 @@ def decoding_schema(theme_ids: list[str], *, max_themes: int | None = None) -> d
     }
 
 
+# The array cap is structural, so it belongs to the schema rather than to hope. Only the
+# version whose prompt asks for it declares it; the others keep their original hash.
+#
+# This lives here, beside `decoding_schema`, rather than in the Spark labelling job, because
+# it is part of the *identity* of a configuration: `LabelSpec.config_hash` hashes the schema,
+# so a caller that forgot the cap would derive a different hash and find zero rows. Deriving
+# that identity must not require importing pyspark -- `src/ai/audit_seal.py` and the gate do
+# it with no cluster in sight.
+PROMPT_MAX_THEMES = {"label-v5": 3}
+
+
+def prompt_schema(prompt_version: str, theme_ids: list[str]) -> dict[str, Any]:
+    """The decoding schema one prompt version ran under. The only correct way to build it.
+
+    Eight call sites used to write `decoding_schema(ids, max_themes=PROMPT_MAX_THEMES.get(v))`
+    by hand; a config hash assembled with the cap forgotten silently selects no rows at all,
+    which reads as "this system was never run" rather than as a mistake.
+    """
+    return decoding_schema(theme_ids, max_themes=PROMPT_MAX_THEMES.get(prompt_version))
+
+
 def validate_label(obj: Any, *, title: str | None, text: str | None, theme_ids: list[str],
                    limits: dict[str, Any]) -> list[str]:
     """Every semantic rule of ADR-0003's output contract. Returns named failures; never repairs."""

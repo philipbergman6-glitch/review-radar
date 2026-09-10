@@ -31,9 +31,9 @@ from datetime import UTC, datetime
 from pyspark.sql import functions as F
 
 from src.ai.label_failures import census as failure_census
-from src.ai.label_themes import LABEL_SOURCE, PROMPT_MAX_THEMES
+from src.ai.label_themes import LABEL_SOURCE
 from src.ai.label_usage import for_training, training_census
-from src.ai.labels import decoding_schema, load_spec, load_taxonomy
+from src.ai.labels import load_spec, load_taxonomy, prompt_schema
 from src.ai.theme_labels import table_name
 from src.common import config as C
 from src.common import runs
@@ -57,7 +57,7 @@ def main() -> None:
     spec, tax = load_spec(), load_taxonomy()
     frozen = spec.require_frozen(purpose="censusing the training pool")
     model = args.model or spec.model_id
-    schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(frozen.version))
+    schema = prompt_schema(frozen.version, tax.ids)
     config_hash = spec.config_hash(frozen.name, schema, extra={"taxonomy": tax.file_hash},
                                    model_id=model)
     sample_run = runs.latest_success("theme_samples", category=args.category,

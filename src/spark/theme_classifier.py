@@ -84,12 +84,11 @@ def frozen_labeller_config_hash(model_id: str | None = None) -> str:
     cannot be two different sets. It lives in this module rather than beside the other
     identities because the per-prompt theme cap it needs is declared by the labelling job.
     """
-    from src.ai.label_themes import PROMPT_MAX_THEMES
-    from src.ai.labels import decoding_schema, load_spec
+    from src.ai.labels import load_spec, prompt_schema
 
     spec, tax = load_spec(), load_taxonomy()
     frozen = spec.require_frozen(purpose="training the classifier")
-    schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(frozen.version))
+    schema = prompt_schema(frozen.version, tax.ids)
     return llm_identity(spec, prompt_name=frozen.name, model_id=model_id or spec.model_id,
                         schema=schema, taxonomy_hash=tax.file_hash).inference_config_hash
 

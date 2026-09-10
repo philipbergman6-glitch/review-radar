@@ -19,8 +19,7 @@ import json
 from datetime import UTC, datetime
 
 from src.ai.label_failures import census
-from src.ai.label_themes import PROMPT_MAX_THEMES
-from src.ai.labels import decoding_schema, load_spec, load_taxonomy
+from src.ai.labels import load_spec, load_taxonomy, prompt_schema
 from src.ai.theme_labels import table_name
 from src.ai.theme_scoring import macro_f1, score_themes
 from src.common.config import PROJECT_ROOT
@@ -45,7 +44,7 @@ def main() -> None:
     prompt_version = prompt.version
     # The same prompt version can have run under more than one configuration; censusing across
     # them would mix a superseded run's failures into this one's (src/ai/theme_labels.py).
-    schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt_version))
+    schema = prompt_schema(prompt_version, tax.ids)
     config_hash = spec.config_hash(args.prompt, schema, extra={"taxonomy": tax.file_hash},
                                    model_id=args.model)
 

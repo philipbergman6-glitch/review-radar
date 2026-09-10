@@ -29,10 +29,10 @@ from pyspark.sql import functions as F
 
 from src.ai import ollama
 from src.ai.labels import (
-    decoding_schema,
     idempotency_key,
     load_spec,
     load_taxonomy,
+    prompt_schema,
     render_taxonomy,
     validate_label,
 )
@@ -65,11 +65,6 @@ PROMPT_TAILS = {
                  "SHORT -- 3 to 6 words, never more than 12. Count the words before you "
                  "write them."),
 }
-
-# The array cap is structural, so it belongs to the schema rather than to hope. Only the
-# version whose prompt asks for it declares it; the others keep their original hash.
-PROMPT_MAX_THEMES = {"label-v5": 3}
-
 
 def prompt_tail(prompt_version: str) -> str:
     return PROMPT_TAILS.get(prompt_version, "")
@@ -104,7 +99,7 @@ def run_label_themes(spark: SparkSession, *, sample: str, scope: str, category: 
         # the same table under a different hash and read as a pool; refuse before spending hours.
         spec.require_frozen(purpose="labelling the training pool", prompt_name=prompt_name)
     prompt = spec.prompts[prompt_name]
-    schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt.version))
+    schema = prompt_schema(prompt.version, tax.ids)
     config_hash = spec.config_hash(prompt_name, schema, extra={"taxonomy": tax.file_hash},
                                    model_id=model)
     system = f"{prompt.text.rstrip()}\n\n{render_taxonomy(tax)}\n\n{prompt_tail(prompt.version)}"

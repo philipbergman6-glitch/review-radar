@@ -132,6 +132,49 @@ def failure_coverage(statuses: dict[str, str], selected: list[str]) -> dict[str,
     return tally
 
 
+def system_report(*, subset: str, reference: dict[str, set[str]], system: dict[str, set[str]],
+                  theme_ids: list[str], product_of: dict[str, str], min_support: int, seed: int,
+                  draws: int, statuses: dict[str, str] | None = None,
+                  reference_other: dict[str, bool] | None = None,
+                  system_other: dict[str, bool | None] | None = None) -> dict[str, Any]:
+    """One system's numbers on one set of reviews, in the shape every reader expects.
+
+    Three systems are compared on the audit set (ADR-0002) and a fourth reader -- the themes
+    gate -- reads whichever artefact is published. They must be the *same* shape: a gate that
+    reaches for `overall.min_supported_recall` cannot tell a differently-built dict from a
+    system that scored badly. So the shape is written once, here, rather than assembled at
+    each writer.
+
+    `statuses` is absent for a system that cannot fail to answer -- the star-only floor is a
+    function of a rating it always has -- and every review then counts as `succeeded`. That is
+    a claim about the system, not a default: a labeller with no statuses would be silently
+    credited with perfect coverage, so the callers that have them always pass them.
+
+    `reference_other` / `system_other` are likewise absent for a system that does not predict
+    `other` at all, and the key is then omitted rather than reported as zero agreement.
+    """
+    ids = sorted(reference)
+    scores = score_themes(reference, system, theme_ids, min_support=min_support)
+    lo, hi = bootstrap_macro_f1(reference, system, theme_ids, product_of,
+                                min_support=min_support, seed=seed, draws=draws)
+    out: dict[str, Any] = {
+        "subset": subset, "reviews": len(ids), "macro_f1": macro_f1(scores),
+        "bootstrap_95": [lo, hi],
+        "supported_themes": [s.theme_id for s in scores if s.supported],
+        "min_supported_recall": min([s.recall for s in scores
+                                     if s.supported and s.recall is not None], default=None),
+        "per_theme": [{"theme_id": s.theme_id, "support": s.support, "predicted": s.predicted,
+                       "tp": s.tp, "fp": s.fp, "fn": s.fn, "precision": s.precision,
+                       "recall": s.recall, "f1": s.f1, "supported": s.supported}
+                      for s in scores],
+    }
+    if reference_other is not None:
+        out["other"] = other_agreement(reference_other, system_other or {}, ids)
+    out["coverage"] = failure_coverage(statuses if statuses is not None
+                                       else dict.fromkeys(ids, "succeeded"), ids)
+    return out
+
+
 def other_agreement(reference_other: dict[str, bool], system_other: dict[str, bool | None],
                     selected: list[str]) -> dict[str, Any]:
     """`other` is a boolean per review; a row the system failed on counts as False, not absent."""

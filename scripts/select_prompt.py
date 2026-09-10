@@ -28,8 +28,7 @@ from typing import Any
 
 from pyspark.sql import functions as F
 
-from src.ai.label_themes import PROMPT_MAX_THEMES
-from src.ai.labels import decoding_schema, load_spec, load_taxonomy
+from src.ai.labels import load_spec, load_taxonomy, prompt_schema
 from src.ai.prompt_selection import Candidate, intervals_overlap, require_comparable, select
 from src.ai.theme_labels import table_name
 from src.common.config import PROJECT_ROOT
@@ -95,7 +94,7 @@ def main() -> None:
     censuses: dict[str, dict[str, Any] | None] = {}
     for name in args.candidates:
         prompt = spec.prompts[name]
-        schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt.version))
+        schema = prompt_schema(prompt.version, tax.ids)
         config_hash = spec.config_hash(name, schema, extra={"taxonomy": tax.file_hash},
                                        model_id=model)
         doc = artefact(f"score-{args.sample}-{prompt.version}-{slug}.json")

@@ -12,9 +12,11 @@ MLlib baseline under its frozen spec hash (ADR-0002). Both are rows in the same 
 their identity separates them, so both identities come from `src.ai.classifier_spec` rather
 than being assembled here -- see the module docstring for why that is not a detail.
 
-Nothing here decides anything. The pass rule (`audit macro-F1 >= 0.70`, `no supported-theme
-recall < 0.50`) lives in scripts/gate_themes.py, and it was frozen before any of these numbers
-existed.
+Nothing here decides anything, and it will not score the **audit** set: all three systems are
+measured together by `scripts/open_audit.py` (`make audit-once`, ticket 09), so that none of
+them is scored after another's result is known. The pass rule (`audit macro-F1 >= 0.70`, `no
+supported-theme recall < 0.50`) lives in `src/ai/audit_seal.py`, frozen before any of these
+numbers existed.
 
 Run:  ./run.sh python scripts/score_themes.py --sample development --prompt label_v4
       ./run.sh python scripts/score_themes.py --sample development --source classifier
@@ -27,6 +29,7 @@ from typing import Any
 
 from pyspark.sql import functions as F
 
+from src.ai.audit_seal import require_measurement_goes_through_the_pass
 from src.ai.classifier_spec import (
     classifier_identity,
     llm_identity,
@@ -35,17 +38,10 @@ from src.ai.classifier_spec import (
     require_frozen_cuts,
     score_artefact_name,
 )
-from src.ai.label_themes import PROMPT_MAX_THEMES
 from src.ai.label_usage import for_evaluation, theme_ids
-from src.ai.labels import decoding_schema, load_spec, load_taxonomy
+from src.ai.labels import load_spec, load_taxonomy, prompt_schema
 from src.ai.theme_labels import table_name
-from src.ai.theme_scoring import (
-    bootstrap_macro_f1,
-    failure_coverage,
-    macro_f1,
-    other_agreement,
-    score_themes,
-)
+from src.ai.theme_scoring import system_report
 from src.common import config as C
 from src.common import runs
 from src.common.config import PROJECT_ROOT
@@ -74,6 +70,11 @@ def main() -> None:
     args = ap.parse_args()
 
     spec, tax = load_spec(), load_taxonomy()
+    try:
+        # One system at a time is how the audit set gets opened three times by accident.
+        require_measurement_goes_through_the_pass(args.sample, command="score_themes.py")
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     if args.source == "classifier":
         try:
             clf = load_classifier_spec()
@@ -89,7 +90,7 @@ def main() -> None:
         prompt = spec.prompts[args.prompt]
         system_id = llm_identity(
             spec, prompt_name=args.prompt, model_id=model, taxonomy_hash=tax.file_hash,
-            schema=decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt.version)))
+            schema=prompt_schema(prompt.version, tax.ids))
     config_hash = system_id.inference_config_hash
     sample_run = runs.latest_success("theme_samples", category=args.category, data_scope=args.scope,
                                      params_match={"sample": args.sample})
@@ -126,24 +127,11 @@ def main() -> None:
     product_of = {rid: asg[rid]["parent_asin"] for rid in selected if rid in asg}
 
     def report(ids: list[str], name: str) -> dict[str, Any]:
-        ref = {k: reference[k] for k in ids}
-        scores = score_themes(ref, system, tax.ids, min_support=args.min_support)
-        m = macro_f1(scores)
-        lo, hi = bootstrap_macro_f1(ref, system, tax.ids, product_of, min_support=args.min_support,
-                                    seed=args.seed, draws=args.bootstrap_draws)
-        return {
-            "subset": name, "reviews": len(ids), "macro_f1": m,
-            "bootstrap_95": [lo, hi],
-            "supported_themes": [s.theme_id for s in scores if s.supported],
-            "min_supported_recall": min([s.recall for s in scores if s.supported and s.recall is not None],
-                                        default=None),
-            "per_theme": [{"theme_id": s.theme_id, "support": s.support, "predicted": s.predicted,
-                           "tp": s.tp, "fp": s.fp, "fn": s.fn, "precision": s.precision,
-                           "recall": s.recall, "f1": s.f1, "supported": s.supported}
-                          for s in scores],
-            "other": other_agreement(reference_other, system_other, ids),
-            "coverage": failure_coverage(statuses, ids),
-        }
+        return system_report(subset=name, reference={k: reference[k] for k in ids},
+                             system=system, theme_ids=tax.ids, product_of=product_of,
+                             min_support=args.min_support, seed=args.seed,
+                             draws=args.bootstrap_draws, statuses=statuses,
+                             reference_other=reference_other, system_other=system_other)
 
     enriched = [r for r in selected if (asg.get(r, {}).get("stratum") or "").startswith("enriched")]
     representative = [r for r in selected if asg.get(r, {}).get("stratum") == "representative"]

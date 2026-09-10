@@ -27,8 +27,7 @@ from typing import Any
 
 from pyspark.sql import functions as F
 
-from src.ai.label_themes import PROMPT_MAX_THEMES
-from src.ai.labels import decoding_schema, load_spec, load_taxonomy
+from src.ai.labels import load_spec, load_taxonomy, prompt_schema
 from src.ai.theme_labels import table_name
 from src.common import config as C
 from src.common import runs
@@ -42,7 +41,7 @@ DOCS = PROJECT_ROOT / "docs" / "theme-taxonomy"
 
 def config_for(spec, tax, prompt_name: str, model: str) -> tuple[str, str]:
     prompt = spec.prompts[prompt_name]
-    schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt.version))
+    schema = prompt_schema(prompt.version, tax.ids)
     return spec.config_hash(prompt_name, schema, extra={"taxonomy": tax.file_hash},
                             model_id=model), prompt.version
 

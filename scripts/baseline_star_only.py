@@ -7,7 +7,9 @@ every threshold gets `k_t = 0` and predicts nothing, reported rather than smooth
 
   --fit    fits every k_t on development and writes conf/theme-star-baseline.json
   --score  applies the frozen thresholds to a sample and writes a score artefact in exactly
-           the shape scripts/score_themes.py writes, so the three systems sit in one table
+           the shape scripts/score_themes.py writes, so the three systems sit in one table.
+           The **audit** set is refused here: it is opened once, for all three systems
+           together, by `make audit-once` (ticket 09).
 
 The thresholds freeze with the prompt and the classifier's cuts (ADR-0002) and are applied
 unchanged to the audit set. Refitting after seeing an audit number is the thing this file
@@ -23,15 +25,19 @@ import json
 
 from pyspark.sql import functions as F
 
+from src.ai.audit_seal import (
+    STAR_SPEC_PATH,
+    require_measurement_goes_through_the_pass,
+)
 from src.ai.labels import load_taxonomy
 from src.ai.theme_labels import table_name
-from src.ai.theme_scoring import bootstrap_macro_f1, macro_f1, score_themes
+from src.ai.theme_scoring import score_themes, system_report
 from src.common import config as C
 from src.common import runs
 from src.common.config import PROJECT_ROOT
 from src.common.spark import build
 
-SPEC_PATH = PROJECT_ROOT / "conf" / "theme-star-baseline.json"
+SPEC_PATH = STAR_SPEC_PATH
 OUT_DIR = PROJECT_ROOT / "eval" / "themes"
 STARS = (1, 2, 3, 4, 5)
 
@@ -79,6 +85,13 @@ def main() -> None:
     g.add_argument("--score", action="store_true")
     args = ap.parse_args()
     tax = load_taxonomy()
+    if args.score:
+        try:
+            # The floor is scored on audit only as part of the one three-way pass (ticket 09).
+            require_measurement_goes_through_the_pass(args.sample,
+                                                      command="baseline_star_only.py --score")
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
 
     if args.fit and SPEC_PATH.exists() and not args.force:
         raise SystemExit(f"{SPEC_PATH.relative_to(PROJECT_ROOT)} is already frozen; refitting "
@@ -125,11 +138,12 @@ def main() -> None:
     thresholds = {t: int(k) for t, k in spec["thresholds"].items()}
     system = predict(reference, asg, thresholds)
     product_of = {r: asg[r]["parent_asin"] for r in reference if r in asg}
-    scores = score_themes(reference, system, tax.ids, min_support=args.min_support)
-    m = macro_f1(scores)
-    lo, hi = bootstrap_macro_f1(reference, system, tax.ids, product_of,
-                                min_support=args.min_support, seed=args.seed,
-                                draws=args.bootstrap_draws)
+    overall = system_report(subset="all", reference=reference, system=system,
+                            theme_ids=tax.ids, product_of=product_of,
+                            min_support=args.min_support, seed=args.seed,
+                            draws=args.bootstrap_draws)
+    m = overall["macro_f1"]
+    lo, hi = overall["bootstrap_95"]
     out = {"sample": args.sample, "scope": args.scope, "label_source": "star_only",
            "model_id": "star_only", "prompt_version": f"star-baseline-v{spec['version']}",
            "inference_config_hash": "", "taxonomy_version": tax.version,
@@ -139,26 +153,17 @@ def main() -> None:
            # prompts it is a floor for: src/ai/prompt_selection.require_comparable reads these.
            "bootstrap_draws": args.bootstrap_draws, "reference_source": "agent_reference",
            "reference_rows": len(reference),
-           "overall": {"subset": "all", "reviews": len(reference), "macro_f1": m,
-                       "bootstrap_95": [lo, hi],
-                       "supported_themes": [s.theme_id for s in scores if s.supported],
-                       "min_supported_recall": min([s.recall for s in scores
-                                                    if s.supported and s.recall is not None],
-                                                   default=None),
-                       "per_theme": [{"theme_id": s.theme_id, "support": s.support,
-                                      "predicted": s.predicted, "tp": s.tp, "fp": s.fp, "fn": s.fn,
-                                      "precision": s.precision, "recall": s.recall, "f1": s.f1,
-                                      "supported": s.supported} for s in scores],
-                       "coverage": {"succeeded": len(reference), "model_abstained": 0,
-                                    "parse_failed": 0, "api_failed": 0, "absent": 0,
-                                    "failure_rate": 0.0, "abstention_rate": 0.0}}}
+           # The floor predicts from a rating it always has, so it cannot fail to answer and
+           # passes no statuses: `system_report` then counts every review as succeeded. That
+           # is a claim about this system, not a default -- see its docstring.
+           "overall": overall}
     path = OUT_DIR / f"score-{args.sample}-star_only.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, indent=1) + "\n")
     print(f"STAR_BASELINE sample={args.sample} reviews={len(reference)} "
           f"macro_f1={None if m is None else round(m, 4)} "
           f"bootstrap95=[{'' if lo is None else round(lo, 4)},{'' if hi is None else round(hi, 4)}] "
-          f"supported={len(out['overall']['supported_themes'])} "
+          f"supported={len(overall['supported_themes'])} "
           f"out={path.relative_to(PROJECT_ROOT)}")
 
 

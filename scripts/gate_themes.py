@@ -12,6 +12,9 @@ Constituents, each on its own line:
                     agent_reference, never human
   THEMES_AUDIT      the audit labelling run is present, terminal for every review, and its
                     inference_config_hash matches the frozen configuration
+  THEMES_SEAL       eval/themes/audit-seal.json exists, every frozen thing the audit numbers
+                    depend on is byte-for-byte what it was when the set was opened, and the
+                    score artefacts the seal names are the ones on disk
   THEMES_SCORE      macro-F1 and the minimum supported-theme recall, against the rule frozen in
                     ADR-0003 *before* any of these numbers existed
 
@@ -30,6 +33,15 @@ from typing import Any
 
 from pyspark.sql import functions as F
 
+from src.ai.audit_seal import (
+    MACRO_F1_BAR,
+    MIN_RECALL_BAR,
+    collect_freezes,
+    fingerprint,
+    freezes_moved,
+    load_seal,
+    seal_matches_artefacts,
+)
 from src.ai.classifier_spec import llm_artefact_stem, score_artefact_name
 from src.ai.labels import load_spec, load_taxonomy
 from src.ai.theme_labels import table_name
@@ -39,8 +51,10 @@ from src.common.spark import build
 from src.gold.controls import load_protocol
 from src.spark.theme_samples import table_names as sample_tables
 
-MACRO_F1_BAR = 0.70          # ADR-0003, frozen 2026-09-06, unmoved through RR-19 and RR-21
-MIN_RECALL_BAR = 0.50
+# The bars are ADR-0003's, frozen 2026-09-06 and unmoved through RR-19, RR-21 and ticket 06.
+# They live in src/ai/audit_seal.py because they are *inside* the audit fingerprint: a bar
+# lowered after the audit invalidates the measurement exactly as a refitted cut does, and a
+# rule the seal cannot see is a rule the seal cannot protect.
 TAXONOMY_CEILING = 10
 SCORES = C.PROJECT_ROOT / "eval" / "themes"
 
@@ -144,6 +158,49 @@ def check_audit_run(spark, scope: str, audit_run: dict[str, Any] | None, audit_s
     return ok
 
 
+def check_seal() -> bool:
+    """The audit was opened once, under freezes that have not moved since (ticket 09).
+
+    THEMES_SCORE reads a number off a file. This is what says the number still means what it
+    meant when it was measured: the prompt, the cuts, the star thresholds, the taxonomy and
+    the pass rule are re-derived from today's config files and compared against the material
+    the seal recorded. Differences are printed by name, because "the fingerprint differs" only
+    tells a reader that something moved, not what.
+    """
+    seal = load_seal()
+    if seal is None:
+        print("THEMES_SEAL seal=missing opened=false ok=false "
+              "(the audit set has not been opened; run `make audit-once`, ticket 09)")
+        return False
+    try:
+        current = collect_freezes()
+    except ValueError as exc:
+        print(f"THEMES_SEAL seal={seal['freeze_fingerprint'][:12]} freezes_unreadable=true "
+              f"ok=false ({exc})")
+        return False
+    moved = freezes_moved(seal["freezes"], current)
+    artefacts = seal_matches_artefacts(seal, scores_dir=SCORES)
+    now = fingerprint(current)
+    ok = not moved and not artefacts and now == seal["freeze_fingerprint"]
+    print(f"THEMES_SEAL opened_at={seal['opened_at']} commit={seal.get('git_commit_sha', '')[:8]} "
+          f"sealed={seal['freeze_fingerprint'][:12]} today={now[:12]} "
+          f"systems={len(seal['systems'])} freezes_moved={len(moved)} "
+          f"artefacts_changed={len(artefacts)} verdict={'PASS' if seal['verdict']['passed'] else 'FAIL'} "
+          f"ok={b(ok)}")
+    for diff in moved:
+        print(f"THEMES_SEAL_MOVED {diff}")
+    for fail in artefacts:
+        print(f"THEMES_SEAL_ARTEFACT {fail}")
+    for sysrow in seal["systems"]:
+        sm = sysrow["macro_f1"]
+        print(f"THEMES_SEAL_SYSTEM {sysrow['system']:<11} "
+              f"macro_f1={'none' if sm is None else round(sm, 4)} "
+              f"min_supported_recall={sysrow['min_supported_recall']} "
+              f"reviews={sysrow['reviews']} runs={len(sysrow['run_ids'])} "
+              f"artefact={sysrow['artefact']}")
+    return ok
+
+
 def check_score(score: dict[str, Any] | None) -> bool:
     if score is None:
         print(f"THEMES_SCORE artefact=missing macro_f1=none bar={MACRO_F1_BAR} ok=false")
@@ -200,6 +257,7 @@ def main() -> None:
             check_prompt(spec, audit_run)[0],
             check_reference(spark, args.scope, audit_size),
             check_audit_run(spark, args.scope, audit_run, audit_size),
+            check_seal(),
             check_score(score),
         ]
     finally:
