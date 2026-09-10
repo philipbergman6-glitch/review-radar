@@ -126,7 +126,8 @@ def main() -> None:
     floor_o = floor["overall"]
     won = systems[winner.version]["overall"]
     overlaps = intervals_overlap(tuple(won["bootstrap_95"]), tuple(floor_o["bootstrap_95"]))
-    margin = won["macro_f1"] - floor_o["macro_f1"]
+    margin = (None if floor_o["macro_f1"] is None
+              else won["macro_f1"] - floor_o["macro_f1"])
 
     spark = build("select_prompt", cores="local[2]", driver_memory="2g")
     try:
@@ -188,19 +189,23 @@ def main() -> None:
     path = OUT_DIR / f"selection-{args.sample}.json"
     path.write_text(json.dumps(out, indent=1) + "\n")
 
+    def n(v: float | None) -> str:
+        """A number that does not exist prints as `none`, never as a crash or a zero."""
+        return "none" if v is None else f"{round(v, 4)}"
+
     for version, d in systems.items():
         o = d["overall"]
         cen = censuses[version]
         lo, hi = o["bootstrap_95"]
-        print(f"PROMPT_CANDIDATE version={version:<17} macro_f1={round(o['macro_f1'], 4):<7} "
-              f"bootstrap95=[{round(lo, 4)},{round(hi, 4)}] "
-              f"min_supported_recall={round(o['min_supported_recall'], 4)} "
+        print(f"PROMPT_CANDIDATE version={version:<17} macro_f1={n(o['macro_f1']):<7} "
+              f"bootstrap95=[{n(lo)},{n(hi)}] "
+              f"min_supported_recall={n(o['min_supported_recall'])} "
               f"failure_rate={o['coverage']['failure_rate']} "
               f"parse_failed={o['coverage']['parse_failed']} "
               f"top_cause={next(iter(cen['by_cause']), 'none') if cen else 'n/a'}")
-    print(f"PROMPT_SELECTION winner={winner.version} macro_f1={round(won['macro_f1'], 4)} "
-          f"reason=\"{reason}\" star_only={round(floor_o['macro_f1'], 4)} "
-          f"margin={round(margin, 4)} intervals_overlap={str(overlaps).lower()} "
+    print(f"PROMPT_SELECTION winner={winner.version} macro_f1={n(won['macro_f1'])} "
+          f"reason=\"{reason}\" star_only={n(floor_o['macro_f1'])} "
+          f"margin={n(margin)} intervals_overlap={str(overlaps).lower()} "
           f"audit_system_rows={audit['audit_system_label_rows']} "
           f"out={path.relative_to(PROJECT_ROOT)}")
 
