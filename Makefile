@@ -7,9 +7,11 @@ CATEGORY ?= All_Beauty
 SAMPLE ?= data/sample/$(CATEGORY).sample.jsonl
 TOPIC ?= reviews.raw
 SAMPLE_NAME ?= development
-PROMPT ?= label_v4
+# The frozen prompt (conf/theme-label-spec.json frozen_prompt, ticket 06). Keep these in step:
+# a stale default here would label the training pool with a superseded teacher.
+PROMPT ?= label_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -142,6 +144,12 @@ blind-export:  ## write eval/themes/blind-<SAMPLE>.jsonl + .map.json for blind l
 
 label-themes:  ## run the labeller over a frame (SAMPLE_NAME, PROMPT, MODEL) -> gold.review_theme_labels
 	$(RUN) -m src.ai.label_themes --sample $(SAMPLE_NAME) --prompt $(PROMPT) $(if $(MODEL),--model $(MODEL),)
+
+label-pool:  ## label the 3,000-review training pool with the frozen prompt (ticket 07); resumable
+	$(RUN) -m src.ai.label_themes --sample training_pool --prompt $(PROMPT)
+
+pool-census:  ## what the labelled pool teaches after the drop -> eval/themes/training-pool-*.json
+	$(RUN) scripts/pool_census.py --scope full
 
 import-reference:  ## import the agent's blind ground truth (label_source=agent_reference)
 	$(RUN) scripts/import_reference_labels.py --sample $(SAMPLE_NAME)

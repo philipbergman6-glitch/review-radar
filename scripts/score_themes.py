@@ -21,6 +21,7 @@ from typing import Any
 from pyspark.sql import functions as F
 
 from src.ai.label_themes import PROMPT_MAX_THEMES
+from src.ai.label_usage import for_evaluation, theme_ids
 from src.ai.labels import decoding_schema, load_spec, load_taxonomy
 from src.ai.theme_labels import table_name
 from src.ai.theme_scoring import (
@@ -44,7 +45,9 @@ def main() -> None:
     ap.add_argument("--sample", required=True, choices=["development", "audit"])
     ap.add_argument("--scope", default="full", choices=["full", "sample"])
     ap.add_argument("--category", default=C.CATEGORY)
-    ap.add_argument("--prompt", default="label_v4")
+    _frozen = load_spec().frozen
+    ap.add_argument("--prompt", default=_frozen.name if _frozen else "label_v4",
+                    help="prompt name in conf/theme-label-spec.json (default: the frozen one)")
     ap.add_argument("--model", default=None, help="the comparison model, e.g. llama3.2:3b")
     ap.add_argument("--source", default="local_llm",
                     help="label_source of the system under test (local_llm | classifier)")
@@ -85,9 +88,11 @@ def main() -> None:
 
     if not ref_rows:
         raise SystemExit(f"no {REFERENCE_SOURCE} labels for budget line {args.sample!r}")
-    reference = {r["source_review_id"]: {t["theme_id"] for t in (r["themes"] or [])} for r in ref_rows}
+    reference = {r["source_review_id"]: theme_ids(r["themes"]) for r in ref_rows}
     reference_other = {r["source_review_id"]: bool(r["other_present"]) for r in ref_rows}
-    system = {r["source_review_id"]: {t["theme_id"] for t in (r["themes"] or [])} for r in sys_rows}
+    # `for_evaluation`, not `r["themes"] or []`: a parse failure scoring as an empty prediction
+    # is a decision, and it is asserted against the training drop in tests/test_label_usage.py.
+    system = {r["source_review_id"]: for_evaluation(r) for r in sys_rows}
     system_other = {r["source_review_id"]: r["other_present"] for r in sys_rows}
     statuses = {r["source_review_id"]: r["label_status"] for r in sys_rows}
     selected = sorted(reference)

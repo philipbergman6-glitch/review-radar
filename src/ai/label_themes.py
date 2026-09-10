@@ -99,6 +99,10 @@ def run_label_themes(spark: SparkSession, *, sample: str, scope: str, category: 
     spec = load_spec()
     tax = load_taxonomy()
     model = model_id or spec.model_id
+    if sample == "training_pool":
+        # The classifier's teacher (ticket 07, ADR-0002). Any other prompt's rows would land in
+        # the same table under a different hash and read as a pool; refuse before spending hours.
+        spec.require_frozen(purpose="labelling the training pool", prompt_name=prompt_name)
     prompt = spec.prompts[prompt_name]
     schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt.version))
     config_hash = spec.config_hash(prompt_name, schema, extra={"taxonomy": tax.file_hash},
@@ -238,7 +242,10 @@ def main() -> None:
     ap.add_argument("--sample", required=True, choices=["development", "audit", "training_pool"])
     ap.add_argument("--scope", default="full", choices=["full", "sample"])
     ap.add_argument("--category", default=C.CATEGORY)
-    ap.add_argument("--prompt", default="label", help="prompt name in conf/theme-label-spec.json")
+    frozen = load_spec().frozen
+    ap.add_argument("--prompt", default=frozen.name if frozen else "label",
+                    help=f"prompt name in conf/theme-label-spec.json (default: the frozen "
+                         f"{frozen.version if frozen else 'none'})")
     ap.add_argument("--model", default=None, help="override the primary model (the comparison row)")
     ap.add_argument("--limit", type=int, default=None, help="execution setting: infer at most N pending")
     ap.add_argument("--chunk", type=int, default=25, help="execution setting: rows per MERGE")

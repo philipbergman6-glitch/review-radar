@@ -15,7 +15,8 @@ and the abstention. It emits a theme set and nothing else.
 Training drops pool rows that ended `parse_failed` or `api_failed` (RR-23): a row with no label
 is not a row with no themes, and training on it teaches the model that long, complaint-dense
 reviews are empty. The count dropped is reported. On the *evaluation* sets a failure still
-scores as an empty prediction for every system -- that is a different question.
+scores as an empty prediction for every system -- that is a different question. Both halves of
+that asymmetry live in `src.ai.label_usage`, which is where the rule is stated once and tested.
 
 Run:  ./run.sh python -m src.spark.theme_classifier --train
       ./run.sh python -m src.spark.theme_classifier --score --sample audit
@@ -36,6 +37,7 @@ from pyspark.ml.feature import IDF, CountVectorizer, RegexTokenizer, StopWordsRe
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+from src.ai.label_usage import TRAINABLE_STATUSES, theme_ids, training_census
 from src.ai.labels import idempotency_key, load_taxonomy
 from src.ai.theme_labels import ensure_table, label_row, merge_chunk, table_name
 from src.common import config as C
@@ -127,10 +129,24 @@ def train(spark: SparkSession, *, scope: str, category: str, source_config_hash:
     try:
         pool, _, _ = labelled_frame(spark, sample="training_pool", scope=scope, category=category,
                                     source="local_llm", config_hash=source_config_hash)
-        total = pool.count()
-        usable = pool.filter(F.col("label_status").isin("succeeded", "model_abstained")).cache()
+        pool = pool.cache()
+        # The drop is named, not inferred from a row-count difference: `training_census` is the
+        # same function the asymmetry test asserts on, so what lands in the run contract is what
+        # `for_training` would decide row by row.
+        census = training_census(r["label_status"] for r in pool.select("label_status").collect())
+        usable = pool.filter(F.col("label_status").isin(list(TRAINABLE_STATUSES))).cache()
         n = usable.count()
-        counts.update({"pool_rows": total, "training_rows": n, "dropped_failed_rows": total - n})
+        if n != census["training_rows"]:
+            raise RuntimeError(f"the Spark filter kept {n} rows but the census says "
+                               f"{census['training_rows']}; the two readings have drifted")
+        counts.update({"pool_rows": census["pool_rows"], "training_rows": n,
+                       "dropped_failed_rows": census["dropped_rows"],
+                       "dropped_by_status": census["dropped_by_status"],
+                       "pool_by_status": census["by_status"],
+                       "drop_rate": census["drop_rate"]})
+        print(f"[classifier] pool {census['pool_rows']} rows: training on {n}, dropped "
+              f"{census['dropped_rows']} unanswered ({census['drop_rate']}) "
+              f"{census['dropped_by_status'] or '{}'}")
         if n < 100:
             raise RuntimeError(f"only {n} usable training rows; the pool must be labelled first")
         for theme in tax.ids:
@@ -173,13 +189,17 @@ def train(spark: SparkSession, *, scope: str, category: str, source_config_hash:
          "spec_hash": shash, "model_path": str(MODEL_DIR.relative_to(C.PROJECT_ROOT) / shash[:12]),
          "taxonomy_version": tax.version, "taxonomy_hash": tax.file_hash,
          "training_labels_config": source_config_hash, "hyperparams": HYPERPARAMS,
-         "training_rows": counts["training_rows"], "vocabulary": counts["vocabulary"],
+         "pool_rows": counts["pool_rows"], "training_rows": counts["training_rows"],
+         "dropped_unanswered_rows": counts["dropped_failed_rows"],
+         "dropped_by_status": counts["dropped_by_status"],
+         "vocabulary": counts["vocabulary"],
          "thresholds": None, "thresholds_fitted_on": None,
          "note": "thresholds are fitted on development by --fit-thresholds and frozen with the prompt"},
         indent=1) + "\n")
     print(f"CLASSIFIER_TRAIN run_id={run.run_id} spec={shash[:12]} pool={counts['pool_rows']} "
           f"trained_on={counts['training_rows']} dropped_failed={counts['dropped_failed_rows']} "
-          f"vocab={counts['vocabulary']} elapsed_s={counts['elapsed_s']}")
+          f"drop_rate={counts['drop_rate']} vocab={counts['vocabulary']} "
+          f"elapsed_s={counts['elapsed_s']}")
     return {"run_id": run.run_id, "spec_hash": shash}
 
 
@@ -205,7 +225,7 @@ def fit_thresholds(spark: SparkSession, *, scope: str, category: str, force: boo
                          "exists is what ADR-0002 forbids")
     frame, _, _ = labelled_frame(spark, sample="development", scope=scope, category=category,
                                  source="agent_reference", config_hash=None)
-    reference = {r["review_id"]: {t["theme_id"] for t in (r["themes"] or [])}
+    reference = {r["review_id"]: theme_ids(r["themes"])
                  for r in frame.select("review_id", "themes").collect()}
     scores = _predict(spark, frame, tax, C.PROJECT_ROOT / spec["model_path"])
     step = HYPERPARAMS["threshold_grid_step"]

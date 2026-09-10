@@ -1,12 +1,14 @@
 """The labelling spec, its identity hash, and the validation that never repairs (ADR-0003, RR-19)."""
 from __future__ import annotations
 
+import dataclasses
 import json
 
 import pytest
 
 from src.ai.labels import (
     DISCOVERY_SCHEMA,
+    SPEC_PATH,
     idempotency_key,
     load_spec,
     quote_is_evidence,
@@ -152,3 +154,54 @@ def test_the_frozen_prompt_block_names_a_real_prompt_and_the_score_it_was_select
     assert scored["overall"]["macro_f1"] == frozen["selected_on"]["value"]
     # The score that selected the prompt was over the whole frame, not the rows it answered.
     assert scored["reference_rows"] == scored["system_rows"] == scored["overall"]["reviews"]
+
+
+def test_the_frozen_prompt_is_loaded_as_structure_not_only_as_raw_json(spec):
+    assert spec.frozen is not None
+    assert spec.frozen.name == spec.raw["frozen_prompt"]["name"]
+    assert spec.frozen.version == spec.prompts[spec.frozen.name].version
+
+
+def test_require_frozen_refuses_a_prompt_that_is_not_the_frozen_one(spec):
+    """Ticket 07: the pool's teacher must be the frozen prompt and nothing else."""
+    assert spec.require_frozen(purpose="x", prompt_name=spec.frozen.name) is spec.frozen
+    other = next(n for n in spec.prompts if n != spec.frozen.name)
+    with pytest.raises(ValueError, match="must use the frozen prompt"):
+        spec.require_frozen(purpose="labelling the training pool", prompt_name=other)
+
+
+def test_require_frozen_refuses_when_nothing_is_frozen(spec):
+    unfrozen = dataclasses.replace(spec, frozen=None)
+    with pytest.raises(ValueError, match="no frozen_prompt block"):
+        unfrozen.require_frozen(purpose="labelling the training pool")
+
+
+def test_the_makefile_default_prompt_is_the_frozen_one(spec):
+    """`make label-pool` and `make score-themes` both take PROMPT from one line of the Makefile.
+
+    A stale default there would label the classifier's teacher with a superseded prompt. The
+    labelling job refuses that for the pool, but `score-themes` and `diagnose-failures` would
+    quietly report on the wrong configuration, so the two are pinned together here.
+    """
+    line = next(ln for ln in (PROJECT_ROOT / "Makefile").read_text().splitlines()
+                if ln.startswith("PROMPT ?="))
+    assert line.split("=", 1)[1].strip() == spec.frozen.name
+
+
+def test_load_spec_rejects_a_freeze_record_that_has_drifted_from_its_prompt(tmp_path):
+    """A freeze naming a version its prompt no longer carries is a lie the loader must not pass on."""
+    doc = json.loads(SPEC_PATH.read_text())
+    doc["frozen_prompt"]["version"] = "label-v99"
+    path = tmp_path / "spec.json"
+    path.write_text(json.dumps(doc))
+    with pytest.raises(ValueError, match="freeze record has drifted"):
+        load_spec(path)
+
+
+def test_load_spec_rejects_a_freeze_naming_a_prompt_that_does_not_exist(tmp_path):
+    doc = json.loads(SPEC_PATH.read_text())
+    doc["frozen_prompt"]["name"] = "label_v42"
+    path = tmp_path / "spec.json"
+    path.write_text(json.dumps(doc))
+    with pytest.raises(ValueError, match="not a declared prompt"):
+        load_spec(path)

@@ -45,6 +45,16 @@ class Prompt:
 
 
 @dataclass(frozen=True)
+class FrozenPrompt:
+    """The one prompt ADR-0003 lets downstream work depend on, recorded by ticket 06's freeze."""
+
+    name: str
+    version: str
+    freeze_commit: str
+    decided_in: str
+
+
+@dataclass(frozen=True)
 class LabelSpec:
     label_spec_version: str
     host: str
@@ -55,7 +65,28 @@ class LabelSpec:
     inference: dict[str, Any]
     limits: dict[str, Any]
     prompts: dict[str, Prompt]
+    frozen: FrozenPrompt | None
     raw: dict[str, Any]
+
+    def require_frozen(self, *, purpose: str, prompt_name: str | None = None) -> FrozenPrompt:
+        """The frozen prompt, hard-failing if there is none -- or if `prompt_name` is not it.
+
+        The classifier's pass rule (ADR-0002) compares it against the labeller's own numbers,
+        which were measured under one prompt. A teacher labelled by any other prompt makes that
+        comparison meaningless, and it would do so silently -- the rows land in the same table
+        and differ only by a hash -- so the refusal happens before the run, not in review.
+
+        `prompt_name=None` asks only that a freeze exists, for a caller that reads the frozen
+        prompt out of the spec rather than being handed one.
+        """
+        if self.frozen is None:
+            raise ValueError(f"{purpose} needs the frozen prompt, but conf/theme-label-spec.json "
+                             "carries no frozen_prompt block; run the freeze first (ticket 06)")
+        if prompt_name is not None and prompt_name != self.frozen.name:
+            raise ValueError(f"{purpose} must use the frozen prompt {self.frozen.name!r} "
+                             f"({self.frozen.version}, frozen in {self.frozen.decided_in}), "
+                             f"got {prompt_name!r}")
+        return self.frozen
 
     def config_hash(self, prompt_name: str, schema: dict[str, Any], *,
                     extra: dict[str, Any] | None = None, model_id: str | None = None) -> str:
@@ -91,11 +122,20 @@ def load_spec(path: Path = SPEC_PATH) -> LabelSpec:
         if not text.strip():
             raise ValueError(f"prompt {name} at {p['path']} is empty")
         prompts[name] = Prompt(name=name, version=p["version"], path=f, text=text, hash=_sha256(text))
+    frozen = None
+    if (fp := doc.get("frozen_prompt")):
+        if fp["name"] not in prompts:
+            raise ValueError(f"frozen_prompt names {fp['name']!r}, which is not a declared prompt")
+        if prompts[fp["name"]].version != fp["version"]:
+            raise ValueError(f"frozen_prompt says {fp['version']!r} but prompt {fp['name']!r} is "
+                             f"{prompts[fp['name']].version!r}; the freeze record has drifted")
+        frozen = FrozenPrompt(name=fp["name"], version=fp["version"],
+                              freeze_commit=fp["freeze_commit"], decided_in=fp["decided_in"])
     return LabelSpec(
         label_spec_version=str(doc["label_spec_version"]), host=doc["host"], endpoint=doc["endpoint"],
         model_id=doc["model_id"], comparison_model_id=doc["comparison_model_id"],
         api_mode=doc["api_mode"], inference=doc["inference"], limits=doc["limits"],
-        prompts=prompts, raw=doc)
+        prompts=prompts, frozen=frozen, raw=doc)
 
 
 def idempotency_key(*, source_review_id: str, label_source: str, model_id: str,
