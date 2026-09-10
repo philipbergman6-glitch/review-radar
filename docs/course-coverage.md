@@ -65,6 +65,31 @@ weakness and closes it with embeddings + kNN in the same engine. Build the
 semantic-search demo as a **side-by-side BM25 vs kNN comparison** — it is
 directly legible to the grader and answers "why not just BM25?" pre-emptively.
 
+**Built 2026-09 (P4 Search + P5 Embeddings, RR-01 / RR-06, ADR-0004 / ADR-0005).**
+Three qualifications the design doc and the talk must carry, because the
+comparison is easy to overclaim:
+
+1. **Two evaluation tables, never merged.** The *controlled* table scores all
+   three retrievers on the ≥ 20-word vector cohort, which is the only population
+   where kNN can compete; the *production* table scores unfiltered BM25 against
+   the production hybrid. Reporting a single number across both would compare
+   retrievers on different corpora.
+2. **"Hybrid beats BM25" is a pre-registered hypothesis that was tested, not a
+   claim.** H-E1 did **not** hold; H-E2 and H-E3 held (`README.md` P5 row,
+   `docs/decisions/embeddings-retrieval.md`). Say which held. The honest framing
+   is the one the deck sets up — neither method wins alone — and a hypothesis
+   that failed is evidence the evaluation was real.
+3. **Fusion is client-side, not the ES RRF endpoint.** `retriever.rrf` and the
+   legacy `rank.rrf` are Enterprise-only on 8.17 and return HTTP 403
+   `security_exception` on the basic licence (RR-04,
+   `docs/research/RR-04-rrf-licence-es817.md`). The project fuses two ES calls in
+   the client with `Σ 1/(60 + rank)` — which is also the more explainable option,
+   since the arithmetic is visible during the demo rather than hidden in a plugin.
+
+Relevance labels on the frozen 20-query set are **model-judged** (`judge=claude`)
+with a human audit subset; both decision docs state this rather than implying
+hand-labelled ground truth.
+
 ### 4. Spark Structured Streaming and its exactly-once claim are taught
 > `SPARK STRUCTURED STREAMING`
 > `▪ End-to-end exactly-once fault-tolerance guarantees through checkpointing and …`
@@ -74,6 +99,22 @@ Also taught: DStream/RDD-based Spark Streaming (the older API), `withWatermark`,
 
 **Consequence.** Phase 1's SIGKILL proof demonstrates a guarantee the course
 *asserts* but does not prove. That is a genuine differentiator — lead with it.
+
+**P8 Stream uses precisely the taught API** (RR-10, ADR-0010). The three calls
+the streaming job is built on are all on deck 3's own DataFrame method lists,
+verbatim `[observed docs/course/…2026 חלק 3.txt:447,450,870]`:
+
+> `… offset  rollup  stat  transform … withWatermark`  (line 447)
+> `columns  dropDuplicatesWithinWatermark  groupBy  joinWith …`  (line 450)
+> `▪ Streaming aggregations, event-time windows, stream-to-batch joins, etc.`  (line 870)
+
+So the streaming phase is not a departure from the course — it is the course's
+own API list, exercised. What the project adds is a *measurement*: lateness is
+**injected** (two held-back slices, near lag 7 d must be accepted, far lag 730 d
+must be dropped, counts known before the run) and a control run must print zero
+natural drops, so `dropDuplicatesWithinWatermark` is shown working rather than
+asserted. The stream is a reconciled projection **beside** batch, not a
+replacement — `STREAM_RECON` prints how the two agree.
 
 ### 5. Spark MLlib is taught (deck 3 only, 18 mentions)
 > `SPARK MLLIB` … `▪ MLlib contains many algorithms and utilities`
@@ -102,8 +143,18 @@ Quote it verbatim in the Q&A. Same framing covers Pig (3 mentions total).
 
 41 mentions, with live shell transcripts. This is the **weakest point** in the
 current design's course-technology coverage — MinIO substitutes for it on
-memory grounds, but HDFS was demonstrated, not merely described. Unresolved;
-decide deliberately rather than by omission.
+memory grounds, but HDFS was demonstrated, not merely described.
+
+**Resolved 2026-09-10 (RR-14, carrying RR-18 §4): DECLINED, including the
+single-node fallback.** §5 below kept a fallback open — one container for one
+`hdfs dfs -put` step. It is now closed as out of scope: Colima's 8 GB is already
+shared by Kafka, Elasticsearch, PostgreSQL, MinIO and Kibana, and Iceberg needs
+S3-compatible storage regardless, so a NameNode buys a shell transcript at the
+cost of demo stability. The design doc's §8 says this out loud and **concedes
+the non-equivalence** — HDFS is a distributed filesystem with block-level
+replication and rack awareness; MinIO is an object store with a flat key space
+and no atomic rename. That concession is the point: the decision is defensible,
+the claim that they are interchangeable is not.
 
 ### 8. Oozie is taught as the Hadoop ETL orchestrator
 > `• Hadoop ETL – Apache Oozie`
@@ -112,6 +163,17 @@ decide deliberately rather than by omission.
 25 mentions. Cutting it needs a better argument than Sqoop's, since it is not
 retired. Current argument (Spark subsumes multistage orchestration) is
 reasonable but is an opinion, not a citation.
+
+**Resolved 2026-09-10 (RR-14, carrying RR-18 §4): DECLINED, and owned as an
+opinion** — the design doc says the word *opinion*, because §6 below already
+established that no quote supports the cut. The follow-up answer is the actual
+mechanism, not a dismissal of Oozie: the **run ledger** (ADR-0008,
+`src/common/runs.py`) records one row per execution attempt of every job with
+typed inputs/outputs/counts, a UUID `run_id` stamped into every Iceberg snapshot,
+ES doc and eval artefact, and downstream stages pinned to one successful run's
+complete output set. That is what filled Oozie's role — a real multistage
+lineage mechanism, demonstrated at demo move 4, rather than a claim that
+orchestration was unnecessary.
 
 ### 9. Kafka is taught on ZooKeeper; the project runs KRaft
 `KRaft` = **0** mentions across all decks. The deck teaches:
@@ -240,14 +302,28 @@ Resolutions for the seven ranked items above, with the argument to use in the
 design doc and the Q&A. Items 1-3 are committed work; 4-7 are reasoned
 positions that must survive a follow-up question.
 
-## 1. Kibana — ADD. Committed to Phase 2.
+> **Phase numbering.** These decisions were written on 2026-09-01, when the plan
+> had Kibana and the ES mapping in "Phase 2". `RR-01` (2026-09-06, ADR-0004)
+> split search out of embeddings and fixed the list: **P2 Silver → P3 Gold →
+> P4 Search → P5 Embeddings → P6 Themes → P7 RAG (conditional) → P8 Stream
+> (conditional)**, plus a **Deliverables track** running throughout. Both items
+> below belong to **P4 Search**, and both are now **built**. Names are the
+> durable reference; the numbers are ordering labels.
+
+## 1. Kibana — ADD. Committed to P4 Search. **Built.**
 Not a judgement call. Deck 5, verbatim: `We will mostly use Kibana throughout
 this course`, and the ELK diagram is `Beats  Kafka  Logstash  Elasticsearch
 Kibana`. One compose service against the running Elasticsearch, plus a saved
 dashboard over the gold layer. It also solves a separate problem: the live demo
 currently has no visual surface, and presentation is 10% of the grade.
 
-## 2. Explicit ES mapping + custom analyzer — ADD. Committed to Phase 2.
+**As built:** compose profile `ui` (`make up-ui`, Kibana 8.17.0 pinned to the ES
+version), a repo-stored saved-object export (`conf/kibana/product_month_dashboard.ndjson`)
+with an idempotent import (`make kibana-import`), reading **only** the
+`product_month` alias — never silver, never the raw review index. It carries
+exactly one live demo move: the decline-candidates view (RR-11 move 5).
+
+## 2. Explicit ES mapping + custom analyzer — ADD. Committed to P4 Search. **Built.**
 Deck 5 is the largest deck (264 pages) and teaches `TEXT ANALYSIS`, `ANALYZERS`,
 `INVERTED INDEX`, `tokenizer` (13), `analyzer` (54). Indexing has to be written
 anyway; writing it with an explicit mapping and a deliberately chosen analyzer
@@ -258,6 +334,16 @@ Concretely: define the review-text field with a custom analyzer (lowercase +
 stop + stemmer), keep a `.keyword` subfield for aggregations, and give
 `dense_vector` its own explicit field. Then the BM25-vs-kNN comparison in
 Finding 3 runs against a mapping we can explain line by line.
+
+**As built** (`conf/es/reviews.contract.json`, ADR-0004): a *mapping contract*
+rather than a mapping — `dynamic: strict`, so an undeclared field is a hard
+error at index time rather than a silently inferred one; required-field
+validation in the indexer; and contract and analyzer tests in CI. It is the
+first Search deliverable and is undroppable, because `SEARCH_GATE` cannot pass
+without it. Two analyzers ship (stemmed and `text.unstemmed`), and the choice
+between them was **measured** on the frozen 20-query blind-pooled set rather
+than asserted — `docs/decisions/search-analyzer.md`. 7/7 analyzer cases pass;
+693,547 docs sit behind the `reviews` alias.
 
 ## 3. Name the V's in the design doc — ADD. One paragraph.
 Deck 2 defines the scope: `Project that involves collection and analyze data
@@ -271,12 +357,24 @@ with at least on of the 4 V's`. Each claim gets a measured number from
 - **Variety** — semi-structured JSON with a free-form `details` object whose
   keys collide on case (this is why `src/common/schemas.py` types it as a
   string), plus a relational catalogue joined from PostgreSQL.
-- **Veracity** — 6,139 duplicate `(user_id, parent_asin, timestamp)` triples,
-  720 empty-text reviews, `price` present on only 15.7% of products and dirty
-  when present (`null` / `9.99` / `$9.99` / ranges).
+- **Veracity** — **6,139 collision groups** over 13,415 rows on the canonical
+  `(user, product, timestamp)` identity, of which 6,138 are byte-exact, 1
+  conflicts on `helpful_vote` and **0 disagree on rating**, so silver removed
+  **7,276 rows** and kept one survivor per group; 720 empty-text reviews
+  (quarantined, not dropped); `price` present on only 15.7% of products and
+  dirty when present (`null` / `9.99` / `$9.99` / ranges).
 
 Variability is the fifth V on the slide; the 2000-2023 span with a 2020 peak of
 126,753 reviews covers it if asked.
+
+> **This paragraph is design-doc §2 verbatim** (`RR-18` §3), which is why the
+> Veracity line is worded precisely. **Never say "6,139 duplicates."** 6,139 is
+> the count of *collision groups*; the count of *rows removed* is 7,276, and it
+> is what `SILVER_COLLISIONS` prints (RR-02, ADR-0007). Quoting the group count
+> as a row count understates the dedupe by 1,137 rows, and the distinction is
+> the whole finding: **zero rating disagreements** across 6,139 groups is the
+> evidence these are the same review recorded twice, not two opinions — which is
+> also prepared Q&A answer 5.
 
 ## 4. Kafka Connect — DECLINE the connector, but the honest reason is narrow
 The deck answers this itself. On what Connect ships with:
@@ -307,6 +405,19 @@ comfortably, since it closes a 43-mention hole for modest work. If it is not
 taken, say so out loud in the design doc rather than leaving it unmentioned;
 an acknowledged gap reads as judgement, an unmentioned one reads as ignorance.
 
+**Resolved 2026-09-10 (RR-14, carrying RR-18 §4): the sink was NOT taken, and
+the design doc says `dropped for time`.** The wording is binding, because the
+two halves of this decision have different strengths and must not be blurred:
+the *source* decline is argued from the deck's own `Except for a trivial "file"
+connector` line and is a good argument; the *sink* decline has no such cover —
+the deck names `Kafka Connect connectors for JDBC, HDFS, S3, and Elasticsearch`
+explicitly, and the project does write Kafka-to-Elasticsearch data movement by
+hand. So it is a genuine 43-mention coverage hole, declined on the three-week
+budget rather than on the merits, and it is stated that way. Hiding a schedule
+cut behind the "trivial connector" quote would be using a sound argument to
+cover an unsound one, and it is exactly the move a grader who knows deck 4
+would catch.
+
 Kafka Streams (5 mentions) and ksqlDB (4) stay cut — Spark already does the
 stream processing and duplicating it would add surface without adding
 understanding.
@@ -330,6 +441,12 @@ defensible; claiming they are interchangeable is not.
 exactly one demonstrated step — `hdfs dfs -put` of the raw JSONL, read back by
 Spark — proves the API without carrying a cluster. Cheap insurance for 41
 mentions. Take it if memory allows after Kibana is in.
+
+**Resolved 2026-09-10 (RR-14): the fallback was NOT taken.** Kibana went in
+(item 1) and took the last of the memory headroom — container caps now total
+5.5 GB of Colima's 8 GB, with the Spark driver's 4 GB on top as host memory.
+The decline stands as written above, concession included, and it is one line in
+design-doc §8 rather than a silence. See Finding 7.
 
 ## 6. Oozie, Sqoop, Pig — DECLINE. Sqoop has a citation; the others do not.
 Sqoop is settled by the course's own slide:
@@ -364,3 +481,48 @@ rubric line is "use of course technologies", and a technology consciously
 declined with a stated reason demonstrates more command of the material than one
 included without understanding. Silence on a 41-mention topic reads as a gap;
 a paragraph on it reads as engineering judgement.
+
+---
+
+# The AI layer against the course (2026-09-10, RR-14)
+
+The decks barely mention the AI layer — `LLM` 2, `RAG` 1, `dense_vector` 0,
+`kNN` 0 — so **none of it earns course-technology credit**, and claiming
+otherwise would be the same error Finding 1 catches with Iceberg. It scores
+under *AI capability* (25%), and its one genuine bridge to the course is
+Finding 3: deck 5 establishes BM25 and names its weakness, and the project
+measures that weakness in the same engine.
+
+Three capabilities, each with an evaluation table and a threshold set **before**
+it was measured (ADR-0006, ADR-0011):
+
+| capability | phase | course anchor | status |
+|---|---|---|---|
+| Embeddings + semantic search | P5 | deck 5's BM25 limitation, verbatim | built, `EMBED_GATE=PASS` |
+| Complaint-theme labelling (+ MLlib baseline) | P6 | deck 3's `SPARK MLLIB`, via the `spark.ml` baseline only | mid-flight |
+| RAG question answering | P7 | none — 1 deck mention | conditional |
+
+**What the RAG answers may and may not claim.** Temporal RAG answers contrast
+the **cited example reviews** from each window and nothing else. The
+quantitative claim — *this theme's prevalence rose by X points between these two
+windows* — lives in the **gold theme-shift table**, which is computed over every
+labelled review, never inferred from a handful of retrieved passages. A
+retriever returns what it ranks highest, not a representative sample, so a
+prevalence figure read off retrieved text would be an artefact of the ranking.
+Answer keys forbid prevalence and direction claims for exactly this reason, and
+the citation contract (`RAG_GATE`, 30/30) is what enforces the boundary.
+
+**Where the MLlib credit actually comes from.** It is the `spark.ml` theme
+classifier baseline (Finding 5, ADR-0002) — CountVectorizer → IDF → per-theme
+logistic regression, trained on LLM labels and scored beside the LLM labeller
+and a star-only baseline. It is a **baseline in an evaluation**, not a fourth
+capability and never a predictor feeding analysis; classifier rows carry
+`label_source="classifier"` and the primary theme-shift job asserts
+`label_source="llm"`. The earlier "MLlib Statistics" framing was withdrawn —
+`pyspark.ml.stat` has no bootstrap, so the claim had nothing behind it.
+
+**The one place the AI layer weakens a course claim** — and the design doc says
+it out loud as trade-off 2: the primary labeller is local `qwen3:8b` via Ollama,
+not hosted Haiku, because `ANTHROPIC_API_KEY` is empty (RR-19). The 0.70
+macro-F1 bar was **not lowered** to accommodate it; a miss is reported as FAIL
+with the caveat attached to the theme-shift table.

@@ -112,6 +112,8 @@ the `RR-01` answer.
 
 - [Design doc sections and slide narrative order](tickets/RR-18-design-doc-and-slides.md) — **Doc: eight sections, two pages hard, links not appendices** — question · the V's · architecture diagram (exactly-once as a figure) · phase-by-phase with gate verdicts · the AI capability with deck 5's own BM25 line · results · *how we avoided fooling ourselves* · trade-offs. The brief's §8 order plus two insertions (the V's, because Addition C is the instructor's definitional slide; the rigour section, because nothing in the brief makes room for it). **Talk: 10:00 = 5:00 slides + 4:40 demo + 20 s slack**, eight slides plus a title, setup (5) → one continuous demo block → payoff (3), so every move lands as proof of a claim made 30 s earlier; demo-last rejected because RR-11's recorded backup already buys that insurance. Slide 2 ships **two variants**, the fork called at rehearsal 2 on RR-09's printed `text_characterisable < 3`, not on "did P6 finish". All four declines sit as one block in §8 — Kafka Connect ES sink says *dropped for time*, HDFS concedes MinIO is not equivalent, Oozie is owned as an opinion. Three trade-offs: Iceberg-not-taught, local `qwen3:8b` with the 0.70 bar unmoved, sensitive review text; Spark-on-host dropped. Unbuilt phases print `NOT_RUN` + `cut_reason` (ADR-0011), never omission. Five prepared Q&A answers, each a number; HDFS and Connect get none because slide 8 already declines them. No ADR — the outlines are the artifact.
 
+- [Reconcile the register, the README and the coverage doc](tickets/RR-14-reconcile-the-three-docs.md) — **the map's closing act; the destination is reached.** Build plan republished as **v4** at the same URL with **zero `open · P…` rows** — all six settled (four of them landing on an option v3 never posed), eleven more added, Out of scope split into its own section with `RR-18` §4's binding wording, phase cards renumbered to `RR-01` carrying `RR-13`'s split gates, a new presentation section with the 9:30 slide table, and the grade table kept but labelled *historical* rather than re-scored. `README.md`: the status table becomes the phase spine (gate name + ADR-0011 verdict per phase, P6–P8/lineage/deliverables represented for the first time), "LLM aspect sentiment" retired everywhere, `349,059` reframed as the raw ceiling vs 345,418 embedded, `6,139` as groups→7,276 rows removed, PostgreSQL's three roles stated, diagram redrawn, ADR index added. `docs/course-coverage.md`: both "Phase 2" refs → P4 Search and marked built, Finding 3 gains the three anti-overclaim qualifications (H-E1 did not hold), Finding 4 cites deck 3:447/450/870 verbatim, Findings 7–8 resolved (HDFS fallback closed, Oozie owned as opinion), the V's paragraph fixed at source, Connect's strong and weak halves separated, plus a new section stating the AI layer earns **no** course-technology credit and fixing the RAG prevalence boundary. Audit repairs R1–R6 verified landed in code. `label_source` propagated, not decided (`RR-13` owns it).
+
 ## Not yet specified
 - *(Burst detection threshold removed 2026-09-04 — `gold.bursts` is out of scope, `RR-09`.)*
 - **Decline-rule thresholds (B, R, δ, P, G, K, minimum counts, placebo ceiling).** Set at
@@ -132,24 +134,33 @@ the `RR-01` answer.
   into the lineage move; placed as move 4 by `RR-11`.)*
 - *(Recorded-backup format and rehearsal logistics: closed 2026-09-07 by `RR-11` — executed
   notebook export, two rehearsals ≤ 300 s; the counting gate is `RR-13`'s.)*
-- **Structured logging and observability.** `print` everywhere today. The metrics-row half
-  is now answered by the run ledger (`RR-16`); whether the pipeline also gets a logger or
-  Spark UI screenshots waits until silver exists.
-- **Integration test strategy.** One test per layer that runs against the compose stack —
-  which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
-  workflow comment says what to add); sharpens once silver has something to test.
+- *(Structured logging and integration-test strategy: ruled **out of scope** 2026-09-10 by
+  `RR-14` — see Out of scope. Both became specifiable once silver existed, but both sit past
+  the destination.)*
 
-## Ticket index (updated 2026-09-10, RR-18 closed)
+**Two patches remain, and both are deliberately foggy.** Neither is a map decision: the
+protocol freeze owns them, and setting either before the freeze is precisely the failure
+ADR-0001 exists to prevent. This map closes with them open on purpose.
 
-Closed: `RR-01`–`RR-13`, `RR-15`–`RR-23` (every decision ticket).
-Frontier — open, unblocked: **`RR-14`** (type `task`, the map's closing act — nothing left to
-decide, only to reconcile). Blocked: none.
+## Ticket index (updated 2026-09-10, RR-14 closed — **the map is closed**)
 
-**The map has no open decisions left.** Once `RR-14` carries the resolutions into the
-build-plan register, `README.md` and `docs/course-coverage.md`, the destination is reached and
-everything remaining is execution.
-Philip's instruction 2026-09-07: implementation starts now (P2 Silver); the three remaining
-map tickets are worked alongside, not before.
+Closed: `RR-01`–`RR-23`, all 23. Frontier: empty. Blocked: none.
+
+**The destination is reached.** Every `open · P…` row in the build-plan register is settled
+with a stated rationale; the phase numbering is fixed and Kibana and the explicit ES mapping
+each have exactly one home (P4 Search); every phase carries a gate that prints a number, with
+ADR-0011 splitting what blocks from what merely reports; every AI capability has an evaluation
+table whose thresholds were set before it was measured; the repo meets the professional bar
+(`RR-15`, CI green, no credential defaults, editable install); and the register, `README.md`
+and `docs/course-coverage.md` say the same thing (`RR-14`).
+
+**Everything remaining is execution**, handed off to implementation sessions. The handoff note
+is `RR-14` §6. In short: pick up P6 Themes at `5f8f907`, then P7, then P8, in `RR-01` order,
+every day until 2026-09-21, shipping whatever is reached and printing `NOT_RUN` + `cut_reason`
+for the rest. Nothing is left to decide first — the first new code is P7's
+`conf/eval-artifact.schema.json`. Three standing rules bind every session: the design doc is
+written against `conf/lineage_chain.toml` and not against prose; thresholds never move; and a
+quality miss never reopens a phase.
 
 ## Out of scope
 
@@ -180,3 +191,11 @@ map tickets are worked alongside, not before.
   insight thread would split a three-week budget. Key collisions survive only as a silver
   provenance result.
 - **Implementing phases 2–8** — execution, handed off once this map closes.
+- **Structured logging and observability** — ruled out of scope 2026-09-10 (`RR-14`). `print`
+  is still the mechanism; the metrics half was answered by the run ledger (`RR-16`), and
+  whether a logger or Spark UI screenshots follow is an execution-quality call inherited by
+  implementation sessions under `RR-15`'s standing bar, not a decision this map owes. It
+  became specifiable once silver existed but sits past the destination.
+- **Integration test strategy** — same call, same date. One test per layer against the compose
+  stack, which fixture, how CI gets a JDK and Docker: real work, and the CI skeleton names
+  what to add, but it is execution rather than a route decision.
