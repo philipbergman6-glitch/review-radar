@@ -18,6 +18,9 @@ dependencies = [
     "pandas>=2.2",
     "pyarrow>=17",
     "scikit-learn>=1.5",
+    # The evaluation artefact contract is a JSON Schema file, validated against directly so
+    # the file stays the only source of it (ADR-0011).
+    "jsonschema>=4.23",
     "matplotlib>=3.9",
     # --- AI ---
     "sentence-transformers>=3.2",

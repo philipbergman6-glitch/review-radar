@@ -1,0 +1,166 @@
+# The declared chain: every capability the submission claims, in ADR-fixed phase order.
+#
+# Two commands read this file and nothing else decides what the submission contains:
+#   * `make eval-table` renders one row per capability from eval/<id>/gate.json;
+#   * `scripts/gate_lineage.py` walks the same list and checks every named ledger job
+#     back to the pipeline_runs row that produced it.
+#
+# A capability is either a number or a written reason. `status = "declared"` means its
+# artefact must exist and validate -- a missing one exits the table non-zero.
+# `status = "cut"` requires a `cut_reason`, renders NOT_RUN, and does not fail the command.
+# "not reached by submission date" is a legitimate reason and is written as such (ADR-0011).
+
+version = "1"
+
+# --------------------------------------------------------------------- P2 Silver ----
+[[capability]]
+id = "silver"
+phase = "P2 Silver"
+gate_name = "SILVER_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = ["silver"]
+
+[[capability]]
+id = "silver_repro"
+phase = "P2 Silver"
+gate_name = "SILVER_REPRO_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = ["silver"]
+
+# ----------------------------------------------------------------------- P3 Gold ----
+[[capability]]
+id = "gold"
+phase = "P3 Gold"
+gate_name = "GOLD_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = ["gold"]
+
+[[capability]]
+id = "gold_repro"
+phase = "P3 Gold"
+gate_name = "GOLD_REPRO_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = ["gold"]
+
+[[capability]]
+id = "gold_calibration"
+phase = "P3 Gold"
+gate_name = "GOLD_CALIBRATION"
+kind = "quality"
+status = "declared"
+jobs = ["gold"]
+
+[[capability]]
+id = "gold_analytical"
+phase = "P3 Gold"
+gate_name = "GOLD_ANALYTICAL"
+kind = "quality"
+status = "declared"
+jobs = ["gold"]
+
+# --------------------------------------------------------------------- P4 Search ----
+[[capability]]
+id = "search"
+phase = "P4 Search"
+gate_name = "SEARCH_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = ["search_index_reviews", "search_index_product_month"]
+
+# ----------------------------------------------------------------- P5 Embeddings ----
+[[capability]]
+id = "embeddings"
+phase = "P5 Embeddings"
+gate_name = "EMBED_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = ["embeddings", "search_index_reviews"]
+
+# --------------------------------------------------------------------- P6 Themes ----
+[[capability]]
+id = "themes"
+phase = "P6 Themes"
+gate_name = "THEMES_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = ["theme_samples", "theme_labels_llm", "theme_labels_reference"]
+
+[[capability]]
+id = "themes_quality"
+phase = "P6 Themes"
+gate_name = "THEMES_QUALITY"
+kind = "quality"
+status = "declared"
+jobs = ["theme_labels_llm"]
+
+[[capability]]
+id = "themes_agreement"
+phase = "P6 Themes"
+gate_name = "THEMES_AGREEMENT"
+kind = "quality"
+status = "declared"
+jobs = ["theme_labels_reference"]
+
+[[capability]]
+id = "themes_repeat_kappa"
+phase = "P6 Themes"
+gate_name = "THEMES_REPEAT_KAPPA"
+kind = "quality"
+status = "cut"
+cut_reason = "the labeller is deterministic (temperature 0, fixed seed), so a repeat-run kappa measures nothing; the published agreement number is THEMES_AGREEMENT (ADR-0011, RR-21)"
+
+# ------------------------------------------------------------------------ P7 RAG ----
+[[capability]]
+id = "rag"
+phase = "P7 RAG"
+gate_name = "RAG_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = ["rag_answers"]
+
+[[capability]]
+id = "rag_quality"
+phase = "P7 RAG"
+gate_name = "RAG_QUALITY"
+kind = "quality"
+status = "declared"
+jobs = ["rag_answers"]
+
+# --------------------------------------------------------------------- P8 Stream ----
+[[capability]]
+id = "stream_control"
+phase = "P8 Stream"
+gate_name = "STREAM_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = []
+
+[[capability]]
+id = "stream_demo"
+phase = "P8 Stream"
+gate_name = "STREAM_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = []
+
+# --------------------------------------------------------------- Lineage track ----
+[[capability]]
+id = "lineage"
+phase = "Lineage track"
+gate_name = "LINEAGE_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = []
+
+# ---------------------------------------------------------- Deliverables track ----
+[[capability]]
+id = "demo"
+phase = "Deliverables track"
+gate_name = "DEMO_GATE"
+kind = "reproducibility"
+status = "declared"
+jobs = []

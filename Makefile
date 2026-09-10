@@ -9,7 +9,7 @@ TOPIC ?= reviews.raw
 SAMPLE_NAME ?= development
 PROMPT ?= label_v4
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes import-reference score-themes gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score diagnose-failures discovery-failures propose-taxonomy score-taxonomy verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes import-reference score-themes gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -184,6 +184,9 @@ propose-taxonomy:  ## count the raw complaint aspects (input to the hand merge, 
 
 score-taxonomy:  ## apply the ADR-0003 support rule to the hand-written merge proposal
 	$(RUN) scripts/score_taxonomy.py --scope full
+
+eval-table:  ## the whole evaluation table from conf/lineage_chain.toml + eval/*/gate.json; non-zero on a capability that is neither a number nor a written reason
+	$(RUN) scripts/eval_table.py
 
 verify:  ## row count, snapshot history, time-travel read
 	$(RUN) scripts/verify_iceberg.py

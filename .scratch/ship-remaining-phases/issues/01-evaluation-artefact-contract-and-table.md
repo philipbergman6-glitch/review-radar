@@ -23,13 +23,13 @@ already-modelled reason.
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** done — landed 2026-09-10
 
-- [ ] `conf/eval-artifact.schema.json` exists and every required field above is declared
-- [ ] `conf/lineage_chain.toml` declares every capability P2–P8 plus the deliverables track
-- [ ] `make eval-table` renders one table: capability, value, threshold, verdict, scope, run id
-- [ ] Reproducibility verdicts and quality verdicts are visually separated in the output
-- [ ] A capability missing from `eval/` and not carrying a `cut_reason` makes the command exit non-zero
-- [ ] A capability declared cut renders `NOT_RUN` with its reason and does **not** fail the command
-- [ ] An artefact at `scope=sample` renders `NOT_RUN`, never `PASS` — a phase is complete only at `scope=full`
-- [ ] Schema validity is tested once, at the contract; the renderer's hard-fail has its own test
+- [x] `conf/eval-artifact.schema.json` exists and every required field above is declared
+- [x] `conf/lineage_chain.toml` declares every capability P2–P8 plus the deliverables track
+- [x] `make eval-table` renders one table: capability, value, threshold, verdict, scope, run id
+- [x] Reproducibility verdicts and quality verdicts are visually separated in the output
+- [x] A capability missing from `eval/` and not carrying a `cut_reason` makes the command exit non-zero
+- [x] A capability declared cut renders `NOT_RUN` with its reason and does **not** fail the command
+- [x] An artefact at `scope=sample` renders `NOT_RUN`, never `PASS` — a phase is complete only at `scope=full`
+- [x] Schema validity is tested once, at the contract; the renderer's hard-fail has its own test

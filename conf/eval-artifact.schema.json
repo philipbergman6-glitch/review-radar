@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "review-radar/eval-artifact/v1",
+  "title": "Evaluation artefact",
+  "description": "One capability's result, written by its gate to eval/<capability>/gate.json (ADR-0011). The evaluation table is assembled from these files and from conf/lineage_chain.toml, never by hand.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_version",
+    "capability",
+    "phase",
+    "kind",
+    "gate_name",
+    "protocol_hash",
+    "model",
+    "prompt",
+    "population",
+    "pipeline_run_id",
+    "scope",
+    "status",
+    "created_at"
+  ],
+  "properties": {
+    "artifact_version": {"const": "1"},
+    "capability": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "phase": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["reproducibility", "quality"]},
+    "gate_name": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"},
+    "protocol_hash": {
+      "description": "Identity of the frozen protocol this result was produced under: the config hash, spec hash or rule hash the gate re-derives from.",
+      "type": "string",
+      "minLength": 8
+    },
+    "model": {
+      "description": "Model identity, or null for a capability that runs no model.",
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "prompt": {
+      "description": "Prompt version, or null for a capability that runs no prompt.",
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "population": {
+      "description": "What was measured over: a named set and its size, plus whatever pins it (snapshot id, index generation, frame name).",
+      "type": "object",
+      "required": ["name", "n"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "n": {"type": "integer", "minimum": 0}
+      }
+    },
+    "pipeline_run_id": {
+      "description": "The pipeline_runs row that produced the measured outputs, or null only when the capability did not run.",
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "scope": {"enum": ["full", "sample"]},
+    "status": {"enum": ["PASS", "FAIL", "REPORTED", "NOT_RUN"]},
+    "metric": {
+      "description": "The number this gate prints, with its threshold beside it. A reproducibility gate's number is its constituent count.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value", "threshold", "direction"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "value": {"type": "number"},
+        "threshold": {"type": ["number", "null"]},
+        "direction": {"enum": ["gte", "lte", "eq", "none"]},
+        "interval": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "constituents": {
+      "description": "The gate's named constituent lines, verbatim, so the table can be traced back to printed output.",
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "cut_reason": {
+      "description": "Mandatory when status is NOT_RUN. 'not reached by submission date' is a legitimate reason and is written as such.",
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "notes": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "minLength": 20}
+  },
+  "allOf": [
+    {
+      "description": "A capability that did not run carries a written reason and no metric.",
+      "if": {"properties": {"status": {"const": "NOT_RUN"}}, "required": ["status"]},
+      "then": {
+        "required": ["cut_reason"],
+        "properties": {"cut_reason": {"type": "string", "minLength": 1}}
+      },
+      "else": {
+        "required": ["metric", "pipeline_run_id"],
+        "properties": {"pipeline_run_id": {"type": "string", "minLength": 1}}
+      }
+    },
+    {
+      "description": "REPORTED is a quality vocabulary: a reproducibility claim either holds or does not.",
+      "if": {"properties": {"kind": {"const": "reproducibility"}}, "required": ["kind"]},
+      "then": {"properties": {"status": {"enum": ["PASS", "FAIL", "NOT_RUN"]}}}
+    }
+  ]
+}
