@@ -11,7 +11,7 @@ SAMPLE_NAME ?= development
 # a stale default here would label the training pool with a superseded teacher.
 PROMPT ?= label_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -182,13 +182,16 @@ star-baseline-score:  ## apply the frozen star thresholds to SAMPLE_NAME
 	$(RUN) scripts/baseline_star_only.py --score --sample $(SAMPLE_NAME)
 
 classifier-train:  ## train the MLlib theme baseline on the frozen-prompt training pool (ADR-0002)
-	$(RUN) -m src.spark.theme_classifier --train --source-config-hash $(CONFIG_HASH)
+	$(RUN) -m src.spark.theme_classifier --train $(if $(CONFIG_HASH),--source-config-hash $(CONFIG_HASH),)
 
 classifier-thresholds:  ## sweep the per-theme probability cuts on development and freeze them
 	$(RUN) -m src.spark.theme_classifier --fit-thresholds
 
 classifier-score:  ## apply the frozen classifier to SAMPLE_NAME -> label_source=classifier
 	$(RUN) -m src.spark.theme_classifier --score --sample $(SAMPLE_NAME)
+
+classifier-table:  ## per-theme table for the classifier's rows on SAMPLE_NAME
+	$(RUN) scripts/score_themes.py --sample $(SAMPLE_NAME) --source classifier
 
 discovery-failures:  ## characterise the discovery parse failures by named validation cause
 	$(RUN) scripts/discovery_failures.py --scope full

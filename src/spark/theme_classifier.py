@@ -37,6 +37,17 @@ from pyspark.ml.feature import IDF, CountVectorizer, RegexTokenizer, StopWordsRe
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+from src.ai.classifier_spec import (
+    LABEL_SOURCE,
+    SPEC_PATH,
+    classifier_identity,
+    llm_identity,
+    load_classifier_spec,
+    require_development_first,
+    require_frozen_cuts,
+    require_frozen_labeller,
+    require_same_taxonomy,
+)
 from src.ai.label_usage import TRAINABLE_STATUSES, theme_ids, training_census
 from src.ai.labels import idempotency_key, load_taxonomy
 from src.ai.theme_labels import ensure_table, label_row, merge_chunk, table_name
@@ -46,8 +57,6 @@ from src.common.spark import build
 
 sys.stdout.reconfigure(line_buffering=True)
 
-LABEL_SOURCE = "classifier"
-SPEC_PATH = C.PROJECT_ROOT / "conf" / "theme-classifier.json"
 MODEL_DIR = C.PROJECT_ROOT / "data" / "models" / "theme_classifier"
 SPEC_VERSION = runs.THEME_CLASSIFIER_SPEC_VERSION
 
@@ -65,6 +74,24 @@ HYPERPARAMS = {
     "max_iter": 100,
     "threshold_grid_step": 0.05,
 }
+
+
+def frozen_labeller_config_hash(model_id: str | None = None) -> str:
+    """The inference config hash of the frozen prompt: the only pool ADR-0002 allows.
+
+    Derived, never typed. It is the same computation `scripts/pool_census.py` makes to find the
+    pool's rows, so "the labels the census counted" and "the labels the classifier trains on"
+    cannot be two different sets. It lives in this module rather than beside the other
+    identities because the per-prompt theme cap it needs is declared by the labelling job.
+    """
+    from src.ai.label_themes import PROMPT_MAX_THEMES
+    from src.ai.labels import decoding_schema, load_spec
+
+    spec, tax = load_spec(), load_taxonomy()
+    frozen = spec.require_frozen(purpose="training the classifier")
+    schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(frozen.version))
+    return llm_identity(spec, prompt_name=frozen.name, model_id=model_id or spec.model_id,
+                        schema=schema, taxonomy_hash=tax.file_hash).inference_config_hash
 
 
 def spec_hash(taxonomy_hash: str, source_config_hash: str) -> str:
@@ -196,6 +223,7 @@ def train(spark: SparkSession, *, scope: str, category: str, source_config_hash:
          "thresholds": None, "thresholds_fitted_on": None,
          "note": "thresholds are fitted on development by --fit-thresholds and frozen with the prompt"},
         indent=1) + "\n")
+    load_classifier_spec()   # what was just written must be readable as a spec, not only as json
     print(f"CLASSIFIER_TRAIN run_id={run.run_id} spec={shash[:12]} pool={counts['pool_rows']} "
           f"trained_on={counts['training_rows']} dropped_failed={counts['dropped_failed_rows']} "
           f"drop_rate={counts['drop_rate']} vocab={counts['vocabulary']} "
@@ -204,7 +232,11 @@ def train(spark: SparkSession, *, scope: str, category: str, source_config_hash:
 
 
 def _predict(spark: SparkSession, frame, tax, model_path) -> dict[str, dict[str, float]]:
-    """Per-review, per-theme probability of the positive class."""
+    """Per-review, per-theme classifier score: the positive-class column MLlib emits.
+
+    Named a score, not a probability, because nothing calibrates it (CONTEXT.md, ADR-0002); it
+    is used only for ranking and for the frozen per-theme cut.
+    """
     feats = PipelineModel.load(str(model_path / "features"))
     featured = feats.transform(frame).select("review_id", "features").cache()
     scores: dict[str, dict[str, float]] = {}
@@ -216,18 +248,23 @@ def _predict(spark: SparkSession, frame, tax, model_path) -> dict[str, dict[str,
 
 
 def fit_thresholds(spark: SparkSession, *, scope: str, category: str, force: bool) -> None:
-    """Sweep each theme's probability cut on the development set (RR-23), then freeze."""
+    """Sweep each theme's classifier-score cut on the development set (RR-23), then freeze."""
     from src.ai.theme_scoring import score_themes
     tax = load_taxonomy()
-    spec = json.loads(SPEC_PATH.read_text())
-    if spec.get("thresholds") and not force:
+    clf = load_classifier_spec()
+    if clf.thresholds and not force:
         raise SystemExit("thresholds are already frozen; refitting them after an audit number "
                          "exists is what ADR-0002 forbids")
+    try:
+        require_same_taxonomy(clf, taxonomy_hash=tax.file_hash)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    spec = clf.raw
     frame, _, _ = labelled_frame(spark, sample="development", scope=scope, category=category,
                                  source="agent_reference", config_hash=None)
     reference = {r["review_id"]: theme_ids(r["themes"])
                  for r in frame.select("review_id", "themes").collect()}
-    scores = _predict(spark, frame, tax, C.PROJECT_ROOT / spec["model_path"])
+    scores = _predict(spark, frame, tax, C.PROJECT_ROOT / clf.model_path)
     step = HYPERPARAMS["threshold_grid_step"]
     grid = [round(step * i, 2) for i in range(1, int(1 / step))]
     thresholds, fit = {}, []
@@ -245,6 +282,7 @@ def fit_thresholds(spark: SparkSession, *, scope: str, category: str, force: boo
     spec["thresholds_fitted_on"] = "development"
     spec["threshold_fit"] = fit
     SPEC_PATH.write_text(json.dumps(spec, indent=1) + "\n")
+    require_frozen_cuts(load_classifier_spec(), taxonomy_hash=tax.file_hash)
     print("CLASSIFIER_THRESHOLDS " + " ".join(f"{t}={thresholds[t]}" for t in tax.ids)
           + f" out={SPEC_PATH.relative_to(C.PROJECT_ROOT)}")
 
@@ -252,26 +290,29 @@ def fit_thresholds(spark: SparkSession, *, scope: str, category: str, force: boo
 def score(spark: SparkSession, *, sample: str, scope: str, category: str, chunk: int) -> dict[str, Any]:
     t0 = time.time()
     tax = load_taxonomy()
-    spec = json.loads(SPEC_PATH.read_text())
-    if not spec.get("thresholds"):
-        raise SystemExit("the classifier has no frozen thresholds; run --fit-thresholds first")
-    if spec["taxonomy_hash"] != tax.file_hash:
-        raise SystemExit("the classifier was trained against a different taxonomy")
+    clf = load_classifier_spec()
+    ident = classifier_identity(clf)
+    try:
+        thresholds = require_frozen_cuts(clf, taxonomy_hash=tax.file_hash)
+        # Audit waits on the committed development score: the fitting pass and the scoring pass
+        # are only demonstrably one each if the first one is on disk before the second runs.
+        require_development_first(sample, identity=ident)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     table = table_name(scope)
     ensure_table(spark, table)
     run = runs.start("theme_classifier_score", SPEC_VERSION, category=category, data_scope=scope,
-                     inputs={"model": {"path": spec["model_path"], "spec_hash": spec["spec_hash"]},
+                     inputs={"model": {"path": clf.model_path, "spec_hash": clf.spec_hash},
                              "taxonomy": {"path": "conf/theme-taxonomy.json",
                                           "version": tax.version, "file_hash": tax.file_hash}},
                      params={"budget_line": sample, "label_source": LABEL_SOURCE,
-                             "thresholds": spec["thresholds"], "spec_hash": spec["spec_hash"]})
-    counts: dict[str, Any] = {"spec_hash": spec["spec_hash"][:12]}
+                             "thresholds": thresholds, "spec_hash": clf.spec_hash})
+    counts: dict[str, Any] = {"spec_hash": clf.spec_hash[:12]}
     outputs: dict[str, Any] = {}
     try:
         frame, _, silver_run = labelled_frame(spark, sample=sample, scope=scope, category=category,
                                               source="agent_reference", config_hash=None)
-        probs = _predict(spark, frame, tax, C.PROJECT_ROOT / spec["model_path"])
-        thresholds = spec["thresholds"]
+        probs = _predict(spark, frame, tax, C.PROJECT_ROOT / clf.model_path)
         rows, hits, empty = [], {t: 0 for t in tax.ids}, 0
         for review_id, per_theme in sorted(probs.items()):
             themes = [{"theme_id": t, "evidence_quote": ""} for t in tax.ids
@@ -283,14 +324,15 @@ def score(spark: SparkSession, *, sample: str, scope: str, category: str, chunk:
                       "abstain": False, "overall_sentiment": "none", "label_confidence": "low"}
             rows.append(label_row(
                 idempotency_key=idempotency_key(
-                    source_review_id=review_id, label_source=LABEL_SOURCE,
-                    model_id="mllib_logreg", label_spec_version=SPEC_VERSION,
-                    prompt_version=f"classifier-v{SPEC_VERSION}",
-                    inference_config_hash=spec["spec_hash"]),
-                source_review_id=review_id, budget_line=sample, label_source=LABEL_SOURCE,
-                model_id="mllib_logreg", label_spec_version=SPEC_VERSION,
-                prompt_version=f"classifier-v{SPEC_VERSION}",
-                inference_config_hash=spec["spec_hash"], api_mode="local", status="succeeded",
+                    source_review_id=review_id, label_source=ident.label_source,
+                    model_id=ident.model_id, label_spec_version=SPEC_VERSION,
+                    prompt_version=ident.prompt_version,
+                    inference_config_hash=ident.inference_config_hash),
+                source_review_id=review_id, budget_line=sample,
+                label_source=ident.label_source, model_id=ident.model_id,
+                label_spec_version=SPEC_VERSION, prompt_version=ident.prompt_version,
+                inference_config_hash=ident.inference_config_hash,
+                api_mode="local", status="succeeded",
                 parsed=parsed,
                 attempts=[{"attempt_no": 1, "provider_request_id": None, "raw_response": None,
                            "validation_error": None, "input_tokens": None, "output_tokens": None,
@@ -309,7 +351,7 @@ def score(spark: SparkSession, *, sample: str, scope: str, category: str, chunk:
         raise
     runs.success(run, records_in=counts["reviews_scored"], records_out=counts["reviews_scored"],
                  records_rejected=0, outputs=outputs, counts=counts)
-    print(f"CLASSIFIER_SCORE run_id={run.run_id} sample={sample} spec={spec['spec_hash'][:12]} "
+    print(f"CLASSIFIER_SCORE run_id={run.run_id} sample={sample} spec={clf.spec_hash[:12]} "
           f"reviews={counts['reviews_scored']} no_predicted_theme={counts['no_predicted_theme']} "
           f"elapsed_s={counts['elapsed_s']}")
     return {"run_id": run.run_id, "counts": counts}
@@ -321,7 +363,8 @@ def main() -> None:
     ap.add_argument("--category", default=C.CATEGORY)
     ap.add_argument("--sample", default="audit", choices=["development", "audit"])
     ap.add_argument("--source-config-hash", default=None,
-                    help="inference_config_hash of the frozen prompt that labelled the pool")
+                    help="the pool's inference_config_hash; defaults to the frozen prompt's, and "
+                         "any other value is refused")
     ap.add_argument("--chunk", type=int, default=100)
     ap.add_argument("--force", action="store_true")
     g = ap.add_mutually_exclusive_group(required=True)
@@ -332,10 +375,14 @@ def main() -> None:
     spark = build("theme_classifier", cores="local[4]", driver_memory="3g")
     try:
         if args.train:
-            if not args.source_config_hash:
-                raise SystemExit("--train needs --source-config-hash (the frozen prompt's hash)")
+            try:
+                pool_config = require_frozen_labeller(
+                    args.source_config_hash,
+                    frozen_config_hash=frozen_labeller_config_hash())
+            except ValueError as exc:
+                raise SystemExit(str(exc)) from exc
             train(spark, scope=args.scope, category=args.category,
-                  source_config_hash=args.source_config_hash, force=args.force)
+                  source_config_hash=pool_config, force=args.force)
         elif args.fit_thresholds:
             fit_thresholds(spark, scope=args.scope, category=args.category, force=args.force)
         else:

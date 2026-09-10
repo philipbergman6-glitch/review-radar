@@ -102,7 +102,11 @@ phase = "P6 Themes"
 gate_name = "THEMES_QUALITY"
 kind = "quality"
 status = "declared"
-jobs = ["theme_labels_llm"]
+# The published P6 quality number is a three-way comparison (ADR-0002): the labeller, the MLlib
+# classifier and the star-only floor, scored on one audit pass. The classifier is an evaluation
+# row rather than a capability with a bar of its own, so its two runs are claimed here -- the
+# table it appears in is this one, and a claimed job with no successful run fails the chain.
+jobs = ["theme_labels_llm", "theme_classifier_train", "theme_classifier_score"]
 
 [[capability]]
 id = "themes_agreement"
@@ -187,7 +191,7 @@ jobs = []
 #
 # Not edges: `theme_classifier_train`/`theme_classifier_score` consume a labels table and a
 # model path rather than a named run, and `rag_answers` has no ledger-run input. They appear
-# in `jobs` above and are pinned as runs; they contribute outputs, not joins.
+# in `themes_quality`'s `jobs` above and are pinned as runs; they contribute outputs, not joins.
 
 [[edge]]
 downstream = "silver"

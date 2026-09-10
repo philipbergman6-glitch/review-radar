@@ -30,6 +30,7 @@ from typing import Any
 
 from pyspark.sql import functions as F
 
+from src.ai.classifier_spec import llm_artefact_stem, score_artefact_name
 from src.ai.labels import load_spec, load_taxonomy
 from src.ai.theme_labels import table_name
 from src.common import config as C
@@ -186,8 +187,9 @@ def main() -> None:
     audit_run = runs.latest_success("theme_labels_llm", category=args.category,
                                     data_scope=args.scope, params_match={"budget_line": "audit"})
     frozen = spec.raw.get("frozen_prompt") or {}
-    score_path = SCORES / (f"score-audit-{frozen.get('version', 'none')}-"
-                           f"{spec.model_id.replace(':', '_')}.json")
+    score_path = SCORES / score_artefact_name(
+        sample="audit", stem=llm_artefact_stem(prompt_version=frozen.get("version", "none"),
+                                               model_id=spec.model_id))
     score = json.loads(score_path.read_text()) if score_path.exists() else None
 
     spark = build("gate_themes", cores="local[2]", driver_memory="2g")

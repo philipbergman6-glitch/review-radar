@@ -1,16 +1,23 @@
-"""Score one labelling configuration against the blind reference labels (ADR-0003, RR-21).
+"""Score one system against the blind reference labels (ADR-0003, RR-21, ADR-0002).
 
 Reads `gold.review_theme_labels`, pairs each `agent_reference` row for a budget line with the
-`local_llm` row for the same review under one `inference_config_hash`, and prints the per-theme
+row the system under test wrote for the same review under one `inference_config_hash`, and
+prints the per-theme
 table ADR-0003 requires: precision, recall, F1 and support per theme, macro-F1 over supported
 themes, `other`, abstention, parse/API failure coverage, and a seeded product-clustered
 bootstrap interval as context.
+
+`--source` picks the system: `local_llm` is the labeller under one prompt, `classifier` is the
+MLlib baseline under its frozen spec hash (ADR-0002). Both are rows in the same table and only
+their identity separates them, so both identities come from `src.ai.classifier_spec` rather
+than being assembled here -- see the module docstring for why that is not a detail.
 
 Nothing here decides anything. The pass rule (`audit macro-F1 >= 0.70`, `no supported-theme
 recall < 0.50`) lives in scripts/gate_themes.py, and it was frozen before any of these numbers
 existed.
 
 Run:  ./run.sh python scripts/score_themes.py --sample development --prompt label_v4
+      ./run.sh python scripts/score_themes.py --sample development --source classifier
 """
 from __future__ import annotations
 
@@ -20,6 +27,14 @@ from typing import Any
 
 from pyspark.sql import functions as F
 
+from src.ai.classifier_spec import (
+    classifier_identity,
+    llm_identity,
+    load_classifier_spec,
+    require_development_first,
+    require_frozen_cuts,
+    score_artefact_name,
+)
 from src.ai.label_themes import PROMPT_MAX_THEMES
 from src.ai.label_usage import for_evaluation, theme_ids
 from src.ai.labels import decoding_schema, load_spec, load_taxonomy
@@ -49,8 +64,8 @@ def main() -> None:
     ap.add_argument("--prompt", default=_frozen.name if _frozen else "label_v4",
                     help="prompt name in conf/theme-label-spec.json (default: the frozen one)")
     ap.add_argument("--model", default=None, help="the comparison model, e.g. llama3.2:3b")
-    ap.add_argument("--source", default="local_llm",
-                    help="label_source of the system under test (local_llm | classifier)")
+    ap.add_argument("--source", default="local_llm", choices=["local_llm", "classifier"],
+                    help="which system's rows to score")
     ap.add_argument("--min-support", type=int, default=10,
                     help="ADR-0003: a supported theme has >= 10 positives in the evaluation set")
     ap.add_argument("--bootstrap-draws", type=int, default=1000)
@@ -59,11 +74,23 @@ def main() -> None:
     args = ap.parse_args()
 
     spec, tax = load_spec(), load_taxonomy()
-    model = args.model or spec.model_id
-    prompt = spec.prompts[args.prompt]
-    schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt.version))
-    config_hash = spec.config_hash(args.prompt, schema, extra={"taxonomy": tax.file_hash},
-                                   model_id=model)
+    if args.source == "classifier":
+        try:
+            clf = load_classifier_spec()
+            require_frozen_cuts(clf, taxonomy_hash=tax.file_hash)
+            system_id = classifier_identity(clf)
+            # This command is what turns rows into an audit number, so it carries the same
+            # refusal the scoring job does: development is committed first (ADR-0002).
+            require_development_first(args.sample, identity=system_id)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+    else:
+        model = args.model or spec.model_id
+        prompt = spec.prompts[args.prompt]
+        system_id = llm_identity(
+            spec, prompt_name=args.prompt, model_id=model, taxonomy_hash=tax.file_hash,
+            schema=decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt.version)))
+    config_hash = system_id.inference_config_hash
     sample_run = runs.latest_success("theme_samples", category=args.category, data_scope=args.scope,
                                      params_match={"sample": args.sample})
     if sample_run is None:
@@ -121,8 +148,8 @@ def main() -> None:
     enriched = [r for r in selected if (asg.get(r, {}).get("stratum") or "").startswith("enriched")]
     representative = [r for r in selected if asg.get(r, {}).get("stratum") == "representative"]
     out: dict[str, Any] = {
-        "sample": args.sample, "scope": args.scope, "label_source": args.source,
-        "model_id": model, "prompt_version": prompt.version,
+        "sample": args.sample, "scope": args.scope, "label_source": system_id.label_source,
+        "model_id": system_id.model_id, "prompt_version": system_id.prompt_version,
         "inference_config_hash": config_hash, "taxonomy_version": tax.version,
         "taxonomy_hash": tax.file_hash, "min_support": args.min_support,
         "reference_source": REFERENCE_SOURCE, "reference_rows": len(ref_rows),
@@ -135,7 +162,8 @@ def main() -> None:
         out["enriched"] = report(enriched, "enriched")
         out["representative"] = report(representative, "representative")
 
-    path = OUT_DIR / (args.out or f"score-{args.sample}-{prompt.version}-{model.replace(':', '_')}.json")
+    path = OUT_DIR / (args.out or score_artefact_name(sample=args.sample,
+                                                      stem=system_id.artefact_stem))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, indent=1) + "\n")
 
@@ -153,8 +181,9 @@ def main() -> None:
     cov = o["coverage"]
     mf = o["macro_f1"]
     lo, hi = o["bootstrap_95"]
-    print(f"\nTHEME_SCORE sample={args.sample} source={args.source} model={model} "
-          f"prompt={prompt.version} config={config_hash[:12]} reviews={o['reviews']} "
+    print(f"\nTHEME_SCORE sample={args.sample} source={system_id.label_source} "
+          f"model={system_id.model_id} "
+          f"prompt={system_id.prompt_version} config={config_hash[:12]} reviews={o['reviews']} "
           f"macro_f1={mf if mf is None else round(mf, 4)} "
           f"bootstrap95=[{'' if lo is None else round(lo, 4)},{'' if hi is None else round(hi, 4)}] "
           f"supported={len(o['supported_themes'])} "

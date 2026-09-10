@@ -49,10 +49,10 @@
     "LINEAGE_PENDING capability=demo reason=eval/demo/gate.json not written yet",
     "LINEAGE_CUT edge=silver<-bronze_drain.bronze reason=the streaming drain writes no ledger row -- ADR-0008 \u00a73 defers producer and bronze instrumentation to their own session -- so silver's bronze snapshot is checked as an Iceberg identity that still exists, but is not joined to a producing run",
     "LINEAGE_ORPHAN run=1dd07a73 job=gold started=2026-09-07 10:39 status=running",
-    "LINEAGE_LEDGER runs_pinned=6 orphan_running=1 failed_runs=0 dirty_runs=4",
+    "LINEAGE_LEDGER runs_pinned=6 orphan_running=1 failed_runs=1 dirty_runs=4",
     "LINEAGE_GATE gate_mode=development chain_clean=true publication_ready=false chain_links_checked=34 LINEAGE_GATE=PASS"
   ],
-  "created_at": "2026-09-10T12:43:36+00:00",
+  "created_at": "2026-09-10T21:56:14+00:00",
   "gate_name": "LINEAGE_GATE",
   "kind": "reproducibility",
   "metric": {
