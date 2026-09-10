@@ -149,7 +149,7 @@ import-reference:  ## import the agent's blind ground truth (label_source=agent_
 score-themes:  ## per-theme table for one configuration (SAMPLE_NAME, PROMPT, MODEL)
 	$(RUN) scripts/score_themes.py --sample $(SAMPLE_NAME) --prompt $(PROMPT) $(if $(MODEL),--model $(MODEL),)
 
-diagnose-failures:  ## why a labelling configuration failed to parse (SAMPLE_NAME, PROMPT, MODEL)
+diagnose-failures:  ## census a configuration's parse failures by named cause -> eval/themes/parse-census-*.json
 	$(RUN) scripts/diagnose_label_failures.py --sample $(SAMPLE_NAME) --prompt $(PROMPT) $(if $(MODEL),--model $(MODEL),)
 
 gate-themes:  ## re-derive every P6 constituent from the spec, the ledger and Iceberg; prints THEMES_GATE

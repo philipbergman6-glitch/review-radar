@@ -15,37 +15,19 @@ Run:  ./run.sh python scripts/diagnose_label_failures.py --sample development --
 from __future__ import annotations
 
 import argparse
-import collections
-import re
+import json
+from datetime import UTC, datetime
 
-from src.ai.labels import load_spec, load_taxonomy
+from src.ai.label_failures import census
+from src.ai.label_themes import PROMPT_MAX_THEMES
+from src.ai.labels import decoding_schema, load_spec, load_taxonomy
 from src.ai.theme_labels import table_name
 from src.ai.theme_scoring import macro_f1, score_themes
+from src.common.config import PROJECT_ROOT
 from src.common.spark import build
 
 REFERENCE_SOURCE = "agent_reference"
-
-# The validator's messages, bucketed. Each bucket is one thing a prompt could fix.
-FAILURE_KINDS = (
-    ("repeats theme_id", "repeated_theme"),
-    ("words, limit", "quote_too_long"),
-    ("not present in the review", "quote_not_verbatim"),
-)
-
-
-def classify(error: str) -> list[str]:
-    """One validator message can carry several violations; every distinct kind counts once."""
-    kinds: set[str] = set()
-    for part in (error or "").split("; "):
-        if not part.strip():
-            continue
-        for needle, kind in FAILURE_KINDS:
-            if needle in part:
-                kinds.add(kind)
-                break
-        else:
-            kinds.add("other")
-    return sorted(kinds)
+OUT_DIR = PROJECT_ROOT / "eval" / "themes"
 
 
 def main() -> None:
@@ -54,41 +36,51 @@ def main() -> None:
     ap.add_argument("--prompt", required=True, help="spec prompt key, e.g. label_v4")
     ap.add_argument("--model", default="qwen3:8b")
     ap.add_argument("--scope", default="full")
+    ap.add_argument("--out", default=None,
+                    help="artefact path; defaults to eval/themes/parse-census-<sample>-<prompt>-<model>.json")
     args = ap.parse_args()
 
     spec, tax = load_spec(), load_taxonomy()
-    prompt_version = spec.prompts[args.prompt].version
+    prompt = spec.prompts[args.prompt]
+    prompt_version = prompt.version
+    # The same prompt version can have run under more than one configuration; censusing across
+    # them would mix a superseded run's failures into this one's (src/ai/theme_labels.py).
+    schema = decoding_schema(tax.ids, max_themes=PROMPT_MAX_THEMES.get(prompt_version))
+    config_hash = spec.config_hash(args.prompt, schema, extra={"taxonomy": tax.file_hash},
+                                   model_id=args.model)
 
     spark = build("theme-label-diagnosis")
     table = table_name(args.scope)
     pred = spark.sql(f"""
         SELECT source_review_id, label_status, themes, attempts FROM {table}
         WHERE label_source = 'local_llm' AND prompt_version = '{prompt_version}'
-          AND model_id = '{args.model}'""").collect()
+          AND model_id = '{args.model}' AND inference_config_hash = '{config_hash}'
+          AND budget_line = '{args.sample}'""").collect()
     if not pred:
-        raise SystemExit(f"no local_llm rows for prompt {prompt_version} model {args.model}")
+        raise SystemExit(f"no local_llm rows for prompt {prompt_version} model {args.model} "
+                         f"config {config_hash[:12]} budget line {args.sample}")
     ref = spark.sql(f"""
         SELECT source_review_id, themes FROM {table}
-        WHERE label_source = '{REFERENCE_SOURCE}' AND label_status = 'succeeded'""").collect()
+        WHERE label_source = '{REFERENCE_SOURCE}' AND label_status = 'succeeded'
+          AND budget_line = '{args.sample}'""").collect()
     reference = {r["source_review_id"]: r["themes"] for r in ref}
 
     failed = [r for r in pred if r["label_status"] == "parse_failed"]
-    census: collections.Counter[str] = collections.Counter()
-    slots: collections.Counter[int] = collections.Counter()
-    for row in failed:
-        error = row["attempts"][0]["validation_error"] if row["attempts"] else ""
-        census[" + ".join(classify(error))] += 1
-        for match in re.finditer(r"themes\[(\d+)\]", error or ""):
-            slots[int(match.group(1))] += 1
+    errors = [row["attempts"][0]["validation_error"] if row["attempts"] else None for row in failed]
+    counts = census(errors)
 
     print(f"prompt={prompt_version} model={args.model} rows={len(pred)} parse_failed={len(failed)}")
-    print(f"\nrejection reasons ({len(failed)} failed rows, first attempt):")
-    for kind, count in census.most_common():
-        print(f"  {count:4d}  {kind}")
-    if slots:
+    print(f"\nrejection causes ({len(failed)} failed rows, first attempt) -- a row with two "
+          "causes counts under both:")
+    for cause, count in counts["by_cause"].items():
+        print(f"  {count:4d}  {cause}")
+    print(f"\nrejection combinations ({len(failed)} failed rows, each counted once):")
+    for combination, count in counts["by_combination"].items():
+        print(f"  {count:4d}  {combination or '(no recorded validation error)'}")
+    if counts["by_theme_slot"]:
         # A prompt that pads to its theme limit fails in the slots it padded. If the
         # violations cluster away from slot 0, the model's first answer was fine.
-        print("\nviolations by theme slot:", dict(sorted(slots.items())))
+        print("\nviolations by theme slot:", counts["by_theme_slot"])
 
     def themes_of(themes: object) -> set[str]:
         return {t["theme_id"] for t in (themes or [])}
@@ -103,6 +95,35 @@ def main() -> None:
     print(f"\nDIAGNOSTIC CEILING over the {len(paired)} answered rows only -- not a score, and "
           f"optimistic by\nconstruction, because the model selected the subset: "
           f"macro_f1={ceiling:.4f} over {len(supported)} supported themes")
+
+    # The census is committed, not just printed: the score artefact carries the failure rate,
+    # and this is the file that says what those failures were. It is a diagnosis, so it is not
+    # an evaluation artefact under conf/eval-artifact.schema.json and never enters the table.
+    statuses = {"succeeded": 0, "model_abstained": 0, "parse_failed": 0, "api_failed": 0}
+    for row in pred:
+        statuses[row["label_status"]] = statuses.get(row["label_status"], 0) + 1
+    out = {
+        "kind": "parse_failure_census", "sample": args.sample, "scope": args.scope,
+        "label_source": "local_llm", "model_id": args.model, "prompt_version": prompt_version,
+        "inference_config_hash": config_hash, "rows": len(pred), "by_status": statuses,
+        "parse_failed": len(failed),
+        "parse_failure_rate": round(len(failed) / len(pred), 4),
+        **{k: counts[k] for k in ("by_cause", "by_combination", "by_theme_slot")},
+        "diagnostic_ceiling": {
+            "macro_f1": ceiling, "answered_rows": len(paired), "supported_themes": len(supported),
+            "note": "Not a score. Computed over the rows the model chose to answer, so it is "
+                    "optimistic by construction; the scored number reads every parse failure as "
+                    "an empty prediction.",
+        },
+        "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
+    }
+    path = OUT_DIR / (args.out or
+                      f"parse-census-{args.sample}-{prompt_version}-{args.model.replace(':', '_')}.json")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, indent=1) + "\n")
+    print(f"\nPARSE_CENSUS sample={args.sample} prompt={prompt_version} model={args.model} "
+          f"rows={len(pred)} parse_failed={len(failed)} rate={out['parse_failure_rate']} "
+          f"causes={len(counts['by_cause'])} out={path.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":

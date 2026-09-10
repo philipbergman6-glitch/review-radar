@@ -1,4 +1,11 @@
 {
+ "fixture": {
+  "is_result": false,
+  "what_this_is": "A scorer fixture, not an evaluation. It was written in commit 03f53f2 to exercise scripts/score_themes.py before any label-v5 score existed, over the 24 rows that had been labelled at that moment.",
+  "why_the_number_is_meaningless": "system_rows=24 against reference_rows=200: 176 of the 200 evaluated reviews had no label-v5 row at all and scored as empty predictions, which is why coverage.absent=176 and failure_rate=0.905. macro_f1=0.1208 measures the missing rows, not the prompt.",
+  "superseded_by": "The 200-row label-v5 run (pipeline run e30176a8-14c6-4cd7-9c23-9e78604fce83, 150 succeeded / 50 parse_failed) is scored by ticket 06; its census is eval/themes/parse-census-development-label-v5-qwen3_8b.json.",
+  "annotated_by": "ticket 05, 2026-09-10"
+ },
  "sample": "development",
  "scope": "full",
  "label_source": "local_llm",

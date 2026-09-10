@@ -1,0 +1,43 @@
+{
+ "kind": "parse_failure_census",
+ "sample": "development",
+ "scope": "full",
+ "label_source": "local_llm",
+ "model_id": "qwen3:8b",
+ "prompt_version": "label-v4",
+ "inference_config_hash": "132960c8b74a12f6cf4190dc081f26cca53f27a0d032d9b37c8ece877da5e66a",
+ "rows": 200,
+ "by_status": {
+  "succeeded": 141,
+  "model_abstained": 0,
+  "parse_failed": 59,
+  "api_failed": 0
+ },
+ "parse_failed": 59,
+ "parse_failure_rate": 0.295,
+ "by_cause": {
+  "quote_too_long": 27,
+  "quote_not_verbatim": 24,
+  "repeated_theme": 19
+ },
+ "by_combination": {
+  "quote_too_long": 21,
+  "quote_not_verbatim": 14,
+  "repeated_theme": 13,
+  "quote_not_verbatim + quote_too_long": 5,
+  "quote_not_verbatim + repeated_theme": 5,
+  "quote_too_long + repeated_theme": 1
+ },
+ "by_theme_slot": {
+  "0": 17,
+  "1": 38,
+  "2": 36
+ },
+ "diagnostic_ceiling": {
+  "macro_f1": 0.5662575518497939,
+  "answered_rows": 141,
+  "supported_themes": 9,
+  "note": "Not a score. Computed over the rows the model chose to answer, so it is optimistic by construction; the scored number reads every parse failure as an empty prediction."
+ },
+ "created_at": "2026-09-10T13:38:10+00:00"
+}
