@@ -135,6 +135,10 @@ def main() -> None:
            "inference_config_hash": "", "taxonomy_version": tax.version,
            "taxonomy_hash": tax.file_hash, "min_support": args.min_support,
            "thresholds": thresholds, "seed": args.seed,
+           # Declared so the floor can be shown to have been measured the same way as the
+           # prompts it is a floor for: src/ai/prompt_selection.require_comparable reads these.
+           "bootstrap_draws": args.bootstrap_draws, "reference_source": "agent_reference",
+           "reference_rows": len(reference),
            "overall": {"subset": "all", "reviews": len(reference), "macro_f1": m,
                        "bootstrap_95": [lo, hi],
                        "supported_themes": [s.theme_id for s in scores if s.supported],

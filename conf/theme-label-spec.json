@@ -1,48 +1,66 @@
 {
-  "label_spec_version": "1",
-  "host": "ollama",
-  "endpoint": "http://localhost:11434",
-  "model_id": "qwen3:8b",
-  "comparison_model_id": "llama3.2:3b",
-  "api_mode": "local",
-  "inference": {
-    "temperature": 0,
-    "num_predict": 512,
-    "think": false,
-    "seed": 20260907
+ "label_spec_version": "1",
+ "host": "ollama",
+ "endpoint": "http://localhost:11434",
+ "model_id": "qwen3:8b",
+ "comparison_model_id": "llama3.2:3b",
+ "api_mode": "local",
+ "inference": {
+  "temperature": 0,
+  "num_predict": 512,
+  "think": false,
+  "seed": 20260907
+ },
+ "prompts": {
+  "discovery": {
+   "version": "discovery-v1",
+   "path": "conf/prompts/discovery-v1.txt"
   },
-  "prompts": {
-    "discovery": {
-      "version": "discovery-v1",
-      "path": "conf/prompts/discovery-v1.txt"
-    },
-    "label_v1": {
-      "version": "label-v1",
-      "path": "conf/prompts/label-v1.txt"
-    },
-    "label_v2": {
-      "version": "label-v2",
-      "path": "conf/prompts/label-v2.txt"
-    },
-    "label_v3": {
-      "version": "label-v3",
-      "path": "conf/prompts/label-v3.txt"
-    },
-    "label_v4": {
-      "version": "label-v4",
-      "path": "conf/prompts/label-v4.txt"
-    },
-    "label_v5": {
-      "version": "label-v5",
-      "path": "conf/prompts/label-v5.txt"
-    }
+  "label_v1": {
+   "version": "label-v1",
+   "path": "conf/prompts/label-v1.txt"
   },
-  "limits": {
-    "discovery_max_items": 5,
-    "discovery_quote_max_words": 12,
-    "discovery_aspect_max_words": 3,
-    "max_attempts": 2,
-    "label_quote_max_words": 15,
-    "other_phrase_max_words": 5
+  "label_v2": {
+   "version": "label-v2",
+   "path": "conf/prompts/label-v2.txt"
+  },
+  "label_v3": {
+   "version": "label-v3",
+   "path": "conf/prompts/label-v3.txt"
+  },
+  "label_v4": {
+   "version": "label-v4",
+   "path": "conf/prompts/label-v4.txt"
+  },
+  "label_v5": {
+   "version": "label-v5",
+   "path": "conf/prompts/label-v5.txt"
   }
+ },
+ "limits": {
+  "discovery_max_items": 5,
+  "discovery_quote_max_words": 12,
+  "discovery_aspect_max_words": 3,
+  "max_attempts": 2,
+  "label_quote_max_words": 15,
+  "other_phrase_max_words": 5
+ },
+ "frozen_prompt": {
+  "name": "label_v5",
+  "version": "label-v5",
+  "freeze_commit": "67926ed92bde3c7afe6c7f4117538c19be84db31",
+  "frozen_at": "2026-09-10T14:05:33.645767+00:00",
+  "decided_in": "docs/decisions/theme-prompt-freeze.md",
+  "selected_on": {
+   "sample": "development",
+   "metric": "macro_f1",
+   "value": 0.4633248579745229,
+   "bootstrap_95": [
+    0.38301107176182975,
+    0.514519495814433
+   ],
+   "reason": "highest development macro-F1 0.4633, 0.0336 above label-v4 (0.4298); the gap exceeds the 0.01 tie epsilon"
+  },
+  "note": "freeze_commit is the commit the selection was made at; the commit recording this block is its child, so both are ancestors of any audit run."
+ }
 }

@@ -21,6 +21,9 @@
   "arrived_damaged": 1
  },
  "seed": 20260907,
+ "bootstrap_draws": 1000,
+ "reference_source": "agent_reference",
+ "reference_rows": 200,
  "overall": {
   "subset": "all",
   "reviews": 200,

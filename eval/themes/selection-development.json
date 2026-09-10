@@ -1,0 +1,520 @@
+{
+ "kind": "prompt_selection",
+ "decision": "docs/decisions/theme-prompt-freeze.md",
+ "sample": "development",
+ "scope": "full",
+ "model_id": "qwen3:8b",
+ "taxonomy_version": "1",
+ "taxonomy_hash": "0cc29c374779e8ee33a6a1aaa02435d03e3b4ec62b473671a6a4302427ee5173",
+ "selected_at": "2026-09-10T14:05:33.645767+00:00",
+ "selected_at_commit": "67926ed92bde3c7afe6c7f4117538c19be84db31",
+ "rule": "highest development macro-F1 over supported themes; ties under 0.01 to the lower parse-failure rate, then to the earlier version; parse failures scored as empty predictions, never netted off",
+ "winner": {
+  "name": "label_v5",
+  "version": "label-v5",
+  "reason": "highest development macro-F1 0.4633, 0.0336 above label-v4 (0.4298); the gap exceeds the 0.01 tie epsilon"
+ },
+ "systems": [
+  {
+   "version": "label-v4",
+   "role": "candidate",
+   "macro_f1": 0.4297728669180282,
+   "bootstrap_95": [
+    0.35366656284066533,
+    0.4842518724002695
+   ],
+   "min_supported_recall": 0.11764705882352941,
+   "supported_themes": 10,
+   "reviews": 200,
+   "coverage": {
+    "succeeded": 141,
+    "model_abstained": 0,
+    "parse_failed": 59,
+    "api_failed": 0,
+    "absent": 0,
+    "failure_rate": 0.295,
+    "abstention_rate": 0.0
+   },
+   "per_theme": [
+    {
+     "theme_id": "does_not_work",
+     "support": 43,
+     "predicted": 34,
+     "tp": 16,
+     "fp": 18,
+     "fn": 27,
+     "precision": 0.47058823529411764,
+     "recall": 0.37209302325581395,
+     "f1": 0.4155844155844156,
+     "supported": true
+    },
+    {
+     "theme_id": "poor_build_quality",
+     "support": 28,
+     "predicted": 20,
+     "tp": 13,
+     "fp": 7,
+     "fn": 15,
+     "precision": 0.65,
+     "recall": 0.4642857142857143,
+     "f1": 0.5416666666666667,
+     "supported": true
+    },
+    {
+     "theme_id": "overpriced",
+     "support": 32,
+     "predicted": 48,
+     "tp": 20,
+     "fp": 28,
+     "fn": 12,
+     "precision": 0.4166666666666667,
+     "recall": 0.625,
+     "f1": 0.5,
+     "supported": true
+    },
+    {
+     "theme_id": "wrong_size_or_fit",
+     "support": 26,
+     "predicted": 24,
+     "tp": 6,
+     "fp": 18,
+     "fn": 20,
+     "precision": 0.25,
+     "recall": 0.23076923076923078,
+     "f1": 0.24000000000000002,
+     "supported": true
+    },
+    {
+     "theme_id": "unpleasant_texture",
+     "support": 17,
+     "predicted": 11,
+     "tp": 2,
+     "fp": 9,
+     "fn": 15,
+     "precision": 0.18181818181818182,
+     "recall": 0.11764705882352941,
+     "f1": 0.14285714285714285,
+     "supported": true
+    },
+    {
+     "theme_id": "hard_to_use",
+     "support": 41,
+     "predicted": 25,
+     "tp": 18,
+     "fp": 7,
+     "fn": 23,
+     "precision": 0.72,
+     "recall": 0.43902439024390244,
+     "f1": 0.5454545454545455,
+     "supported": true
+    },
+    {
+     "theme_id": "unpleasant_scent",
+     "support": 16,
+     "predicted": 46,
+     "tp": 7,
+     "fp": 39,
+     "fn": 9,
+     "precision": 0.15217391304347827,
+     "recall": 0.4375,
+     "f1": 0.22580645161290325,
+     "supported": true
+    },
+    {
+     "theme_id": "not_as_described",
+     "support": 19,
+     "predicted": 56,
+     "tp": 12,
+     "fp": 44,
+     "fn": 7,
+     "precision": 0.21428571428571427,
+     "recall": 0.631578947368421,
+     "f1": 0.32,
+     "supported": true
+    },
+    {
+     "theme_id": "irritation_or_harm",
+     "support": 22,
+     "predicted": 9,
+     "tp": 9,
+     "fp": 0,
+     "fn": 13,
+     "precision": 1.0,
+     "recall": 0.4090909090909091,
+     "f1": 0.5806451612903226,
+     "supported": true
+    },
+    {
+     "theme_id": "arrived_damaged",
+     "support": 13,
+     "predicted": 15,
+     "tp": 11,
+     "fp": 4,
+     "fn": 2,
+     "precision": 0.7333333333333333,
+     "recall": 0.8461538461538461,
+     "f1": 0.7857142857142856,
+     "supported": true
+    }
+   ],
+   "parse_census": {
+    "parse_failed": 59,
+    "parse_failure_rate": 0.295,
+    "by_cause": {
+     "quote_too_long": 27,
+     "quote_not_verbatim": 24,
+     "repeated_theme": 19
+    },
+    "by_combination": {
+     "quote_too_long": 21,
+     "quote_not_verbatim": 14,
+     "repeated_theme": 13,
+     "quote_not_verbatim + quote_too_long": 5,
+     "quote_not_verbatim + repeated_theme": 5,
+     "quote_too_long + repeated_theme": 1
+    },
+    "by_theme_slot": {
+     "0": 17,
+     "1": 38,
+     "2": 36
+    },
+    "diagnostic_ceiling": {
+     "macro_f1": 0.5662575518497939,
+     "answered_rows": 141,
+     "supported_themes": 9,
+     "note": "Not a score. Computed over the rows the model chose to answer, so it is optimistic by construction; the scored number reads every parse failure as an empty prediction."
+    }
+   }
+  },
+  {
+   "version": "label-v5",
+   "role": "candidate",
+   "macro_f1": 0.4633248579745229,
+   "bootstrap_95": [
+    0.38301107176182975,
+    0.514519495814433
+   ],
+   "min_supported_recall": 0.29411764705882354,
+   "supported_themes": 10,
+   "reviews": 200,
+   "coverage": {
+    "succeeded": 150,
+    "model_abstained": 0,
+    "parse_failed": 50,
+    "api_failed": 0,
+    "absent": 0,
+    "failure_rate": 0.25,
+    "abstention_rate": 0.0
+   },
+   "per_theme": [
+    {
+     "theme_id": "does_not_work",
+     "support": 43,
+     "predicted": 36,
+     "tp": 16,
+     "fp": 20,
+     "fn": 27,
+     "precision": 0.4444444444444444,
+     "recall": 0.37209302325581395,
+     "f1": 0.40506329113924044,
+     "supported": true
+    },
+    {
+     "theme_id": "poor_build_quality",
+     "support": 28,
+     "predicted": 23,
+     "tp": 14,
+     "fp": 9,
+     "fn": 14,
+     "precision": 0.6086956521739131,
+     "recall": 0.5,
+     "f1": 0.5490196078431373,
+     "supported": true
+    },
+    {
+     "theme_id": "overpriced",
+     "support": 32,
+     "predicted": 66,
+     "tp": 21,
+     "fp": 45,
+     "fn": 11,
+     "precision": 0.3181818181818182,
+     "recall": 0.65625,
+     "f1": 0.4285714285714286,
+     "supported": true
+    },
+    {
+     "theme_id": "wrong_size_or_fit",
+     "support": 26,
+     "predicted": 33,
+     "tp": 14,
+     "fp": 19,
+     "fn": 12,
+     "precision": 0.42424242424242425,
+     "recall": 0.5384615384615384,
+     "f1": 0.47457627118644075,
+     "supported": true
+    },
+    {
+     "theme_id": "unpleasant_texture",
+     "support": 17,
+     "predicted": 18,
+     "tp": 5,
+     "fp": 13,
+     "fn": 12,
+     "precision": 0.2777777777777778,
+     "recall": 0.29411764705882354,
+     "f1": 0.28571428571428575,
+     "supported": true
+    },
+    {
+     "theme_id": "hard_to_use",
+     "support": 41,
+     "predicted": 41,
+     "tp": 22,
+     "fp": 19,
+     "fn": 19,
+     "precision": 0.5365853658536586,
+     "recall": 0.5365853658536586,
+     "f1": 0.5365853658536586,
+     "supported": true
+    },
+    {
+     "theme_id": "unpleasant_scent",
+     "support": 16,
+     "predicted": 60,
+     "tp": 7,
+     "fp": 53,
+     "fn": 9,
+     "precision": 0.11666666666666667,
+     "recall": 0.4375,
+     "f1": 0.18421052631578946,
+     "supported": true
+    },
+    {
+     "theme_id": "not_as_described",
+     "support": 19,
+     "predicted": 79,
+     "tp": 13,
+     "fp": 66,
+     "fn": 6,
+     "precision": 0.16455696202531644,
+     "recall": 0.6842105263157895,
+     "f1": 0.26530612244897955,
+     "supported": true
+    },
+    {
+     "theme_id": "irritation_or_harm",
+     "support": 22,
+     "predicted": 12,
+     "tp": 11,
+     "fp": 1,
+     "fn": 11,
+     "precision": 0.9166666666666666,
+     "recall": 0.5,
+     "f1": 0.6470588235294118,
+     "supported": true
+    },
+    {
+     "theme_id": "arrived_damaged",
+     "support": 13,
+     "predicted": 15,
+     "tp": 12,
+     "fp": 3,
+     "fn": 1,
+     "precision": 0.8,
+     "recall": 0.9230769230769231,
+     "f1": 0.8571428571428571,
+     "supported": true
+    }
+   ],
+   "parse_census": {
+    "parse_failed": 50,
+    "parse_failure_rate": 0.25,
+    "by_cause": {
+     "quote_not_verbatim": 38,
+     "repeated_theme": 12,
+     "quote_too_long": 2
+    },
+    "by_combination": {
+     "quote_not_verbatim": 36,
+     "repeated_theme": 10,
+     "quote_too_long": 2,
+     "quote_not_verbatim + repeated_theme": 2
+    },
+    "by_theme_slot": {
+     "0": 15,
+     "1": 23,
+     "2": 27
+    },
+    "diagnostic_ceiling": {
+     "macro_f1": 0.5969219034369715,
+     "answered_rows": 150,
+     "supported_themes": 8,
+     "note": "Not a score. Computed over the rows the model chose to answer, so it is optimistic by construction; the scored number reads every parse failure as an empty prediction."
+    }
+   }
+  },
+  {
+   "version": "star-baseline-v1",
+   "role": "baseline",
+   "macro_f1": 0.3655644200001298,
+   "bootstrap_95": [
+    0.3392307536983035,
+    0.4074739594584505
+   ],
+   "min_supported_recall": 0.46153846153846156,
+   "supported_themes": 10,
+   "reviews": 200,
+   "coverage": {
+    "succeeded": 200,
+    "model_abstained": 0,
+    "parse_failed": 0,
+    "api_failed": 0,
+    "absent": 0,
+    "failure_rate": 0.0,
+    "abstention_rate": 0.0
+   },
+   "per_theme": [
+    {
+     "theme_id": "does_not_work",
+     "support": 43,
+     "predicted": 82,
+     "tp": 33,
+     "fp": 49,
+     "fn": 10,
+     "precision": 0.4024390243902439,
+     "recall": 0.7674418604651163,
+     "f1": 0.5280000000000001,
+     "supported": true
+    },
+    {
+     "theme_id": "poor_build_quality",
+     "support": 28,
+     "predicted": 55,
+     "tp": 19,
+     "fp": 36,
+     "fn": 9,
+     "precision": 0.34545454545454546,
+     "recall": 0.6785714285714286,
+     "f1": 0.45783132530120485,
+     "supported": true
+    },
+    {
+     "theme_id": "overpriced",
+     "support": 32,
+     "predicted": 82,
+     "tp": 31,
+     "fp": 51,
+     "fn": 1,
+     "precision": 0.3780487804878049,
+     "recall": 0.96875,
+     "f1": 0.543859649122807,
+     "supported": true
+    },
+    {
+     "theme_id": "wrong_size_or_fit",
+     "support": 26,
+     "predicted": 107,
+     "tp": 18,
+     "fp": 89,
+     "fn": 8,
+     "precision": 0.16822429906542055,
+     "recall": 0.6923076923076923,
+     "f1": 0.2706766917293233,
+     "supported": true
+    },
+    {
+     "theme_id": "unpleasant_texture",
+     "support": 17,
+     "predicted": 82,
+     "tp": 16,
+     "fp": 66,
+     "fn": 1,
+     "precision": 0.1951219512195122,
+     "recall": 0.9411764705882353,
+     "f1": 0.32323232323232326,
+     "supported": true
+    },
+    {
+     "theme_id": "hard_to_use",
+     "support": 41,
+     "predicted": 107,
+     "tp": 29,
+     "fp": 78,
+     "fn": 12,
+     "precision": 0.27102803738317754,
+     "recall": 0.7073170731707317,
+     "f1": 0.3918918918918919,
+     "supported": true
+    },
+    {
+     "theme_id": "unpleasant_scent",
+     "support": 16,
+     "predicted": 82,
+     "tp": 10,
+     "fp": 72,
+     "fn": 6,
+     "precision": 0.12195121951219512,
+     "recall": 0.625,
+     "f1": 0.20408163265306123,
+     "supported": true
+    },
+    {
+     "theme_id": "not_as_described",
+     "support": 19,
+     "predicted": 55,
+     "tp": 14,
+     "fp": 41,
+     "fn": 5,
+     "precision": 0.2545454545454545,
+     "recall": 0.7368421052631579,
+     "f1": 0.37837837837837834,
+     "supported": true
+    },
+    {
+     "theme_id": "irritation_or_harm",
+     "support": 22,
+     "predicted": 82,
+     "tp": 17,
+     "fp": 65,
+     "fn": 5,
+     "precision": 0.2073170731707317,
+     "recall": 0.7727272727272727,
+     "f1": 0.3269230769230769,
+     "supported": true
+    },
+    {
+     "theme_id": "arrived_damaged",
+     "support": 13,
+     "predicted": 39,
+     "tp": 6,
+     "fp": 33,
+     "fn": 7,
+     "precision": 0.15384615384615385,
+     "recall": 0.46153846153846156,
+     "f1": 0.23076923076923075,
+     "supported": true
+    }
+   ],
+   "parse_census": null
+  }
+ ],
+ "star_only_floor": {
+  "version": "star-baseline-v1",
+  "macro_f1": 0.3655644200001298,
+  "bootstrap_95": [
+   0.3392307536983035,
+   0.4074739594584505
+  ],
+  "margin": 0.0977604379743931,
+  "intervals_overlap": true,
+  "statement": "The winner's bootstrap interval [0.383, 0.5145] overlaps the star-only floor's [0.3392, 0.4075]. On 200 development rows the labeller is therefore not distinguishable from predicting themes off the star rating; the freeze proceeds because one has to, and the P6 verdict inherits this limitation."
+ },
+ "audit_evidence": {
+  "audit_label_rows_by_source": {},
+  "audit_system_label_rows": 0,
+  "audit_score_artefacts": [],
+  "untouched": true
+ }
+}

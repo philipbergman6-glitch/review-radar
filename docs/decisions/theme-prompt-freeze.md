@@ -47,5 +47,76 @@ selects on existed in the repo**, so the rule cannot have been fitted to the out
 
 ## The selection
 
-_Filled in by `make select-prompt` after the rule above was committed. See the section appended
-below._
+Produced by `make select-prompt FREEZE=1` at commit `67926ed`, the commit that carries the rule
+above and nothing else. The artefact is `eval/themes/selection-development.json`; the numbers
+here are copied from it and are re-derivable by re-running the target.
+
+All three systems, 200 `development` rows, the same `agent_reference` ground truth,
+`min_support=10`, `seed=20260907`, 1000 bootstrap draws, taxonomy v1 (`0cc29c374779`):
+
+| System | macro-F1 | bootstrap 95% | min supported recall | parse-failure rate |
+|---|---:|---|---:|---:|
+| `label-v5` **(frozen)** | **0.4633** | [0.3830, 0.5145] | 0.2941 | 0.250 |
+| `label-v4` | 0.4298 | [0.3537, 0.4843] | 0.1176 | 0.295 |
+| `star-baseline-v1` (floor) | 0.3656 | [0.3392, 0.4075] | 0.4615 | 0.000 |
+
+**Winner: `label-v5`**, by rule 4 — 0.4633 against 0.4298, a margin of 0.0336, more than three
+times the 0.01 tie epsilon, so no tie-break was needed. It is also the cheaper system to
+operate (50 parse failures against 59), and it lifts the worst supported theme's recall from
+0.1176 to 0.2941; neither fact was allowed to influence the choice, and neither had to.
+
+`label-v5` beats `label-v4` on seven of the ten themes. The two it loses are `overpriced`
+(0.429 against 0.500) and `does_not_work` (0.405 against 0.416); the gains are concentrated in
+`wrong_size_or_fit` (0.240 → 0.475) and `unpleasant_texture` (0.143 → 0.286), the two themes v4
+was worst at. Per-theme tables for both are committed:
+`eval/themes/score-development-label-v4-qwen3_8b.json` and
+`eval/themes/score-development-label-v5-qwen3_8b.json`.
+
+### The star-only overlap, stated plainly
+
+`label-v5`'s interval [0.3830, 0.5145] **overlaps** the star-only floor's [0.3392, 0.4075]. The
+point estimates are 0.0978 apart and the overlap band is narrow — 0.3830 to 0.4075 — but it is
+an overlap, and on 200 development rows the labeller is therefore **not distinguishable from
+predicting complaint themes off the star rating**. This does not veto the freeze (rule 6):
+something must be frozen before the audit opens, and `label-v5` is the best of what exists. It
+is a stated limitation that the P6 verdict and the theme-shift table inherit, and it is the
+reason the audit result is worth running rather than assumed.
+
+The floor beats both prompts on one axis: its minimum supported-theme recall is 0.4615, higher
+than either LLM's. A rule that predicts every theme below a star threshold cannot miss much;
+what it cannot do is say *which* complaint, which is what precision 0.32 on `overpriced` and
+the whole taxonomy's separation costs.
+
+### Plumbing cost, separated
+
+Per rule 3 the scores above already carry the parse failures as empty predictions. Beside them,
+from `eval/themes/parse-census-development-*.json`:
+
+| Version | parse-failed | dominant cause | causes |
+|---|---:|---|---|
+| `label-v5` | 50 (0.250) | `quote_not_verbatim` 38 | `repeated_theme` 12, `quote_too_long` 2 |
+| `label-v4` | 59 (0.295) | `quote_too_long` 27 | `quote_not_verbatim` 24, `repeated_theme` 19 |
+
+v5's prompt was written against v4's census and it worked where it aimed — `quote_too_long`
+collapsed 27 → 2 — while `quote_not_verbatim` rose 24 → 38: shorter quotes are easier to
+paraphrase than to copy. A quarter of v5's rows are still lost to plumbing rather than to
+disagreement, and its diagnostic ceiling over answered rows is 0.5969. That ceiling is not the
+score and was not used to select; it is the size of the prize a sixth prompt would have been
+chasing, and ADR-0003's five-version budget is spent.
+
+### The freeze
+
+`conf/theme-label-spec.json` now carries:
+
+```json
+"frozen_prompt": {"name": "label_v5", "version": "label-v5", "freeze_commit": "67926ed9…"}
+```
+
+`freeze_commit` is the commit the selection was made at; the commit that records the block is
+its child, so both are ancestors of any later audit run — which is the ancestry
+`scripts/gate_themes.py:check_prompt` re-derives before it will pass `THEMES_PROMPT`.
+
+**The audit set was not touched.** At freeze time `gold.review_theme_labels` held zero `audit`
+rows of any label source, and `eval/themes/` held no `score-audit-*.json`. `select_prompt.py`
+checks both and exits non-zero rather than selecting if either is non-empty; the counts are in
+the artefact's `audit_evidence` block.

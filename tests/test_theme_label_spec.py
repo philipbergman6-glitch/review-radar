@@ -13,6 +13,7 @@ from src.ai.labels import (
     validate_discovery,
 )
 from src.common import runs
+from src.common.config import PROJECT_ROOT
 
 
 @pytest.fixture(scope="module")
@@ -128,3 +129,26 @@ def test_agent_reference_is_a_distinct_label_source_from_human_and_local_llm():
                                  inference_config_hash="h")
             for src in ("agent_reference", "human", "local_llm")}
     assert len(set(keys.values())) == 3
+
+
+def test_the_frozen_prompt_block_names_a_real_prompt_and_the_score_it_was_selected_on(spec):
+    """ADR-0003 line 27, ticket 06: the freeze is a claim the repo must be able to re-derive.
+
+    `scripts/gate_themes.py` trusts this block for the audit run's prompt identity, so a block
+    that names a version the spec does not have, or a macro-F1 the committed artefact does not
+    show, would let the audit be scored against a prompt nobody selected.
+    """
+    frozen = spec.raw["frozen_prompt"]
+    assert spec.prompts[frozen["name"]].version == frozen["version"]
+    assert frozen["freeze_commit"] and frozen["decided_in"] == "docs/decisions/theme-prompt-freeze.md"
+
+    selection = json.loads((PROJECT_ROOT / "eval" / "themes" / "selection-development.json").read_text())
+    assert selection["winner"]["version"] == frozen["version"]
+    assert selection["audit_evidence"]["untouched"], "the freeze is void if the audit set was open"
+
+    scored = json.loads((PROJECT_ROOT / "eval" / "themes"
+                         / f"score-development-{frozen['version']}-"
+                           f"{spec.model_id.replace(':', '_')}.json").read_text())
+    assert scored["overall"]["macro_f1"] == frozen["selected_on"]["value"]
+    # The score that selected the prompt was over the whole frame, not the rows it answered.
+    assert scored["reference_rows"] == scored["system_rows"] == scored["overall"]["reviews"]

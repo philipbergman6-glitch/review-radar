@@ -199,3 +199,26 @@ concern was put to him once.
 - **The evaluation table carries the limitation in its verdict column**, not a footnote: the
   P6 row states that ground truth is agent-generated and prints the Philip-agreement figure
   beside it. If agreement is weak, the theme-shift table inherits the caveat.
+
+## Amendment 2026-09-10 (d) — `label-v5` is the frozen prompt, and it overlaps the star floor
+
+The line-27 freeze, executed before the audit set was opened. The rule that selected it was
+committed in `docs/decisions/theme-prompt-freeze.md` one commit *before* the scores it selects
+on, and `make select-prompt` re-derives the selection from the committed artefacts.
+
+- **Frozen prompt: `label-v5`**, on development macro-F1 0.4633 [0.3830, 0.5145] against
+  `label-v4`'s 0.4298 [0.3537, 0.4843], over the identical 200 development rows. The
+  `frozen_prompt` block in `conf/theme-label-spec.json` carries the version and freeze commit;
+  `THEMES_PROMPT` re-derives that the freeze commit is an ancestor of the audit run.
+- **The prompt does not change after this point**, and the five-version budget is spent.
+- **The star-only floor is not separated.** `label-v5`'s interval overlaps the floor's
+  [0.3392, 0.4075] in the band 0.3830–0.4075. On 200 development rows the labeller is not
+  distinguishable from predicting themes off the star rating. Per RR-21 this limitation goes in
+  the evaluation table's verdict column, not a footnote, and the theme-shift table inherits it.
+- **A quarter of development rows are lost to parse failure, not disagreement** (50/200 for
+  v5), dominated by `quote_not_verbatim`. The census is committed beside every score so the
+  plumbing cost stays separable from the disagreement cost; neither is netted off the other.
+- **The 0.70 macro-F1 bar and the 0.50 recall floor still do not move.** Development is 0.4633
+  and the worst supported theme's recall is 0.2941. Both are well under the bars, which are for
+  the audit set and were frozen in 2026-09-06 before any of this existed. The audit run happens
+  against the frozen prompt and reports what it reports.
