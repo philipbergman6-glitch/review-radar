@@ -37,6 +37,7 @@ from src.common import evaluation as E
 from src.common import runs
 from src.common.spark import build
 from src.gates import embeddings as gate
+from src.gates import lineage as L
 from src.serving import judgements as J
 from src.serving import projection as P
 from src.serving import search as S
@@ -197,7 +198,7 @@ def main() -> None:
         "recall": check_recall(es, spec), "judgements": judgements,
         "hypotheses": check_hypotheses(qs, spec),
     }
-    v = gate.verdict(facts, scope=args.scope)
+    v = L.attest(gate.verdict(facts, scope=args.scope), "embeddings")
     v.emit()
     if emb is None:
         sys.exit(1)   # no ledger row: nothing to attribute the result to, so nothing to publish

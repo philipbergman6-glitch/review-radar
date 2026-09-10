@@ -9,16 +9,17 @@
     "SILVER_COLLISIONS groups=6139 exact_groups=6138 conflicting_groups=1 unresolvable_groups=0 table_rows=13415 removed=7276",
     "SILVER_LEDGER run_id=4447727f-ee66-48eb-be9e-8a23e061d708 snapshots_stamped=true ledger_matches_tables=true commit=3c3162ac66c8869c6192fbc2a38cba29062853c4 dirty=true",
     "SILVER_RERUN previous_run=42a6bd4c-0677-44d4-afdb-2a8765d02767 identical=true",
+    "RUN_CONTRACTS gate=SILVER_GATE jobs=silver,catalogue_load registered=2/2 missing=none run_contract_registered=true",
     "SILVER_GATE bronze_snapshot=1672093859820484049 catalogue_load_id=84af7fa0-e6db-4b53-b58e-f4df321e0436 catalogue_rows_read=112590 bronze_rows=701528 reject_rows=0 silver_rows=694252 collision_rows_removed=7276 unmatched_review_rows=0 unmatched_parent_asins=0 join_cardinality_ok=true review_id_unique=true identity=PASS gate_scope=full SILVER_GATE=PASS"
   ],
-  "created_at": "2026-09-10T12:03:15+00:00",
+  "created_at": "2026-09-10T12:44:41+00:00",
   "gate_name": "SILVER_GATE",
   "kind": "reproducibility",
   "metric": {
     "direction": "eq",
     "name": "constituents_ok",
-    "threshold": 7,
-    "value": 7
+    "threshold": 8,
+    "value": 8
   },
   "model": null,
   "phase": "P2 Silver",

@@ -211,10 +211,76 @@ class Capability:
         return Path("eval") / self.id / "gate.json"
 
 
+@dataclass(frozen=True)
+class Edge:
+    """One declared join: the downstream job's named input is the upstream job's output.
+
+    `spec_version` narrows the edge to one contract version of the downstream job -- reviews
+    gained its embeddings input at v2 -- and is None when every version must show it.
+    """
+    downstream: str
+    input: str
+    upstream: str
+    status: str
+    cut_reason: str | None
+    spec_version: str | None
+
+    @property
+    def key(self) -> tuple[str, str]:
+        return (self.downstream, self.input)
+
+    @property
+    def name(self) -> str:
+        return f"{self.downstream}<-{self.upstream}.{self.input}"
+
+    def applies_to(self, spec_version: str) -> bool:
+        return self.spec_version is None or self.spec_version == spec_version
+
+
+def _read_chain(path: Path) -> dict[str, Any]:
+    with path.open("rb") as f:
+        return tomllib.load(f)
+
+
+def load_edges(path: Path = CHAIN_PATH) -> tuple[Edge, ...]:
+    """The declared edges. Hard-fails on a malformed or duplicated declaration."""
+    out: list[Edge] = []
+    seen: set[tuple[str, str, str | None]] = set()
+    for i, e in enumerate(_read_chain(path).get("edge", [])):
+        for key in ("downstream", "input", "upstream"):
+            if not str(e.get(key, "")).strip():
+                raise ValueError(f"edge[{i}] is missing {key}")
+        status = e.get("status", "declared")
+        if status not in CHAIN_STATUSES:
+            raise ValueError(f"edge[{i}]: status must be one of {CHAIN_STATUSES}, got {status!r}")
+        reason = e.get("cut_reason")
+        if status == "cut" and not str(reason or "").strip():
+            raise ValueError(f"edge[{i}]: status is cut, so cut_reason is mandatory")
+        if status == "declared" and reason:
+            raise ValueError(f"edge[{i}]: cut_reason belongs to a cut edge only")
+        spec = e.get("spec_version")
+        ident = (e["downstream"], e["input"], spec)
+        if ident in seen:
+            raise ValueError(f"edge {e['downstream']}.{e['input']} is declared twice")
+        seen.add(ident)
+        out.append(Edge(downstream=e["downstream"], input=e["input"], upstream=e["upstream"],
+                        status=status, cut_reason=reason,
+                        spec_version=None if spec is None else str(spec)))
+    return tuple(out)
+
+
+def edge_for(edges: Sequence[Edge], downstream: str, input_name: str,
+             spec_version: str) -> Edge | None:
+    """The declared edge governing one recorded input, or None when none is declared."""
+    for e in edges:
+        if e.key == (downstream, input_name) and e.applies_to(spec_version):
+            return e
+    return None
+
+
 def load_chain(path: Path = CHAIN_PATH) -> tuple[Capability, ...]:
     """The declared chain. Hard-fails on a malformed declaration rather than skipping it."""
-    with path.open("rb") as f:
-        doc = tomllib.load(f)
+    doc = _read_chain(path)
     entries = doc.get("capability")
     if not entries:
         raise ValueError(f"{path} declares no capabilities")

@@ -33,6 +33,7 @@ from elasticsearch import BadRequestError
 from src.common import config as C
 from src.common import evaluation as E
 from src.common import runs
+from src.gates import lineage as L
 from src.gates import search as gate
 from src.serving import judgements as J
 from src.serving import projection as P
@@ -175,7 +176,7 @@ def main() -> None:
         "judgements": judgements,
         "analyzer": check_analyzer(qs),
     }
-    v = gate.verdict(facts, scope=args.scope)
+    v = L.attest(gate.verdict(facts, scope=args.scope), "search")
     v.emit()
     if not reviews_row:
         sys.exit(1)   # no ledger row: nothing to attribute the result to, so nothing to publish

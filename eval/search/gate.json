@@ -8,16 +8,17 @@
     "SEARCH_KIBANA host=http://localhost:5601 dashboard=pm-dashboard present=true ok=true",
     "SEARCH_JUDGEMENTS set_version=1 hash=570f31717e1b queries=20 systems=bm25_plain,bm25_stemmed pooled=273 judged=273 complete_queries=20/20 ok=true",
     "SEARCH_ANALYZER complete=true frozen_default=bm25_stemmed set_hash_matches=true decision_file=true bm25_plain.descriptive=0.7 bm25_plain.lexical=0.82 bm25_stemmed.descriptive=0.76 bm25_stemmed.lexical=0.86 ok=true",
+    "RUN_CONTRACTS gate=SEARCH_GATE jobs=search_index_reviews,search_index_product_month registered=2/2 missing=none run_contract_registered=true",
     "SEARCH_GATE scope=full reviews=true product_month=true contract=true kibana=true judgements=true analyzer=true SEARCH_GATE=PASS"
   ],
-  "created_at": "2026-09-10T12:05:37+00:00",
+  "created_at": "2026-09-10T12:43:40+00:00",
   "gate_name": "SEARCH_GATE",
   "kind": "reproducibility",
   "metric": {
     "direction": "eq",
     "name": "constituents_ok",
-    "threshold": 6,
-    "value": 6
+    "threshold": 7,
+    "value": 7
   },
   "model": null,
   "notes": [

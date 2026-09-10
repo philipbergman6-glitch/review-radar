@@ -61,6 +61,7 @@ from src.common import evaluation as E
 from src.common import runs
 from src.common.spark import build
 from src.gates import gold as verdicts
+from src.gates import lineage as L
 
 sys.stdout.reconfigure(line_buffering=True)
 
@@ -576,7 +577,8 @@ def main() -> None:
             lines.append(f"GOLD_REPRO_DIFF {ex}")
     lines.append(max_drop_span_line(mine.episodes, tol))
 
-    v = verdicts.repro(scope=args.scope, checks=checks, constituents=lines)
+    v = L.attest(verdicts.repro(scope=args.scope, checks=checks, constituents=lines),
+                 "gold_repro")
     v.emit()
 
     E.record(v, capability="gold_repro", phase="P3 Gold", kind="reproducibility",

@@ -1,9 +1,14 @@
-# The declared chain: every capability the submission claims, in ADR-fixed phase order.
+# The declared chain: every capability the submission claims, in ADR-fixed phase order,
+# and every edge between the jobs those capabilities rest on.
 #
 # Two commands read this file and nothing else decides what the submission contains:
 #   * `make eval-table` renders one row per capability from eval/<id>/gate.json;
 #   * `scripts/gate_lineage.py` walks the same list and checks every named ledger job
 #     back to the pipeline_runs row that produced it.
+#
+# `jobs` is load-bearing twice over: the lineage gate pins one ledger run per named job and
+# refuses an artefact filed under a capability that does not declare the job that produced it,
+# and every phase gate prints `run_contract_registered` for these jobs and fails without them.
 #
 # A capability is either a number or a written reason. `status = "declared"` means its
 # artefact must exist and validate -- a missing one exits the table non-zero.
@@ -19,7 +24,9 @@ phase = "P2 Silver"
 gate_name = "SILVER_GATE"
 kind = "reproducibility"
 status = "declared"
-jobs = ["silver"]
+# The catalogue loader is P2's other job: its run id *is* the catalogue_load_id stamped on
+# every products row and named by silver's join (ADR-0007), so the phase claims both.
+jobs = ["silver", "catalogue_load"]
 
 [[capability]]
 id = "silver_repro"
@@ -164,3 +171,100 @@ gate_name = "DEMO_GATE"
 kind = "reproducibility"
 status = "declared"
 jobs = []
+
+# ============================================================== The declared edges ====
+#
+# One edge per (downstream job, input name) that names an upstream run: the input entry the
+# downstream job recorded carries the upstream's `run_id` (or, for the catalogue, the
+# `catalogue_load_id` that *is* its run id). `scripts/gate_lineage.py` checks the join in both
+# directions -- an undeclared edge found in the ledger fails just as loudly as a declared edge
+# the ledger does not show, so this list cannot quietly fall behind the pipeline.
+#
+# `spec_version` narrows an edge to one contract version; without it the edge is expected of
+# every version. `status = "cut"` names a link the submission does not claim, with the reason
+# written out; the identity is still checked for existence as an unjoined input, so cutting an
+# edge never makes it an unchecked one.
+#
+# Not edges: `theme_classifier_train`/`theme_classifier_score` consume a labels table and a
+# model path rather than a named run, and `rag_answers` has no ledger-run input. They appear
+# in `jobs` above and are pinned as runs; they contribute outputs, not joins.
+
+[[edge]]
+downstream = "silver"
+input = "bronze"
+upstream = "bronze_drain"
+status = "cut"
+cut_reason = "the streaming drain writes no ledger row -- ADR-0008 §3 defers producer and bronze instrumentation to their own session -- so silver's bronze snapshot is checked as an Iceberg identity that still exists, but is not joined to a producing run"
+
+[[edge]]
+downstream = "silver"
+input = "catalogue"
+upstream = "catalogue_load"
+status = "declared"
+
+[[edge]]
+downstream = "gold"
+input = "silver"
+upstream = "silver"
+status = "declared"
+
+[[edge]]
+downstream = "embeddings"
+input = "silver"
+upstream = "silver"
+status = "declared"
+
+[[edge]]
+downstream = "search_index_reviews"
+input = "silver"
+upstream = "silver"
+status = "declared"
+
+[[edge]]
+downstream = "search_index_reviews"
+input = "embeddings"
+upstream = "embeddings"
+spec_version = "2"
+status = "declared"
+
+[[edge]]
+downstream = "search_index_product_month"
+input = "gold"
+upstream = "gold"
+status = "declared"
+
+[[edge]]
+downstream = "theme_samples"
+input = "gold"
+upstream = "gold"
+status = "declared"
+
+[[edge]]
+downstream = "theme_samples"
+input = "silver"
+upstream = "silver"
+status = "declared"
+
+[[edge]]
+downstream = "theme_labels_llm"
+input = "samples"
+upstream = "theme_samples"
+status = "declared"
+
+[[edge]]
+downstream = "theme_labels_llm"
+input = "silver"
+upstream = "silver"
+status = "declared"
+
+[[edge]]
+downstream = "theme_labels_reference"
+input = "samples"
+upstream = "theme_samples"
+status = "declared"
+
+[[edge]]
+downstream = "theme_labels_reference"
+input = "silver"
+upstream = "silver"
+status = "declared"

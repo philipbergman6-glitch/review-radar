@@ -8,16 +8,17 @@
     "EMBED_RECALL index=reviews_s8507728480475534879_d2e56c46 on_live_generation=true spec_matches=true k=50 num_candidates=200 doc_queries=200 doc_recall10_mean=0.9595 doc_recall10_min=0.4 frozen_recall10_mean=0.955 frozen_recall10_min=0.7 ok=true",
     "EMBED_JUDGEMENTS set_version=1 hash=570f31717e1b systems=knn,hybrid,bm25_cohort,hybrid_cohort pooled=457 judged=457 complete_queries=20/20 ok=true",
     "EMBED_HYPOTHESES complete=true set_hash_matches=true spec_matches=true decision_file=true H-E1=not held H-E2=held H-E3cont=held H-E3prod=held judges={'claude': 575, 'philip': 4} ok=true",
+    "RUN_CONTRACTS gate=EMBED_GATE jobs=embeddings,search_index_reviews registered=2/2 missing=none run_contract_registered=true",
     "EMBED_GATE scope=full spec=true table=true index=true recall=true judgements=true hypotheses=true EMBED_GATE=PASS"
   ],
-  "created_at": "2026-09-10T12:04:13+00:00",
+  "created_at": "2026-09-10T12:44:30+00:00",
   "gate_name": "EMBED_GATE",
   "kind": "reproducibility",
   "metric": {
     "direction": "eq",
     "name": "constituents_ok",
-    "threshold": 6,
-    "value": 6
+    "threshold": 7,
+    "value": 7
   },
   "model": "sentence-transformers/all-MiniLM-L6-v2",
   "notes": [

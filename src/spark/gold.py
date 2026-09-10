@@ -44,6 +44,7 @@ from src.common import evaluation as E
 from src.common import runs
 from src.common.spark import CATALOG, build
 from src.gates import gold as gate
+from src.gates import lineage as L
 from src.gold.rule import CLOSED_BY, RULE_PATH, Rule, evaluate, load_rule
 from src.spark.silver import digest, write_replace
 
@@ -321,8 +322,8 @@ def print_lines(rule: Rule, c: dict[str, Any], *, run_id: str, scope: str,
     """
     analytical = gate.analytical(c, rule_status=rule.status, holdout_start=rule.holdout_start,
                                  config_hash=rule.config_hash)
-    v = gate.verdict(c, run_id=run_id, scope=scope, rule_status=rule.status)
-    for line in gate.constituent_lines(c):
+    v = L.attest(gate.verdict(c, run_id=run_id, scope=scope, rule_status=rule.status), "gold")
+    for line in v.constituents:
         print(line)
     print(analytical.terminal)
     print(v.terminal)

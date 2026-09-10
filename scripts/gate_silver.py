@@ -25,6 +25,7 @@ from src.common import evaluation as E
 from src.common import runs
 from src.common.pg import connect
 from src.common.spark import build
+from src.gates import lineage as L
 from src.gates import silver as gate
 from src.gates.silver import REJECT_REASONS
 
@@ -109,6 +110,7 @@ def main() -> None:
                 "ledger_matches_tables": ledger_agrees, "commit": row["git_commit_sha"],
                 "dirty": row["worktree_dirty"]},
         rerun=rerun)
+    v = L.attest(v, "silver")
     v.emit()
     E.record(v, capability="silver", phase="P2 Silver", kind="reproducibility",
              protocol_hash=row["git_commit_sha"] or "uncommitted-worktree",

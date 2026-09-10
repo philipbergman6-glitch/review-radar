@@ -38,6 +38,7 @@ from src.common import config as C
 from src.common import evaluation as E
 from src.common import runs
 from src.common.spark import build
+from src.gates import lineage as L
 from src.gates import silver as gate
 
 sys.stdout.reconfigure(line_buffering=True)
@@ -332,8 +333,8 @@ def main() -> None:
         print(f"SILVER_REPRO class={c} groups_mine={int((groups == c).sum())} "
               f"groups_theirs={row['counts'][f'{c}_groups']}")
 
-    v = gate.repro(scope=args.scope, checks=list(checks.items()))
-    print(v.terminal)
+    v = L.attest(gate.repro(scope=args.scope, checks=list(checks.items())), "silver_repro")
+    v.emit()
     E.record(v, capability="silver_repro", phase="P2 Silver", kind="reproducibility",
              protocol_hash=row["git_commit_sha"] or "uncommitted-worktree",
              population={"name": f"{reviews_path.as_posix()} vs silver.reviews",
