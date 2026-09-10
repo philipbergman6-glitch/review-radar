@@ -110,10 +110,9 @@ the `RR-01` answer.
 
 - [A printed number for every phase gate](tickets/RR-13-printable-gates.md) — **Only reproducibility blocks.** A gate's `PASS|FAIL` carries counts that reconcile, ID sets that match, reruns that agree, artefacts that validate; a FAIL reopens the phase. Every quality target prints its own `verdict=PASS|FAIL` on its own line and never blocks — a miss sets status `built, evaluated, below target`, because reopening on a quality miss means tuning against a held-out set (ADR-0001/0003/RR-21 forbid it). Phase complete only at `scope=full`; sample renders `NOT_RUN`. Never-reached and cut-on-merits share `NOT_RUN` plus a mandatory `cut_reason` in `conf/lineage_chain.toml`; `make eval-table` hard-fails on an artefact missing *and* not declared cut. Five rows were already built and are cited, not re-decided; newly frozen are `RAG_GATE` + `RAG_QUALITY`, `DEMO_GATE … rehearsals≥2 docs_present=`, `GOLD_REPRO_GATE`, and `GOLD_CALIBRATION` which **blocks the protocol freeze**. Universal constituents: `run_contract_registered=` on every phase gate, `eval/<capability>/gate.json` on every capability gate. P6 corrected — hosted budget ledger withdrawn for `THEMES_BUDGET`, repeat-kappa stays `NOT_RUN` with `THEMES_AGREEMENT` reported instead, and the 0.70/0.50 bars move out of `THEMES_GATE` into `THEMES_QUALITY` **without moving**. `label_source` enum settled here: `llm` · `agent_reference` · `classifier`. ADR-0006's artefact path corrected to `eval/<cap>/gate.json`. Repo-baseline row dropped — CI is not a phase gate. ADR-0011.
 
-## Not yet specified
+- [Design doc sections and slide narrative order](tickets/RR-18-design-doc-and-slides.md) — **Doc: eight sections, two pages hard, links not appendices** — question · the V's · architecture diagram (exactly-once as a figure) · phase-by-phase with gate verdicts · the AI capability with deck 5's own BM25 line · results · *how we avoided fooling ourselves* · trade-offs. The brief's §8 order plus two insertions (the V's, because Addition C is the instructor's definitional slide; the rigour section, because nothing in the brief makes room for it). **Talk: 10:00 = 5:00 slides + 4:40 demo + 20 s slack**, eight slides plus a title, setup (5) → one continuous demo block → payoff (3), so every move lands as proof of a claim made 30 s earlier; demo-last rejected because RR-11's recorded backup already buys that insurance. Slide 2 ships **two variants**, the fork called at rehearsal 2 on RR-09's printed `text_characterisable < 3`, not on "did P6 finish". All four declines sit as one block in §8 — Kafka Connect ES sink says *dropped for time*, HDFS concedes MinIO is not equivalent, Oozie is owned as an opinion. Three trade-offs: Iceberg-not-taught, local `qwen3:8b` with the 0.70 bar unmoved, sensitive review text; Spark-on-host dropped. Unbuilt phases print `NOT_RUN` + `cut_reason` (ADR-0011), never omission. Five prepared Q&A answers, each a number; HDFS and Connect get none because slide 8 already declines them. No ADR — the outlines are the artifact.
 
-- *(Design-doc contents and slide order graduated 2026-09-04 into `Design doc sections and
-  slide narrative order` (`RR-18`).)*
+## Not yet specified
 - *(Burst detection threshold removed 2026-09-04 — `gold.bursts` is out of scope, `RR-09`.)*
 - **Decline-rule thresholds (B, R, δ, P, G, K, minimum counts, placebo ceiling).** Set at
   the protocol freeze from pre-2020 aggregates only, per `RR-09` / ADR-0001; deliberately
@@ -140,12 +139,15 @@ the `RR-01` answer.
   which fixture, how CI gets a JDK and Docker. The CI skeleton exists (`RR-15`, no JDK, the
   workflow comment says what to add); sharpens once silver has something to test.
 
-## Ticket index (updated 2026-09-10, RR-13 closed)
+## Ticket index (updated 2026-09-10, RR-18 closed)
 
-Closed: `RR-01`, `RR-02`, `RR-03`, `RR-04`, `RR-05`, `RR-06`, `RR-07`, `RR-08`, `RR-09`,
-`RR-10`, `RR-11`, `RR-12`, `RR-13`, `RR-15`, `RR-16`, `RR-17`, `RR-19`, `RR-20`, `RR-21`,
-`RR-22`, `RR-23`. Frontier — open, unblocked: `RR-18`.
-Blocked: `RR-14` (on RR-18).
+Closed: `RR-01`–`RR-13`, `RR-15`–`RR-23` (every decision ticket).
+Frontier — open, unblocked: **`RR-14`** (type `task`, the map's closing act — nothing left to
+decide, only to reconcile). Blocked: none.
+
+**The map has no open decisions left.** Once `RR-14` carries the resolutions into the
+build-plan register, `README.md` and `docs/course-coverage.md`, the destination is reached and
+everything remaining is execution.
 Philip's instruction 2026-09-07: implementation starts now (P2 Silver); the three remaining
 map tickets are worked alongside, not before.
 

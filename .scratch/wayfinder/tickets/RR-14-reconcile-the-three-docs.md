@@ -113,3 +113,31 @@ references to Streamlit are to be withdrawn.
 - `docs/AUDIT_REPORT_2026-09-01.md` F4 → addressed by decision (ADR-0010), implementation in P8.
 - `docs/course-coverage.md` §4: cite `withWatermark` / `dropDuplicatesWithinWatermark` /
   "event-time windows" (deck 3, 2026 part 3, lines 447/450/870) as the taught API P8 uses.
+
+## Input from RR-18 (closed 2026-09-10) — last blocker cleared
+
+This ticket is now on the frontier and is the map's only open ticket.
+
+- README's `Design doc, slides` row (`README.md:33`) stays `*planned*` but must name the
+  decided shape: **eight sections / two pages** for the doc, **eight slides plus a title**
+  for the talk, 9:30 of a 10:00 ceiling (5:00 slides + 4:40 demo). The outlines are not
+  copied anywhere — they live in `RR-18` §3 and §7 and are cited.
+- The build-plan artifact's presentation rows take `RR-18` §7's slide table, and its
+  out-of-scope lines must carry the wording constraints from `RR-18` §4: Kafka Connect ES
+  sink says **dropped for time**; HDFS concedes MinIO is not equivalent (block replication
+  and rack awareness vs a flat key space with no atomic rename); Oozie is owned as an
+  opinion.
+- `docs/course-coverage.md` Addition C's V's paragraph becomes design-doc §2 verbatim — so
+  fix it here first: retire "6,139 duplicates" for the collision-group / removed-row split
+  per `RR-02` (6,139 groups, 7,276 rows removed).
+- The README status table and the doc's §4 phase table share one spine: every phase, its
+  gate name, its verdict from ADR-0011's vocabulary (PASS / FAIL / REPORTED / NOT_RUN), and
+  a `cut_reason` for anything `NOT_RUN`. `RR-14`'s handoff note should say that the design
+  doc is written *against* `conf/lineage_chain.toml`, not against prose.
+- Nothing from `RR-18` needs an ADR; do not add ADR-0012 for it.
+
+**Build state to reconcile against** `[observed README.md:17-33, 2026-09-10]`: P2 Silver,
+P3 Gold, P4 Search, P5 Embeddings are **built** with passing gates. P6 Themes is mid-flight
+(`5f8f907`). P7 RAG, P8 Stream, the demo notebook, the design doc and the slides are
+`*planned*`. Several map tickets were written when far less existed; the reconciliation
+should state the split honestly rather than inherit stale "planned" language.
