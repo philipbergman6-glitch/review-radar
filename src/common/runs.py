@@ -34,7 +34,7 @@ PROJECT_ROOT = C.PROJECT_ROOT
 JOB_NAMES: tuple[str, ...] = (
     "produce", "catalogue_load", "bronze_drain", "silver", "gold",
     "search_index_reviews", "search_index_product_month", "embeddings",
-    "theme_samples", "theme_labels_llm", "theme_labels_reference",
+    "theme_samples", "theme_labels_llm", "theme_labels_reference", "theme_labels_human",
     "theme_classifier_train", "theme_classifier_score", "rag_answers",
 )
 
@@ -49,6 +49,11 @@ THEME_SAMPLES_SPEC_VERSION = "2"   # v2 generalises the discovery-only counts to
 THEME_DISCOVERY_SPEC_VERSION = "1"
 THEME_LABELS_SPEC_VERSION = "2"
 THEME_REFERENCE_SPEC_VERSION = "1"
+# Philip's blind stratified 50 (RR-21). A separate job from `theme_labels_reference` on
+# purpose: same shape, different annotator, and `label_source="human"` is the one value the
+# labels table reserves for it. One job writing under two provenances would make the
+# correlated-error number this exists to publish unverifiable after the fact.
+THEME_HUMAN_SPEC_VERSION = "1"
 THEME_CLASSIFIER_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
@@ -487,6 +492,22 @@ _register(Contract(
             "theme_hits", "other_present", "no_theme_labels", "table_rows_for_config",
             "distinct_keys_for_config", "inference_config_hash", "taxonomy_hash", "elapsed_s"),
     identity=_theme_reference_identity))
+
+# The same contract for Philip's 50, and the same identity check: a partially imported
+# adjudication subset shrinks the denominator of the agreement number, which is the one number
+# published to price the correlated-error risk of machine-made ground truth (RR-21).
+_register(Contract(
+    "theme_labels_human", THEME_HUMAN_SPEC_VERSION,
+    inputs={"samples": ("run_id", "table", "snapshot_id", "sample_name"),
+            "silver": ("run_id", "table", "snapshot_id"),
+            "blind_export": ("path", "map_path", "rows", "sha256"),
+            "taxonomy": ("path", "version", "file_hash")},
+    outputs={"gold.review_theme_labels": ("table", "snapshot_id", "budget_line", "label_source")},
+    counts=("reviews_selected", "labels_submitted", "accepted", "rejected", "abstained",
+            "theme_hits", "other_present", "no_theme_labels", "table_rows_for_config",
+            "distinct_keys_for_config", "inference_config_hash", "taxonomy_hash", "elapsed_s"),
+    identity=_theme_reference_identity))
+
 
 def _classifier_train_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
     """The pool splits into what trained the model and what was dropped for having no label."""

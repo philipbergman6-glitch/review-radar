@@ -1,0 +1,43 @@
+{
+  "artifact_version": "1",
+  "capability": "themes",
+  "constituents": [
+    "THEMES_TAXONOMY version=1 themes=10 ceiling=10 hash=0cc29c374779 recorded=0cc29c374779 unchanged_since_audit=true ok=true",
+    "THEMES_PROTOCOL status=frozen hash=8a6d50fbc7fb audit=200/200 development=200/200 discovery=600/600 training_pool=3000/3000 reviews_in_two_samples=0 ok=true",
+    "THEMES_PROMPT frozen=label-v5 freeze_commit=67926ed9 in_spec=true audit_used=label-v5 frozen_before_audit=true ok=true",
+    "THEMES_REFERENCE source=agent_reference rows=200 distinct=200 expected=200 human_rows=0 ok=true",
+    "THEMES_AUDIT run_id=e39584c3-9022-4417-8677-291166af7ec3 model=qwen3:8b config=b84a2ce22193 rows=200/200 terminal=200 ok_labels=173 abstained=0 parse_failed=27 api_failed=0 ok=true",
+    "THEMES_SEAL opened_at=2026-09-11T06:26:28.403443+00:00 commit=aafaad58 sealed=f39ce4f57abd today=f39ce4f57abd systems=3 freezes_moved=0 artefacts_changed=0 verdict=FAIL ok=true",
+    "THEMES_SEAL_SYSTEM llm         macro_f1=0.4583 min_supported_recall=0.4666666666666667 reviews=200 runs=1 artefact=score-audit-label-v5-qwen3_8b.json",
+    "THEMES_SEAL_SYSTEM classifier  macro_f1=0.3899 min_supported_recall=0.3333333333333333 reviews=200 runs=1 artefact=score-audit-classifier-v1-c0adf0923dc5.json",
+    "THEMES_SEAL_SYSTEM star_only   macro_f1=0.2968 min_supported_recall=0.7222222222222222 reviews=200 runs=0 artefact=score-audit-star_only.json",
+    "RUN_CONTRACTS gate=THEMES_GATE jobs=theme_samples,theme_labels_llm,theme_labels_reference registered=3/3 missing=none run_contract_registered=true",
+    "THEMES_GATE scope=full constituents_ok=6/6 failed=none kind=reproducibility THEMES_GATE=PASS"
+  ],
+  "created_at": "2026-09-11T06:44:33+00:00",
+  "gate_name": "THEMES_GATE",
+  "kind": "reproducibility",
+  "metric": {
+    "direction": "eq",
+    "name": "constituents_ok",
+    "threshold": 7,
+    "value": 7
+  },
+  "model": "qwen3:8b",
+  "notes": [
+    "audit set opened once at 2026-09-11T06:26:28.403443+00:00, freeze fingerprint f39ce4f57abd; inference may repeat, measurement may not (ticket 09)"
+  ],
+  "phase": "P6 Themes",
+  "pipeline_run_id": "e39584c3-9022-4417-8677-291166af7ec3",
+  "population": {
+    "enriched_rows": 120,
+    "n": 200,
+    "name": "audit (held-out, post-2020 candidate and control products)",
+    "reference_source": "agent_reference",
+    "representative_rows": 80
+  },
+  "prompt": "label-v5",
+  "protocol_hash": "8a6d50fbc7fb896efaa5462e9d7c5cf6c51176a3d7cd0438f2f02af7f39d2566",
+  "scope": "full",
+  "status": "PASS"
+}

@@ -155,10 +155,20 @@ def system_report(*, subset: str, reference: dict[str, set[str]], system: dict[s
     """
     ids = sorted(reference)
     scores = score_themes(reference, system, theme_ids, min_support=min_support)
-    lo, hi = bootstrap_macro_f1(reference, system, theme_ids, product_of,
-                                min_support=min_support, seed=seed, draws=draws)
+    point = macro_f1(scores)
+    # No interval around an undefined statistic (ticket 10). When no theme reaches min_support
+    # the point estimate is None, but the resampler would still return a range -- it averages
+    # over whichever draws happened to contain a supported theme, and in the audit set's
+    # 80-row representative stratum that range sits *above* the system's own overall score.
+    # An interval that cannot be read beside a point estimate is not weak evidence, it is not
+    # evidence, so it is not produced. The artefacts already sealed on 2026-09-11 keep theirs
+    # and are reported as NOT_RUN in that stratum instead: rewriting a scored artefact after
+    # the audit set is opened is the one act the seal exists to refuse (ticket 09).
+    lo, hi = (bootstrap_macro_f1(reference, system, theme_ids, product_of,
+                                 min_support=min_support, seed=seed, draws=draws)
+              if point is not None else (None, None))
     out: dict[str, Any] = {
-        "subset": subset, "reviews": len(ids), "macro_f1": macro_f1(scores),
+        "subset": subset, "reviews": len(ids), "macro_f1": point,
         "bootstrap_95": [lo, hi],
         "supported_themes": [s.theme_id for s in scores if s.supported],
         "min_supported_recall": min([s.recall for s in scores

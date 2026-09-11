@@ -5,7 +5,13 @@ the agent is still labelling. This runs the *same* validator over whatever has b
 so far and prints one line per failure, so a mistyped evidence quote is caught in seconds
 instead of at the end of a 200-row set.
 
+Philip's blind 50 (RR-21, ticket 10) needs the same loop for the same reason, against a
+different pair of files, so the two paths are arguments with the reference set's names as
+defaults rather than a second copy of this script.
+
 Run:  ./run.sh python scripts/check_reference_labels.py --sample development
+      ./run.sh python scripts/check_reference_labels.py --sample audit \\
+          --blind blind-agreement-audit.jsonl --labels human-agreement-audit.jsonl
 """
 from __future__ import annotations
 
@@ -21,10 +27,15 @@ OUT_DIR = PROJECT_ROOT / "eval" / "themes"
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--sample", required=True, choices=["development", "audit"])
+    ap.add_argument("--blind", default=None,
+                    help="blind export filename under eval/themes/ (default blind-<sample>.jsonl)")
+    ap.add_argument("--labels", default=None,
+                    help="labels filename under eval/themes/ (default reference-<sample>.jsonl)")
     args = ap.parse_args()
+    blind_path = OUT_DIR / (args.blind or f"blind-{args.sample}.jsonl")
     blind = {json.loads(x)["blind_id"]: json.loads(x)
-             for x in (OUT_DIR / f"blind-{args.sample}.jsonl").read_text().splitlines() if x.strip()}
-    path = OUT_DIR / f"reference-{args.sample}.jsonl"
+             for x in blind_path.read_text().splitlines() if x.strip()}
+    path = OUT_DIR / (args.labels or f"reference-{args.sample}.jsonl")
     spec, tax = load_spec(), load_taxonomy()
     bad = seen = 0
     ids: set[str] = set()

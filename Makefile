@@ -11,7 +11,7 @@ SAMPLE_NAME ?= development
 # a stale default here would label the training pool with a superseded teacher.
 PROMPT ?= label_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -174,6 +174,21 @@ adjudicate-export:  ## write the disagreement worklist for one configuration (SA
 
 adjudicate-import:  ## validate the filled causes and write docs/theme-taxonomy/adjudication-*.csv
 	$(RUN) scripts/adjudicate_themes.py --sample $(SAMPLE_NAME) --prompt $(PROMPT) --import
+
+agreement-draw:  ## draw Philip's blind stratified 50 of the audit set; frozen on first write (RR-21)
+	$(RUN) scripts/agreement_subset.py --draw --scope full
+
+agreement-export:  ## carve the 50 blind rows out of the audit export -> eval/themes/blind-agreement-audit.jsonl
+	$(RUN) scripts/agreement_subset.py --export --scope full
+
+agreement-check:  ## validate Philip's partial hand-label file without importing it
+	$(RUN) scripts/check_reference_labels.py --sample audit --blind blind-agreement-audit.jsonl --labels human-agreement-audit.jsonl
+
+agreement-import:  ## import Philip's hand labels with label_source=human; all 50 or none
+	$(RUN) scripts/agreement_subset.py --import --scope full
+
+agreement-score:  ## per-theme and overall agreement with Wilson intervals -> eval/themes/agreement-audit.json
+	$(RUN) scripts/agreement_subset.py --score --scope full
 
 sentiment-check:  ## overall_sentiment vs stars, 3-star excluded, Wilson intervals (ADR-0003)
 	$(RUN) scripts/sentiment_check.py --sample $(SAMPLE_NAME) --prompt $(PROMPT)

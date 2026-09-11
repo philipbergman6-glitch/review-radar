@@ -22,7 +22,11 @@ def wilson(successes: int, n: int, z: float = Z95) -> tuple[float, float]:
     denom = 1 + z * z / n
     centre = (p + z * z / (2 * n)) / denom
     half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
-    return (max(0.0, centre - half), min(1.0, centre + half))
+    # Clamped to contain its own point estimate. At p == 1 the algebra gives exactly 1.0 and
+    # floating point gives 0.9999999999999999, which would publish an interval that excludes
+    # the rate it is an interval for -- and "agreement 1.000, 95% [0.722, 1.000)" is a thing
+    # no reader should have to interpret. Same at p == 0.
+    return (max(0.0, min(p, centre - half)), min(1.0, max(p, centre + half)))
 
 
 def cohens_kappa(a: list[bool], b: list[bool]) -> float | None:

@@ -1,0 +1,229 @@
+{
+ "sample": "audit",
+ "scope": "full",
+ "seed": 20260907,
+ "salt": "audit-adjudication",
+ "protocol_config_hash": "81d77cc7372289e5a1562bdb996601b813fbd6748ee502e9e6df8e64cd1f9436",
+ "theme_samples_run_id": "3265c771-4a66-4b79-8acd-5b7cd9820f71",
+ "assignments_snapshot_id": 6283858356172163250,
+ "blind_export_sha256": "34823971ff871db2c3dc88f0e7ef6a310a19b1cfa7e0653d0c6893cabc23a87c",
+ "size": 50,
+ "quotas": {
+  "enriched_does_not_work": 3,
+  "enriched_poor_build_quality": 3,
+  "enriched_overpriced": 3,
+  "enriched_wrong_size_or_fit": 3,
+  "enriched_unpleasant_texture": 3,
+  "enriched_hard_to_use": 3,
+  "enriched_unpleasant_scent": 3,
+  "enriched_not_as_described": 3,
+  "enriched_irritation_or_harm": 3,
+  "enriched_arrived_damaged": 3,
+  "representative": 20
+ },
+ "shortfall": {},
+ "annotator": "philip",
+ "label_source": "human",
+ "rows": [
+  {
+   "blind_id": "aud-0005",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0010",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0014",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0022",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0029",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0031",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0034",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0037",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0042",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0045",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0046",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0051",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0053",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0055",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0057",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0066",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0075",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0077",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0078",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0079",
+   "stratum": "representative"
+  },
+  {
+   "blind_id": "aud-0085",
+   "stratum": "enriched_arrived_damaged"
+  },
+  {
+   "blind_id": "aud-0087",
+   "stratum": "enriched_does_not_work"
+  },
+  {
+   "blind_id": "aud-0090",
+   "stratum": "enriched_arrived_damaged"
+  },
+  {
+   "blind_id": "aud-0096",
+   "stratum": "enriched_hard_to_use"
+  },
+  {
+   "blind_id": "aud-0100",
+   "stratum": "enriched_unpleasant_scent"
+  },
+  {
+   "blind_id": "aud-0104",
+   "stratum": "enriched_wrong_size_or_fit"
+  },
+  {
+   "blind_id": "aud-0107",
+   "stratum": "enriched_does_not_work"
+  },
+  {
+   "blind_id": "aud-0115",
+   "stratum": "enriched_unpleasant_texture"
+  },
+  {
+   "blind_id": "aud-0118",
+   "stratum": "enriched_irritation_or_harm"
+  },
+  {
+   "blind_id": "aud-0123",
+   "stratum": "enriched_unpleasant_texture"
+  },
+  {
+   "blind_id": "aud-0125",
+   "stratum": "enriched_arrived_damaged"
+  },
+  {
+   "blind_id": "aud-0127",
+   "stratum": "enriched_irritation_or_harm"
+  },
+  {
+   "blind_id": "aud-0134",
+   "stratum": "enriched_hard_to_use"
+  },
+  {
+   "blind_id": "aud-0144",
+   "stratum": "enriched_hard_to_use"
+  },
+  {
+   "blind_id": "aud-0148",
+   "stratum": "enriched_not_as_described"
+  },
+  {
+   "blind_id": "aud-0154",
+   "stratum": "enriched_unpleasant_scent"
+  },
+  {
+   "blind_id": "aud-0159",
+   "stratum": "enriched_poor_build_quality"
+  },
+  {
+   "blind_id": "aud-0160",
+   "stratum": "enriched_irritation_or_harm"
+  },
+  {
+   "blind_id": "aud-0163",
+   "stratum": "enriched_not_as_described"
+  },
+  {
+   "blind_id": "aud-0167",
+   "stratum": "enriched_overpriced"
+  },
+  {
+   "blind_id": "aud-0169",
+   "stratum": "enriched_wrong_size_or_fit"
+  },
+  {
+   "blind_id": "aud-0170",
+   "stratum": "enriched_poor_build_quality"
+  },
+  {
+   "blind_id": "aud-0171",
+   "stratum": "enriched_overpriced"
+  },
+  {
+   "blind_id": "aud-0173",
+   "stratum": "enriched_not_as_described"
+  },
+  {
+   "blind_id": "aud-0178",
+   "stratum": "enriched_does_not_work"
+  },
+  {
+   "blind_id": "aud-0179",
+   "stratum": "enriched_wrong_size_or_fit"
+  },
+  {
+   "blind_id": "aud-0181",
+   "stratum": "enriched_unpleasant_scent"
+  },
+  {
+   "blind_id": "aud-0189",
+   "stratum": "enriched_overpriced"
+  },
+  {
+   "blind_id": "aud-0190",
+   "stratum": "enriched_poor_build_quality"
+  },
+  {
+   "blind_id": "aud-0196",
+   "stratum": "enriched_unpleasant_texture"
+  }
+ ]
+}

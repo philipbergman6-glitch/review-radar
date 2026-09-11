@@ -1,0 +1,22 @@
+{
+  "artifact_version": "1",
+  "capability": "themes_agreement",
+  "constituents": [
+    "THEMES_AGREEMENT n=0 expected=50 scope=full blocks=false verdict=NOT_RUN"
+  ],
+  "created_at": "2026-09-11T06:44:33+00:00",
+  "cut_reason": "Philip's blind stratified 50 of the audit set are drawn and exported but not yet hand-labelled, so no agreement number exists (RR-21); the draw is frozen and cannot be re-tuned once it is",
+  "gate_name": "THEMES_AGREEMENT",
+  "kind": "quality",
+  "model": null,
+  "phase": "P6 Themes",
+  "pipeline_run_id": "e39584c3-9022-4417-8677-291166af7ec3",
+  "population": {
+    "n": 50,
+    "name": "audit adjudication subset (Philip, blind)"
+  },
+  "prompt": null,
+  "protocol_hash": "8a6d50fbc7fb896efaa5462e9d7c5cf6c51176a3d7cd0438f2f02af7f39d2566",
+  "scope": "full",
+  "status": "NOT_RUN"
+}
