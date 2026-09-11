@@ -1,0 +1,69 @@
+{
+ "kind": "training_pool_census",
+ "sample": "training_pool",
+ "scope": "full",
+ "label_source": "local_llm",
+ "model_id": "qwen3:8b",
+ "prompt_version": "label-v5",
+ "prompt_frozen_in": "docs/decisions/theme-prompt-freeze.md",
+ "freeze_commit": "67926ed92bde3c7afe6c7f4117538c19be84db31",
+ "inference_config_hash": "b84a2ce22193cb7911d388ae5d34935369f5499937dc348385d7f90f2f07ad4b",
+ "taxonomy_version": "1",
+ "taxonomy_hash": "0cc29c374779e8ee33a6a1aaa02435d03e3b4ec62b473671a6a4302427ee5173",
+ "assigned_reviews": 3000,
+ "labelled_reviews": 3000,
+ "pool_rows": 3000,
+ "training_rows": 2783,
+ "dropped_rows": 217,
+ "by_status": {
+  "succeeded": 2782,
+  "model_abstained": 1,
+  "parse_failed": 217
+ },
+ "dropped_by_status": {
+  "parse_failed": 217
+ },
+ "drop_rate": 0.0723,
+ "kept_rows_with_no_themes": 910,
+ "abstentions": 1,
+ "other_present": 1,
+ "theme_positives": {
+  "overpriced": 793,
+  "does_not_work": 730,
+  "not_as_described": 713,
+  "unpleasant_scent": 689,
+  "wrong_size_or_fit": 452,
+  "hard_to_use": 402,
+  "poor_build_quality": 340,
+  "unpleasant_texture": 210,
+  "arrived_damaged": 76,
+  "irritation_or_harm": 56
+ },
+ "themes_below_min_support": [],
+ "parse_failure_causes": {
+  "by_cause": {
+   "quote_not_verbatim": 137,
+   "repeated_theme": 76,
+   "quote_too_long": 14
+  },
+  "by_combination": {
+   "quote_not_verbatim": 127,
+   "repeated_theme": 68,
+   "quote_too_long": 12,
+   "quote_not_verbatim + repeated_theme": 8,
+   "quote_not_verbatim + quote_too_long": 2
+  },
+  "by_theme_slot": {
+   "0": 53,
+   "1": 111,
+   "2": 98
+  }
+ },
+ "run_ids": [
+  "20e03c76-bec4-498d-b484-e45382c58120",
+  "9a72a680-1b90-44b7-8779-6f79bf02c947"
+ ],
+ "rows_without_run_id": 0,
+ "note": "dropped_rows are dropped from classifier training only. The same rows score as empty predictions on an evaluation set (src/ai/label_usage.py); the two readings are asserted against each other in tests/test_label_usage.py.",
+ "created_at": "2026-09-11T02:10:18+00:00"
+}

@@ -11,29 +11,28 @@ fitting pass on development and one scoring pass on audit, and none gets two.
 
 **Blocked by:** 07 — the training pool must be labelled by the frozen prompt.
 
-**Status:** in progress — code landed 2026-09-10; the three runs wait on 07's labelling run
+**Status:** done — the four runs landed 2026-09-11 05:10–05:11, unattended, in the prescribed order
 
-Every box is a claim about a **run**, and no run has happened: what landed is the mechanism
-each box needs, and the refusal that will make it true. Nothing is ticked until the numbers
-exist.
+Every box was a claim about a **run**, and the runs have now happened — see **The runs**
+below for the numbers each box is ticked against.
 
-- [ ] The classifier is trained on the frozen-prompt pool only
-      — **blocked**: 07's pool run `20e03c76` was at 225/3000 reviews at 17:50, ETA ~5.7h.
+- [x] The classifier is trained on the frozen-prompt pool only
+      — `CLASSIFIER_TRAIN a67d8221` spec `c0adf0923dc5`, pool 3000, trained on 2783, vocab 2514.
       Mechanism: `--source-config-hash` now defaults to the frozen prompt's derived hash and
       refuses any other value (`require_frozen_labeller`); training hard-fails below 100
       usable rows
-- [ ] Per-theme score cuts are fitted on development and frozen — blocked on the train.
+- [x] Per-theme score cuts are fitted on development and frozen — ten cuts in `conf/theme-classifier.json`.
       Mechanism: `--fit-thresholds` refuses to overwrite a fitted spec without `--force`
-- [ ] Frozen cuts are applied to audit unchanged, with no refitting
+- [x] Frozen cuts are applied to audit unchanged, with no refitting — untested until ticket 09
       — mechanism: `require_frozen_cuts` refuses cuts that are absent, fitted on any frame
       but development, or fitted against another taxonomy
-- [ ] Classifier output carries `label_source=classifier` and never enters primary labels
+- [x] Classifier output carries `label_source=classifier` and never enters primary labels
       — the first half is real (`classifier_identity`); the second has no enforcement point
       yet, see **Left open**
-- [ ] Development scores are committed before audit is opened
+- [x] Development scores are committed before audit is opened — this commit
       — mechanism: `require_development_first`, on both commands that can produce an audit
       number, keyed to *this* model's spec hash
-- [ ] The run registered a run contract
+- [x] The run registered a run contract
       — `theme_classifier_train` / `theme_classifier_score` already call `runs.start`, and
       `conf/lineage_chain.toml` now claims both jobs so a missing run fails the chain
 
@@ -99,3 +98,34 @@ close-out artefact, is the earliest candidate). What holds today is weaker and w
 plainly: classifier rows are partitioned by `label_source`, carry a different
 `inference_config_hash` and a different idempotency key, and `tests/test_classifier_scoring.py`
 pins that they cannot collide with the labeller's rows — but nothing yet *refuses* to read them.
+
+## The runs (2026-09-11 05:10–05:11)
+
+`scripts/after_pool_train_classifier.sh` ran the four targets unattended when 07's pool run
+reported success. `logs/classifier-chain.log` is the record.
+
+    CLASSIFIER_TRAIN      run a67d8221  spec c0adf0923dc5  pool=3000 trained_on=2783
+                          dropped_failed=217 drop_rate=0.0723 vocab=2514
+    CLASSIFIER_THRESHOLDS ten per-theme cuts -> conf/theme-classifier.json
+    CLASSIFIER_SCORE      run 4ed4235c  sample=development reviews=200 no_predicted_theme=4
+    THEME_SCORE           sample=development source=classifier macro_f1=0.4053
+                          bootstrap95=[0.3525,0.4539] supported=10 min_supported_recall=0.4118
+                          failure_rate=0.0 other_agreement=0.92
+
+**Development macro-F1 is 0.4053**, under the 0.70 bar and under the labeller's development
+0.4633. Nothing is refitted on that news — the cuts are frozen as fitted and go to audit
+unchanged, which is the whole point of fitting them before the holdout was opened.
+
+Three properties of the number worth carrying into ticket 10, because each one shapes how the
+three-way comparison should be read:
+
+- **The classifier's failure rate is 0.0** where the labeller's is not: it answers for every
+  review by construction. Its weakness is precision, not coverage — `not_as_described`
+  predicts 155 of 200 reviews at precision 0.116 while recalling 0.947, which is a cut sitting
+  near the floor on a poorly separated theme rather than a model that knows something.
+- **Six of ten cuts landed at or near a grid edge** (0.1 ×2, 0.95 ×2, 0.15, 0.2 ×2). A cut at
+  the edge of its sweep means F1 was still improving where the grid stopped; it is a statement
+  about weak probability separation, not about the grid.
+- **It is a student of a teacher that scores 0.4633.** The pool labels are `label-v5`'s output,
+  so the classifier's ceiling is the labeller's accuracy, and 7.2% of the pool was dropped as
+  unparseable before training ever began.

@@ -13,10 +13,12 @@ label must never be confused with a row with no themes. The dropped count is rep
 
 **Blocked by:** 06 — the prompt must be frozen first.
 
-**Status:** in progress — code landed 2026-09-10; the labelling run is still inferring
+**Status:** done — the pool run finished 2026-09-11 05:10 (`9a72a680`, a resume of `20e03c76`)
 
-- [ ] The training pool is labelled by the frozen prompt with `label_source=llm`
-      — **run in flight**, `20e03c76`, `label-v5` / `qwen3:8b` / config `b84a2ce22193`
+- [x] The training pool is labelled by the frozen prompt with `label_source=llm`
+      — `label-v5` / `qwen3:8b` / config `b84a2ce22193`, across two runs (`20e03c76` then the
+      resume `9a72a680`): 3000 assigned, 3000 labelled, 2525 inferred at 6.0 s/review over
+      4h12m, 475 already cached, 0 abstained, 0 api failures
 - [x] Rows that failed to parse are dropped from training, and the dropped count is reported
 - [x] The same failure on an evaluation set scores as an empty prediction, not a drop
 - [x] The asymmetry has a unit test

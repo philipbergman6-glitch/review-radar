@@ -1,0 +1,95 @@
+{
+ "classifier": "mllib_theme_baseline",
+ "spec_version": "1",
+ "decided_in": "RR-23",
+ "spec_hash": "c0adf0923dc58d80b4b93e22824094f36013111349548d0f5f59468a027dbea5",
+ "model_path": "data/models/theme_classifier/c0adf0923dc5",
+ "taxonomy_version": "1",
+ "taxonomy_hash": "0cc29c374779e8ee33a6a1aaa02435d03e3b4ec62b473671a6a4302427ee5173",
+ "training_labels_config": "b84a2ce22193cb7911d388ae5d34935369f5499937dc348385d7f90f2f07ad4b",
+ "hyperparams": {
+  "tokenizer_pattern": "[^a-z0-9']+",
+  "min_token_length": 2,
+  "remove_stopwords": true,
+  "vocab_size": 20000,
+  "min_df": 3,
+  "idf_min_doc_freq": 3,
+  "reg_param": 0.05,
+  "elastic_net_param": 0.0,
+  "max_iter": 100,
+  "threshold_grid_step": 0.05
+ },
+ "pool_rows": 3000,
+ "training_rows": 2783,
+ "dropped_unanswered_rows": 217,
+ "dropped_by_status": {
+  "parse_failed": 217
+ },
+ "vocabulary": 2514,
+ "thresholds": {
+  "does_not_work": 0.1,
+  "poor_build_quality": 0.1,
+  "overpriced": 0.95,
+  "wrong_size_or_fit": 0.55,
+  "unpleasant_texture": 0.2,
+  "hard_to_use": 0.25,
+  "unpleasant_scent": 0.95,
+  "not_as_described": 0.15,
+  "irritation_or_harm": 0.25,
+  "arrived_damaged": 0.2
+ },
+ "thresholds_fitted_on": "development",
+ "note": "thresholds are fitted on development by --fit-thresholds and frozen with the prompt",
+ "threshold_fit": [
+  {
+   "theme_id": "does_not_work",
+   "cut": 0.1,
+   "development_f1": 0.4167
+  },
+  {
+   "theme_id": "poor_build_quality",
+   "cut": 0.1,
+   "development_f1": 0.4894
+  },
+  {
+   "theme_id": "overpriced",
+   "cut": 0.95,
+   "development_f1": 0.3636
+  },
+  {
+   "theme_id": "wrong_size_or_fit",
+   "cut": 0.55,
+   "development_f1": 0.4706
+  },
+  {
+   "theme_id": "unpleasant_texture",
+   "cut": 0.2,
+   "development_f1": 0.3182
+  },
+  {
+   "theme_id": "hard_to_use",
+   "cut": 0.25,
+   "development_f1": 0.4786
+  },
+  {
+   "theme_id": "unpleasant_scent",
+   "cut": 0.95,
+   "development_f1": 0.3056
+  },
+  {
+   "theme_id": "not_as_described",
+   "cut": 0.15,
+   "development_f1": 0.2069
+  },
+  {
+   "theme_id": "irritation_or_harm",
+   "cut": 0.25,
+   "development_f1": 0.4878
+  },
+  {
+   "theme_id": "arrived_damaged",
+   "cut": 0.2,
+   "development_f1": 0.5161
+  }
+ ]
+}
