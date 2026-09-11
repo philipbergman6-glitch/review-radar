@@ -15,26 +15,23 @@ holdout looks like.
 
 **Blocked by:** 06 (frozen prompt) and 08 (frozen classifier thresholds).
 
-**Status:** in progress — the pass and its refusals landed 2026-09-11; no audit row has been
-read, and three preconditions are outstanding (below)
+**Status:** done — the set was opened 2026-09-11 06:26 UTC, seal `f39ce4f57abd`, verdict FAIL.
+It cannot be opened again.
 
-Every box is a claim about a **run**, and no run has happened. What landed is the one command
-that may open the set, and the refusals that make "once" true rather than intended.
-
-- [ ] All three systems scored on the audit set in one pass
-      — **blocked**, see the three preconditions. Mechanism: `make audit-once`
+- [x] All three systems scored on the audit set in one pass — one invocation, three artefacts.
+      Mechanism: `make audit-once`
       (`scripts/open_audit.py`) scores all three or none, and the three single-system scorers
       now refuse `--sample audit` outright (`require_measurement_goes_through_the_pass`)
-- [ ] Per-theme and macro-F1 with bootstrap intervals committed for each system
+- [x] Per-theme and macro-F1 with bootstrap intervals committed for each system
       — mechanism: one `system_report` builds the artefact shape for all three, so the gate
       cannot be handed a differently-built dict by a system that scored badly
-- [ ] No threshold, prompt or cut changed after the audit numbers were seen
+- [x] No threshold, prompt or cut changed after the audit numbers were seen
       — mechanism: `THEMES_SEAL` re-derives the freeze fingerprint from today's config files
       and prints every difference by name
-- [ ] The audit set is not scored again for any reason
+- [x] The audit set is not scored again for any reason — `require_audit_unopened` is now live
       — mechanism: `require_audit_unopened` refuses a second pass and quotes the first one's
       numbers back
-- [ ] The run registered a run contract and results carry the run id
+- [x] The run registered a run contract and results carry the run id
       — the artefacts carry `run_ids` from the rows they scored. The star floor carries none,
       stated as such: it ran no inference and an invented run id would claim it did
 
@@ -119,3 +116,64 @@ something else.
     baseline_star_only.py --score --sample audit -> refused, names `make audit-once`
     gate-themes                              -> THEMES_SEAL seal=missing ok=false (1/7)
     425 tests pass; the two development artefacts are byte-identical after the refactor
+
+---
+
+## The pass (2026-09-11 06:26 UTC)
+
+Preconditions cleared in order: 07's pool run finished 05:10 and 08's chain trained and froze
+the cuts by 05:11; 09a's 200 blind reference labels landed at 01:40; the audit labelling run
+`e39584c3` finished 09:25 IDT (200 inferred, 173 ok, **27 parse failures**, 0 API failures);
+`classifier-score SAMPLE_NAME=audit` (`147d43ae`) put the classifier's predictions in place.
+Then one invocation of `make audit-once`, against a clean tree at `aafaad58`.
+
+    AUDIT_FREEZES fingerprint=f39ce4f57abd prompt=label-v5 classifier=c0adf0923dc5
+                  star=v1 taxonomy=0cc29c374779 bar=0.7/0.5
+
+| system | macro-F1 | bootstrap 95% | min supported recall | failure rate | supported |
+|---|---|---|---|---|---|
+| LLM `label-v5` / `qwen3:8b` | **0.4583** | [0.3647, 0.5223] | 0.4667 | 0.135 | 9/10 |
+| MLlib `classifier-v1` | 0.3899 | [0.3074, 0.4639] | 0.3333 | 0.0 | 9/10 |
+| star-only floor | 0.2968 | [0.2612, 0.3493] | 0.7222 | 0.0 | 9/10 |
+
+`AUDIT_ONCE published=llm macro_f1=0.4583 bar=0.7 min_supported_recall=0.4667 recall_bar=0.5
+verdict=FAIL`. Both bars are missed, the headline by a wide margin. P6 is `built, evaluated,
+below target`; nothing is refitted and P7 is not held up. The target exits non-zero on a FAIL,
+which is correct — the artefacts and the seal are written first, precisely so a bad number
+cannot be met with a silent re-run.
+
+### The finding the development set could not give
+
+On development the labeller's interval overlapped the star-only baseline's, and ticket 10 was
+written to report that overlap as a result about weak local models on a J-shaped corpus.
+**On the held-out set the intervals are disjoint** — [0.3647, 0.5223] against [0.2612, 0.3493].
+The labeller is distinguishably better than a star threshold, and the development overlap was
+the smaller sample, not the truth. Ticket 10 must report the audit comparison as the finding
+and the development overlap as the weaker earlier evidence, not the other way round.
+
+The classifier's interval [0.3074, 0.4639] still overlaps the floor's. It is **not**
+distinguishable from a star threshold, and that is the honest reading of the MLlib arm.
+
+### Three properties of the published number
+
+- **Failure rate 0.135.** 27 of 200 audit reviews came back unparseable after a retry, against
+  7.2% on the training pool. Each scores as an empty prediction, so they are 27 recall losses
+  that precede any judgement about theme quality. The classifier's is 0.0 by construction.
+- **The recall bar is missed too**, 0.4667 against 0.50, on the weakest supported theme.
+- **The star floor has the highest recall of the three** (0.7222) and the lowest macro-F1. It
+  is a high-recall, low-precision instrument, which is what predicting themes from a star
+  rating should look like.
+
+### A reporting defect, recorded and not fixed here
+
+The artefacts carry a per-stratum split — 120 enriched, 80 prevalence-representative. In the
+representative stratum **no theme reaches `min_support` 10**, so `macro_f1` is `None` for all
+three systems, correctly. But `bootstrap_macro_f1` still returns an interval beside it, because
+it averages over the resamples that happened to contain a supported theme: star-only reads
+`[0.483, 0.800]` there, *above* its own overall score, which would be an absurd thing to publish.
+
+It is not fixed by regenerating the artefacts. Their sha256s are in the seal, and rewriting a
+scored artefact after the set is opened is the exact act the seal exists to refuse. Ticket 10
+publishes the representative stratum as `NOT_RUN` with the reason "no theme reaches min_support
+10 in 80 rows" and prints no interval. If the bootstrap is ever changed to return `(None, None)`
+when the point estimate is `None`, that is a change to a *future* pass, not to this one.

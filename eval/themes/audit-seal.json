@@ -1,0 +1,136 @@
+{
+ "sample": "audit",
+ "scope": "full",
+ "opened_at": "2026-09-11T06:26:28.403443+00:00",
+ "git_commit_sha": "aafaad58f75c75b28ce9d5dac582aecb26e3ad55",
+ "freeze_fingerprint": "f39ce4f57abd125633d355bd106c89d67d01751dcf4859ff00198fd0809ea6b3",
+ "freezes": {
+  "taxonomy": {
+   "version": "1",
+   "hash": "0cc29c374779e8ee33a6a1aaa02435d03e3b4ec62b473671a6a4302427ee5173",
+   "themes": 10
+  },
+  "llm": {
+   "prompt_name": "label_v5",
+   "prompt_version": "label-v5",
+   "freeze_commit": "67926ed92bde3c7afe6c7f4117538c19be84db31",
+   "decided_in": "docs/decisions/theme-prompt-freeze.md",
+   "model_id": "qwen3:8b",
+   "label_spec_version": "1",
+   "inference_config_hash": "b84a2ce22193cb7911d388ae5d34935369f5499937dc348385d7f90f2f07ad4b"
+  },
+  "classifier": {
+   "spec_version": "1",
+   "spec_hash": "c0adf0923dc58d80b4b93e22824094f36013111349548d0f5f59468a027dbea5",
+   "training_labels_config": "b84a2ce22193cb7911d388ae5d34935369f5499937dc348385d7f90f2f07ad4b",
+   "thresholds_fitted_on": "development",
+   "thresholds": {
+    "arrived_damaged": 0.2,
+    "does_not_work": 0.1,
+    "hard_to_use": 0.25,
+    "irritation_or_harm": 0.25,
+    "not_as_described": 0.15,
+    "overpriced": 0.95,
+    "poor_build_quality": 0.1,
+    "unpleasant_scent": 0.95,
+    "unpleasant_texture": 0.2,
+    "wrong_size_or_fit": 0.55
+   }
+  },
+  "star_only": {
+   "version": "1",
+   "fitted_on": "development",
+   "thresholds": {
+    "arrived_damaged": 1,
+    "does_not_work": 3,
+    "hard_to_use": 4,
+    "irritation_or_harm": 3,
+    "not_as_described": 2,
+    "overpriced": 3,
+    "poor_build_quality": 2,
+    "unpleasant_scent": 3,
+    "unpleasant_texture": 3,
+    "wrong_size_or_fit": 4
+   }
+  },
+  "pass_rule": {
+   "macro_f1_bar": 0.7,
+   "min_supported_recall_bar": 0.5
+  }
+ },
+ "reference_rows": 200,
+ "systems": [
+  {
+   "system": "llm",
+   "label_source": "local_llm",
+   "model_id": "qwen3:8b",
+   "prompt_version": "label-v5",
+   "inference_config_hash": "b84a2ce22193cb7911d388ae5d34935369f5499937dc348385d7f90f2f07ad4b",
+   "artefact": "score-audit-label-v5-qwen3_8b.json",
+   "artefact_sha256": "00c1aac2316048abb4da4e157bbbdd85a6aca2ab04c1ae90ab46f38d5c33bd1d",
+   "run_ids": [
+    "e39584c3-9022-4417-8677-291166af7ec3"
+   ],
+   "reviews": 200,
+   "macro_f1": 0.4582513400987497,
+   "bootstrap_95": [
+    0.36467415604739545,
+    0.5223414876717782
+   ],
+   "min_supported_recall": 0.4666666666666667,
+   "supported_themes": 9,
+   "failure_rate": 0.135
+  },
+  {
+   "system": "classifier",
+   "label_source": "classifier",
+   "model_id": "mllib_logreg",
+   "prompt_version": "classifier-v1",
+   "inference_config_hash": "c0adf0923dc58d80b4b93e22824094f36013111349548d0f5f59468a027dbea5",
+   "artefact": "score-audit-classifier-v1-c0adf0923dc5.json",
+   "artefact_sha256": "db738ce4e14555e0de92fac9d22a804c6de32050c55802e62b0464da410c5843",
+   "run_ids": [
+    "147d43ae-a9b6-4de9-83d1-e99e24d5fc15"
+   ],
+   "reviews": 200,
+   "macro_f1": 0.38985343423106184,
+   "bootstrap_95": [
+    0.30740824517150145,
+    0.46390534917842496
+   ],
+   "min_supported_recall": 0.3333333333333333,
+   "supported_themes": 9,
+   "failure_rate": 0.0
+  },
+  {
+   "system": "star_only",
+   "label_source": "star_only",
+   "model_id": "star_only",
+   "prompt_version": "star-baseline-v1",
+   "inference_config_hash": "",
+   "artefact": "score-audit-star_only.json",
+   "artefact_sha256": "2a6518ab4dceac8364f4b0aeba81af704a4c4b4e1f54456babf2dcc71b8e1dbd",
+   "run_ids": [],
+   "reviews": 200,
+   "macro_f1": 0.29680685933677997,
+   "bootstrap_95": [
+    0.26117707379156013,
+    0.34932896147634257
+   ],
+   "min_supported_recall": 0.7222222222222222,
+   "supported_themes": 9,
+   "failure_rate": 0.0
+  }
+ ],
+ "pass_rule": {
+  "macro_f1_bar": 0.7,
+  "min_supported_recall_bar": 0.5,
+  "published_system": "llm"
+ },
+ "verdict": {
+  "macro_f1": 0.4582513400987497,
+  "min_supported_recall": 0.4666666666666667,
+  "passed": false,
+  "note": "a miss is reported, not re-tuned: P6 is then `built, evaluated, below target` and P7 is not held up (ticket 09)"
+ }
+}
