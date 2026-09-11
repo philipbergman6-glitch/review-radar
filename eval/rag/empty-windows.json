@@ -1,0 +1,57 @@
+{
+  "scope": "full",
+  "silver_run_id": "4447727f-ee66-48eb-be9e-8a23e061d708",
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
+  "window_months": 6,
+  "windows": [
+    {
+      "end": "2019-02",
+      "lifetime_end": "2021-02",
+      "lifetime_start": "2015-01",
+      "parent_asin": "B00RPJZMUM",
+      "start": "2018-09"
+    },
+    {
+      "end": "2019-08",
+      "lifetime_end": "2021-02",
+      "lifetime_start": "2015-01",
+      "parent_asin": "B00RPJZMUM",
+      "start": "2019-03"
+    },
+    {
+      "end": "2020-07",
+      "lifetime_end": "2021-02",
+      "lifetime_start": "2015-01",
+      "parent_asin": "B00RPJZMUM",
+      "start": "2020-02"
+    },
+    {
+      "end": "2021-01",
+      "lifetime_end": "2021-02",
+      "lifetime_start": "2015-01",
+      "parent_asin": "B00RPJZMUM",
+      "start": "2020-08"
+    },
+    {
+      "end": "2018-10",
+      "lifetime_end": "2020-01",
+      "lifetime_start": "2015-10",
+      "parent_asin": "B0113GT5Q4",
+      "start": "2018-05"
+    },
+    {
+      "end": "2019-04",
+      "lifetime_end": "2020-01",
+      "lifetime_start": "2015-10",
+      "parent_asin": "B0113GT5Q4",
+      "start": "2018-11"
+    },
+    {
+      "end": "2019-10",
+      "lifetime_end": "2020-01",
+      "lifetime_start": "2015-10",
+      "parent_asin": "B0113GT5Q4",
+      "start": "2019-05"
+    }
+  ]
+}

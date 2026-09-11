@@ -1,0 +1,253 @@
+{
+  "answerability_confirmed": false,
+  "category": "All_Beauty",
+  "complete": true,
+  "gold_run_id": "6e1c0d3a-85e8-4458-8109-57b76331ad38",
+  "note": "Provisional until scripts/rag_evidence_scan.py and its manual validation confirm every product. The lexical pre-filter narrows; it never decides. A product validation cannot confirm is dropped and the draw walks further down the same ranking, every skip recorded.",
+  "prefilter": {
+    "eligible_products": 48,
+    "min_lexical_matches": 6,
+    "products_considered": 177,
+    "source": "eval/rag/prefilter.json"
+  },
+  "rejected_by_validation": [
+    "B007QG7G3U",
+    "B00SH5WGNE"
+  ],
+  "scope": "full",
+  "silver_run_id": "4447727f-ee66-48eb-be9e-8a23e061d708",
+  "skipped": [
+    {
+      "episode_id": "B00Y3DF9X8:2016-10",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B07KXM94BT:2019-05",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B01N32BEJM:2017-08",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B06XH3Y6VZ:2019-01",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B0010VSH3K:2018-09",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B00SH5WGNE:2015-08",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B07FDWYCTL:2019-01",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B07NZYRLDS:2019-10",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B07FCHMPKC:2019-06",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B07MB1HM15:2019-07",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B01CS3OWBY:2016-10",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B074R5ZVKN:2018-10",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B075RB3XJV:2018-04",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B0052YFCSO:2018-04",
+      "reason": "no_distinct_eligible_control"
+    },
+    {
+      "episode_id": "B01IMEH6GG:2017-03",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B00U4O3YHI:2017-07",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B013Q1TSLQ:2017-01",
+      "reason": "candidate_not_eligible"
+    },
+    {
+      "episode_id": "B01N5GPXG2:2017-12",
+      "reason": "no_distinct_eligible_control"
+    },
+    {
+      "episode_id": "B07CVHWC68:2019-08",
+      "reason": "candidate_not_eligible"
+    }
+  ],
+  "slots": [
+    {
+      "baseline_end": "2017-03",
+      "baseline_start": "2016-10",
+      "control_rank": null,
+      "decline_lower_bound": 1.018208,
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "match_distance": null,
+      "parent_asin": "B00RPJZMUM",
+      "point_month": "2017-03",
+      "product_title": "Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results",
+      "recent_end": "2017-09",
+      "recent_start": "2017-04",
+      "slot_role": "candidate"
+    },
+    {
+      "baseline_end": "2017-03",
+      "baseline_start": "2016-10",
+      "control_rank": 1,
+      "decline_lower_bound": 1.018208,
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "match_distance": 0.094439,
+      "parent_asin": "B0BM4GX6TT",
+      "point_month": "2017-03",
+      "product_title": "Godefroy Tint Kit for Spot Coloring, Dark Brown",
+      "recent_end": "2017-09",
+      "recent_start": "2017-04",
+      "slot_role": "control"
+    },
+    {
+      "baseline_end": "2016-10",
+      "baseline_start": "2016-05",
+      "control_rank": null,
+      "decline_lower_bound": 0.868421,
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "match_distance": null,
+      "parent_asin": "B0113GT5Q4",
+      "point_month": "2016-10",
+      "product_title": "Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W",
+      "recent_end": "2017-04",
+      "recent_start": "2016-11",
+      "slot_role": "candidate"
+    },
+    {
+      "baseline_end": "2016-10",
+      "baseline_start": "2016-05",
+      "control_rank": 1,
+      "decline_lower_bound": 0.868421,
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "match_distance": 0.050239,
+      "parent_asin": "B00V8ZCT1Y",
+      "point_month": "2016-10",
+      "product_title": "Primal Pit Paste Natural Deodorant, Aluminum Free, Paraben Free, No Added Fragrances, Royal & Rogue Jar",
+      "recent_end": "2017-04",
+      "recent_start": "2016-11",
+      "slot_role": "control"
+    },
+    {
+      "baseline_end": "2018-01",
+      "baseline_start": "2017-08",
+      "control_rank": null,
+      "decline_lower_bound": 0.721856,
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "match_distance": null,
+      "parent_asin": "B00R1TAN7I",
+      "point_month": "2018-01",
+      "product_title": "GranNaturals Boar Bristle Smoothing Hair Brush for Women and Men - Medium/Soft Bristles - Natural Wooden Large Flat Square Paddle Hairbrush for Fine, Thin, Straight, Long, or Short Hair",
+      "recent_end": "2018-07",
+      "recent_start": "2018-02",
+      "slot_role": "candidate"
+    },
+    {
+      "baseline_end": "2018-01",
+      "baseline_start": "2017-08",
+      "control_rank": 1,
+      "decline_lower_bound": 0.721856,
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "match_distance": 0.01012,
+      "parent_asin": "B01MXLP1T1",
+      "point_month": "2018-01",
+      "product_title": "Natural Makeup Remover Facial Cleansing Wipes from 1790 Are the Best Gentle Towelettes For Your Face - Remove Eye Makeup - Kind to Your Skin - Blemish Free Finish (25 Count, Pack of 6)",
+      "recent_end": "2018-07",
+      "recent_start": "2018-02",
+      "slot_role": "control"
+    },
+    {
+      "baseline_end": "2014-12",
+      "baseline_start": "2014-07",
+      "control_rank": null,
+      "decline_lower_bound": 0.48479,
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "match_distance": null,
+      "parent_asin": "B016LD3C04",
+      "point_month": "2014-12",
+      "product_title": "Michel Mercier Sparkle Detangling Brush Green - For Normal Hair",
+      "recent_end": "2015-06",
+      "recent_start": "2015-01",
+      "slot_role": "candidate"
+    },
+    {
+      "baseline_end": "2014-12",
+      "baseline_start": "2014-07",
+      "control_rank": 1,
+      "decline_lower_bound": 0.48479,
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "match_distance": 0.29616,
+      "parent_asin": "B00KCTER3U",
+      "point_month": "2014-12",
+      "product_title": "Retinol Face Moisturizer Cream Natural Facial moisturizing Cream 1.76 OZ with Ortho-Hydroxybenzoic Acid,VE for Hydrating,Repairing",
+      "recent_end": "2015-06",
+      "recent_start": "2015-01",
+      "slot_role": "control"
+    },
+    {
+      "baseline_end": "2018-03",
+      "baseline_start": "2017-10",
+      "control_rank": null,
+      "decline_lower_bound": 0.476326,
+      "decline_rank": 24,
+      "episode_id": "B07D1B499B:2018-02",
+      "match_distance": null,
+      "parent_asin": "B07D1B499B",
+      "point_month": "2018-03",
+      "product_title": "InnoLife Nail Art Drill Treatments KIT Electric File Buffer Bits Acrylics 6 File Pedicure Hands & Nails Repair (110V US 1.5M Plug) - Pink",
+      "recent_end": "2018-09",
+      "recent_start": "2018-04",
+      "slot_role": "candidate"
+    },
+    {
+      "baseline_end": "2018-03",
+      "baseline_start": "2017-10",
+      "control_rank": 1,
+      "decline_lower_bound": 0.476326,
+      "decline_rank": 24,
+      "episode_id": "B07D1B499B:2018-02",
+      "match_distance": 0.0625,
+      "parent_asin": "B075GK4249",
+      "point_month": "2018-03",
+      "product_title": "Makeup Brush Cleaner Wloomm Electric Makeup Brush Cleaner And Dryer Tool Kits in Seconds for All Makeup Brushes Cleaning",
+      "recent_end": "2018-09",
+      "recent_start": "2018-04",
+      "slot_role": "control"
+    }
+  ],
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
+  "spec_status": "frozen",
+  "spec_version": "1",
+  "theme_samples_run_id": "aa4cccbf-a42e-4ad2-95fc-adfd61f014e0"
+}

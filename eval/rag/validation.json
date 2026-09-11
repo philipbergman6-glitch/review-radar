@@ -1,0 +1,183 @@
+{
+  "annotator": "agent",
+  "annotator_note": "Machine-made, exactly like P6's reference labels (RR-21): the agent read every review the lexical scan put on the worklist and judged it against ADR-0003's taxonomy rules -- complaint only, praise never counts, a neutral mention is not a complaint. Recorded as `agent`, never as `human`.",
+  "complaint_bearing": 153,
+  "confirmed_products": [
+    "B00KCTER3U",
+    "B00R1TAN7I",
+    "B00RPJZMUM",
+    "B00V8ZCT1Y",
+    "B0113GT5Q4",
+    "B016LD3C04",
+    "B01MXLP1T1",
+    "B075GK4249",
+    "B07D1B499B",
+    "B0BM4GX6TT"
+  ],
+  "examined": 244,
+  "min_support_per_window": 3,
+  "pending_decisions": [],
+  "per_product": {
+    "B007QG7G3U": {
+      "confirmed": false,
+      "examined_per_window": {
+        "baseline": 11,
+        "recent": 9
+      },
+      "min_window_support": 2,
+      "validated_per_window": {
+        "baseline": 3,
+        "recent": 2
+      },
+      "verdict": "excluded_band"
+    },
+    "B00KCTER3U": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 12,
+        "recent": 12
+      },
+      "min_window_support": 5,
+      "validated_per_window": {
+        "baseline": 5,
+        "recent": 5
+      },
+      "verdict": "answerable"
+    },
+    "B00R1TAN7I": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 8,
+        "recent": 12
+      },
+      "min_window_support": 6,
+      "validated_per_window": {
+        "baseline": 6,
+        "recent": 11
+      },
+      "verdict": "answerable"
+    },
+    "B00RPJZMUM": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 12,
+        "recent": 12
+      },
+      "min_window_support": 7,
+      "validated_per_window": {
+        "baseline": 7,
+        "recent": 11
+      },
+      "verdict": "answerable"
+    },
+    "B00SH5WGNE": {
+      "confirmed": false,
+      "examined_per_window": {
+        "baseline": 6,
+        "recent": 6
+      },
+      "min_window_support": 2,
+      "validated_per_window": {
+        "baseline": 2,
+        "recent": 5
+      },
+      "verdict": "excluded_band"
+    },
+    "B00V8ZCT1Y": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 12,
+        "recent": 12
+      },
+      "min_window_support": 5,
+      "validated_per_window": {
+        "baseline": 5,
+        "recent": 6
+      },
+      "verdict": "answerable"
+    },
+    "B0113GT5Q4": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 8,
+        "recent": 12
+      },
+      "min_window_support": 5,
+      "validated_per_window": {
+        "baseline": 5,
+        "recent": 11
+      },
+      "verdict": "answerable"
+    },
+    "B016LD3C04": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 12,
+        "recent": 12
+      },
+      "min_window_support": 10,
+      "validated_per_window": {
+        "baseline": 10,
+        "recent": 12
+      },
+      "verdict": "answerable"
+    },
+    "B01MXLP1T1": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 12,
+        "recent": 8
+      },
+      "min_window_support": 3,
+      "validated_per_window": {
+        "baseline": 6,
+        "recent": 3
+      },
+      "verdict": "answerable"
+    },
+    "B075GK4249": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 7,
+        "recent": 6
+      },
+      "min_window_support": 6,
+      "validated_per_window": {
+        "baseline": 7,
+        "recent": 6
+      },
+      "verdict": "answerable"
+    },
+    "B07D1B499B": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 8,
+        "recent": 11
+      },
+      "min_window_support": 6,
+      "validated_per_window": {
+        "baseline": 6,
+        "recent": 11
+      },
+      "verdict": "answerable"
+    },
+    "B0BM4GX6TT": {
+      "confirmed": true,
+      "examined_per_window": {
+        "baseline": 12,
+        "recent": 12
+      },
+      "min_window_support": 4,
+      "validated_per_window": {
+        "baseline": 4,
+        "recent": 4
+      },
+      "verdict": "answerable"
+    }
+  },
+  "rejected_products": [
+    "B007QG7G3U",
+    "B00SH5WGNE"
+  ],
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1"
+}

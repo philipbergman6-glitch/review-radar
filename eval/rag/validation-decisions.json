@@ -1,0 +1,596 @@
+{
+  "annotator": "agent",
+  "annotator_note": "Machine-made, exactly like P6's reference labels (RR-21): the agent read every review the lexical scan put on the worklist and judged it against ADR-0003's taxonomy rules -- complaint only, praise never counts, a neutral mention is not a complaint. Recorded as `agent`, never as `human`.",
+  "rule": "A worklist rank listed here was judged complaint-bearing and carries the themes it evidences. A rank examined and not listed was judged NOT complaint-bearing; the expander writes it out as an explicit negative so the census is complete.",
+  "validated": {
+    "B007QG7G3U|baseline": {
+      "1": [
+        "does_not_work"
+      ],
+      "4": [
+        "does_not_work",
+        "irritation_or_harm"
+      ],
+      "7": [
+        "does_not_work",
+        "overpriced"
+      ]
+    },
+    "B007QG7G3U|recent": {
+      "1": [
+        "arrived_damaged"
+      ],
+      "2": [
+        "does_not_work"
+      ]
+    },
+    "B00KCTER3U|baseline": {
+      "10": [
+        "poor_build_quality",
+        "unpleasant_texture"
+      ],
+      "2": [
+        "unpleasant_scent"
+      ],
+      "4": [
+        "unpleasant_scent",
+        "does_not_work",
+        "unpleasant_texture"
+      ],
+      "7": [
+        "unpleasant_texture"
+      ],
+      "9": [
+        "does_not_work"
+      ]
+    },
+    "B00KCTER3U|recent": {
+      "1": [
+        "unpleasant_texture",
+        "unpleasant_scent"
+      ],
+      "10": [
+        "does_not_work",
+        "unpleasant_texture"
+      ],
+      "3": [
+        "does_not_work",
+        "unpleasant_scent",
+        "unpleasant_texture"
+      ],
+      "4": [
+        "unpleasant_scent"
+      ],
+      "5": [
+        "unpleasant_texture",
+        "does_not_work",
+        "poor_build_quality"
+      ]
+    },
+    "B00R1TAN7I|baseline": {
+      "1": [
+        "unpleasant_scent"
+      ],
+      "2": [
+        "wrong_size_or_fit"
+      ],
+      "3": [
+        "wrong_size_or_fit"
+      ],
+      "4": [
+        "wrong_size_or_fit"
+      ],
+      "6": [
+        "unpleasant_scent",
+        "arrived_damaged"
+      ],
+      "7": [
+        "wrong_size_or_fit"
+      ]
+    },
+    "B00R1TAN7I|recent": {
+      "1": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "10": [
+        "irritation_or_harm"
+      ],
+      "11": [
+        "unpleasant_scent"
+      ],
+      "12": [
+        "does_not_work"
+      ],
+      "2": [
+        "unpleasant_scent"
+      ],
+      "3": [
+        "unpleasant_scent"
+      ],
+      "4": [
+        "unpleasant_scent"
+      ],
+      "5": [
+        "unpleasant_scent"
+      ],
+      "7": [
+        "does_not_work",
+        "poor_build_quality"
+      ],
+      "8": [
+        "unpleasant_scent",
+        "does_not_work"
+      ],
+      "9": [
+        "unpleasant_scent"
+      ]
+    },
+    "B00RPJZMUM|baseline": {
+      "10": [
+        "arrived_damaged",
+        "poor_build_quality"
+      ],
+      "12": [
+        "arrived_damaged",
+        "poor_build_quality"
+      ],
+      "2": [
+        "wrong_size_or_fit"
+      ],
+      "3": [
+        "does_not_work",
+        "poor_build_quality"
+      ],
+      "7": [
+        "wrong_size_or_fit",
+        "hard_to_use",
+        "irritation_or_harm"
+      ],
+      "8": [
+        "poor_build_quality",
+        "unpleasant_scent"
+      ],
+      "9": [
+        "poor_build_quality",
+        "wrong_size_or_fit"
+      ]
+    },
+    "B00RPJZMUM|recent": {
+      "1": [
+        "poor_build_quality",
+        "unpleasant_scent"
+      ],
+      "10": [
+        "poor_build_quality",
+        "irritation_or_harm"
+      ],
+      "11": [
+        "poor_build_quality",
+        "overpriced"
+      ],
+      "2": [
+        "poor_build_quality",
+        "overpriced"
+      ],
+      "3": [
+        "poor_build_quality"
+      ],
+      "4": [
+        "does_not_work",
+        "poor_build_quality"
+      ],
+      "5": [
+        "does_not_work",
+        "poor_build_quality",
+        "unpleasant_scent",
+        "overpriced"
+      ],
+      "6": [
+        "poor_build_quality",
+        "irritation_or_harm"
+      ],
+      "7": [
+        "poor_build_quality"
+      ],
+      "8": [
+        "poor_build_quality"
+      ],
+      "9": [
+        "poor_build_quality"
+      ]
+    },
+    "B00SH5WGNE|baseline": {
+      "2": [
+        "poor_build_quality",
+        "does_not_work"
+      ],
+      "5": [
+        "hard_to_use"
+      ]
+    },
+    "B00SH5WGNE|recent": {
+      "1": [
+        "does_not_work"
+      ],
+      "2": [
+        "irritation_or_harm"
+      ],
+      "3": [
+        "irritation_or_harm"
+      ],
+      "4": [
+        "irritation_or_harm",
+        "unpleasant_texture",
+        "does_not_work"
+      ],
+      "5": [
+        "poor_build_quality",
+        "unpleasant_texture"
+      ]
+    },
+    "B00V8ZCT1Y|baseline": {
+      "1": [
+        "unpleasant_scent"
+      ],
+      "2": [
+        "irritation_or_harm"
+      ],
+      "3": [
+        "arrived_damaged"
+      ],
+      "5": [
+        "unpleasant_texture"
+      ],
+      "9": [
+        "hard_to_use"
+      ]
+    },
+    "B00V8ZCT1Y|recent": {
+      "11": [
+        "irritation_or_harm"
+      ],
+      "12": [
+        "does_not_work",
+        "unpleasant_scent",
+        "overpriced"
+      ],
+      "5": [
+        "irritation_or_harm"
+      ],
+      "6": [
+        "does_not_work",
+        "unpleasant_texture"
+      ],
+      "7": [
+        "irritation_or_harm"
+      ],
+      "9": [
+        "irritation_or_harm"
+      ]
+    },
+    "B0113GT5Q4|baseline": {
+      "2": [
+        "wrong_size_or_fit"
+      ],
+      "3": [
+        "poor_build_quality"
+      ],
+      "5": [
+        "not_as_described"
+      ],
+      "7": [
+        "unpleasant_texture",
+        "not_as_described"
+      ],
+      "8": [
+        "hard_to_use"
+      ]
+    },
+    "B0113GT5Q4|recent": {
+      "1": [
+        "poor_build_quality"
+      ],
+      "10": [
+        "unpleasant_texture"
+      ],
+      "11": [
+        "unpleasant_texture",
+        "poor_build_quality"
+      ],
+      "12": [
+        "poor_build_quality"
+      ],
+      "2": [
+        "poor_build_quality"
+      ],
+      "4": [
+        "unpleasant_scent",
+        "poor_build_quality",
+        "overpriced"
+      ],
+      "5": [
+        "poor_build_quality"
+      ],
+      "6": [
+        "poor_build_quality"
+      ],
+      "7": [
+        "poor_build_quality"
+      ],
+      "8": [
+        "unpleasant_texture"
+      ],
+      "9": [
+        "unpleasant_texture"
+      ]
+    },
+    "B016LD3C04|baseline": {
+      "1": [
+        "does_not_work",
+        "irritation_or_harm"
+      ],
+      "10": [
+        "does_not_work"
+      ],
+      "11": [
+        "wrong_size_or_fit",
+        "poor_build_quality"
+      ],
+      "12": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "2": [
+        "does_not_work"
+      ],
+      "3": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "4": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "5": [
+        "wrong_size_or_fit"
+      ],
+      "6": [
+        "does_not_work",
+        "irritation_or_harm",
+        "poor_build_quality",
+        "overpriced"
+      ],
+      "7": [
+        "does_not_work"
+      ]
+    },
+    "B016LD3C04|recent": {
+      "1": [
+        "does_not_work",
+        "hard_to_use",
+        "overpriced"
+      ],
+      "10": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "11": [
+        "poor_build_quality"
+      ],
+      "12": [
+        "does_not_work",
+        "wrong_size_or_fit"
+      ],
+      "2": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "3": [
+        "does_not_work",
+        "irritation_or_harm"
+      ],
+      "4": [
+        "does_not_work"
+      ],
+      "5": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "6": [
+        "does_not_work",
+        "overpriced",
+        "poor_build_quality",
+        "irritation_or_harm"
+      ],
+      "7": [
+        "poor_build_quality",
+        "overpriced"
+      ],
+      "8": [
+        "does_not_work"
+      ],
+      "9": [
+        "not_as_described"
+      ]
+    },
+    "B01MXLP1T1|baseline": {
+      "12": [
+        "unpleasant_scent"
+      ],
+      "2": [
+        "wrong_size_or_fit"
+      ],
+      "5": [
+        "wrong_size_or_fit",
+        "unpleasant_texture"
+      ],
+      "6": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "8": [
+        "unpleasant_texture",
+        "irritation_or_harm",
+        "does_not_work"
+      ],
+      "9": [
+        "irritation_or_harm"
+      ]
+    },
+    "B01MXLP1T1|recent": {
+      "2": [
+        "irritation_or_harm"
+      ],
+      "3": [
+        "irritation_or_harm",
+        "unpleasant_texture"
+      ],
+      "7": [
+        "unpleasant_texture"
+      ]
+    },
+    "B075GK4249|baseline": {
+      "1": [
+        "poor_build_quality"
+      ],
+      "2": [
+        "poor_build_quality",
+        "wrong_size_or_fit"
+      ],
+      "3": [
+        "does_not_work"
+      ],
+      "4": [
+        "does_not_work"
+      ],
+      "5": [
+        "poor_build_quality"
+      ],
+      "6": [
+        "does_not_work"
+      ],
+      "7": [
+        "does_not_work",
+        "wrong_size_or_fit"
+      ]
+    },
+    "B075GK4249|recent": {
+      "1": [
+        "poor_build_quality",
+        "does_not_work"
+      ],
+      "2": [
+        "poor_build_quality"
+      ],
+      "3": [
+        "does_not_work",
+        "poor_build_quality"
+      ],
+      "4": [
+        "does_not_work"
+      ],
+      "5": [
+        "does_not_work",
+        "not_as_described",
+        "hard_to_use"
+      ],
+      "6": [
+        "does_not_work"
+      ]
+    },
+    "B07D1B499B|baseline": {
+      "2": [
+        "poor_build_quality"
+      ],
+      "3": [
+        "does_not_work",
+        "poor_build_quality",
+        "irritation_or_harm"
+      ],
+      "4": [
+        "poor_build_quality"
+      ],
+      "5": [
+        "poor_build_quality"
+      ],
+      "6": [
+        "does_not_work",
+        "poor_build_quality"
+      ],
+      "8": [
+        "does_not_work",
+        "overpriced"
+      ]
+    },
+    "B07D1B499B|recent": {
+      "1": [
+        "poor_build_quality"
+      ],
+      "10": [
+        "poor_build_quality",
+        "overpriced"
+      ],
+      "11": [
+        "does_not_work"
+      ],
+      "2": [
+        "poor_build_quality",
+        "overpriced"
+      ],
+      "3": [
+        "poor_build_quality"
+      ],
+      "4": [
+        "poor_build_quality",
+        "does_not_work"
+      ],
+      "5": [
+        "poor_build_quality"
+      ],
+      "6": [
+        "poor_build_quality",
+        "overpriced"
+      ],
+      "7": [
+        "poor_build_quality"
+      ],
+      "8": [
+        "poor_build_quality"
+      ],
+      "9": [
+        "does_not_work",
+        "overpriced"
+      ]
+    },
+    "B0BM4GX6TT|baseline": {
+      "3": [
+        "does_not_work"
+      ],
+      "4": [
+        "not_as_described"
+      ],
+      "6": [
+        "does_not_work"
+      ],
+      "9": [
+        "does_not_work"
+      ]
+    },
+    "B0BM4GX6TT|recent": {
+      "12": [
+        "does_not_work",
+        "overpriced"
+      ],
+      "2": [
+        "arrived_damaged"
+      ],
+      "7": [
+        "irritation_or_harm"
+      ],
+      "8": [
+        "arrived_damaged"
+      ]
+    }
+  }
+}

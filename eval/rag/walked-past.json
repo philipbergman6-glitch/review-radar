@@ -1,0 +1,126 @@
+{
+  "note": "Every product a draw has reached, whether it was kept or walked past. The evidence scan reads this as well as the current slots, so the validation census records the whole walk rather than only where it stopped.",
+  "products": [
+    {
+      "baseline_end": "2017-03",
+      "baseline_start": "2016-10",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "outcome": "drawn",
+      "parent_asin": "B00RPJZMUM",
+      "recent_end": "2017-09",
+      "recent_start": "2017-04"
+    },
+    {
+      "baseline_end": "2017-03",
+      "baseline_start": "2016-10",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "outcome": "drawn",
+      "parent_asin": "B0BM4GX6TT",
+      "recent_end": "2017-09",
+      "recent_start": "2017-04"
+    },
+    {
+      "baseline_end": "2016-10",
+      "baseline_start": "2016-05",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "outcome": "drawn",
+      "parent_asin": "B00V8ZCT1Y",
+      "recent_end": "2017-04",
+      "recent_start": "2016-11"
+    },
+    {
+      "baseline_end": "2016-10",
+      "baseline_start": "2016-05",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "outcome": "drawn",
+      "parent_asin": "B0113GT5Q4",
+      "recent_end": "2017-04",
+      "recent_start": "2016-11"
+    },
+    {
+      "baseline_end": "2015-09",
+      "baseline_start": "2015-04",
+      "decline_rank": 8,
+      "episode_id": "B00SH5WGNE:2015-08",
+      "outcome": "drawn",
+      "parent_asin": "B007QG7G3U",
+      "recent_end": "2016-03",
+      "recent_start": "2015-10"
+    },
+    {
+      "baseline_end": "2015-09",
+      "baseline_start": "2015-04",
+      "decline_rank": 8,
+      "episode_id": "B00SH5WGNE:2015-08",
+      "outcome": "drawn",
+      "parent_asin": "B00SH5WGNE",
+      "recent_end": "2016-03",
+      "recent_start": "2015-10"
+    },
+    {
+      "baseline_end": "2018-01",
+      "baseline_start": "2017-08",
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "outcome": "drawn",
+      "parent_asin": "B00R1TAN7I",
+      "recent_end": "2018-07",
+      "recent_start": "2018-02"
+    },
+    {
+      "baseline_end": "2018-01",
+      "baseline_start": "2017-08",
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "outcome": "drawn",
+      "parent_asin": "B01MXLP1T1",
+      "recent_end": "2018-07",
+      "recent_start": "2018-02"
+    },
+    {
+      "baseline_end": "2014-12",
+      "baseline_start": "2014-07",
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "outcome": "drawn",
+      "parent_asin": "B00KCTER3U",
+      "recent_end": "2015-06",
+      "recent_start": "2015-01"
+    },
+    {
+      "baseline_end": "2014-12",
+      "baseline_start": "2014-07",
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "outcome": "drawn",
+      "parent_asin": "B016LD3C04",
+      "recent_end": "2015-06",
+      "recent_start": "2015-01"
+    },
+    {
+      "baseline_end": "2018-03",
+      "baseline_start": "2017-10",
+      "decline_rank": 24,
+      "episode_id": "B07D1B499B:2018-02",
+      "outcome": "drawn",
+      "parent_asin": "B075GK4249",
+      "recent_end": "2018-09",
+      "recent_start": "2018-04"
+    },
+    {
+      "baseline_end": "2018-03",
+      "baseline_start": "2017-10",
+      "decline_rank": 24,
+      "episode_id": "B07D1B499B:2018-02",
+      "outcome": "drawn",
+      "parent_asin": "B07D1B499B",
+      "recent_end": "2018-09",
+      "recent_start": "2018-04"
+    }
+  ],
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1"
+}

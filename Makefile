@@ -220,6 +220,27 @@ propose-taxonomy:  ## count the raw complaint aspects (input to the hand merge, 
 score-taxonomy:  ## apply the ADR-0003 support rule to the hand-written merge proposal
 	$(RUN) scripts/score_taxonomy.py --scope full
 
+rag-ranking:  ## rank the decline candidates by RR-09's bootstrap lower bound, draw nothing
+	$(RUN) scripts/rag_slots.py --ranking-only
+
+rag-prefilter:  ## lexical pre-filter over every product in the ranking head (necessary, never sufficient)
+	$(RUN) scripts/rag_prefilter.py
+
+rag-slots:  ## top five eligible decline candidates + nearest distinct control each -> eval/rag/slots.json
+	$(RUN) scripts/rag_slots.py --eligible-from eval/rag/prefilter.json $(if $(wildcard eval/rag/validation.json),--reject-from eval/rag/validation.json,)
+
+rag-scan:  ## evidence scan step 1: frozen terms over every in-scope review -> census, worklist, probes
+	$(RUN) scripts/rag_evidence_scan.py
+
+rag-validate:  ## evidence scan step 2: expand the manual reading into the validation record
+	$(RUN) scripts/rag_validate.py
+
+rag-questions-draft:  ## build the thirty questions and check every invariant, writing only a draft
+	$(RUN) scripts/rag_freeze_questions.py --dry-run
+
+rag-freeze:  ## freeze conf/rag-questions.json; refuses if any answer already exists (ADR-0006)
+	$(RUN) scripts/rag_freeze_questions.py --freeze
+
 eval-table:  ## the whole evaluation table from conf/lineage_chain.toml + eval/*/gate.json; non-zero on a capability that is neither a number nor a written reason
 	$(RUN) scripts/eval_table.py
 

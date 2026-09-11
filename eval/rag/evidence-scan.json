@@ -1,0 +1,335 @@
+{
+  "scope": "full",
+  "silver_run_id": "4447727f-ee66-48eb-be9e-8a23e061d708",
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
+  "windows": {
+    "B007QG7G3U|baseline": {
+      "matched": 11,
+      "matched_per_theme": {
+        "does_not_work": 1,
+        "irritation_or_harm": 1,
+        "overpriced": 2,
+        "unpleasant_scent": 8
+      },
+      "parent_asin": "B007QG7G3U",
+      "reviews_in_scope": 40,
+      "window": "baseline"
+    },
+    "B007QG7G3U|recent": {
+      "matched": 9,
+      "matched_per_theme": {
+        "irritation_or_harm": 2,
+        "poor_build_quality": 1,
+        "unpleasant_scent": 5,
+        "unpleasant_texture": 1
+      },
+      "parent_asin": "B007QG7G3U",
+      "reviews_in_scope": 39,
+      "window": "recent"
+    },
+    "B00KCTER3U|baseline": {
+      "matched": 42,
+      "matched_per_theme": {
+        "does_not_work": 3,
+        "hard_to_use": 1,
+        "irritation_or_harm": 6,
+        "poor_build_quality": 1,
+        "unpleasant_scent": 25,
+        "unpleasant_texture": 25,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B00KCTER3U",
+      "reviews_in_scope": 92,
+      "window": "baseline"
+    },
+    "B00KCTER3U|recent": {
+      "matched": 86,
+      "matched_per_theme": {
+        "does_not_work": 2,
+        "irritation_or_harm": 6,
+        "poor_build_quality": 1,
+        "unpleasant_scent": 46,
+        "unpleasant_texture": 54,
+        "wrong_size_or_fit": 2
+      },
+      "parent_asin": "B00KCTER3U",
+      "reviews_in_scope": 222,
+      "window": "recent"
+    },
+    "B00R1TAN7I|baseline": {
+      "matched": 8,
+      "matched_per_theme": {
+        "overpriced": 1,
+        "unpleasant_scent": 2,
+        "unpleasant_texture": 1,
+        "wrong_size_or_fit": 4
+      },
+      "parent_asin": "B00R1TAN7I",
+      "reviews_in_scope": 62,
+      "window": "baseline"
+    },
+    "B00R1TAN7I|recent": {
+      "matched": 21,
+      "matched_per_theme": {
+        "does_not_work": 4,
+        "irritation_or_harm": 1,
+        "not_as_described": 1,
+        "overpriced": 3,
+        "unpleasant_scent": 15,
+        "unpleasant_texture": 1,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B00R1TAN7I",
+      "reviews_in_scope": 49,
+      "window": "recent"
+    },
+    "B00RPJZMUM|baseline": {
+      "matched": 23,
+      "matched_per_theme": {
+        "arrived_damaged": 2,
+        "does_not_work": 1,
+        "hard_to_use": 1,
+        "irritation_or_harm": 5,
+        "overpriced": 3,
+        "poor_build_quality": 3,
+        "unpleasant_scent": 2,
+        "wrong_size_or_fit": 8
+      },
+      "parent_asin": "B00RPJZMUM",
+      "reviews_in_scope": 95,
+      "window": "baseline"
+    },
+    "B00RPJZMUM|recent": {
+      "matched": 16,
+      "matched_per_theme": {
+        "does_not_work": 3,
+        "hard_to_use": 2,
+        "irritation_or_harm": 3,
+        "overpriced": 3,
+        "poor_build_quality": 7,
+        "unpleasant_scent": 3,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B00RPJZMUM",
+      "reviews_in_scope": 37,
+      "window": "recent"
+    },
+    "B00SH5WGNE|baseline": {
+      "matched": 6,
+      "matched_per_theme": {
+        "irritation_or_harm": 2,
+        "unpleasant_scent": 1,
+        "unpleasant_texture": 2,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B00SH5WGNE",
+      "reviews_in_scope": 40,
+      "window": "baseline"
+    },
+    "B00SH5WGNE|recent": {
+      "matched": 6,
+      "matched_per_theme": {
+        "irritation_or_harm": 4,
+        "poor_build_quality": 1,
+        "unpleasant_texture": 3
+      },
+      "parent_asin": "B00SH5WGNE",
+      "reviews_in_scope": 22,
+      "window": "recent"
+    },
+    "B00V8ZCT1Y|baseline": {
+      "matched": 36,
+      "matched_per_theme": {
+        "does_not_work": 2,
+        "hard_to_use": 1,
+        "irritation_or_harm": 16,
+        "overpriced": 2,
+        "poor_build_quality": 2,
+        "unpleasant_scent": 27,
+        "unpleasant_texture": 4,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B00V8ZCT1Y",
+      "reviews_in_scope": 66,
+      "window": "baseline"
+    },
+    "B00V8ZCT1Y|recent": {
+      "matched": 17,
+      "matched_per_theme": {
+        "does_not_work": 2,
+        "irritation_or_harm": 11,
+        "unpleasant_scent": 10,
+        "unpleasant_texture": 1,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B00V8ZCT1Y",
+      "reviews_in_scope": 34,
+      "window": "recent"
+    },
+    "B0113GT5Q4|baseline": {
+      "matched": 8,
+      "matched_per_theme": {
+        "hard_to_use": 1,
+        "not_as_described": 1,
+        "poor_build_quality": 2,
+        "unpleasant_texture": 2,
+        "wrong_size_or_fit": 2
+      },
+      "parent_asin": "B0113GT5Q4",
+      "reviews_in_scope": 38,
+      "window": "baseline"
+    },
+    "B0113GT5Q4|recent": {
+      "matched": 14,
+      "matched_per_theme": {
+        "hard_to_use": 1,
+        "overpriced": 2,
+        "poor_build_quality": 8,
+        "unpleasant_scent": 2,
+        "unpleasant_texture": 4
+      },
+      "parent_asin": "B0113GT5Q4",
+      "reviews_in_scope": 34,
+      "window": "recent"
+    },
+    "B016LD3C04|baseline": {
+      "matched": 16,
+      "matched_per_theme": {
+        "does_not_work": 10,
+        "irritation_or_harm": 2,
+        "overpriced": 5,
+        "poor_build_quality": 1,
+        "unpleasant_texture": 1,
+        "wrong_size_or_fit": 2
+      },
+      "parent_asin": "B016LD3C04",
+      "reviews_in_scope": 77,
+      "window": "baseline"
+    },
+    "B016LD3C04|recent": {
+      "matched": 46,
+      "matched_per_theme": {
+        "does_not_work": 24,
+        "hard_to_use": 1,
+        "irritation_or_harm": 6,
+        "not_as_described": 4,
+        "overpriced": 9,
+        "poor_build_quality": 11,
+        "unpleasant_texture": 1,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B016LD3C04",
+      "reviews_in_scope": 149,
+      "window": "recent"
+    },
+    "B01MXLP1T1|baseline": {
+      "matched": 14,
+      "matched_per_theme": {
+        "irritation_or_harm": 4,
+        "overpriced": 2,
+        "poor_build_quality": 1,
+        "unpleasant_scent": 3,
+        "unpleasant_texture": 4,
+        "wrong_size_or_fit": 2
+      },
+      "parent_asin": "B01MXLP1T1",
+      "reviews_in_scope": 51,
+      "window": "baseline"
+    },
+    "B01MXLP1T1|recent": {
+      "matched": 8,
+      "matched_per_theme": {
+        "irritation_or_harm": 2,
+        "overpriced": 4,
+        "unpleasant_scent": 2,
+        "unpleasant_texture": 2
+      },
+      "parent_asin": "B01MXLP1T1",
+      "reviews_in_scope": 26,
+      "window": "recent"
+    },
+    "B075GK4249|baseline": {
+      "matched": 7,
+      "matched_per_theme": {
+        "does_not_work": 3,
+        "poor_build_quality": 3,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B075GK4249",
+      "reviews_in_scope": 48,
+      "window": "baseline"
+    },
+    "B075GK4249|recent": {
+      "matched": 6,
+      "matched_per_theme": {
+        "does_not_work": 4,
+        "hard_to_use": 1,
+        "overpriced": 1,
+        "poor_build_quality": 2
+      },
+      "parent_asin": "B075GK4249",
+      "reviews_in_scope": 17,
+      "window": "recent"
+    },
+    "B07D1B499B|baseline": {
+      "matched": 8,
+      "matched_per_theme": {
+        "does_not_work": 1,
+        "hard_to_use": 1,
+        "overpriced": 3,
+        "poor_build_quality": 3
+      },
+      "parent_asin": "B07D1B499B",
+      "reviews_in_scope": 32,
+      "window": "baseline"
+    },
+    "B07D1B499B|recent": {
+      "matched": 11,
+      "matched_per_theme": {
+        "does_not_work": 6,
+        "irritation_or_harm": 2,
+        "overpriced": 3,
+        "poor_build_quality": 3
+      },
+      "parent_asin": "B07D1B499B",
+      "reviews_in_scope": 33,
+      "window": "recent"
+    },
+    "B0BM4GX6TT|baseline": {
+      "matched": 18,
+      "matched_per_theme": {
+        "does_not_work": 1,
+        "hard_to_use": 5,
+        "irritation_or_harm": 5,
+        "not_as_described": 1,
+        "overpriced": 1,
+        "poor_build_quality": 1,
+        "unpleasant_texture": 1,
+        "wrong_size_or_fit": 4
+      },
+      "parent_asin": "B0BM4GX6TT",
+      "reviews_in_scope": 106,
+      "window": "baseline"
+    },
+    "B0BM4GX6TT|recent": {
+      "matched": 25,
+      "matched_per_theme": {
+        "arrived_damaged": 2,
+        "does_not_work": 1,
+        "hard_to_use": 4,
+        "irritation_or_harm": 7,
+        "not_as_described": 1,
+        "overpriced": 3,
+        "poor_build_quality": 5,
+        "unpleasant_scent": 1,
+        "unpleasant_texture": 5,
+        "wrong_size_or_fit": 1
+      },
+      "parent_asin": "B0BM4GX6TT",
+      "reviews_in_scope": 111,
+      "window": "recent"
+    }
+  },
+  "worklist_order": "sha256(seed:worklist:review_id) ascending -- unbiased by rating",
+  "worklist_per_window": 12
+}

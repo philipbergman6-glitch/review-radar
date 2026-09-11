@@ -1,0 +1,2362 @@
+{
+  "eligible_products": [
+    "B000BOZ8UM",
+    "B001LY7FRK",
+    "B0052YFCSO",
+    "B005BZQHEC",
+    "B007QG7G3U",
+    "B007WFZ0XI",
+    "B00JJV2XL0",
+    "B00KBYQDI8",
+    "B00KCTER3U",
+    "B00R1TAN7I",
+    "B00RPJZMUM",
+    "B00SH5WGNE",
+    "B00V8ZCT1Y",
+    "B00X6QE9MK",
+    "B00XYM5Q2I",
+    "B0113GT5Q4",
+    "B012P4KUIU",
+    "B016LD3C04",
+    "B019GBG0IE",
+    "B01BIDW19K",
+    "B01C8404OC",
+    "B01FK1IUIM",
+    "B01G7SKNC8",
+    "B01GCEQTA2",
+    "B01HPD37K4",
+    "B01IDOV7TC",
+    "B01MTKLSFV",
+    "B01MXLP1T1",
+    "B01MYPDMEU",
+    "B01N5GPXG2",
+    "B074J6FFTZ",
+    "B074KD4PX2",
+    "B0753JC12P",
+    "B075GK4249",
+    "B076JLNGS5",
+    "B076LKL1XY",
+    "B07894LH23",
+    "B07D1B499B",
+    "B07FMR3PJK",
+    "B07KXVGHTV",
+    "B085BB7B1M",
+    "B09FR54XLC",
+    "B09X9BG4FC",
+    "B0B7L451Z9",
+    "B0B96MFXSJ",
+    "B0BGQQKWWY",
+    "B0BM4GX6TT",
+    "B0BV1FPZY6"
+  ],
+  "episodes_considered": 60,
+  "min_lexical_matches": 6,
+  "per_product": {
+    "B0010VSH3K:2018-09|B0010VSH3K": {
+      "episode_id": "B0010VSH3K:2018-09",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 2
+      },
+      "parent_asin": "B0010VSH3K",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 14,
+        "recent": 13
+      }
+    },
+    "B0010VSH3K:2018-09|B01N070HWY": {
+      "episode_id": "B0010VSH3K:2018-09",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 0
+      },
+      "parent_asin": "B01N070HWY",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 13
+      }
+    },
+    "B0010VSH3K:2018-09|B07894LH23": {
+      "episode_id": "B0010VSH3K:2018-09",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 15
+      },
+      "parent_asin": "B07894LH23",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 20,
+        "recent": 48
+      }
+    },
+    "B001D0812A:2014-11|B000BOZ8UM": {
+      "episode_id": "B001D0812A:2014-11",
+      "lexical_matches": {
+        "baseline": 10,
+        "recent": 9
+      },
+      "parent_asin": "B000BOZ8UM",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 17
+      }
+    },
+    "B001D0812A:2014-11|B001B9VSFK": {
+      "episode_id": "B001D0812A:2014-11",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 1
+      },
+      "parent_asin": "B001B9VSFK",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 17,
+        "recent": 27
+      }
+    },
+    "B001D0812A:2014-11|B001D0812A": {
+      "episode_id": "B001D0812A:2014-11",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 5
+      },
+      "parent_asin": "B001D0812A",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 12,
+        "recent": 11
+      }
+    },
+    "B0052YFCSO:2018-04|B0052YFCSO": {
+      "episode_id": "B0052YFCSO:2018-04",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 6
+      },
+      "parent_asin": "B0052YFCSO",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 11
+      }
+    },
+    "B0052YFCSO:2018-04|B01M1CZH9Y": {
+      "episode_id": "B0052YFCSO:2018-04",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 3
+      },
+      "parent_asin": "B01M1CZH9Y",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 25,
+        "recent": 14
+      }
+    },
+    "B0052YFCSO:2018-04|B071DT8RVD": {
+      "episode_id": "B0052YFCSO:2018-04",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 3
+      },
+      "parent_asin": "B071DT8RVD",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 17,
+        "recent": 19
+      }
+    },
+    "B00HFTINH6:2014-10|B001LY7FRK": {
+      "episode_id": "B00HFTINH6:2014-10",
+      "lexical_matches": {
+        "baseline": 9,
+        "recent": 22
+      },
+      "parent_asin": "B001LY7FRK",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 20,
+        "recent": 53
+      }
+    },
+    "B00HFTINH6:2014-10|B005X5SHJS": {
+      "episode_id": "B00HFTINH6:2014-10",
+      "lexical_matches": {
+        "baseline": 0,
+        "recent": 1
+      },
+      "parent_asin": "B005X5SHJS",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 11,
+        "recent": 20
+      }
+    },
+    "B00HFTINH6:2014-10|B00HFTINH6": {
+      "episode_id": "B00HFTINH6:2014-10",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 6
+      },
+      "parent_asin": "B00HFTINH6",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 11,
+        "recent": 17
+      }
+    },
+    "B00JJV2XL0:2015-06|B005BZQHEC": {
+      "episode_id": "B00JJV2XL0:2015-06",
+      "lexical_matches": {
+        "baseline": 21,
+        "recent": 18
+      },
+      "parent_asin": "B005BZQHEC",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 95,
+        "recent": 62
+      }
+    },
+    "B00JJV2XL0:2015-06|B00JJV2XL0": {
+      "episode_id": "B00JJV2XL0:2015-06",
+      "lexical_matches": {
+        "baseline": 35,
+        "recent": 19
+      },
+      "parent_asin": "B00JJV2XL0",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 132,
+        "recent": 45
+      }
+    },
+    "B00JJV2XL0:2015-06|B00KCTER3U": {
+      "episode_id": "B00JJV2XL0:2015-06",
+      "lexical_matches": {
+        "baseline": 90,
+        "recent": 28
+      },
+      "parent_asin": "B00KCTER3U",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 234,
+        "recent": 66
+      }
+    },
+    "B00JZRTZVY:2014-10|B007WFZ0XI": {
+      "episode_id": "B00JZRTZVY:2014-10",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 7
+      },
+      "parent_asin": "B007WFZ0XI",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 27,
+        "recent": 13
+      }
+    },
+    "B00JZRTZVY:2014-10|B00H4BZM9M": {
+      "episode_id": "B00JZRTZVY:2014-10",
+      "lexical_matches": {
+        "baseline": 0,
+        "recent": 4
+      },
+      "parent_asin": "B00H4BZM9M",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 26,
+        "recent": 53
+      }
+    },
+    "B00JZRTZVY:2014-10|B00JZRTZVY": {
+      "episode_id": "B00JZRTZVY:2014-10",
+      "lexical_matches": {
+        "baseline": 0,
+        "recent": 2
+      },
+      "parent_asin": "B00JZRTZVY",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 19,
+        "recent": 60
+      }
+    },
+    "B00K70U7NI:2016-05|B00E4MQENM": {
+      "episode_id": "B00K70U7NI:2016-05",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 1
+      },
+      "parent_asin": "B00E4MQENM",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 43,
+        "recent": 20
+      }
+    },
+    "B00K70U7NI:2016-05|B00K70U7NI": {
+      "episode_id": "B00K70U7NI:2016-05",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 0
+      },
+      "parent_asin": "B00K70U7NI",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 25,
+        "recent": 15
+      }
+    },
+    "B00K70U7NI:2016-05|B01448SZ0U": {
+      "episode_id": "B00K70U7NI:2016-05",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 0
+      },
+      "parent_asin": "B01448SZ0U",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 34,
+        "recent": 24
+      }
+    },
+    "B00R1TAN7I:2017-12|B00R1TAN7I": {
+      "episode_id": "B00R1TAN7I:2017-12",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 21
+      },
+      "parent_asin": "B00R1TAN7I",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 62,
+        "recent": 49
+      }
+    },
+    "B00R1TAN7I:2017-12|B01MTKLSFV": {
+      "episode_id": "B00R1TAN7I:2017-12",
+      "lexical_matches": {
+        "baseline": 16,
+        "recent": 7
+      },
+      "parent_asin": "B01MTKLSFV",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 40,
+        "recent": 19
+      }
+    },
+    "B00R1TAN7I:2017-12|B01MXLP1T1": {
+      "episode_id": "B00R1TAN7I:2017-12",
+      "lexical_matches": {
+        "baseline": 14,
+        "recent": 8
+      },
+      "parent_asin": "B01MXLP1T1",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 51,
+        "recent": 26
+      }
+    },
+    "B00RPJZMUM:2015-06|B001LY7FRK": {
+      "episode_id": "B00RPJZMUM:2015-06",
+      "lexical_matches": {
+        "baseline": 17,
+        "recent": 17
+      },
+      "parent_asin": "B001LY7FRK",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 53,
+        "recent": 41
+      }
+    },
+    "B00RPJZMUM:2015-06|B005BZQHEC": {
+      "episode_id": "B00RPJZMUM:2015-06",
+      "lexical_matches": {
+        "baseline": 21,
+        "recent": 18
+      },
+      "parent_asin": "B005BZQHEC",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 95,
+        "recent": 62
+      }
+    },
+    "B00RPJZMUM:2015-06|B00RPJZMUM": {
+      "episode_id": "B00RPJZMUM:2015-06",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 11
+      },
+      "parent_asin": "B00RPJZMUM",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 77,
+        "recent": 25
+      }
+    },
+    "B00RPJZMUM:2017-02|B00RPJZMUM": {
+      "episode_id": "B00RPJZMUM:2017-02",
+      "lexical_matches": {
+        "baseline": 23,
+        "recent": 16
+      },
+      "parent_asin": "B00RPJZMUM",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 95,
+        "recent": 37
+      }
+    },
+    "B00RPJZMUM:2017-02|B01HIW5BG0": {
+      "episode_id": "B00RPJZMUM:2017-02",
+      "lexical_matches": {
+        "baseline": 17,
+        "recent": 1
+      },
+      "parent_asin": "B01HIW5BG0",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 61,
+        "recent": 20
+      }
+    },
+    "B00RPJZMUM:2017-02|B0BM4GX6TT": {
+      "episode_id": "B00RPJZMUM:2017-02",
+      "lexical_matches": {
+        "baseline": 18,
+        "recent": 25
+      },
+      "parent_asin": "B0BM4GX6TT",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 106,
+        "recent": 111
+      }
+    },
+    "B00SH5WGNE:2015-08|B007QG7G3U": {
+      "episode_id": "B00SH5WGNE:2015-08",
+      "lexical_matches": {
+        "baseline": 11,
+        "recent": 9
+      },
+      "parent_asin": "B007QG7G3U",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 40,
+        "recent": 39
+      }
+    },
+    "B00SH5WGNE:2015-08|B00H4BZM9M": {
+      "episode_id": "B00SH5WGNE:2015-08",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 1
+      },
+      "parent_asin": "B00H4BZM9M",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 42,
+        "recent": 31
+      }
+    },
+    "B00SH5WGNE:2015-08|B00SH5WGNE": {
+      "episode_id": "B00SH5WGNE:2015-08",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 6
+      },
+      "parent_asin": "B00SH5WGNE",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 40,
+        "recent": 22
+      }
+    },
+    "B00U4O3YHI:2017-07|B00U4O3YHI": {
+      "episode_id": "B00U4O3YHI:2017-07",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 8
+      },
+      "parent_asin": "B00U4O3YHI",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 22,
+        "recent": 19
+      }
+    },
+    "B00U4O3YHI:2017-07|B01JLDWKJA": {
+      "episode_id": "B00U4O3YHI:2017-07",
+      "lexical_matches": {
+        "baseline": 13,
+        "recent": 4
+      },
+      "parent_asin": "B01JLDWKJA",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 30,
+        "recent": 13
+      }
+    },
+    "B00U4O3YHI:2017-07|B01MTKLSFV": {
+      "episode_id": "B00U4O3YHI:2017-07",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 16
+      },
+      "parent_asin": "B01MTKLSFV",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 35,
+        "recent": 42
+      }
+    },
+    "B00X6QE9MK:2016-01|B00MT767M2": {
+      "episode_id": "B00X6QE9MK:2016-01",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 3
+      },
+      "parent_asin": "B00MT767M2",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 21
+      }
+    },
+    "B00X6QE9MK:2016-01|B00X6QE9MK": {
+      "episode_id": "B00X6QE9MK:2016-01",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 7
+      },
+      "parent_asin": "B00X6QE9MK",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 19,
+        "recent": 16
+      }
+    },
+    "B00X6QE9MK:2016-01|B012P4KUIU": {
+      "episode_id": "B00X6QE9MK:2016-01",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 7
+      },
+      "parent_asin": "B012P4KUIU",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 19
+      }
+    },
+    "B00Y3DF9X8:2016-10|B00Y3DF9X8": {
+      "episode_id": "B00Y3DF9X8:2016-10",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 5
+      },
+      "parent_asin": "B00Y3DF9X8",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 14
+      }
+    },
+    "B00Y3DF9X8:2016-10|B015WVW8EW": {
+      "episode_id": "B00Y3DF9X8:2016-10",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 4
+      },
+      "parent_asin": "B015WVW8EW",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 15
+      }
+    },
+    "B00Y3DF9X8:2016-10|B01CJ9QPOE": {
+      "episode_id": "B00Y3DF9X8:2016-10",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 5
+      },
+      "parent_asin": "B01CJ9QPOE",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 32,
+        "recent": 14
+      }
+    },
+    "B0113GT5Q4:2016-09|B00V8ZCT1Y": {
+      "episode_id": "B0113GT5Q4:2016-09",
+      "lexical_matches": {
+        "baseline": 36,
+        "recent": 17
+      },
+      "parent_asin": "B00V8ZCT1Y",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 66,
+        "recent": 34
+      }
+    },
+    "B0113GT5Q4:2016-09|B0113GT5Q4": {
+      "episode_id": "B0113GT5Q4:2016-09",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 14
+      },
+      "parent_asin": "B0113GT5Q4",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 38,
+        "recent": 34
+      }
+    },
+    "B0113GT5Q4:2016-09|B01E5UVUCW": {
+      "episode_id": "B0113GT5Q4:2016-09",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 3
+      },
+      "parent_asin": "B01E5UVUCW",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 25,
+        "recent": 40
+      }
+    },
+    "B012Q9NGE4:2018-02|B012Q9NGE4": {
+      "episode_id": "B012Q9NGE4:2018-02",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 7
+      },
+      "parent_asin": "B012Q9NGE4",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 27,
+        "recent": 17
+      }
+    },
+    "B012Q9NGE4:2018-02|B01M7UMAUG": {
+      "episode_id": "B012Q9NGE4:2018-02",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 4
+      },
+      "parent_asin": "B01M7UMAUG",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 33,
+        "recent": 14
+      }
+    },
+    "B012Q9NGE4:2018-02|B074DW8MBZ": {
+      "episode_id": "B012Q9NGE4:2018-02",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 0
+      },
+      "parent_asin": "B074DW8MBZ",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 24,
+        "recent": 15
+      }
+    },
+    "B013Q1TSLQ:2017-01|B00XYM5Q2I": {
+      "episode_id": "B013Q1TSLQ:2017-01",
+      "lexical_matches": {
+        "baseline": 11,
+        "recent": 6
+      },
+      "parent_asin": "B00XYM5Q2I",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 12
+      }
+    },
+    "B013Q1TSLQ:2017-01|B013Q1TSLQ": {
+      "episode_id": "B013Q1TSLQ:2017-01",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 5
+      },
+      "parent_asin": "B013Q1TSLQ",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 24
+      }
+    },
+    "B013Q1TSLQ:2017-01|B01FX46BH8": {
+      "episode_id": "B013Q1TSLQ:2017-01",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 6
+      },
+      "parent_asin": "B01FX46BH8",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 11,
+        "recent": 16
+      }
+    },
+    "B0145XI8RO:2017-07|B0145XI8RO": {
+      "episode_id": "B0145XI8RO:2017-07",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 10
+      },
+      "parent_asin": "B0145XI8RO",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 61,
+        "recent": 40
+      }
+    },
+    "B0145XI8RO:2017-07|B01GCEQTA2": {
+      "episode_id": "B0145XI8RO:2017-07",
+      "lexical_matches": {
+        "baseline": 15,
+        "recent": 18
+      },
+      "parent_asin": "B01GCEQTA2",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 35,
+        "recent": 33
+      }
+    },
+    "B0145XI8RO:2017-07|B09FFQT1KK": {
+      "episode_id": "B0145XI8RO:2017-07",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 8
+      },
+      "parent_asin": "B09FFQT1KK",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 44,
+        "recent": 98
+      }
+    },
+    "B016LD3C04:2014-11|B00KCTER3U": {
+      "episode_id": "B016LD3C04:2014-11",
+      "lexical_matches": {
+        "baseline": 42,
+        "recent": 86
+      },
+      "parent_asin": "B00KCTER3U",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 92,
+        "recent": 222
+      }
+    },
+    "B016LD3C04:2014-11|B016LD3C04": {
+      "episode_id": "B016LD3C04:2014-11",
+      "lexical_matches": {
+        "baseline": 16,
+        "recent": 46
+      },
+      "parent_asin": "B016LD3C04",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 77,
+        "recent": 149
+      }
+    },
+    "B0184ABLDW:2016-07|B00H3WGN9K": {
+      "episode_id": "B0184ABLDW:2016-07",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 9
+      },
+      "parent_asin": "B00H3WGN9K",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 21,
+        "recent": 20
+      }
+    },
+    "B0184ABLDW:2016-07|B00XQOR3JS": {
+      "episode_id": "B0184ABLDW:2016-07",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 0
+      },
+      "parent_asin": "B00XQOR3JS",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 14,
+        "recent": 10
+      }
+    },
+    "B0184ABLDW:2016-07|B0184ABLDW": {
+      "episode_id": "B0184ABLDW:2016-07",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 4
+      },
+      "parent_asin": "B0184ABLDW",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 16,
+        "recent": 11
+      }
+    },
+    "B01BIDW19K:2017-01|B00XBRCWSM": {
+      "episode_id": "B01BIDW19K:2017-01",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 7
+      },
+      "parent_asin": "B00XBRCWSM",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 48,
+        "recent": 57
+      }
+    },
+    "B01BIDW19K:2017-01|B011KJ084M": {
+      "episode_id": "B01BIDW19K:2017-01",
+      "lexical_matches": {
+        "baseline": 12,
+        "recent": 4
+      },
+      "parent_asin": "B011KJ084M",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 75,
+        "recent": 27
+      }
+    },
+    "B01BIDW19K:2017-01|B01BIDW19K": {
+      "episode_id": "B01BIDW19K:2017-01",
+      "lexical_matches": {
+        "baseline": 42,
+        "recent": 9
+      },
+      "parent_asin": "B01BIDW19K",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 79,
+        "recent": 29
+      }
+    },
+    "B01BYWYNUA:2017-12|B01BYWYNUA": {
+      "episode_id": "B01BYWYNUA:2017-12",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 6
+      },
+      "parent_asin": "B01BYWYNUA",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 16
+      }
+    },
+    "B01BYWYNUA:2017-12|B01M8Q1FXK": {
+      "episode_id": "B01BYWYNUA:2017-12",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 0
+      },
+      "parent_asin": "B01M8Q1FXK",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 13
+      }
+    },
+    "B01BYWYNUA:2017-12|B07WVBDLG9": {
+      "episode_id": "B01BYWYNUA:2017-12",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 7
+      },
+      "parent_asin": "B07WVBDLG9",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 32,
+        "recent": 38
+      }
+    },
+    "B01C8404OC:2016-12|B01C8404OC": {
+      "episode_id": "B01C8404OC:2016-12",
+      "lexical_matches": {
+        "baseline": 12,
+        "recent": 6
+      },
+      "parent_asin": "B01C8404OC",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 54,
+        "recent": 17
+      }
+    },
+    "B01C8404OC:2016-12|B01D2IXB20": {
+      "episode_id": "B01C8404OC:2016-12",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 7
+      },
+      "parent_asin": "B01D2IXB20",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 34,
+        "recent": 55
+      }
+    },
+    "B01C8404OC:2016-12|B01H1RGQGQ": {
+      "episode_id": "B01C8404OC:2016-12",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 2
+      },
+      "parent_asin": "B01H1RGQGQ",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 39,
+        "recent": 16
+      }
+    },
+    "B01CE23EEA:2017-03|B00V8ZCT1Y": {
+      "episode_id": "B01CE23EEA:2017-03",
+      "lexical_matches": {
+        "baseline": 17,
+        "recent": 15
+      },
+      "parent_asin": "B00V8ZCT1Y",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 34,
+        "recent": 38
+      }
+    },
+    "B01CE23EEA:2017-03|B01CE23EEA": {
+      "episode_id": "B01CE23EEA:2017-03",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 15
+      },
+      "parent_asin": "B01CE23EEA",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 30,
+        "recent": 28
+      }
+    },
+    "B01CE23EEA:2017-03|B01DU15Z3C": {
+      "episode_id": "B01CE23EEA:2017-03",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 1
+      },
+      "parent_asin": "B01DU15Z3C",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 36,
+        "recent": 16
+      }
+    },
+    "B01CS3OWBY:2016-10|B0006O2HRO": {
+      "episode_id": "B01CS3OWBY:2016-10",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 3
+      },
+      "parent_asin": "B0006O2HRO",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 12
+      }
+    },
+    "B01CS3OWBY:2016-10|B015QSOGC8": {
+      "episode_id": "B01CS3OWBY:2016-10",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 9
+      },
+      "parent_asin": "B015QSOGC8",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 10,
+        "recent": 14
+      }
+    },
+    "B01CS3OWBY:2016-10|B01CS3OWBY": {
+      "episode_id": "B01CS3OWBY:2016-10",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 4
+      },
+      "parent_asin": "B01CS3OWBY",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 14,
+        "recent": 19
+      }
+    },
+    "B01EMMH0KY:2017-01|B01D2IO4BC": {
+      "episode_id": "B01EMMH0KY:2017-01",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 6
+      },
+      "parent_asin": "B01D2IO4BC",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 37,
+        "recent": 18
+      }
+    },
+    "B01EMMH0KY:2017-01|B01EMMH0KY": {
+      "episode_id": "B01EMMH0KY:2017-01",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 7
+      },
+      "parent_asin": "B01EMMH0KY",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 19,
+        "recent": 28
+      }
+    },
+    "B01EMMH0KY:2017-01|B01FX46BH8": {
+      "episode_id": "B01EMMH0KY:2017-01",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 6
+      },
+      "parent_asin": "B01FX46BH8",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 11,
+        "recent": 16
+      }
+    },
+    "B01FK1IUIM:2016-11|B01DU15Z3C": {
+      "episode_id": "B01FK1IUIM:2016-11",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 3
+      },
+      "parent_asin": "B01DU15Z3C",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 43,
+        "recent": 22
+      }
+    },
+    "B01FK1IUIM:2016-11|B01FK1IUIM": {
+      "episode_id": "B01FK1IUIM:2016-11",
+      "lexical_matches": {
+        "baseline": 15,
+        "recent": 17
+      },
+      "parent_asin": "B01FK1IUIM",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 86,
+        "recent": 94
+      }
+    },
+    "B01FK1IUIM:2016-11|B0BM4GX6TT": {
+      "episode_id": "B01FK1IUIM:2016-11",
+      "lexical_matches": {
+        "baseline": 18,
+        "recent": 20
+      },
+      "parent_asin": "B0BM4GX6TT",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 132,
+        "recent": 110
+      }
+    },
+    "B01G7SKNC8:2016-12|B01G7SKNC8": {
+      "episode_id": "B01G7SKNC8:2016-12",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 17
+      },
+      "parent_asin": "B01G7SKNC8",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 34,
+        "recent": 52
+      }
+    },
+    "B01G7SKNC8:2016-12|B01HPD37K4": {
+      "episode_id": "B01G7SKNC8:2016-12",
+      "lexical_matches": {
+        "baseline": 14,
+        "recent": 14
+      },
+      "parent_asin": "B01HPD37K4",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 44,
+        "recent": 62
+      }
+    },
+    "B01IDOV7TC:2017-04|B00V8ZCT1Y": {
+      "episode_id": "B01IDOV7TC:2017-04",
+      "lexical_matches": {
+        "baseline": 21,
+        "recent": 9
+      },
+      "parent_asin": "B00V8ZCT1Y",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 44,
+        "recent": 24
+      }
+    },
+    "B01IDOV7TC:2017-04|B01DU15Z3C": {
+      "episode_id": "B01IDOV7TC:2017-04",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 1
+      },
+      "parent_asin": "B01DU15Z3C",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 30,
+        "recent": 17
+      }
+    },
+    "B01IDOV7TC:2017-04|B01IDOV7TC": {
+      "episode_id": "B01IDOV7TC:2017-04",
+      "lexical_matches": {
+        "baseline": 18,
+        "recent": 11
+      },
+      "parent_asin": "B01IDOV7TC",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 29,
+        "recent": 18
+      }
+    },
+    "B01IMEH6GG:2017-03|B01695MZ9S": {
+      "episode_id": "B01IMEH6GG:2017-03",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 4
+      },
+      "parent_asin": "B01695MZ9S",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 44,
+        "recent": 32
+      }
+    },
+    "B01IMEH6GG:2017-03|B01D2IXB20": {
+      "episode_id": "B01IMEH6GG:2017-03",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 2
+      },
+      "parent_asin": "B01D2IXB20",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 57,
+        "recent": 29
+      }
+    },
+    "B01IMEH6GG:2017-03|B01IMEH6GG": {
+      "episode_id": "B01IMEH6GG:2017-03",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 4
+      },
+      "parent_asin": "B01IMEH6GG",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 56,
+        "recent": 16
+      }
+    },
+    "B01LAV3O6E:2017-07|B01JLDWKJA": {
+      "episode_id": "B01LAV3O6E:2017-07",
+      "lexical_matches": {
+        "baseline": 13,
+        "recent": 4
+      },
+      "parent_asin": "B01JLDWKJA",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 30,
+        "recent": 13
+      }
+    },
+    "B01LAV3O6E:2017-07|B01LAV3O6E": {
+      "episode_id": "B01LAV3O6E:2017-07",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 12
+      },
+      "parent_asin": "B01LAV3O6E",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 51,
+        "recent": 63
+      }
+    },
+    "B01LAV3O6E:2017-07|B01M32EXU4": {
+      "episode_id": "B01LAV3O6E:2017-07",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 0
+      },
+      "parent_asin": "B01M32EXU4",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 44,
+        "recent": 18
+      }
+    },
+    "B01LVXCGG0:2017-06|B01I5MFUZ4": {
+      "episode_id": "B01LVXCGG0:2017-06",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 3
+      },
+      "parent_asin": "B01I5MFUZ4",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 10
+      }
+    },
+    "B01LVXCGG0:2017-06|B01LVXCGG0": {
+      "episode_id": "B01LVXCGG0:2017-06",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 5
+      },
+      "parent_asin": "B01LVXCGG0",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 14,
+        "recent": 15
+      }
+    },
+    "B01LVXCGG0:2017-06|B01M8Q1FXK": {
+      "episode_id": "B01LVXCGG0:2017-06",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 1
+      },
+      "parent_asin": "B01M8Q1FXK",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 14,
+        "recent": 15
+      }
+    },
+    "B01MDLG6II:2017-05|B01M07CRQR": {
+      "episode_id": "B01MDLG6II:2017-05",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 3
+      },
+      "parent_asin": "B01M07CRQR",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 28,
+        "recent": 10
+      }
+    },
+    "B01MDLG6II:2017-05|B01MDLG6II": {
+      "episode_id": "B01MDLG6II:2017-05",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 3
+      },
+      "parent_asin": "B01MDLG6II",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 17,
+        "recent": 18
+      }
+    },
+    "B01MDLG6II:2017-05|B01MYPDMEU": {
+      "episode_id": "B01MDLG6II:2017-05",
+      "lexical_matches": {
+        "baseline": 10,
+        "recent": 11
+      },
+      "parent_asin": "B01MYPDMEU",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 22,
+        "recent": 22
+      }
+    },
+    "B01N00UFDV:2017-07|B01M07CRQR": {
+      "episode_id": "B01N00UFDV:2017-07",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 3
+      },
+      "parent_asin": "B01M07CRQR",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 17,
+        "recent": 10
+      }
+    },
+    "B01N00UFDV:2017-07|B01MYPDMEU": {
+      "episode_id": "B01N00UFDV:2017-07",
+      "lexical_matches": {
+        "baseline": 14,
+        "recent": 10
+      },
+      "parent_asin": "B01MYPDMEU",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 25,
+        "recent": 20
+      }
+    },
+    "B01N00UFDV:2017-07|B01N00UFDV": {
+      "episode_id": "B01N00UFDV:2017-07",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 2
+      },
+      "parent_asin": "B01N00UFDV",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 16
+      }
+    },
+    "B01N32BEJM:2017-08|B01M07CRQR": {
+      "episode_id": "B01N32BEJM:2017-08",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 3
+      },
+      "parent_asin": "B01M07CRQR",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 14,
+        "recent": 10
+      }
+    },
+    "B01N32BEJM:2017-08|B01N32BEJM": {
+      "episode_id": "B01N32BEJM:2017-08",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 3
+      },
+      "parent_asin": "B01N32BEJM",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 22,
+        "recent": 20
+      }
+    },
+    "B01N32BEJM:2017-08|B06XSGJRGC": {
+      "episode_id": "B01N32BEJM:2017-08",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 1
+      },
+      "parent_asin": "B06XSGJRGC",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 22,
+        "recent": 15
+      }
+    },
+    "B01N5GPXG2:2017-12|B01M8Q1FXK": {
+      "episode_id": "B01N5GPXG2:2017-12",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 0
+      },
+      "parent_asin": "B01M8Q1FXK",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 13
+      }
+    },
+    "B01N5GPXG2:2017-12|B01N5GPXG2": {
+      "episode_id": "B01N5GPXG2:2017-12",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 8
+      },
+      "parent_asin": "B01N5GPXG2",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 18
+      }
+    },
+    "B01N5GPXG2:2017-12|B06XTHDHKW": {
+      "episode_id": "B01N5GPXG2:2017-12",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 5
+      },
+      "parent_asin": "B06XTHDHKW",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 16,
+        "recent": 21
+      }
+    },
+    "B06XH3Y6VZ:2019-01|B01FX13TT4": {
+      "episode_id": "B06XH3Y6VZ:2019-01",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 4
+      },
+      "parent_asin": "B01FX13TT4",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 16,
+        "recent": 11
+      }
+    },
+    "B06XH3Y6VZ:2019-01|B01N6KIO7Z": {
+      "episode_id": "B06XH3Y6VZ:2019-01",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 3
+      },
+      "parent_asin": "B01N6KIO7Z",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 14,
+        "recent": 19
+      }
+    },
+    "B06XH3Y6VZ:2019-01|B06XH3Y6VZ": {
+      "episode_id": "B06XH3Y6VZ:2019-01",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 3
+      },
+      "parent_asin": "B06XH3Y6VZ",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 14,
+        "recent": 11
+      }
+    },
+    "B074J6FFTZ:2018-03|B000NIZYIW": {
+      "episode_id": "B074J6FFTZ:2018-03",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 2
+      },
+      "parent_asin": "B000NIZYIW",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 10
+      }
+    },
+    "B074J6FFTZ:2018-03|B01MXLP1T1": {
+      "episode_id": "B074J6FFTZ:2018-03",
+      "lexical_matches": {
+        "baseline": 10,
+        "recent": 5
+      },
+      "parent_asin": "B01MXLP1T1",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 37,
+        "recent": 27
+      }
+    },
+    "B074J6FFTZ:2018-03|B074J6FFTZ": {
+      "episode_id": "B074J6FFTZ:2018-03",
+      "lexical_matches": {
+        "baseline": 19,
+        "recent": 17
+      },
+      "parent_asin": "B074J6FFTZ",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 36,
+        "recent": 23
+      }
+    },
+    "B074KD4PX2:2018-02|B074KD4PX2": {
+      "episode_id": "B074KD4PX2:2018-02",
+      "lexical_matches": {
+        "baseline": 29,
+        "recent": 50
+      },
+      "parent_asin": "B074KD4PX2",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 253,
+        "recent": 267
+      }
+    },
+    "B074KD4PX2:2018-02|B085BB7B1M": {
+      "episode_id": "B074KD4PX2:2018-02",
+      "lexical_matches": {
+        "baseline": 40,
+        "recent": 23
+      },
+      "parent_asin": "B085BB7B1M",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 174,
+        "recent": 130
+      }
+    },
+    "B074M6XPXW:2018-06|B00AEVP8QG": {
+      "episode_id": "B074M6XPXW:2018-06",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 1
+      },
+      "parent_asin": "B00AEVP8QG",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 20,
+        "recent": 12
+      }
+    },
+    "B074M6XPXW:2018-06|B06XHPHHR4": {
+      "episode_id": "B074M6XPXW:2018-06",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 0
+      },
+      "parent_asin": "B06XHPHHR4",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 28,
+        "recent": 12
+      }
+    },
+    "B074M6XPXW:2018-06|B074M6XPXW": {
+      "episode_id": "B074M6XPXW:2018-06",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 1
+      },
+      "parent_asin": "B074M6XPXW",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 13
+      }
+    },
+    "B074R5ZVKN:2018-10|B074R5ZVKN": {
+      "episode_id": "B074R5ZVKN:2018-10",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 9
+      },
+      "parent_asin": "B074R5ZVKN",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 31
+      }
+    },
+    "B074R5ZVKN:2018-10|B07G5R9BKW": {
+      "episode_id": "B074R5ZVKN:2018-10",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 1
+      },
+      "parent_asin": "B07G5R9BKW",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 13
+      }
+    },
+    "B074R5ZVKN:2018-10|B0BTLTVR1X": {
+      "episode_id": "B074R5ZVKN:2018-10",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 2
+      },
+      "parent_asin": "B0BTLTVR1X",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 27
+      }
+    },
+    "B0753JC12P:2018-07|B0753JC12P": {
+      "episode_id": "B0753JC12P:2018-07",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 7
+      },
+      "parent_asin": "B0753JC12P",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 32,
+        "recent": 34
+      }
+    },
+    "B0753JC12P:2018-07|B076LKL1XY": {
+      "episode_id": "B0753JC12P:2018-07",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 7
+      },
+      "parent_asin": "B076LKL1XY",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 40,
+        "recent": 26
+      }
+    },
+    "B0753JC12P:2018-07|B0BGQQKWWY": {
+      "episode_id": "B0753JC12P:2018-07",
+      "lexical_matches": {
+        "baseline": 25,
+        "recent": 13
+      },
+      "parent_asin": "B0BGQQKWWY",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 44,
+        "recent": 29
+      }
+    },
+    "B075RB3XJV:2018-04|B06XHPHHR4": {
+      "episode_id": "B075RB3XJV:2018-04",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 1
+      },
+      "parent_asin": "B06XHPHHR4",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 39,
+        "recent": 17
+      }
+    },
+    "B075RB3XJV:2018-04|B075RB3XJV": {
+      "episode_id": "B075RB3XJV:2018-04",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 7
+      },
+      "parent_asin": "B075RB3XJV",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 32,
+        "recent": 15
+      }
+    },
+    "B075RB3XJV:2018-04|B0BGQQKWWY": {
+      "episode_id": "B075RB3XJV:2018-04",
+      "lexical_matches": {
+        "baseline": 28,
+        "recent": 15
+      },
+      "parent_asin": "B0BGQQKWWY",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 52,
+        "recent": 27
+      }
+    },
+    "B076JLNGS5:2018-05|B00AEVP8QG": {
+      "episode_id": "B076JLNGS5:2018-05",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 0
+      },
+      "parent_asin": "B00AEVP8QG",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 16,
+        "recent": 13
+      }
+    },
+    "B076JLNGS5:2018-05|B071DT8RVD": {
+      "episode_id": "B076JLNGS5:2018-05",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 2
+      },
+      "parent_asin": "B071DT8RVD",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 20,
+        "recent": 17
+      }
+    },
+    "B076JLNGS5:2018-05|B076JLNGS5": {
+      "episode_id": "B076JLNGS5:2018-05",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 12
+      },
+      "parent_asin": "B076JLNGS5",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 30
+      }
+    },
+    "B077D3MNHF:2018-09|B00EO5JV48": {
+      "episode_id": "B077D3MNHF:2018-09",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 3
+      },
+      "parent_asin": "B00EO5JV48",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 11,
+        "recent": 15
+      }
+    },
+    "B077D3MNHF:2018-09|B071F82KR7": {
+      "episode_id": "B077D3MNHF:2018-09",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 4
+      },
+      "parent_asin": "B071F82KR7",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 21,
+        "recent": 25
+      }
+    },
+    "B077D3MNHF:2018-09|B077D3MNHF": {
+      "episode_id": "B077D3MNHF:2018-09",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 6
+      },
+      "parent_asin": "B077D3MNHF",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 20,
+        "recent": 14
+      }
+    },
+    "B0792Q3T59:2019-05|B01AONIWZM": {
+      "episode_id": "B0792Q3T59:2019-05",
+      "lexical_matches": {
+        "baseline": 0,
+        "recent": 1
+      },
+      "parent_asin": "B01AONIWZM",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 24
+      }
+    },
+    "B0792Q3T59:2019-05|B01GU60NBS": {
+      "episode_id": "B0792Q3T59:2019-05",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 1
+      },
+      "parent_asin": "B01GU60NBS",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 11
+      }
+    },
+    "B0792Q3T59:2019-05|B0792Q3T59": {
+      "episode_id": "B0792Q3T59:2019-05",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 3
+      },
+      "parent_asin": "B0792Q3T59",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 12,
+        "recent": 10
+      }
+    },
+    "B07CVHWC68:2019-08|B07CVHWC68": {
+      "episode_id": "B07CVHWC68:2019-08",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 13
+      },
+      "parent_asin": "B07CVHWC68",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 16,
+        "recent": 25
+      }
+    },
+    "B07CVHWC68:2019-08|B07H8PJ7DB": {
+      "episode_id": "B07CVHWC68:2019-08",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 4
+      },
+      "parent_asin": "B07H8PJ7DB",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 12
+      }
+    },
+    "B07CVHWC68:2019-08|B07MVM8GMM": {
+      "episode_id": "B07CVHWC68:2019-08",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 2
+      },
+      "parent_asin": "B07MVM8GMM",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 11
+      }
+    },
+    "B07D1B499B:2018-02|B071GQNN4G": {
+      "episode_id": "B07D1B499B:2018-02",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 9
+      },
+      "parent_asin": "B071GQNN4G",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 29,
+        "recent": 37
+      }
+    },
+    "B07D1B499B:2018-02|B075GK4249": {
+      "episode_id": "B07D1B499B:2018-02",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 6
+      },
+      "parent_asin": "B075GK4249",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 48,
+        "recent": 17
+      }
+    },
+    "B07D1B499B:2018-02|B07D1B499B": {
+      "episode_id": "B07D1B499B:2018-02",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 11
+      },
+      "parent_asin": "B07D1B499B",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 32,
+        "recent": 33
+      }
+    },
+    "B07FCHMPKC:2019-06|B079R2VWNX": {
+      "episode_id": "B07FCHMPKC:2019-06",
+      "lexical_matches": {
+        "baseline": 0,
+        "recent": 4
+      },
+      "parent_asin": "B079R2VWNX",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 22,
+        "recent": 28
+      }
+    },
+    "B07FCHMPKC:2019-06|B07FCHMPKC": {
+      "episode_id": "B07FCHMPKC:2019-06",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 7
+      },
+      "parent_asin": "B07FCHMPKC",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 20,
+        "recent": 19
+      }
+    },
+    "B07FCHMPKC:2019-06|B07GLFZ97D": {
+      "episode_id": "B07FCHMPKC:2019-06",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 3
+      },
+      "parent_asin": "B07GLFZ97D",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 23,
+        "recent": 27
+      }
+    },
+    "B07FDWYCTL:2019-01|B078R1YZ3P": {
+      "episode_id": "B07FDWYCTL:2019-01",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 3
+      },
+      "parent_asin": "B078R1YZ3P",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 11,
+        "recent": 35
+      }
+    },
+    "B07FDWYCTL:2019-01|B07CFWHQZ9": {
+      "episode_id": "B07FDWYCTL:2019-01",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 1
+      },
+      "parent_asin": "B07CFWHQZ9",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 11,
+        "recent": 22
+      }
+    },
+    "B07FDWYCTL:2019-01|B07FDWYCTL": {
+      "episode_id": "B07FDWYCTL:2019-01",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 8
+      },
+      "parent_asin": "B07FDWYCTL",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 12,
+        "recent": 15
+      }
+    },
+    "B07FMR3PJK:2019-07|B07FMR3PJK": {
+      "episode_id": "B07FMR3PJK:2019-07",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 8
+      },
+      "parent_asin": "B07FMR3PJK",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 17,
+        "recent": 21
+      }
+    },
+    "B07FMR3PJK:2019-07|B07KXVGHTV": {
+      "episode_id": "B07FMR3PJK:2019-07",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 8
+      },
+      "parent_asin": "B07KXVGHTV",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 33,
+        "recent": 46
+      }
+    },
+    "B07FMR3PJK:2019-07|B0B7L451Z9": {
+      "episode_id": "B07FMR3PJK:2019-07",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 15
+      },
+      "parent_asin": "B0B7L451Z9",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 21,
+        "recent": 68
+      }
+    },
+    "B07KXM94BT:2019-05|B07894LH23": {
+      "episode_id": "B07KXM94BT:2019-05",
+      "lexical_matches": {
+        "baseline": 9,
+        "recent": 8
+      },
+      "parent_asin": "B07894LH23",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 36,
+        "recent": 24
+      }
+    },
+    "B07KXM94BT:2019-05|B07HKNYDKD": {
+      "episode_id": "B07KXM94BT:2019-05",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 2
+      },
+      "parent_asin": "B07HKNYDKD",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 27,
+        "recent": 18
+      }
+    },
+    "B07KXM94BT:2019-05|B07KXM94BT": {
+      "episode_id": "B07KXM94BT:2019-05",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 7
+      },
+      "parent_asin": "B07KXM94BT",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 29,
+        "recent": 21
+      }
+    },
+    "B07L2SJZYB:2019-07|B07CNL2KQP": {
+      "episode_id": "B07L2SJZYB:2019-07",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 2
+      },
+      "parent_asin": "B07CNL2KQP",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 16
+      }
+    },
+    "B07L2SJZYB:2019-07|B07G4QLHCK": {
+      "episode_id": "B07L2SJZYB:2019-07",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 2
+      },
+      "parent_asin": "B07G4QLHCK",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 12,
+        "recent": 18
+      }
+    },
+    "B07L2SJZYB:2019-07|B07L2SJZYB": {
+      "episode_id": "B07L2SJZYB:2019-07",
+      "lexical_matches": {
+        "baseline": 5,
+        "recent": 11
+      },
+      "parent_asin": "B07L2SJZYB",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 42
+      }
+    },
+    "B07MB1HM15:2019-07|B00KBYQDI8": {
+      "episode_id": "B07MB1HM15:2019-07",
+      "lexical_matches": {
+        "baseline": 6,
+        "recent": 8
+      },
+      "parent_asin": "B00KBYQDI8",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 19,
+        "recent": 22
+      }
+    },
+    "B07MB1HM15:2019-07|B07MB1HM15": {
+      "episode_id": "B07MB1HM15:2019-07",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 4
+      },
+      "parent_asin": "B07MB1HM15",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 17,
+        "recent": 16
+      }
+    },
+    "B07MB1HM15:2019-07|B07MJBRZPL": {
+      "episode_id": "B07MB1HM15:2019-07",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 2
+      },
+      "parent_asin": "B07MJBRZPL",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 16,
+        "recent": 18
+      }
+    },
+    "B07N6JN34N:2019-10|B01NB8JP21": {
+      "episode_id": "B07N6JN34N:2019-10",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 0
+      },
+      "parent_asin": "B01NB8JP21",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 12,
+        "recent": 16
+      }
+    },
+    "B07N6JN34N:2019-10|B07N6JN34N": {
+      "episode_id": "B07N6JN34N:2019-10",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 2
+      },
+      "parent_asin": "B07N6JN34N",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 15,
+        "recent": 17
+      }
+    },
+    "B07N6JN34N:2019-10|B07QQQXZ4S": {
+      "episode_id": "B07N6JN34N:2019-10",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 2
+      },
+      "parent_asin": "B07QQQXZ4S",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 18,
+        "recent": 30
+      }
+    },
+    "B07NZYRLDS:2019-10|B07K1KFDLB": {
+      "episode_id": "B07NZYRLDS:2019-10",
+      "lexical_matches": {
+        "baseline": 4,
+        "recent": 1
+      },
+      "parent_asin": "B07K1KFDLB",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 22,
+        "recent": 13
+      }
+    },
+    "B07NZYRLDS:2019-10|B07MQST9BQ": {
+      "episode_id": "B07NZYRLDS:2019-10",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 3
+      },
+      "parent_asin": "B07MQST9BQ",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 30,
+        "recent": 17
+      }
+    },
+    "B07NZYRLDS:2019-10|B07NZYRLDS": {
+      "episode_id": "B07NZYRLDS:2019-10",
+      "lexical_matches": {
+        "baseline": 7,
+        "recent": 2
+      },
+      "parent_asin": "B07NZYRLDS",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 36,
+        "recent": 10
+      }
+    },
+    "B07QZML9BZ:2019-10|B07L3TSB2L": {
+      "episode_id": "B07QZML9BZ:2019-10",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 4
+      },
+      "parent_asin": "B07L3TSB2L",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 37,
+        "recent": 35
+      }
+    },
+    "B07QZML9BZ:2019-10|B07QZML9BZ": {
+      "episode_id": "B07QZML9BZ:2019-10",
+      "lexical_matches": {
+        "baseline": 3,
+        "recent": 10
+      },
+      "parent_asin": "B07QZML9BZ",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 19,
+        "recent": 36
+      }
+    },
+    "B07QZML9BZ:2019-10|B09TT8ZVPN": {
+      "episode_id": "B07QZML9BZ:2019-10",
+      "lexical_matches": {
+        "baseline": 8,
+        "recent": 5
+      },
+      "parent_asin": "B09TT8ZVPN",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 15
+      }
+    },
+    "B084JLBN7C:2019-06|B076JLTMT4": {
+      "episode_id": "B084JLBN7C:2019-06",
+      "lexical_matches": {
+        "baseline": 2,
+        "recent": 1
+      },
+      "parent_asin": "B076JLTMT4",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 11,
+        "recent": 16
+      }
+    },
+    "B084JLBN7C:2019-06|B07G23R7ZX": {
+      "episode_id": "B084JLBN7C:2019-06",
+      "lexical_matches": {
+        "baseline": 0,
+        "recent": 2
+      },
+      "parent_asin": "B07G23R7ZX",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 19,
+        "recent": 16
+      }
+    },
+    "B084JLBN7C:2019-06|B084JLBN7C": {
+      "episode_id": "B084JLBN7C:2019-06",
+      "lexical_matches": {
+        "baseline": 1,
+        "recent": 6
+      },
+      "parent_asin": "B084JLBN7C",
+      "passes_prefilter": false,
+      "reviews_in_scope": {
+        "baseline": 13,
+        "recent": 14
+      }
+    },
+    "B09FR54XLC:2017-01|B019GBG0IE": {
+      "episode_id": "B09FR54XLC:2017-01",
+      "lexical_matches": {
+        "baseline": 30,
+        "recent": 42
+      },
+      "parent_asin": "B019GBG0IE",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 140,
+        "recent": 158
+      }
+    },
+    "B09FR54XLC:2017-01|B09FR54XLC": {
+      "episode_id": "B09FR54XLC:2017-01",
+      "lexical_matches": {
+        "baseline": 22,
+        "recent": 20
+      },
+      "parent_asin": "B09FR54XLC",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 155,
+        "recent": 64
+      }
+    },
+    "B09FR54XLC:2017-01|B0BM4GX6TT": {
+      "episode_id": "B09FR54XLC:2017-01",
+      "lexical_matches": {
+        "baseline": 19,
+        "recent": 24
+      },
+      "parent_asin": "B0BM4GX6TT",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 115,
+        "recent": 107
+      }
+    },
+    "B09X9BG4FC:2019-10|B09X9BG4FC": {
+      "episode_id": "B09X9BG4FC:2019-10",
+      "lexical_matches": {
+        "baseline": 27,
+        "recent": 34
+      },
+      "parent_asin": "B09X9BG4FC",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 184,
+        "recent": 80
+      }
+    },
+    "B09X9BG4FC:2019-10|B0B96MFXSJ": {
+      "episode_id": "B09X9BG4FC:2019-10",
+      "lexical_matches": {
+        "baseline": 9,
+        "recent": 13
+      },
+      "parent_asin": "B0B96MFXSJ",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 100,
+        "recent": 79
+      }
+    },
+    "B09X9BG4FC:2019-10|B0BV1FPZY6": {
+      "episode_id": "B09X9BG4FC:2019-10",
+      "lexical_matches": {
+        "baseline": 43,
+        "recent": 46
+      },
+      "parent_asin": "B0BV1FPZY6",
+      "passes_prefilter": true,
+      "reviews_in_scope": {
+        "baseline": 102,
+        "recent": 103
+      }
+    }
+  },
+  "products_considered": 177,
+  "rule": "necessary, never sufficient: a window needs this many lexically matched reviews to be worth reading, and manual validation still decides",
+  "scope": "full",
+  "silver_run_id": "4447727f-ee66-48eb-be9e-8a23e061d708",
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1"
+}

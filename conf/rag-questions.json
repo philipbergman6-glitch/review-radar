@@ -1,0 +1,4062 @@
+{
+  "annotator": "agent",
+  "annotator_note": "Machine-made, exactly like P6's reference labels (RR-21): the agent read every review the lexical scan put on the worklist and judged it against ADR-0003's taxonomy rules -- complaint only, praise never counts, a neutral mention is not a complaint. Recorded as `agent`, never as `human`.",
+  "category": "All_Beauty",
+  "decided_in": "ticket 11 (ADR-0006, RR-17)",
+  "note": "Theme-shift direction is deliberately absent from every question and every key: it is diagnostic metadata hidden from the generator and the judge, and the quantitative claim about it lives in the gold table, not in a RAG answer.",
+  "provenance": {
+    "elasticsearch": {
+      "alias": "reviews",
+      "generations": [
+        "reviews_s8507728480475534879_d2e56c46"
+      ],
+      "supporting_ids_checked": 141
+    },
+    "gold_run_id": "6e1c0d3a-85e8-4458-8109-57b76331ad38",
+    "prefilter": "eval/rag/prefilter.json",
+    "ranking": "eval/rag/decline-ranking.json",
+    "scan": "eval/rag/evidence-scan.json",
+    "silver_run_id": "4447727f-ee66-48eb-be9e-8a23e061d708",
+    "slots": "eval/rag/slots.json",
+    "theme_samples_run_id": "aa4cccbf-a42e-4ad2-95fc-adfd61f014e0",
+    "validation": "eval/rag/validation.json",
+    "walked_past": "eval/rag/walked-past.json",
+    "worklist": "eval/rag/scan-worklist.jsonl"
+  },
+  "questions": [
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "poor_build_quality",
+          "does_not_work",
+          "irritation_or_harm",
+          "overpriced",
+          "unpleasant_scent",
+          "wrong_size_or_fit",
+          "arrived_damaged",
+          "hard_to_use"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about poor build quality, cited to a review inside the declared window.",
+          "At least one complaint about does not work, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2017-02",
+            "review_id": "c5daede881787a106e1d2f98193a51497d0761c955d429c8792f9740e863f58d",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "a6531d777088eb97efece5756310a7ac638988df1999ed70340c8d247e7df006",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-01",
+            "review_id": "4aee2021c58c5837fd6184524b6676ae8876c8fbb50564937dea11cf89f1e5f0",
+            "themes": [
+              "hard_to_use",
+              "irritation_or_harm",
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-02",
+            "review_id": "b0737a46a45c29eefa2f75d73b0cbcc1a8ffda686fc943fe28e5d0fd56dc218e",
+            "themes": [
+              "poor_build_quality",
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "8087702ef07741e2c58d37eb75c52024ecf62a19759c903602658b465ce7b0ec",
+            "themes": [
+              "poor_build_quality",
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "248423dbd66080f8ed7bbaf33a571164c22b719880d3405bdb721fc5f8aa092e",
+            "themes": [
+              "arrived_damaged",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-11",
+            "review_id": "2eb23acf7a6f43fbb8d52c1f22ab1408005339c56c1929ee9646dee8bba98416",
+            "themes": [
+              "arrived_damaged",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "720ee3e0511b55b15bef8ff89afe319bc0ebdedb885723697dd0eb606b502a0f",
+            "themes": [
+              "poor_build_quality",
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-06",
+            "review_id": "5f2d3cd217dffd16f2aa166cbe528a38dd63dc053667b03a751e98eeb5557d34",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-09",
+            "review_id": "bc9ffa86c28d2e72075f98e092b3b8d624530c8a58d5585c7e20768800b313a3",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-06",
+            "review_id": "458736a678ef5b9b9f21ca9d6b938f12e9576480efac8920852aa358b4ca68f6",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "be8499633e957f5e5cb6de1fed954b27d93ddc4e0d6a67f08a5fd35f978b3add",
+            "themes": [
+              "does_not_work",
+              "overpriced",
+              "poor_build_quality",
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "bd7cce85f85b68b06bbe804e847be38118117d9e60611349647aace33c82c3bc",
+            "themes": [
+              "irritation_or_harm",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-06",
+            "review_id": "e4c368a165e843d7c1c35991c10ebf88eee33dc94339cfd04253268babf28f5e",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-07",
+            "review_id": "2fd280d5a474b327efe7dc68c800fd4f42f2b3c35cbb3f5156ffd299ab423813",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-06",
+            "review_id": "377a3e0df76b3f07834c750f7a37d00afa0b02fe744ec9f068f35367d9f247ef",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "753b18a92bc3158790361e879ff5d6e2b7b3c963c546c5f168531c3e8bee6ac5",
+            "themes": [
+              "irritation_or_harm",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-08",
+            "review_id": "0896d62fc82b3435bca953d014f22875aed475cbb5949ceb816b03a5055d2188",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "evidence": {
+        "examined": 24,
+        "validated": 18,
+        "validated_per_window": {
+          "scope": 18
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00RPJZMUM",
+      "product_title": "Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results",
+      "question": "What complaints appear in the cited reviews for Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results (ASIN B00RPJZMUM) between 2016-10 and 2017-09?",
+      "question_id": "product_scoped-01",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2017-09",
+            "start": "2016-10"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "poor_build_quality",
+          "does_not_work",
+          "irritation_or_harm",
+          "overpriced",
+          "unpleasant_scent",
+          "wrong_size_or_fit",
+          "arrived_damaged",
+          "hard_to_use"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- poor build quality is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- poor build quality is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2017-02",
+            "review_id": "c5daede881787a106e1d2f98193a51497d0761c955d429c8792f9740e863f58d",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "a6531d777088eb97efece5756310a7ac638988df1999ed70340c8d247e7df006",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-01",
+            "review_id": "4aee2021c58c5837fd6184524b6676ae8876c8fbb50564937dea11cf89f1e5f0",
+            "themes": [
+              "hard_to_use",
+              "irritation_or_harm",
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-02",
+            "review_id": "b0737a46a45c29eefa2f75d73b0cbcc1a8ffda686fc943fe28e5d0fd56dc218e",
+            "themes": [
+              "poor_build_quality",
+              "unpleasant_scent"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "8087702ef07741e2c58d37eb75c52024ecf62a19759c903602658b465ce7b0ec",
+            "themes": [
+              "poor_build_quality",
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "248423dbd66080f8ed7bbaf33a571164c22b719880d3405bdb721fc5f8aa092e",
+            "themes": [
+              "arrived_damaged",
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-11",
+            "review_id": "2eb23acf7a6f43fbb8d52c1f22ab1408005339c56c1929ee9646dee8bba98416",
+            "themes": [
+              "arrived_damaged",
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "720ee3e0511b55b15bef8ff89afe319bc0ebdedb885723697dd0eb606b502a0f",
+            "themes": [
+              "poor_build_quality",
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-06",
+            "review_id": "5f2d3cd217dffd16f2aa166cbe528a38dd63dc053667b03a751e98eeb5557d34",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-09",
+            "review_id": "bc9ffa86c28d2e72075f98e092b3b8d624530c8a58d5585c7e20768800b313a3",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-06",
+            "review_id": "458736a678ef5b9b9f21ca9d6b938f12e9576480efac8920852aa358b4ca68f6",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "be8499633e957f5e5cb6de1fed954b27d93ddc4e0d6a67f08a5fd35f978b3add",
+            "themes": [
+              "does_not_work",
+              "overpriced",
+              "poor_build_quality",
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "bd7cce85f85b68b06bbe804e847be38118117d9e60611349647aace33c82c3bc",
+            "themes": [
+              "irritation_or_harm",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-06",
+            "review_id": "e4c368a165e843d7c1c35991c10ebf88eee33dc94339cfd04253268babf28f5e",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-07",
+            "review_id": "2fd280d5a474b327efe7dc68c800fd4f42f2b3c35cbb3f5156ffd299ab423813",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-06",
+            "review_id": "377a3e0df76b3f07834c750f7a37d00afa0b02fe744ec9f068f35367d9f247ef",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "753b18a92bc3158790361e879ff5d6e2b7b3c963c546c5f168531c3e8bee6ac5",
+            "themes": [
+              "irritation_or_harm",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-08",
+            "review_id": "0896d62fc82b3435bca953d014f22875aed475cbb5949ceb816b03a5055d2188",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "evidence": {
+        "examined": 24,
+        "validated": 18,
+        "validated_per_window": {
+          "baseline": 7,
+          "recent": 11
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B00RPJZMUM",
+      "product_title": "Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results",
+      "question": "What complaints appear in the cited reviews for Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results (ASIN B00RPJZMUM) from 2017-04 to 2017-09, and how do those examples contrast with cited reviews from 2016-10 to 2017-03?",
+      "question_id": "temporal-01",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2017-03",
+            "start": "2016-10"
+          },
+          "recent": {
+            "end": "2017-09",
+            "start": "2017-04"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "does_not_work",
+          "arrived_damaged",
+          "irritation_or_harm",
+          "not_as_described",
+          "overpriced"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about does not work, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2016-10",
+            "review_id": "68ae77dabe924694eab62575f28ac003e699008b22152085dc7a323dd1d10019",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "bbb9a72eb692b2c53143ea2f050590fad3b8403a8501ee8604eddd6b955cc2c3",
+            "themes": [
+              "not_as_described"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-02",
+            "review_id": "feffaa13358f021e244d6d946447efc160fb5df0f8de8884a7942028614c5060",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-01",
+            "review_id": "4256dca2b5da0e6d5f31cc6abeba80613aaaac071626b64f92bb36f082ea2a5d",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-07",
+            "review_id": "2b0ea23d387a738f36d7363a4f7d4febcdfffe446d10e2c6684ef2917d5ec781",
+            "themes": [
+              "arrived_damaged"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-07",
+            "review_id": "2d57900161bc47ac9e53215c63711531a81e990860f833d37f51c74c02a41eac",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "3f1a9695c47642f40fb2ba416e78f7293aea4fc48e251ad8698cba321f2858f9",
+            "themes": [
+              "arrived_damaged"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-07",
+            "review_id": "c66fba073ce51f4cbf76f060d800bfa094603a4481f0495e44505ec35915b29c",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "evidence": {
+        "examined": 24,
+        "validated": 8,
+        "validated_per_window": {
+          "scope": 8
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B0BM4GX6TT",
+      "product_title": "Godefroy Tint Kit for Spot Coloring, Dark Brown",
+      "question": "What complaints appear in the cited reviews for Godefroy Tint Kit for Spot Coloring, Dark Brown (ASIN B0BM4GX6TT) between 2016-10 and 2017-09?",
+      "question_id": "product_scoped-02",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2017-09",
+            "start": "2016-10"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "does_not_work",
+          "arrived_damaged",
+          "irritation_or_harm",
+          "not_as_described",
+          "overpriced"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- arrived damaged is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- does not work is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2016-10",
+            "review_id": "68ae77dabe924694eab62575f28ac003e699008b22152085dc7a323dd1d10019",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "bbb9a72eb692b2c53143ea2f050590fad3b8403a8501ee8604eddd6b955cc2c3",
+            "themes": [
+              "not_as_described"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-02",
+            "review_id": "feffaa13358f021e244d6d946447efc160fb5df0f8de8884a7942028614c5060",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-01",
+            "review_id": "4256dca2b5da0e6d5f31cc6abeba80613aaaac071626b64f92bb36f082ea2a5d",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-07",
+            "review_id": "2b0ea23d387a738f36d7363a4f7d4febcdfffe446d10e2c6684ef2917d5ec781",
+            "themes": [
+              "arrived_damaged"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-07",
+            "review_id": "2d57900161bc47ac9e53215c63711531a81e990860f833d37f51c74c02a41eac",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-05",
+            "review_id": "3f1a9695c47642f40fb2ba416e78f7293aea4fc48e251ad8698cba321f2858f9",
+            "themes": [
+              "arrived_damaged"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-07",
+            "review_id": "c66fba073ce51f4cbf76f060d800bfa094603a4481f0495e44505ec35915b29c",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "evidence": {
+        "examined": 24,
+        "validated": 8,
+        "validated_per_window": {
+          "baseline": 4,
+          "recent": 4
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B0BM4GX6TT",
+      "product_title": "Godefroy Tint Kit for Spot Coloring, Dark Brown",
+      "question": "What complaints appear in the cited reviews for Godefroy Tint Kit for Spot Coloring, Dark Brown (ASIN B0BM4GX6TT) from 2017-04 to 2017-09, and how do those examples contrast with cited reviews from 2016-10 to 2017-03?",
+      "question_id": "temporal-02",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2017-03",
+            "start": "2016-10"
+          },
+          "recent": {
+            "end": "2017-09",
+            "start": "2017-04"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "poor_build_quality",
+          "unpleasant_texture",
+          "not_as_described",
+          "hard_to_use",
+          "overpriced",
+          "unpleasant_scent",
+          "wrong_size_or_fit"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about poor build quality, cited to a review inside the declared window.",
+          "At least one complaint about unpleasant texture, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2016-08",
+            "review_id": "7b28f23dcabb66a7b331d2a2013b95ce830db3f8d13b5ef91e34197d7048110a",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-07",
+            "review_id": "bfa37a08a5aab89bc0a28c73faf051d65d1fce37498cf796c6b2efc76775a14a",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-05",
+            "review_id": "233bc5a8fc04e32ef5839d1560381059c6acb0acc58fa89dc279c5934d53518b",
+            "themes": [
+              "not_as_described"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-09",
+            "review_id": "91c8c861808c822d45f5c14d01c95cc445c63d79d479b9da12899cefa166ab9e",
+            "themes": [
+              "not_as_described",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-08",
+            "review_id": "e81e7f9cfbf9973e58e3a9ed26853da553d8c1f96b698ac001c4d507d079a26a",
+            "themes": [
+              "hard_to_use"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-04",
+            "review_id": "37e1393a40598c85216b227d6e4e1b25b59c367e9f743e90cc52a4c9f5847d18",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-04",
+            "review_id": "a8ef99bc0692e09d5aad0be2db0cfa1ffb910e287365b298243042d734a2fc08",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "3fd6d71c828f438790bec97a66a16a6a272c13e3b1b9a51cfcc06eb79b43f5c4",
+            "themes": [
+              "overpriced",
+              "poor_build_quality",
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "7a1a41ee26e4052ecd85d635347f6f0d5ad8ce42dc608a4783d3d57482658c5b",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "d885478a1874695b6601ca735569c32a6608319b1773afdea4544fcf0e9061ee",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "347be44951adecebbeb7e8454c40f0b3029cdc3db2fb9ac53b1c2b23b2f667ac",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "0483aedfb57e8b06918d7697625fe6d239c3af6bb525db7ca7d508d0ab09f95d",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "e1dd6d6099bbbda151d0971870e350bf72e7c0982568b907915135c5dbd5ee86",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "182aec434ea13866b2642388f60ea1fa35ca0d49d11af24814243dd438777c6e",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-02",
+            "review_id": "959e068f25512d7d357ec09a42f8b4a22db34c1c969a645636214761de7ce592",
+            "themes": [
+              "poor_build_quality",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "aa52c63c0a84287aaa46c8d30a12f4714ebd308d4a4d99601d7c5ac0bc68750b",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "evidence": {
+        "examined": 20,
+        "validated": 16,
+        "validated_per_window": {
+          "scope": 16
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B0113GT5Q4",
+      "product_title": "Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W",
+      "question": "What complaints appear in the cited reviews for Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W (ASIN B0113GT5Q4) between 2016-05 and 2017-04?",
+      "question_id": "product_scoped-03",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2017-04",
+            "start": "2016-05"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "poor_build_quality",
+          "unpleasant_texture",
+          "not_as_described",
+          "hard_to_use",
+          "overpriced",
+          "unpleasant_scent",
+          "wrong_size_or_fit"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- poor build quality is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- not as described is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2016-08",
+            "review_id": "7b28f23dcabb66a7b331d2a2013b95ce830db3f8d13b5ef91e34197d7048110a",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-07",
+            "review_id": "bfa37a08a5aab89bc0a28c73faf051d65d1fce37498cf796c6b2efc76775a14a",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-05",
+            "review_id": "233bc5a8fc04e32ef5839d1560381059c6acb0acc58fa89dc279c5934d53518b",
+            "themes": [
+              "not_as_described"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-09",
+            "review_id": "91c8c861808c822d45f5c14d01c95cc445c63d79d479b9da12899cefa166ab9e",
+            "themes": [
+              "not_as_described",
+              "unpleasant_texture"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-08",
+            "review_id": "e81e7f9cfbf9973e58e3a9ed26853da553d8c1f96b698ac001c4d507d079a26a",
+            "themes": [
+              "hard_to_use"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-04",
+            "review_id": "37e1393a40598c85216b227d6e4e1b25b59c367e9f743e90cc52a4c9f5847d18",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-04",
+            "review_id": "a8ef99bc0692e09d5aad0be2db0cfa1ffb910e287365b298243042d734a2fc08",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "3fd6d71c828f438790bec97a66a16a6a272c13e3b1b9a51cfcc06eb79b43f5c4",
+            "themes": [
+              "overpriced",
+              "poor_build_quality",
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "7a1a41ee26e4052ecd85d635347f6f0d5ad8ce42dc608a4783d3d57482658c5b",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "d885478a1874695b6601ca735569c32a6608319b1773afdea4544fcf0e9061ee",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "347be44951adecebbeb7e8454c40f0b3029cdc3db2fb9ac53b1c2b23b2f667ac",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "0483aedfb57e8b06918d7697625fe6d239c3af6bb525db7ca7d508d0ab09f95d",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "e1dd6d6099bbbda151d0971870e350bf72e7c0982568b907915135c5dbd5ee86",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "182aec434ea13866b2642388f60ea1fa35ca0d49d11af24814243dd438777c6e",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-02",
+            "review_id": "959e068f25512d7d357ec09a42f8b4a22db34c1c969a645636214761de7ce592",
+            "themes": [
+              "poor_build_quality",
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "aa52c63c0a84287aaa46c8d30a12f4714ebd308d4a4d99601d7c5ac0bc68750b",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "evidence": {
+        "examined": 20,
+        "validated": 16,
+        "validated_per_window": {
+          "baseline": 5,
+          "recent": 11
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B0113GT5Q4",
+      "product_title": "Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W",
+      "question": "What complaints appear in the cited reviews for Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W (ASIN B0113GT5Q4) from 2016-11 to 2017-04, and how do those examples contrast with cited reviews from 2016-05 to 2016-10?",
+      "question_id": "temporal-03",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2016-10",
+            "start": "2016-05"
+          },
+          "recent": {
+            "end": "2017-04",
+            "start": "2016-11"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "irritation_or_harm",
+          "does_not_work",
+          "unpleasant_scent",
+          "unpleasant_texture",
+          "arrived_damaged",
+          "hard_to_use",
+          "overpriced"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about irritation or harm, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2016-06",
+            "review_id": "b54a5ec613b58d952741b63e0e3bb505325c1771e9c126157bd26fe567ad6cca",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-08",
+            "review_id": "447424116e1042490b2418b6fd2f95191483a26f4068b79db456c133ad0a6fdc",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-07",
+            "review_id": "e8b92133dfc67abe84ae96f83ab32bdd68a11c7770b1cc75665154636a5139e1",
+            "themes": [
+              "arrived_damaged"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-06",
+            "review_id": "8ccba28ecd52b0cdc855a00d83c7eb2c65c42a06213bfc9133b177f8b1695f75",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-05",
+            "review_id": "7f3a1bf5a5d6234dd23f6aa6d4e4d80a19d04e2f2cb5eb1ca3e81ba004ee77f8",
+            "themes": [
+              "hard_to_use"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-12",
+            "review_id": "a72959e417285b8096213a5eec7317fa2bbfbe62ee347fb2ad845536dbe44f06",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "024ff13a4c803e31f9bb9f899731a359bcad01d8157e49759b6d973175527a7f",
+            "themes": [
+              "does_not_work",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-01",
+            "review_id": "dab4811460b7889fc1f689ec396120fbeeae7ad79bdd8f10297480ad2490f05a",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-01",
+            "review_id": "fa39d002e1dedb9d4c3ae41256f49527ad28fae0f4c630223165767e325894af",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2016-11",
+            "review_id": "f5f9fff57420ba57d42a945e1471ca661bf516e364b6b0f8ba12d3b45d604ffa",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "b3484a0b0d7044087eaed0d5fc566a9bf13bd09392b9b8450c74c9e595c65454",
+            "themes": [
+              "does_not_work",
+              "overpriced",
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "evidence": {
+        "examined": 24,
+        "validated": 11,
+        "validated_per_window": {
+          "scope": 11
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00V8ZCT1Y",
+      "product_title": "Primal Pit Paste Natural Deodorant, Aluminum Free, Paraben Free, No Added Fragrances, Royal & Rogue Jar",
+      "question": "What complaints appear in the cited reviews for Primal Pit Paste Natural Deodorant, Aluminum Free, Paraben Free, No Added Fragrances, Royal & Rogue Jar (ASIN B00V8ZCT1Y) between 2016-05 and 2017-04?",
+      "question_id": "product_scoped-04",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2017-04",
+            "start": "2016-05"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "irritation_or_harm",
+          "does_not_work",
+          "unpleasant_scent",
+          "unpleasant_texture",
+          "arrived_damaged",
+          "hard_to_use",
+          "overpriced"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- irritation or harm is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- arrived damaged is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2016-06",
+            "review_id": "b54a5ec613b58d952741b63e0e3bb505325c1771e9c126157bd26fe567ad6cca",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-08",
+            "review_id": "447424116e1042490b2418b6fd2f95191483a26f4068b79db456c133ad0a6fdc",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-07",
+            "review_id": "e8b92133dfc67abe84ae96f83ab32bdd68a11c7770b1cc75665154636a5139e1",
+            "themes": [
+              "arrived_damaged"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-06",
+            "review_id": "8ccba28ecd52b0cdc855a00d83c7eb2c65c42a06213bfc9133b177f8b1695f75",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-05",
+            "review_id": "7f3a1bf5a5d6234dd23f6aa6d4e4d80a19d04e2f2cb5eb1ca3e81ba004ee77f8",
+            "themes": [
+              "hard_to_use"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2016-12",
+            "review_id": "a72959e417285b8096213a5eec7317fa2bbfbe62ee347fb2ad845536dbe44f06",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "024ff13a4c803e31f9bb9f899731a359bcad01d8157e49759b6d973175527a7f",
+            "themes": [
+              "does_not_work",
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-01",
+            "review_id": "dab4811460b7889fc1f689ec396120fbeeae7ad79bdd8f10297480ad2490f05a",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-01",
+            "review_id": "fa39d002e1dedb9d4c3ae41256f49527ad28fae0f4c630223165767e325894af",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2016-11",
+            "review_id": "f5f9fff57420ba57d42a945e1471ca661bf516e364b6b0f8ba12d3b45d604ffa",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2017-03",
+            "review_id": "b3484a0b0d7044087eaed0d5fc566a9bf13bd09392b9b8450c74c9e595c65454",
+            "themes": [
+              "does_not_work",
+              "overpriced",
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "evidence": {
+        "examined": 24,
+        "validated": 11,
+        "validated_per_window": {
+          "baseline": 5,
+          "recent": 6
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B00V8ZCT1Y",
+      "product_title": "Primal Pit Paste Natural Deodorant, Aluminum Free, Paraben Free, No Added Fragrances, Royal & Rogue Jar",
+      "question": "What complaints appear in the cited reviews for Primal Pit Paste Natural Deodorant, Aluminum Free, Paraben Free, No Added Fragrances, Royal & Rogue Jar (ASIN B00V8ZCT1Y) from 2016-11 to 2017-04, and how do those examples contrast with cited reviews from 2016-05 to 2016-10?",
+      "question_id": "temporal-04",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2016-10",
+            "start": "2016-05"
+          },
+          "recent": {
+            "end": "2017-04",
+            "start": "2016-11"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "unpleasant_scent",
+          "does_not_work",
+          "wrong_size_or_fit",
+          "arrived_damaged",
+          "irritation_or_harm",
+          "overpriced",
+          "poor_build_quality"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about unpleasant scent, cited to a review inside the declared window.",
+          "At least one complaint about does not work, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2017-09",
+            "review_id": "9dd1e419f6902b157faa936be98235cfa91a623592bcf7210ce94fd9ac0fe443",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-09",
+            "review_id": "10d6ef4d22d26968f3ead68a95f8d08e8fd6b666a3dcfc6319ebf37f2931992f",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "7e4eef83cacee37df4a53f17dc99e7fed05e32a7406684490ad1be478638526c",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "fd91ac0215bb19cf85ba8261fb2b890d8375e1a7bf5634f83d3ed56d0b112091",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "024cbfcb2416cbe83420bca1d408d16fec257f386b8b2c1b6a27088ece47020e",
+            "themes": [
+              "arrived_damaged",
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "bc3bdbe7e3befe35436a7d4bb71f0536d7c91c5a38fee9a65e7f4fb75c124b3b",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "a6d6480ff34825465b0272ae7ad332e22d01a35d8907d8eea4dd0d3d09cc7a56",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "0870b2a339567d3c0dc75f9c1ce516646240f289d0919678bddcaeeca8df7b2d",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "52a9b44ae92dfee8552512d08c7c2077b545172145147609d32a97805a0c380f",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "c0a224211824ae48dfc9d59d13eaab8bf8b2a61ce11fe59f67e89ce35fd7dfe2",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "6b6623d2dc164037738953fec63ab011ab4b2de21f15289806bd0982b937a1f8",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "d220569351088e69f6b02a8190a36fb2b68b2283a16aab60b64b1c8cdff4e785",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "b653b95c513707579a23b7b4e6b0e6b438feea32282967cbb12b04b55f123000",
+            "themes": [
+              "does_not_work",
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "f449664834984e852f65bc0b57648c5480a1955b5ede0e7c4ec287e255f496ab",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "9fd0006e33ec8f9dbb4b88fb0df0d94a4ef5c107e8db0b37a4e284ff159b3631",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "bc1e814b7828c59b6e16d273f02eee93059d53e47dca1a16a679b45b511fb38b",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-06",
+            "review_id": "48ce749172c389a02ade663fdb5678f7bb5f4521eeca3bf75f0eaf519a0d4314",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "evidence": {
+        "examined": 20,
+        "validated": 17,
+        "validated_per_window": {
+          "scope": 17
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00R1TAN7I",
+      "product_title": "GranNaturals Boar Bristle Smoothing Hair Brush for Women and Men - Medium/Soft Bristles - Natural Wooden Large Flat Square Paddle Hairbrush for Fine, Thin, Straight, Long, or Short Hair",
+      "question": "What complaints appear in the cited reviews for GranNaturals Boar Bristle Smoothing Hair Brush for Women and Men - Medium/Soft Bristles - Natural Wooden Large Flat Square Paddle Hairbrush for Fine, Thin, Straight, Long, or Short Hair (ASIN B00R1TAN7I) between 2017-08 and 2018-07?",
+      "question_id": "product_scoped-05",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2018-07",
+            "start": "2017-08"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "unpleasant_scent",
+          "does_not_work",
+          "wrong_size_or_fit",
+          "arrived_damaged",
+          "irritation_or_harm",
+          "overpriced",
+          "poor_build_quality"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- unpleasant scent is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- wrong size or fit is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2017-09",
+            "review_id": "9dd1e419f6902b157faa936be98235cfa91a623592bcf7210ce94fd9ac0fe443",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-09",
+            "review_id": "10d6ef4d22d26968f3ead68a95f8d08e8fd6b666a3dcfc6319ebf37f2931992f",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "7e4eef83cacee37df4a53f17dc99e7fed05e32a7406684490ad1be478638526c",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "fd91ac0215bb19cf85ba8261fb2b890d8375e1a7bf5634f83d3ed56d0b112091",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "024cbfcb2416cbe83420bca1d408d16fec257f386b8b2c1b6a27088ece47020e",
+            "themes": [
+              "arrived_damaged",
+              "unpleasant_scent"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "bc3bdbe7e3befe35436a7d4bb71f0536d7c91c5a38fee9a65e7f4fb75c124b3b",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "a6d6480ff34825465b0272ae7ad332e22d01a35d8907d8eea4dd0d3d09cc7a56",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "0870b2a339567d3c0dc75f9c1ce516646240f289d0919678bddcaeeca8df7b2d",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "52a9b44ae92dfee8552512d08c7c2077b545172145147609d32a97805a0c380f",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "c0a224211824ae48dfc9d59d13eaab8bf8b2a61ce11fe59f67e89ce35fd7dfe2",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "6b6623d2dc164037738953fec63ab011ab4b2de21f15289806bd0982b937a1f8",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "d220569351088e69f6b02a8190a36fb2b68b2283a16aab60b64b1c8cdff4e785",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "b653b95c513707579a23b7b4e6b0e6b438feea32282967cbb12b04b55f123000",
+            "themes": [
+              "does_not_work",
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "f449664834984e852f65bc0b57648c5480a1955b5ede0e7c4ec287e255f496ab",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "9fd0006e33ec8f9dbb4b88fb0df0d94a4ef5c107e8db0b37a4e284ff159b3631",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "bc1e814b7828c59b6e16d273f02eee93059d53e47dca1a16a679b45b511fb38b",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-06",
+            "review_id": "48ce749172c389a02ade663fdb5678f7bb5f4521eeca3bf75f0eaf519a0d4314",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "evidence": {
+        "examined": 20,
+        "validated": 17,
+        "validated_per_window": {
+          "baseline": 6,
+          "recent": 11
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B00R1TAN7I",
+      "product_title": "GranNaturals Boar Bristle Smoothing Hair Brush for Women and Men - Medium/Soft Bristles - Natural Wooden Large Flat Square Paddle Hairbrush for Fine, Thin, Straight, Long, or Short Hair",
+      "question": "What complaints appear in the cited reviews for GranNaturals Boar Bristle Smoothing Hair Brush for Women and Men - Medium/Soft Bristles - Natural Wooden Large Flat Square Paddle Hairbrush for Fine, Thin, Straight, Long, or Short Hair (ASIN B00R1TAN7I) from 2018-02 to 2018-07, and how do those examples contrast with cited reviews from 2017-08 to 2018-01?",
+      "question_id": "temporal-05",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2018-01",
+            "start": "2017-08"
+          },
+          "recent": {
+            "end": "2018-07",
+            "start": "2018-02"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "irritation_or_harm",
+          "unpleasant_texture",
+          "does_not_work",
+          "wrong_size_or_fit",
+          "overpriced",
+          "unpleasant_scent"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about irritation or harm, cited to a review inside the declared window.",
+          "At least one complaint about unpleasant texture, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2018-01",
+            "review_id": "45db2a5d146fb5d72f5f0f34f23ccf5b8609957e2248524cebdafc1e2b304fd1",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-12",
+            "review_id": "fd5107569310f0f536ceaccbc6e7e51c5e019e1b794f30928c981e45de064d56",
+            "themes": [
+              "unpleasant_texture",
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-08",
+            "review_id": "1a5740d3e613abb007a2f9c60e5343704d23f0fb5c882914e1bf3bcfe859a113",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "5e433373c67a2c01d58e2cf9ed370c5a65a76c833cf9a8f989d5983a45c07994",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-10",
+            "review_id": "7093dc3e47621c67843ca14d5e8a67fd4c7830139be0f951adf29e579eb99c14",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-09",
+            "review_id": "43fad944ae6693ad1b8035581e565c60963bbcb686faaf0cfcd91b32192468bc",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "89391ac6aa75135522476037412c336e882f78c0a1f091f8256569c7c7245337",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "4628e8027625eb610a7ece42d309ab25730d5039645cf4964e5b4ef9864bb8df",
+            "themes": [
+              "irritation_or_harm",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "93f348e3ee2912edf49ad5d1ac6e8d5c9c6ed26c53deb65e91f72e54a6b2714f",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "evidence": {
+        "examined": 20,
+        "validated": 9,
+        "validated_per_window": {
+          "scope": 9
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B01MXLP1T1",
+      "product_title": "Natural Makeup Remover Facial Cleansing Wipes from 1790 Are the Best Gentle Towelettes For Your Face - Remove Eye Makeup - Kind to Your Skin - Blemish Free Finish (25 Count, Pack of 6)",
+      "question": "What complaints appear in the cited reviews for Natural Makeup Remover Facial Cleansing Wipes from 1790 Are the Best Gentle Towelettes For Your Face - Remove Eye Makeup - Kind to Your Skin - Blemish Free Finish (25 Count, Pack of 6) (ASIN B01MXLP1T1) between 2017-08 and 2018-07?",
+      "question_id": "product_scoped-06",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2018-07",
+            "start": "2017-08"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "irritation_or_harm",
+          "unpleasant_texture",
+          "does_not_work",
+          "wrong_size_or_fit",
+          "overpriced",
+          "unpleasant_scent"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- irritation or harm is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- does not work is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2018-01",
+            "review_id": "45db2a5d146fb5d72f5f0f34f23ccf5b8609957e2248524cebdafc1e2b304fd1",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-12",
+            "review_id": "fd5107569310f0f536ceaccbc6e7e51c5e019e1b794f30928c981e45de064d56",
+            "themes": [
+              "unpleasant_texture",
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-08",
+            "review_id": "1a5740d3e613abb007a2f9c60e5343704d23f0fb5c882914e1bf3bcfe859a113",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "5e433373c67a2c01d58e2cf9ed370c5a65a76c833cf9a8f989d5983a45c07994",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm",
+              "unpleasant_texture"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-10",
+            "review_id": "7093dc3e47621c67843ca14d5e8a67fd4c7830139be0f951adf29e579eb99c14",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-09",
+            "review_id": "43fad944ae6693ad1b8035581e565c60963bbcb686faaf0cfcd91b32192468bc",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "89391ac6aa75135522476037412c336e882f78c0a1f091f8256569c7c7245337",
+            "themes": [
+              "irritation_or_harm"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "4628e8027625eb610a7ece42d309ab25730d5039645cf4964e5b4ef9864bb8df",
+            "themes": [
+              "irritation_or_harm",
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "93f348e3ee2912edf49ad5d1ac6e8d5c9c6ed26c53deb65e91f72e54a6b2714f",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "evidence": {
+        "examined": 20,
+        "validated": 9,
+        "validated_per_window": {
+          "baseline": 6,
+          "recent": 3
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B01MXLP1T1",
+      "product_title": "Natural Makeup Remover Facial Cleansing Wipes from 1790 Are the Best Gentle Towelettes For Your Face - Remove Eye Makeup - Kind to Your Skin - Blemish Free Finish (25 Count, Pack of 6)",
+      "question": "What complaints appear in the cited reviews for Natural Makeup Remover Facial Cleansing Wipes from 1790 Are the Best Gentle Towelettes For Your Face - Remove Eye Makeup - Kind to Your Skin - Blemish Free Finish (25 Count, Pack of 6) (ASIN B01MXLP1T1) from 2018-02 to 2018-07, and how do those examples contrast with cited reviews from 2017-08 to 2018-01?",
+      "question_id": "temporal-06",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2018-01",
+            "start": "2017-08"
+          },
+          "recent": {
+            "end": "2018-07",
+            "start": "2018-02"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "does_not_work",
+          "overpriced",
+          "poor_build_quality",
+          "irritation_or_harm",
+          "wrong_size_or_fit",
+          "hard_to_use",
+          "not_as_described"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about does not work, cited to a review inside the declared window.",
+          "At least one complaint about overpriced, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2014-11",
+            "review_id": "e019c560766dffd8e9ec6195a03f3781116f7c68364cfa70a9b428fbe41c88b7",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "5e1d4833bbfd634f1ba25ad635c3b40b761edd55266acd8b1c5a4f43902368de",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-11",
+            "review_id": "e9f14698c328db0b8d49b6fb17b85c24c5b519b1da69b68612479ac899681940",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-09",
+            "review_id": "06dd04df3960e65d9cbe867c59b4fdcea081349f7e9d47e291c2359b1a39a28f",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-10",
+            "review_id": "81db0e9fd9cd2c983d5d4e1e187c2f0166d4fbd6a98b17d290f00d4230856c26",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "018caa61c438c5e5309448ed6f433a4c085cf5a656a5eb378fd5d723687cdcb0",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm",
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-07",
+            "review_id": "0b5e5c781d903ecaaa501243da4816dc23ae2f0422c67a53b38dacb35ba56e54",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "aa92b3ab8c2c2cb3ad2796ae8a8ae4f64d1c5ac0b22de7299d47325958e08bd4",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-10",
+            "review_id": "11203dd04a51838e2b318e9c3c9e76e2c19d875e4347239fc5860b3eea9e9c96",
+            "themes": [
+              "poor_build_quality",
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "8a72388e4b27932f730fe71e0effd9cc8948666118d362cbf16c4415ca2bf0ba",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-02",
+            "review_id": "dea4680cc4dfd27a9f50a0996600e1e58eff3086c274c37a10591ee3ccaf0837",
+            "themes": [
+              "does_not_work",
+              "hard_to_use",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-03",
+            "review_id": "06b34e9992611cb2e41629f9f779291af034379c7e25e3219a3b4dddb1c0e5df",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-01",
+            "review_id": "0b19cf7742c25b6c2ed24067b10e837f4103d50bf0841762395462d390e5ce23",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "bb6689028d15645370b72e4d2a4a8ce563e4d419c86950196e3db8b1de517d67",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "5bbd2aa439b0e83509bd64d37fd6f6b3e0e91d3ce6e16f5cf7023bd1b2a2cfb2",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "f9f537cc87a716910ffb48c16269a552c6d1b57e682bd25c163afa34b9871bce",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm",
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "3a7f2841062663ecdb3cc3341dc9179de7f2d1ef0f0fef6c645ebc55e1153791",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "6b2e13b14cf2cd5333ca1634db2e3c9052e92caf2b3a2d83bb07df182eb230db",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "d4a0881165c81c45ceb44238933917543e1f01fd6a65afc52f4c488017243cb5",
+            "themes": [
+              "not_as_described"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "4ca191bb796b2f16a7724ec1b2c378b3051e44bf351a873db363bc2f7503584b",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-01",
+            "review_id": "7ccfb678af1dc4c42d2c1c6a5e4c9ecb21f5a47c9b147748ea45d9c6c0b5cff9",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-03",
+            "review_id": "60412cae517758f07c3ed3ca06dc06ad203d97f1a6a6ee20af28733b6065db3c",
+            "themes": [
+              "does_not_work",
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "evidence": {
+        "examined": 24,
+        "validated": 22,
+        "validated_per_window": {
+          "scope": 22
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B016LD3C04",
+      "product_title": "Michel Mercier Sparkle Detangling Brush Green - For Normal Hair",
+      "question": "What complaints appear in the cited reviews for Michel Mercier Sparkle Detangling Brush Green - For Normal Hair (ASIN B016LD3C04) between 2014-07 and 2015-06?",
+      "question_id": "product_scoped-07",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2015-06",
+            "start": "2014-07"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "does_not_work",
+          "overpriced",
+          "poor_build_quality",
+          "irritation_or_harm",
+          "wrong_size_or_fit",
+          "hard_to_use",
+          "not_as_described"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- does not work is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- does not work is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2014-11",
+            "review_id": "e019c560766dffd8e9ec6195a03f3781116f7c68364cfa70a9b428fbe41c88b7",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "5e1d4833bbfd634f1ba25ad635c3b40b761edd55266acd8b1c5a4f43902368de",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-11",
+            "review_id": "e9f14698c328db0b8d49b6fb17b85c24c5b519b1da69b68612479ac899681940",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-09",
+            "review_id": "06dd04df3960e65d9cbe867c59b4fdcea081349f7e9d47e291c2359b1a39a28f",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-10",
+            "review_id": "81db0e9fd9cd2c983d5d4e1e187c2f0166d4fbd6a98b17d290f00d4230856c26",
+            "themes": [
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "018caa61c438c5e5309448ed6f433a4c085cf5a656a5eb378fd5d723687cdcb0",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm",
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-07",
+            "review_id": "0b5e5c781d903ecaaa501243da4816dc23ae2f0422c67a53b38dacb35ba56e54",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "aa92b3ab8c2c2cb3ad2796ae8a8ae4f64d1c5ac0b22de7299d47325958e08bd4",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-10",
+            "review_id": "11203dd04a51838e2b318e9c3c9e76e2c19d875e4347239fc5860b3eea9e9c96",
+            "themes": [
+              "poor_build_quality",
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "8a72388e4b27932f730fe71e0effd9cc8948666118d362cbf16c4415ca2bf0ba",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2015-02",
+            "review_id": "dea4680cc4dfd27a9f50a0996600e1e58eff3086c274c37a10591ee3ccaf0837",
+            "themes": [
+              "does_not_work",
+              "hard_to_use",
+              "overpriced"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-03",
+            "review_id": "06b34e9992611cb2e41629f9f779291af034379c7e25e3219a3b4dddb1c0e5df",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-01",
+            "review_id": "0b19cf7742c25b6c2ed24067b10e837f4103d50bf0841762395462d390e5ce23",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "bb6689028d15645370b72e4d2a4a8ce563e4d419c86950196e3db8b1de517d67",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "5bbd2aa439b0e83509bd64d37fd6f6b3e0e91d3ce6e16f5cf7023bd1b2a2cfb2",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "f9f537cc87a716910ffb48c16269a552c6d1b57e682bd25c163afa34b9871bce",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm",
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "3a7f2841062663ecdb3cc3341dc9179de7f2d1ef0f0fef6c645ebc55e1153791",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "6b2e13b14cf2cd5333ca1634db2e3c9052e92caf2b3a2d83bb07df182eb230db",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "d4a0881165c81c45ceb44238933917543e1f01fd6a65afc52f4c488017243cb5",
+            "themes": [
+              "not_as_described"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "4ca191bb796b2f16a7724ec1b2c378b3051e44bf351a873db363bc2f7503584b",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-01",
+            "review_id": "7ccfb678af1dc4c42d2c1c6a5e4c9ecb21f5a47c9b147748ea45d9c6c0b5cff9",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-03",
+            "review_id": "60412cae517758f07c3ed3ca06dc06ad203d97f1a6a6ee20af28733b6065db3c",
+            "themes": [
+              "does_not_work",
+              "wrong_size_or_fit"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "evidence": {
+        "examined": 24,
+        "validated": 22,
+        "validated_per_window": {
+          "baseline": 10,
+          "recent": 12
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B016LD3C04",
+      "product_title": "Michel Mercier Sparkle Detangling Brush Green - For Normal Hair",
+      "question": "What complaints appear in the cited reviews for Michel Mercier Sparkle Detangling Brush Green - For Normal Hair (ASIN B016LD3C04) from 2015-01 to 2015-06, and how do those examples contrast with cited reviews from 2014-07 to 2014-12?",
+      "question_id": "temporal-07",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2014-12",
+            "start": "2014-07"
+          },
+          "recent": {
+            "end": "2015-06",
+            "start": "2015-01"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "unpleasant_texture",
+          "does_not_work",
+          "unpleasant_scent",
+          "poor_build_quality"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about unpleasant texture, cited to a review inside the declared window.",
+          "At least one complaint about does not work, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2014-12",
+            "review_id": "d544329a72e6cc63220cbe978c51e4808626e3114aac338ee0e870ce285bbd36",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "94ba0ee225767bd6d19f2294045b16f6af7091d64393091277bb5f322d8b66e1",
+            "themes": [
+              "does_not_work",
+              "unpleasant_scent",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-09",
+            "review_id": "4f9fc9ebb2598122aefc0ec11da5dddf93db5a3e85c09142fe17b0ab221876a7",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-08",
+            "review_id": "ca86ab5c3aed222f10b20cdc17ffbea1d4216fd33f6b35ac8dcb6e1c61b3e7ef",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2014-11",
+            "review_id": "05bac3eebd55de7d6cc8e52d12b12a1b8f8023647ae93e2c1b054686912ff913",
+            "themes": [
+              "poor_build_quality",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "12ee9a6e7d90dc4c7004c1a34a13bd3ca10fccff4abf0e3e01de9aaabf3e8440",
+            "themes": [
+              "unpleasant_scent",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-01",
+            "review_id": "cc7c5567c04e8d22b955c8c9f94086b497945eb22b547edda3973a1e4e21d772",
+            "themes": [
+              "does_not_work",
+              "unpleasant_scent",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "f9cf64d31acdcad666c26e01294ad56f675030db3e7bedba1724ffc8295fee95",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "a453b5532e511044b4c593d3b0564f8900da2bd538ac78043f43fee08695fea6",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "d24f115114429b99b2bb6a13b2fec47a36497f24739b14ae97d67db2e977e63d",
+            "themes": [
+              "does_not_work",
+              "unpleasant_texture"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "evidence": {
+        "examined": 24,
+        "validated": 10,
+        "validated_per_window": {
+          "scope": 10
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00KCTER3U",
+      "product_title": "Retinol Face Moisturizer Cream Natural Facial moisturizing Cream 1.76 OZ with Ortho-Hydroxybenzoic Acid,VE for Hydrating,Repairing",
+      "question": "What complaints appear in the cited reviews for Retinol Face Moisturizer Cream Natural Facial moisturizing Cream 1.76 OZ with Ortho-Hydroxybenzoic Acid,VE for Hydrating,Repairing (ASIN B00KCTER3U) between 2014-07 and 2015-06?",
+      "question_id": "product_scoped-08",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2015-06",
+            "start": "2014-07"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "unpleasant_texture",
+          "does_not_work",
+          "unpleasant_scent",
+          "poor_build_quality"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- unpleasant texture is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- unpleasant texture is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2014-12",
+            "review_id": "d544329a72e6cc63220cbe978c51e4808626e3114aac338ee0e870ce285bbd36",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-12",
+            "review_id": "94ba0ee225767bd6d19f2294045b16f6af7091d64393091277bb5f322d8b66e1",
+            "themes": [
+              "does_not_work",
+              "unpleasant_scent",
+              "unpleasant_texture"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-09",
+            "review_id": "4f9fc9ebb2598122aefc0ec11da5dddf93db5a3e85c09142fe17b0ab221876a7",
+            "themes": [
+              "unpleasant_texture"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-08",
+            "review_id": "ca86ab5c3aed222f10b20cdc17ffbea1d4216fd33f6b35ac8dcb6e1c61b3e7ef",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2014-11",
+            "review_id": "05bac3eebd55de7d6cc8e52d12b12a1b8f8023647ae93e2c1b054686912ff913",
+            "themes": [
+              "poor_build_quality",
+              "unpleasant_texture"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "12ee9a6e7d90dc4c7004c1a34a13bd3ca10fccff4abf0e3e01de9aaabf3e8440",
+            "themes": [
+              "unpleasant_scent",
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-01",
+            "review_id": "cc7c5567c04e8d22b955c8c9f94086b497945eb22b547edda3973a1e4e21d772",
+            "themes": [
+              "does_not_work",
+              "unpleasant_scent",
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "f9cf64d31acdcad666c26e01294ad56f675030db3e7bedba1724ffc8295fee95",
+            "themes": [
+              "unpleasant_scent"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-05",
+            "review_id": "a453b5532e511044b4c593d3b0564f8900da2bd538ac78043f43fee08695fea6",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality",
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2015-04",
+            "review_id": "d24f115114429b99b2bb6a13b2fec47a36497f24739b14ae97d67db2e977e63d",
+            "themes": [
+              "does_not_work",
+              "unpleasant_texture"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "evidence": {
+        "examined": 24,
+        "validated": 10,
+        "validated_per_window": {
+          "baseline": 5,
+          "recent": 5
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B00KCTER3U",
+      "product_title": "Retinol Face Moisturizer Cream Natural Facial moisturizing Cream 1.76 OZ with Ortho-Hydroxybenzoic Acid,VE for Hydrating,Repairing",
+      "question": "What complaints appear in the cited reviews for Retinol Face Moisturizer Cream Natural Facial moisturizing Cream 1.76 OZ with Ortho-Hydroxybenzoic Acid,VE for Hydrating,Repairing (ASIN B00KCTER3U) from 2015-01 to 2015-06, and how do those examples contrast with cited reviews from 2014-07 to 2014-12?",
+      "question_id": "temporal-08",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2014-12",
+            "start": "2014-07"
+          },
+          "recent": {
+            "end": "2015-06",
+            "start": "2015-01"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "poor_build_quality",
+          "does_not_work",
+          "overpriced",
+          "irritation_or_harm"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about poor build quality, cited to a review inside the declared window.",
+          "At least one complaint about does not work, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2018-01",
+            "review_id": "1c403475255260bc126c57626f868f513308a3446e298003e220b13401e53576",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "50dad91e3429b86ff0f67ba2600482d61c4b19de78074dcdd54980a1d8451759",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-10",
+            "review_id": "1c9856496c64532575a033dd793913ebcb3510e6188c0cff892d25d61fd8624c",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "90e01a0e76d1fd050836a733c9d65eb973038516aa305b8ad1abe12ac496cbe1",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-02",
+            "review_id": "555672ca698af99d6d4e8b488130e1a8ec4492e0b8aa402d4c2efc682728f39a",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-03",
+            "review_id": "9cb3abe79a087b1bdcaaefcf4b0c82d8d95d3e47ea81665ddcd045245d23d3fb",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "77f4e3b4b05954b1ee255e6afc5d2d5042ad2494898bf02c2be38044fc0eb3e7",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "0e9e2dc8eb4c732802649ed6165e82bbbc4d24ae79e23e052680d53453b7098a",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-09",
+            "review_id": "efc25b1d99c9ca40ea103a9caf4aa9366f294259a6ab4bc1b550e4f4542ad548",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "5be7af15c3b29794c0d5f5c4ac575303c8fc925953e3d77141fb703d6513b879",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "d3c0e53b68d743b230fc15ddc036b2d2f6a990a59dd5cf3bea2f51ddce0fdbc3",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "9ab6c7aa6e28294e769ed732b076b262c5b361aad666a253fb3b91d92c453228",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "690732640cbac9f431d15d59f2301445157dbc2e7a5a75d3f3a11e4572995f35",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-09",
+            "review_id": "229d3a92132b274301463caa17a29aca08eca306c3db215b4009f967989e2d93",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "d0de712e3ab90c549f2a92e52035272bc3dd6ad586ab02735b8a9e4ddff74eef",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "ce74564ceb13a77bccb062614c6e3fb4a3cde11c0496df39d34492383ba4b333",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "db150ddb6342b80084374f433353b820fa987a59b09014bfabebe48ba56a5b10",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 24,
+      "episode_id": "B07D1B499B:2018-02",
+      "evidence": {
+        "examined": 19,
+        "validated": 17,
+        "validated_per_window": {
+          "scope": 17
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B07D1B499B",
+      "product_title": "InnoLife Nail Art Drill Treatments KIT Electric File Buffer Bits Acrylics 6 File Pedicure Hands & Nails Repair (110V US 1.5M Plug) - Pink",
+      "question": "What complaints appear in the cited reviews for InnoLife Nail Art Drill Treatments KIT Electric File Buffer Bits Acrylics 6 File Pedicure Hands & Nails Repair (110V US 1.5M Plug) - Pink (ASIN B07D1B499B) between 2017-10 and 2018-09?",
+      "question_id": "product_scoped-09",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2018-09",
+            "start": "2017-10"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "poor_build_quality",
+          "does_not_work",
+          "overpriced",
+          "irritation_or_harm"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- poor build quality is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- poor build quality is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2018-01",
+            "review_id": "1c403475255260bc126c57626f868f513308a3446e298003e220b13401e53576",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-01",
+            "review_id": "50dad91e3429b86ff0f67ba2600482d61c4b19de78074dcdd54980a1d8451759",
+            "themes": [
+              "does_not_work",
+              "irritation_or_harm",
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-10",
+            "review_id": "1c9856496c64532575a033dd793913ebcb3510e6188c0cff892d25d61fd8624c",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "90e01a0e76d1fd050836a733c9d65eb973038516aa305b8ad1abe12ac496cbe1",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-02",
+            "review_id": "555672ca698af99d6d4e8b488130e1a8ec4492e0b8aa402d4c2efc682728f39a",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-03",
+            "review_id": "9cb3abe79a087b1bdcaaefcf4b0c82d8d95d3e47ea81665ddcd045245d23d3fb",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "77f4e3b4b05954b1ee255e6afc5d2d5042ad2494898bf02c2be38044fc0eb3e7",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "0e9e2dc8eb4c732802649ed6165e82bbbc4d24ae79e23e052680d53453b7098a",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-09",
+            "review_id": "efc25b1d99c9ca40ea103a9caf4aa9366f294259a6ab4bc1b550e4f4542ad548",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "5be7af15c3b29794c0d5f5c4ac575303c8fc925953e3d77141fb703d6513b879",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "d3c0e53b68d743b230fc15ddc036b2d2f6a990a59dd5cf3bea2f51ddce0fdbc3",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "9ab6c7aa6e28294e769ed732b076b262c5b361aad666a253fb3b91d92c453228",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "690732640cbac9f431d15d59f2301445157dbc2e7a5a75d3f3a11e4572995f35",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-09",
+            "review_id": "229d3a92132b274301463caa17a29aca08eca306c3db215b4009f967989e2d93",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "d0de712e3ab90c549f2a92e52035272bc3dd6ad586ab02735b8a9e4ddff74eef",
+            "themes": [
+              "does_not_work",
+              "overpriced"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-05",
+            "review_id": "ce74564ceb13a77bccb062614c6e3fb4a3cde11c0496df39d34492383ba4b333",
+            "themes": [
+              "overpriced",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "db150ddb6342b80084374f433353b820fa987a59b09014bfabebe48ba56a5b10",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 24,
+      "episode_id": "B07D1B499B:2018-02",
+      "evidence": {
+        "examined": 19,
+        "validated": 17,
+        "validated_per_window": {
+          "baseline": 6,
+          "recent": 11
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B07D1B499B",
+      "product_title": "InnoLife Nail Art Drill Treatments KIT Electric File Buffer Bits Acrylics 6 File Pedicure Hands & Nails Repair (110V US 1.5M Plug) - Pink",
+      "question": "What complaints appear in the cited reviews for InnoLife Nail Art Drill Treatments KIT Electric File Buffer Bits Acrylics 6 File Pedicure Hands & Nails Repair (110V US 1.5M Plug) - Pink (ASIN B07D1B499B) from 2018-04 to 2018-09, and how do those examples contrast with cited reviews from 2017-10 to 2018-03?",
+      "question_id": "temporal-09",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2018-03",
+            "start": "2017-10"
+          },
+          "recent": {
+            "end": "2018-09",
+            "start": "2018-04"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "does_not_work",
+          "poor_build_quality",
+          "wrong_size_or_fit",
+          "hard_to_use",
+          "not_as_described"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint about does not work, cited to a review inside the declared window.",
+          "At least one complaint about poor build quality, cited to a review inside the declared window."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2018-03",
+            "review_id": "05dce777acccf3593c217554aab8064b76dec4a490bc25c8e7b96304495bdaae",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "95ec9913ac2c47babc75c650db66a54f53f6899d6de1399e81d79cec13a86f5a",
+            "themes": [
+              "poor_build_quality",
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-02",
+            "review_id": "b9df210ccedf242691817fa8bca48d6c10886a15c9b20a2e699c47a17422c406",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-03",
+            "review_id": "4579eaa8651362450bf35e2ab374dce5c39fd5e890e9cb67b0d8a8a28955c0c8",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "7df3687df88a6e4fc2d3867010adf00214796cb17288ee468d1928589553868f",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "7473ab4d5d104196873a9d2113208158a3edbea7b8df82145615403b137235cb",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2017-12",
+            "review_id": "6a165314b6bca78943b13cc59413b4a323dd96a56df044aa8759e711a8181ceb",
+            "themes": [
+              "does_not_work",
+              "wrong_size_or_fit"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-06",
+            "review_id": "46c664384e6e88068d31ee420da33252e9aa04ecfb19e8dd7548b10255401950",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "2e46211e41e546d0e6ffb5f19fb91197ef8f102f1d9b046cbe31fa8a1e7b8aa1",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "9fceff0b52bf5b6a1468d0c0edf2cffce659bb42a235f6396d1a9203d95a5229",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "e9f75393062aef646a0586f32e3a85555ed65f8c06a63c10110379c7363988dd",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "a1e3d1d3d7f5a6753b5422319b4b39b2c4937fe3bc1cc04bc6dda10dbc97eb14",
+            "themes": [
+              "does_not_work",
+              "hard_to_use",
+              "not_as_described"
+            ],
+            "window": "scope"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "c5c02807f1a1a2e2bd89fdabdcd2f8733446050d1570ac9ba9b3eb7f37433324",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "scope"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 24,
+      "episode_id": "B07D1B499B:2018-02",
+      "evidence": {
+        "examined": 13,
+        "validated": 13,
+        "validated_per_window": {
+          "scope": 13
+        }
+      },
+      "family": "product_scoped",
+      "parent_asin": "B075GK4249",
+      "product_title": "Makeup Brush Cleaner Wloomm Electric Makeup Brush Cleaner And Dryer Tool Kits in Seconds for All Makeup Brushes Cleaning",
+      "question": "What complaints appear in the cited reviews for Makeup Brush Cleaner Wloomm Electric Makeup Brush Cleaner And Dryer Tool Kits in Seconds for All Makeup Brushes Cleaning (ASIN B075GK4249) between 2017-10 and 2018-09?",
+      "question_id": "product_scoped-10",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2018-09",
+            "start": "2017-10"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [
+          "does_not_work",
+          "poor_build_quality",
+          "wrong_size_or_fit",
+          "hard_to_use",
+          "not_as_described"
+        ],
+        "expected_refusal_reason": null,
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [
+          "At least one complaint drawn from the recent window, cited to a review dated inside it -- does not work is one such complaint.",
+          "At least one complaint drawn from the baseline window, cited to a review dated inside it -- does not work is one such complaint.",
+          "An explicit qualitative contrast between the cited examples of the two windows, stated without any claim about how often either complaint occurs or about which direction anything moved."
+        ],
+        "supporting_review_ids": [
+          {
+            "month": "2018-03",
+            "review_id": "05dce777acccf3593c217554aab8064b76dec4a490bc25c8e7b96304495bdaae",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "95ec9913ac2c47babc75c650db66a54f53f6899d6de1399e81d79cec13a86f5a",
+            "themes": [
+              "poor_build_quality",
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-02",
+            "review_id": "b9df210ccedf242691817fa8bca48d6c10886a15c9b20a2e699c47a17422c406",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-03",
+            "review_id": "4579eaa8651362450bf35e2ab374dce5c39fd5e890e9cb67b0d8a8a28955c0c8",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "7df3687df88a6e4fc2d3867010adf00214796cb17288ee468d1928589553868f",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-11",
+            "review_id": "7473ab4d5d104196873a9d2113208158a3edbea7b8df82145615403b137235cb",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2017-12",
+            "review_id": "6a165314b6bca78943b13cc59413b4a323dd96a56df044aa8759e711a8181ceb",
+            "themes": [
+              "does_not_work",
+              "wrong_size_or_fit"
+            ],
+            "window": "baseline"
+          },
+          {
+            "month": "2018-06",
+            "review_id": "46c664384e6e88068d31ee420da33252e9aa04ecfb19e8dd7548b10255401950",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-07",
+            "review_id": "2e46211e41e546d0e6ffb5f19fb91197ef8f102f1d9b046cbe31fa8a1e7b8aa1",
+            "themes": [
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "9fceff0b52bf5b6a1468d0c0edf2cffce659bb42a235f6396d1a9203d95a5229",
+            "themes": [
+              "does_not_work",
+              "poor_build_quality"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "e9f75393062aef646a0586f32e3a85555ed65f8c06a63c10110379c7363988dd",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-04",
+            "review_id": "a1e3d1d3d7f5a6753b5422319b4b39b2c4937fe3bc1cc04bc6dda10dbc97eb14",
+            "themes": [
+              "does_not_work",
+              "hard_to_use",
+              "not_as_described"
+            ],
+            "window": "recent"
+          },
+          {
+            "month": "2018-08",
+            "review_id": "c5c02807f1a1a2e2bd89fdabdcd2f8733446050d1570ac9ba9b3eb7f37433324",
+            "themes": [
+              "does_not_work"
+            ],
+            "window": "recent"
+          }
+        ]
+      },
+      "answerability": "answerable",
+      "decline_rank": 24,
+      "episode_id": "B07D1B499B:2018-02",
+      "evidence": {
+        "examined": 13,
+        "validated": 13,
+        "validated_per_window": {
+          "baseline": 7,
+          "recent": 6
+        }
+      },
+      "family": "temporal",
+      "parent_asin": "B075GK4249",
+      "product_title": "Makeup Brush Cleaner Wloomm Electric Makeup Brush Cleaner And Dryer Tool Kits in Seconds for All Makeup Brushes Cleaning",
+      "question": "What complaints appear in the cited reviews for Makeup Brush Cleaner Wloomm Electric Makeup Brush Cleaner And Dryer Tool Kits in Seconds for All Makeup Brushes Cleaning (ASIN B075GK4249) from 2018-04 to 2018-09, and how do those examples contrast with cited reviews from 2017-10 to 2018-03?",
+      "question_id": "temporal-10",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2018-03",
+            "start": "2017-10"
+          },
+          "recent": {
+            "end": "2018-09",
+            "start": "2018-04"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": null
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "No review of this product in the declared window discusses whether the packaging is recyclable, so the corpus cannot answer the question.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "evidence": {
+        "scan_hits_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00RPJZMUM",
+      "probe": {
+        "id": "recyclable_packaging",
+        "in_scope_hits": 0,
+        "label": "whether the packaging is recyclable"
+      },
+      "product_title": "Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results",
+      "question": "What complaints about whether the packaging is recyclable appear in the cited reviews for Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results (ASIN B00RPJZMUM) between 2016-10 and 2017-09?",
+      "question_id": "absent_attribute-01",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2017-09",
+            "start": "2016-10"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": "absent_attribute"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "No review of this product in the declared window discusses cruelty-free status and animal testing, so the corpus cannot answer the question.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "evidence": {
+        "scan_hits_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B0BM4GX6TT",
+      "probe": {
+        "id": "cruelty_free",
+        "in_scope_hits": 0,
+        "label": "cruelty-free status and animal testing"
+      },
+      "product_title": "Godefroy Tint Kit for Spot Coloring, Dark Brown",
+      "question": "What complaints about cruelty-free status and animal testing appear in the cited reviews for Godefroy Tint Kit for Spot Coloring, Dark Brown (ASIN B0BM4GX6TT) between 2016-10 and 2017-09?",
+      "question_id": "absent_attribute-02",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2017-09",
+            "start": "2016-10"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": "absent_attribute"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "No review of this product in the declared window discusses sulfates and parabens in the ingredients, so the corpus cannot answer the question.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "evidence": {
+        "scan_hits_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B0113GT5Q4",
+      "probe": {
+        "id": "sulfates_and_parabens",
+        "in_scope_hits": 0,
+        "label": "sulfates and parabens in the ingredients"
+      },
+      "product_title": "Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W",
+      "question": "What complaints about sulfates and parabens in the ingredients appear in the cited reviews for Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W (ASIN B0113GT5Q4) between 2016-05 and 2017-04?",
+      "question_id": "absent_attribute-03",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2017-04",
+            "start": "2016-05"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": "absent_attribute"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "No review of this product in the declared window discusses the expiry date or shelf life, so the corpus cannot answer the question.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "evidence": {
+        "scan_hits_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00V8ZCT1Y",
+      "probe": {
+        "id": "expiry_date",
+        "in_scope_hits": 0,
+        "label": "the expiry date or shelf life"
+      },
+      "product_title": "Primal Pit Paste Natural Deodorant, Aluminum Free, Paraben Free, No Added Fragrances, Royal & Rogue Jar",
+      "question": "What complaints about the expiry date or shelf life appear in the cited reviews for Primal Pit Paste Natural Deodorant, Aluminum Free, Paraben Free, No Added Fragrances, Royal & Rogue Jar (ASIN B00V8ZCT1Y) between 2016-05 and 2017-04?",
+      "question_id": "absent_attribute-04",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2017-04",
+            "start": "2016-05"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": "absent_attribute"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "This product has no reviews at all in the declared window, so there is nothing to cite.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "evidence": {
+        "product_lifetime": [
+          "2015-01",
+          "2021-02"
+        ],
+        "reviews_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00RPJZMUM",
+      "product_title": "Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results",
+      "question": "What complaints appear in the cited reviews for Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results (ASIN B00RPJZMUM) between 2018-09 and 2019-02?",
+      "question_id": "zero_review_scope-01",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-02",
+            "start": "2018-09"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": "zero_review_scope"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "This product has no reviews at all in the declared window, so there is nothing to cite.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 6,
+      "episode_id": "B0113GT5Q4:2016-09",
+      "evidence": {
+        "product_lifetime": [
+          "2015-10",
+          "2020-01"
+        ],
+        "reviews_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B0113GT5Q4",
+      "product_title": "Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W",
+      "question": "What complaints appear in the cited reviews for Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W (ASIN B0113GT5Q4) between 2018-05 and 2018-10?",
+      "question_id": "zero_review_scope-02",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2018-10",
+            "start": "2018-05"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": "zero_review_scope"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "This product has no reviews at all in the declared window, so there is nothing to cite.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 3,
+      "episode_id": "B00RPJZMUM:2017-02",
+      "evidence": {
+        "product_lifetime": [
+          "2015-01",
+          "2021-02"
+        ],
+        "reviews_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00RPJZMUM",
+      "product_title": "Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results",
+      "question": "What complaints appear in the cited reviews for Xtava Professional Ionic Hair Dryer - Peony Pink Salon Blow Dryer - Turbo Travel Hair Dryer with Attachment Nozzle - Compact Lightweight 1875 Watt Powerful Iron Blowdryer Best for Frizz Free Results (ASIN B00RPJZMUM) between 2019-03 and 2019-08?",
+      "question_id": "zero_review_scope-03",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-08",
+            "start": "2019-03"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": "zero_review_scope"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "No review of this product in the declared window discusses engine oil viscosity; it is not a subject of this review corpus.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "evidence": {
+        "scan_hits_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B00R1TAN7I",
+      "probe": {
+        "corpus_hits": 4,
+        "corpus_reviews": 694252,
+        "id": "engine_oil",
+        "in_scope_hits": 0,
+        "label": "engine oil viscosity"
+      },
+      "product_title": "GranNaturals Boar Bristle Smoothing Hair Brush for Women and Men - Medium/Soft Bristles - Natural Wooden Large Flat Square Paddle Hairbrush for Fine, Thin, Straight, Long, or Short Hair",
+      "question": "What complaints about engine oil viscosity appear in the cited reviews for GranNaturals Boar Bristle Smoothing Hair Brush for Women and Men - Medium/Soft Bristles - Natural Wooden Large Flat Square Paddle Hairbrush for Fine, Thin, Straight, Long, or Short Hair (ASIN B00R1TAN7I) between 2017-08 and 2018-07?",
+      "question_id": "out_of_domain-01",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2018-07",
+            "start": "2017-08"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": "out_of_domain"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "No review of this product in the declared window discusses mortgage interest rates; it is not a subject of this review corpus.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 11,
+      "episode_id": "B00R1TAN7I:2017-12",
+      "evidence": {
+        "scan_hits_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B01MXLP1T1",
+      "probe": {
+        "corpus_hits": 4,
+        "corpus_reviews": 694252,
+        "id": "mortgage_rates",
+        "in_scope_hits": 0,
+        "label": "mortgage interest rates"
+      },
+      "product_title": "Natural Makeup Remover Facial Cleansing Wipes from 1790 Are the Best Gentle Towelettes For Your Face - Remove Eye Makeup - Kind to Your Skin - Blemish Free Finish (25 Count, Pack of 6)",
+      "question": "What complaints about mortgage interest rates appear in the cited reviews for Natural Makeup Remover Facial Cleansing Wipes from 1790 Are the Best Gentle Towelettes For Your Face - Remove Eye Makeup - Kind to Your Skin - Blemish Free Finish (25 Count, Pack of 6) (ASIN B01MXLP1T1) between 2017-08 and 2018-07?",
+      "question_id": "out_of_domain-02",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2018-07",
+            "start": "2017-08"
+          }
+        }
+      },
+      "slot_role": "control",
+      "stratum": "out_of_domain"
+    },
+    {
+      "answer_key": {
+        "acceptable_themes": [],
+        "expected_refusal_reason": "No review of this product in the declared window discusses filing a tax return; it is not a subject of this review corpus.",
+        "forbidden_claims": [
+          "prevalence: how many or what share of this product's reviews complain about something",
+          "direction: that a complaint increased, decreased, became more common, or started",
+          "representativeness: that the cited reviews are typical of the product or the corpus",
+          "causation: that one thing caused another, including a decline in rating"
+        ],
+        "required_propositions": [],
+        "supporting_review_ids": []
+      },
+      "answerability": "unanswerable",
+      "decline_rank": 23,
+      "episode_id": "B016LD3C04:2014-11",
+      "evidence": {
+        "scan_hits_in_scope": 0,
+        "validated": 0
+      },
+      "family": "product_scoped",
+      "parent_asin": "B016LD3C04",
+      "probe": {
+        "corpus_hits": 6,
+        "corpus_reviews": 694252,
+        "id": "tax_filing",
+        "in_scope_hits": 0,
+        "label": "filing a tax return"
+      },
+      "product_title": "Michel Mercier Sparkle Detangling Brush Green - For Normal Hair",
+      "question": "What complaints about filing a tax return appear in the cited reviews for Michel Mercier Sparkle Detangling Brush Green - For Normal Hair (ASIN B016LD3C04) between 2014-07 and 2015-06?",
+      "question_id": "out_of_domain-03",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2015-06",
+            "start": "2014-07"
+          }
+        }
+      },
+      "slot_role": "candidate",
+      "stratum": "out_of_domain"
+    }
+  ],
+  "questions_version": "1",
+  "scope": "full",
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
+  "spec_version": "1",
+  "status": "frozen"
+}

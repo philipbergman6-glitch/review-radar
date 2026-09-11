@@ -1,0 +1,424 @@
+{
+  "version": "1",
+  "status": "frozen",
+  "decided_in": "ticket 11 (ADR-0006, RR-17)",
+  "note": "How the thirty P7 questions are constructed, frozen before any of them is instantiated. `scan_terms` is the evidence scan's lexical half only: a matched review is a candidate for manual semantic validation, never evidence on its own. The mined `conf/theme-terms.json` list is deliberately NOT reused here -- it was mined to *offer reviews for labelling*, it contains stopword-ish fragments like \"see\" and \"few\", and an answerability decision resting on it would rest on whatever the discovery sample happened to contain.",
+  "seed": 20260911,
+  "bootstrap_draws": 2000,
+  "lower_bound_quantile": 0.025,
+  "templates": {
+    "product_scoped": "What complaints appear in the cited reviews for {product_title} (ASIN {parent_asin}) between {scope_start} and {scope_end}?",
+    "temporal": "What complaints appear in the cited reviews for {product_title} (ASIN {parent_asin}) from {recent_start} to {recent_end}, and how do those examples contrast with cited reviews from {baseline_start} to {baseline_end}?",
+    "absent_attribute": "What complaints about {probe_label} appear in the cited reviews for {product_title} (ASIN {parent_asin}) between {scope_start} and {scope_end}?",
+    "zero_review_scope": "What complaints appear in the cited reviews for {product_title} (ASIN {parent_asin}) between {scope_start} and {scope_end}?",
+    "out_of_domain": "What complaints about {probe_label} appear in the cited reviews for {product_title} (ASIN {parent_asin}) between {scope_start} and {scope_end}?"
+  },
+  "refusal_reasons": {
+    "absent_attribute": "No review of this product in the declared window discusses {probe_label}, so the corpus cannot answer the question.",
+    "zero_review_scope": "This product has no reviews at all in the declared window, so there is nothing to cite.",
+    "out_of_domain": "No review of this product in the declared window discusses {probe_label}; it is not a subject of this review corpus."
+  },
+  "scan_terms": {
+    "does_not_work": [
+      "does not work",
+      "doesn't work",
+      "didn't work",
+      "did not work",
+      "does nothing",
+      "did nothing",
+      "no effect",
+      "no difference",
+      "didn't do anything",
+      "did not do anything",
+      "useless",
+      "ineffective",
+      "not effective",
+      "doesn't do what",
+      "stopped working",
+      "won't turn on",
+      "will not turn on",
+      "doesn't heat",
+      "won't charge",
+      "will not charge",
+      "hold a charge",
+      "waste of money",
+      "no results",
+      "didn't see any",
+      "did not see any"
+    ],
+    "poor_build_quality": [
+      "broke",
+      "broken",
+      "cracked",
+      "fell apart",
+      "falling apart",
+      "flimsy",
+      "cheaply made",
+      "cheap plastic",
+      "poorly made",
+      "poor quality",
+      "bad quality",
+      "low quality",
+      "defective",
+      "shedding",
+      "sheds",
+      "bristles fell",
+      "came apart",
+      "wore out",
+      "worn out",
+      "stopped after",
+      "died after",
+      "lasted only",
+      "didn't last",
+      "did not last",
+      "snapped",
+      "bent"
+    ],
+    "overpriced": [
+      "overpriced",
+      "over priced",
+      "too expensive",
+      "not worth",
+      "not worth it",
+      "waste of money",
+      "rip off",
+      "ripoff",
+      "for the price",
+      "price is too",
+      "cheaper elsewhere",
+      "half the price",
+      "money wasted",
+      "wasted my money",
+      "poor value",
+      "not worth the price"
+    ],
+    "wrong_size_or_fit": [
+      "too small",
+      "too big",
+      "too large",
+      "too short",
+      "too long",
+      "too heavy",
+      "too thick",
+      "too thin",
+      "doesn't fit",
+      "does not fit",
+      "didn't fit",
+      "did not fit",
+      "wrong size",
+      "smaller than",
+      "bigger than",
+      "larger than",
+      "not the size",
+      "too narrow",
+      "too wide"
+    ],
+    "unpleasant_texture": [
+      "sticky",
+      "greasy",
+      "oily",
+      "residue",
+      "gritty",
+      "scratchy",
+      "rough",
+      "lumpy",
+      "clumpy",
+      "runny",
+      "watery",
+      "too thick",
+      "chalky",
+      "waxy",
+      "tacky",
+      "uncomfortable to wear",
+      "feels cheap",
+      "hard and stiff",
+      "leaves a film"
+    ],
+    "hard_to_use": [
+      "hard to use",
+      "difficult to use",
+      "hard to apply",
+      "difficult to apply",
+      "hard to open",
+      "difficult to open",
+      "messy",
+      "takes forever",
+      "no instructions",
+      "instructions are",
+      "confusing",
+      "awkward",
+      "impossible to",
+      "a pain to",
+      "hard to control",
+      "hard to clean",
+      "difficult to clean"
+    ],
+    "unpleasant_scent": [
+      "smells",
+      "smell",
+      "smelled",
+      "odor",
+      "odour",
+      "chemical smell",
+      "strong scent",
+      "overpowering",
+      "fragrance is",
+      "stinks",
+      "stinky",
+      "rancid",
+      "bad smell",
+      "awful smell",
+      "horrible smell",
+      "scent is too"
+    ],
+    "not_as_described": [
+      "not as described",
+      "not as pictured",
+      "not what i expected",
+      "different from the picture",
+      "looks nothing like",
+      "wrong color",
+      "wrong colour",
+      "wrong shade",
+      "misleading",
+      "false advertising",
+      "not the same as",
+      "description is",
+      "not what was advertised",
+      "doesn't match the",
+      "does not match the"
+    ],
+    "irritation_or_harm": [
+      "burned",
+      "burning",
+      "stings",
+      "stinging",
+      "itchy",
+      "itching",
+      "rash",
+      "irritation",
+      "irritated",
+      "broke me out",
+      "breakout",
+      "allergic",
+      "redness",
+      "swelling",
+      "hair loss",
+      "hair fell out",
+      "pulled my hair",
+      "damaged my hair",
+      "hurt my",
+      "painful",
+      "blisters",
+      "chemical burn"
+    ],
+    "arrived_damaged": [
+      "arrived broken",
+      "arrived damaged",
+      "arrived cracked",
+      "came broken",
+      "came damaged",
+      "came cracked",
+      "leaked",
+      "leaking",
+      "spilled",
+      "smashed",
+      "crushed",
+      "dented",
+      "half empty",
+      "seal was broken",
+      "box was damaged",
+      "packaging was"
+    ]
+  },
+  "absent_attribute": {
+    "note": "Probes for the four absent-attribute unanswerable questions. Each is a subject a beauty shopper could plausibly ask about -- packaging, certification, ingredients, delivery -- that this particular product's reviews in the declared window never discuss. Plausibility is the point: refusing \"what do reviewers say about GPS?\" tests nothing, because no retriever would surface anything either way. Which four pairs are used is decided by the scan returning zero in scope, never by taste.",
+    "probes": [
+      {
+        "id": "recyclable_packaging",
+        "label": "whether the packaging is recyclable",
+        "terms": [
+          "recyclable",
+          "recycling",
+          "recycle the",
+          "compostable",
+          "biodegradable",
+          "plastic waste",
+          "landfill"
+        ]
+      },
+      {
+        "id": "cruelty_free",
+        "label": "cruelty-free status and animal testing",
+        "terms": [
+          "cruelty free",
+          "cruelty-free",
+          "animal testing",
+          "tested on animals",
+          "peta",
+          "not tested on"
+        ]
+      },
+      {
+        "id": "sulfates_and_parabens",
+        "label": "sulfates and parabens in the ingredients",
+        "terms": [
+          "sulfate",
+          "sulfates",
+          "paraben",
+          "parabens",
+          "phthalate",
+          "phthalates",
+          "sls"
+        ]
+      },
+      {
+        "id": "expiry_date",
+        "label": "the expiry date or shelf life",
+        "terms": [
+          "expiration date",
+          "expiry date",
+          "expired",
+          "use by date",
+          "shelf life",
+          "past its date"
+        ]
+      },
+      {
+        "id": "counterfeit_concerns",
+        "label": "whether the item is counterfeit",
+        "terms": [
+          "counterfeit",
+          "fake product",
+          "not authentic",
+          "knock off",
+          "knockoff",
+          "not genuine"
+        ]
+      },
+      {
+        "id": "refill_availability",
+        "label": "refills and replacement parts",
+        "terms": [
+          "refill",
+          "refills",
+          "refillable",
+          "replacement part",
+          "replacement parts",
+          "spare parts"
+        ]
+      },
+      {
+        "id": "shipping_speed",
+        "label": "how long delivery took",
+        "terms": [
+          "arrived late",
+          "shipping was slow",
+          "took weeks to arrive",
+          "late delivery",
+          "delayed shipment",
+          "slow shipping"
+        ]
+      },
+      {
+        "id": "allergen_labelling",
+        "label": "allergen labelling on the ingredient list",
+        "terms": [
+          "allergen",
+          "allergens",
+          "ingredient list",
+          "ingredients listed",
+          "nut allergy",
+          "gluten free"
+        ]
+      },
+      {
+        "id": "child_safety",
+        "label": "child safety and childproofing",
+        "terms": [
+          "childproof",
+          "child proof",
+          "child safe",
+          "keep away from children",
+          "my toddler",
+          "swallowed it"
+        ]
+      },
+      {
+        "id": "subscription_pricing",
+        "label": "subscribe-and-save pricing",
+        "terms": [
+          "subscribe and save",
+          "subscription",
+          "auto ship",
+          "autoship",
+          "recurring order"
+        ]
+      }
+    ]
+  },
+  "out_of_domain": {
+    "note": "Probes for the three out-of-domain unanswerable questions: subjects a beauty-product review corpus has no business discussing. Scanned corpus-wide as well as in scope, so the corpus-wide count is recorded beside each question -- these terms are not literally absent from 694k reviews, and the refusal reason therefore claims only what the scan checked: the declared window.",
+    "probes": [
+      {
+        "id": "flight_delays",
+        "label": "flight delays",
+        "terms": [
+          "flight delay",
+          "flight was delayed",
+          "airline",
+          "boarding pass",
+          "connecting flight",
+          "airport"
+        ]
+      },
+      {
+        "id": "mortgage_rates",
+        "label": "mortgage interest rates",
+        "terms": [
+          "mortgage",
+          "interest rate",
+          "refinance",
+          "escrow",
+          "down payment on a house"
+        ]
+      },
+      {
+        "id": "engine_oil",
+        "label": "engine oil viscosity",
+        "terms": [
+          "engine oil",
+          "oil viscosity",
+          "5w-30",
+          "10w-40",
+          "crankcase",
+          "spark plug"
+        ]
+      },
+      {
+        "id": "tax_filing",
+        "label": "filing a tax return",
+        "terms": [
+          "tax return",
+          "irs",
+          "tax refund",
+          "w-2",
+          "deductible expenses"
+        ]
+      },
+      {
+        "id": "lawn_care",
+        "label": "lawn mower blades",
+        "terms": [
+          "lawn mower",
+          "lawnmower",
+          "mower blade",
+          "grass clippings",
+          "weed killer"
+        ]
+      }
+    ]
+  },
+  "frozen_at": "2026-09-11",
+  "frozen_note": "Frozen before any question was instantiated and before any answer exists. The spec hash is stamped on every artefact drawn from it; changing any hashed field invalidates the slot draw, the scan, the validation record and the question set together, which is the point."
+}

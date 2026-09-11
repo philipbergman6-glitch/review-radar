@@ -1,0 +1,49 @@
+{
+  "corpus_reviews": 694252,
+  "in_scope_hits": {
+    "B00KCTER3U|baseline": {
+      "allergen_labelling": 2,
+      "cruelty_free": 1,
+      "expiry_date": 1,
+      "sulfates_and_parabens": 2
+    },
+    "B00KCTER3U|recent": {
+      "cruelty_free": 1,
+      "sulfates_and_parabens": 3
+    },
+    "B00RPJZMUM|baseline": {
+      "child_safety": 1,
+      "expiry_date": 1
+    },
+    "B00SH5WGNE|recent": {
+      "allergen_labelling": 1,
+      "cruelty_free": 1
+    },
+    "B00V8ZCT1Y|baseline": {
+      "recyclable_packaging": 1
+    },
+    "B016LD3C04|recent": {
+      "counterfeit_concerns": 1
+    },
+    "B01MXLP1T1|baseline": {
+      "sulfates_and_parabens": 2
+    },
+    "B075GK4249|baseline": {
+      "counterfeit_concerns": 1
+    },
+    "B0BM4GX6TT|baseline": {
+      "counterfeit_concerns": 1,
+      "refill_availability": 1
+    }
+  },
+  "out_of_domain_corpus_hits": {
+    "engine_oil": 4,
+    "flight_delays": 125,
+    "lawn_care": 43,
+    "mortgage_rates": 4,
+    "tax_filing": 6
+  },
+  "scope": "full",
+  "silver_run_id": "4447727f-ee66-48eb-be9e-8a23e061d708",
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1"
+}
