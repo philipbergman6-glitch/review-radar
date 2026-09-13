@@ -1,6 +1,6 @@
 {
   "answer_spec_version": "1",
-  "status": "provisional",
+  "status": "frozen",
   "decided_in": "ticket 12 (ADR-0006, RR-17)",
   "note": "How a P7 answer is produced, and under what identity. The generator sees the question, its declared windows, and the retrieved reviews -- never the answer key, never the theme-shift direction, never a rating or a product's decline rank. `retrieval` is the retriever identity the evaluation run must match: changing any of it changes what every answer rests on, so it is hashed into the inference config alongside the prompt and the decoding schema.",
   "host": "ollama",
@@ -55,5 +55,19 @@
       "path": "conf/prompts/rag-v5.txt",
       "version": "rag-v5"
     }
+  },
+  "frozen_prompt": {
+    "name": "rag_v5",
+    "version": "rag-v5",
+    "freeze_commit": "524f6f847d4622cc2520516079ee55ee5575e450",
+    "frozen_at": "2026-09-13T16:19:47+00:00",
+    "decided_in": "ticket 12 (ADR-0006)",
+    "selected_on": {
+      "set": "development (ten questions, pre-2020 windows of non-candidate products)",
+      "criterion": "the citation and scope contract clean at 10/10, with the refusal branch reachable",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "reason": "rag-v1 and its successors were selected on contract behaviour alone -- no answer quality was scored, because scoring it would need answer keys and the only keyed set is the held-out thirty. rag-v2 fixed the citation vocabulary (contract 10/10, still 0 of 3 out-of-domain refusals). rag-v3 and rag-v4 added the subject test and the no-absence-as-a-claim rule in prose and moved 1 of 3. rag-v5 pairs the same prose with the decision-first schema and refused 3 of 3, plus two development products whose retrieved reviews are all praise, with the contract still clean at 10/10."
+    },
+    "note": "freeze_commit is the commit the development runs were made at; the commit recording this block is its child, so both are ancestors of the evaluation run."
   }
 }
