@@ -12,7 +12,9 @@ loaded. Nothing here touches Postgres, Spark or Elasticsearch.
   agree with the artefact about scope. This is the trip case the ticket names: a run id with
   no ledger row is a broken chain, not a missing nicety.
 * `output` -- a pinned run's recorded output must resolve physically: the Iceberg snapshot is
-  in the table's history *and* its summary carries the run id; the Elasticsearch generation
+  in the table's history *and* the run is attributed on it -- by the snapshot summary, or, for
+  a table `conf/lineage_chain.toml` declares column-attributed, by the run's own rows still
+  being there and still being that many (ticket 10a); the Elasticsearch generation
   exists with the alias on it and every document stamped `source_run_id`; the catalogue rows
   carry the loader's id. `current=false` is not a broken link -- the identity still resolves --
   but it withholds `publication_ready`.
@@ -20,7 +22,9 @@ loaded. Nothing here touches Postgres, Spark or Elasticsearch.
   still checked for existence, so a cut edge does not become an unchecked one.
 * `edge` -- a run's recorded input names an upstream run id; that run's recorded outputs must
   contain the exact identity claimed. This is the join. It also fails when the upstream run is
-  not the one the chain pinned for that job, which is how a stale branch is caught.
+  not one the chain pinned for that job, which is how a stale branch is caught. A job may have
+  several pinned runs -- `theme_samples` draws one frame per run -- so the pin set is the
+  closure of what the published artefacts consumed, never "whichever ran last" (ticket 10a).
 * `retention` -- a `failed` run's partial outputs are still present. Nothing is ever rolled
   back (ADR-0008 §3), so a failure stays diagnosable; a vanished partial output is a lie about
   what happened.
@@ -103,7 +107,10 @@ def pin_link(*, capability: str, job: str, run_id: str | None, source: str,
 
     `source=artifact` is the run the capability's own artefact names; `source=latest_success`
     is a job the capability claims beside it (search's product-month projection beside its
-    reviews index). A declared job with no successful run is a claim with nothing behind it.
+    reviews index); `source=consumed_by:<job>` is a run the walk reached because something
+    already pinned recorded it as an input -- the frame a labelling run actually read, rather
+    than the frame that happened to be drawn last. A declared job with no successful run is a
+    claim with nothing behind it.
     """
     ok = bool(run_id and status == "success")
     line = (f"LINEAGE_PIN capability={capability} job={job} run={short_id(run_id)} "
@@ -112,12 +119,22 @@ def pin_link(*, capability: str, job: str, run_id: str | None, source: str,
 
 
 def output_link(*, job: str, run_id: str, output: str, store: str, identity: str,
-                exists: bool, stamped: bool, current: bool, detail: str = "") -> Link:
-    """A recorded output → the physical artefact, stamped with the run that wrote it."""
+                exists: bool, stamped: bool, current: bool, detail: str = "",
+                attribution: str = "snapshot_summary") -> Link:
+    """A recorded output → the physical artefact, stamped with the run that wrote it.
+
+    `attribution` names *how* the claim was checked, because not every store answers the
+    question the same way. `snapshot_summary` is ADR-0008's default: the Iceberg snapshot
+    carries the run id. A table declared column-attributed in `conf/lineage_chain.toml` --
+    one written by `MERGE INTO`, where that write option does not exist -- answers by counting
+    the run's own rows instead. Either way `stamped` is a checked fact; the field exists so a
+    reader can see which check produced it rather than assuming the stricter one (ticket 10a).
+    """
     ok = bool(exists and stamped)
     line = (f"LINEAGE_OUTPUT run={short_id(run_id)} job={job} output={output} store={store} "
             f"identity={identity} exists={_b(exists)} stamped={_b(stamped)} "
-            f"current={_b(current)}{' ' + detail if detail else ''} ok={_b(ok)}")
+            f"current={_b(current)} attribution={attribution}"
+            f"{' ' + detail if detail else ''} ok={_b(ok)}")
     return Link("output", line, ok)
 
 
@@ -160,6 +177,11 @@ def self_line(*, capability: str) -> str:
     """This gate does not walk its own artefact -- it writes it (see the module docstring)."""
     return (f"LINEAGE_SELF capability={capability} reason=this gate writes this artefact at the "
             f"end of the walk, so checking it would only ever check the previous walk")
+
+
+def recorded_pin_line(*, edge: str, reason: str) -> str:
+    """An edge whose upstream run is chosen by the downstream, and the reason it may be."""
+    return f"LINEAGE_RECORDED_PIN edge={edge} reason={reason}"
 
 
 def pending_line(*, capability: str, reason: str) -> str:

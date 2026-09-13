@@ -108,6 +108,14 @@ def test_an_output_that_is_gone_or_unstamped_fails_but_a_superseded_one_does_not
     assert verdict([output(current=False)]).status == "PASS"
 
 
+def test_an_output_names_the_check_that_attributed_it():
+    """A weaker mechanism is legible, never silent: the line says which one answered."""
+    assert "attribution=snapshot_summary" in output().line
+    by_column = output(attribution="column:run_id", detail="rows_written=200 rows_at_head=200")
+    assert "attribution=column:run_id rows_written=200 rows_at_head=200" in by_column.line
+    assert by_column.ok
+
+
 def test_a_superseded_output_withholds_publication_without_breaking_the_chain():
     v = verdict([output(current=False)], mode="publication", stale_outputs=1)
     assert v.status == "FAIL"
@@ -236,6 +244,48 @@ def test_a_cut_edge_must_say_why_and_a_declared_one_must_not(tmp_path):
         E.load_edges(write('[[edge]]\ndownstream="a"\ninput="b"\n'))
 
 
+def test_an_edge_that_lets_the_downstream_choose_its_upstream_must_say_why(tmp_path):
+    def write(body):
+        p = tmp_path / "chain.toml"
+        p.write_text('[[edge]]\ndownstream="a"\ninput="b"\nupstream="c"\n' + body)
+        return p
+
+    with pytest.raises(ValueError, match="pin_reason is mandatory"):
+        E.load_edges(write('upstream_pin="recorded"\n'))
+    with pytest.raises(ValueError, match="recorded pin only"):
+        E.load_edges(write('pin_reason="because"\n'))
+    with pytest.raises(ValueError, match="upstream_pin must be one of"):
+        E.load_edges(write('upstream_pin="whatever"\n'))
+    (edge,) = E.load_edges(write('upstream_pin="recorded"\npin_reason="one frame per run"\n'))
+    assert edge.upstream_pin == "recorded" and edge.pin_reason == "one frame per run"
+
+
+def test_the_default_pin_is_the_strict_one():
+    """Every edge is checked against the chain's own pin unless it says otherwise in writing."""
+    loose = [e.name for e in E.load_edges() if e.upstream_pin == "recorded"]
+    assert all(e.pin_reason for e in E.load_edges() if e.upstream_pin == "recorded")
+    assert set(loose) == {"theme_labels_llm<-theme_samples.samples",
+                          "theme_labels_reference<-theme_samples.samples",
+                          "theme_samples<-gold.gold"}
+
+
+def test_a_table_attributed_by_column_declares_the_column_and_the_reason(tmp_path):
+    def write(body):
+        p = tmp_path / "chain.toml"
+        p.write_text(body)
+        return p
+
+    with pytest.raises(ValueError, match="is missing reason"):
+        E.load_attributions(write('[[attribution]]\ntable="t"\nmechanism="column"\n'
+                                  'column="run_id"\n'))
+    with pytest.raises(ValueError, match="only mechanism the gate knows"):
+        E.load_attributions(write('[[attribution]]\ntable="t"\nmechanism="vibes"\n'
+                                  'column="run_id"\nreason="x"\n'))
+    declared = E.load_attributions()
+    labels = declared["lake.gold.review_theme_labels"]
+    assert labels.column == "run_id" and "MERGE INTO" in labels.reason
+
+
 def test_an_edge_narrowed_to_one_spec_version_applies_to_that_version_only():
     edges = E.load_edges()
     embed = E.edge_for(edges, "search_index_reviews", "embeddings", "2")
@@ -255,6 +305,68 @@ def test_an_input_that_names_two_tables_yields_two_identities():
 
 def test_a_table_with_no_snapshot_id_names_no_identity():
     assert S.identities({"table": "products", "catalogue_load_id": UPSTREAM}) == []
+
+
+FRAME_EDGES = (E.Edge(downstream="theme_labels_llm", input="samples", upstream="theme_samples",
+                      status="declared", cut_reason=None, spec_version=None,
+                      upstream_pin="recorded", pin_reason="one frame per run"),
+               E.Edge(downstream="theme_samples", input="gold", upstream="gold",
+                      status="declared", cut_reason=None, spec_version=None),)
+
+
+def ledger_row(run_id, job, inputs=None, status="success"):
+    return {"run_id": run_id, "job_name": job, "spec_version": "2", "status": status,
+            "inputs": inputs or {}, "outputs": {}}
+
+
+def test_the_frame_a_run_read_is_pinned_beside_the_one_that_was_drawn_last():
+    """The defect ticket 10a names: `latest_success` pins a frame nothing in the chain read."""
+    read = ledger_row("frame-audit", "theme_samples")
+    drew_last = ledger_row("frame-pool", "theme_samples")
+    labels = ledger_row("labels-1", "theme_labels_llm",
+                        {"samples": {"run_id": "frame-audit", "table": "lake.gold.t",
+                                     "snapshot_id": 1}})
+    pins = {"theme_labels_llm": {"labels-1": labels}, "theme_samples": {"frame-pool": drew_last}}
+    by_id = {r["run_id"]: r for r in (read, drew_last, labels)}
+    assert S.consumed_pins(pins, FRAME_EDGES, by_id) == [(read, "theme_labels_llm")]
+
+
+def test_a_recorded_upstream_that_never_finished_is_not_pinned_into_the_chain():
+    """An unpinned upstream is what the edge link then reports -- not a run quietly adopted."""
+    crashed = ledger_row("frame-audit", "theme_samples", status="running")
+    labels = ledger_row("labels-1", "theme_labels_llm",
+                        {"samples": {"run_id": "frame-audit", "table": "lake.gold.t",
+                                     "snapshot_id": 1}})
+    pins = {"theme_labels_llm": {"labels-1": labels}}
+    assert S.consumed_pins(pins, FRAME_EDGES, {r["run_id"]: r for r in (crashed, labels)}) == []
+
+
+def test_only_an_edge_that_declares_it_may_name_its_own_upstream():
+    """`theme_samples <- gold` here is a strict edge, so the gold run it read is not adopted."""
+    gold = ledger_row("gold-old", "gold")
+    frame = ledger_row("frame-audit", "theme_samples",
+                       {"gold": {"run_id": "gold-old", "points_table": "lake.gold.p",
+                                 "points_snapshot_id": 2}})
+    pins = {"theme_samples": {"frame-audit": frame}}
+    assert S.consumed_pins(pins, FRAME_EDGES, {r["run_id"]: r for r in (gold, frame)}) == []
+
+
+def test_the_walk_closes_over_what_the_recorded_runs_themselves_recorded():
+    """Two hops: the frame the labels read, then the gold run that frame was drawn from."""
+    recorded_gold = E.Edge(downstream="theme_samples", input="gold", upstream="gold",
+                           status="declared", cut_reason=None, spec_version=None,
+                           upstream_pin="recorded", pin_reason="the draw is frozen")
+    gold = ledger_row("gold-old", "gold")
+    frame = ledger_row("frame-audit", "theme_samples",
+                       {"gold": {"run_id": "gold-old", "points_table": "lake.gold.p",
+                                 "points_snapshot_id": 2}})
+    labels = ledger_row("labels-1", "theme_labels_llm",
+                        {"samples": {"run_id": "frame-audit", "table": "lake.gold.t",
+                                     "snapshot_id": 1}})
+    by_id = {r["run_id"]: r for r in (gold, frame, labels)}
+    found = S.consumed_pins({"theme_labels_llm": {"labels-1": labels}},
+                            (FRAME_EDGES[0], recorded_gold), by_id)
+    assert found == [(frame, "theme_labels_llm"), (gold, "theme_samples")]
 
 
 def test_the_catalogue_load_id_is_a_run_reference_like_any_other():

@@ -11,7 +11,7 @@ SAMPLE_NAME ?= development
 # a stale default here would label the training pool with a superseded teacher.
 PROMPT ?= label_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -246,6 +246,9 @@ eval-table:  ## the whole evaluation table from conf/lineage_chain.toml + eval/*
 
 gate-lineage:  ## walk the declared chain: every artefact, snapshot and ES generation back to its ledger row; prints LINEAGE_GATE and chain_links_checked
 	$(RUN) scripts/gate_lineage.py --mode development --scope full
+
+reconcile-run:  ## close a run a killed driver left `running`: RUN_ID=<id> REASON="what happened" -- records it failed, never success
+	$(RUN) scripts/reconcile_run.py --run "$(RUN_ID)" --reason "$(REASON)"
 
 gate-lineage-publication:  ## the same walk at the publication bar: every declared capability pinned, current and finished
 	$(RUN) scripts/gate_lineage.py --mode publication --scope full

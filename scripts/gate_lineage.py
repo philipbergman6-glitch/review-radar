@@ -7,7 +7,10 @@ and this script hardcodes nothing about it. It walks:
                                                         ->  the runs that row's inputs name
 
 Every step is a **link**, and the terminal line prints how many were checked, so a verdict over
-an empty chain is impossible. The decision is pure and lives in `src/gates/lineage.py`;
+an empty chain is impossible. One run per job is pinned from the artefacts, plus -- for an edge
+the chain declares `upstream_pin = "recorded"` -- the run the downstream actually named, which
+is how a job that draws one frame per run is walked frame by frame rather than by whichever
+frame was drawn last (ticket 10a). The decision is pure and lives in `src/gates/lineage.py`;
 everything here is the I/O that feeds it: Postgres for the ledger and the catalogue, Spark for
 Iceberg snapshot history, Elasticsearch for index generations, the filesystem for artefacts.
 
@@ -98,6 +101,7 @@ class Iceberg:
         self.spark = spark
         self._history: dict[str, dict[int, str | None]] = {}
         self._current: dict[str, int | None] = {}
+        self._by_column: dict[tuple[str, str, int | None], dict[str, int]] = {}
 
     def _load(self, table: str) -> None:
         if table in self._history:
@@ -119,6 +123,30 @@ class Iceberg:
         return (snapshot_id in history, history.get(snapshot_id),
                 self._current[table] == snapshot_id)
 
+    def rows_by(self, table: str, column: str, snapshot_id: int | None) -> dict[str, int]:
+        """Row counts per value of `column`, at one snapshot or at the table head.
+
+        One grouped count per (table, column, snapshot) serves every run that claims it, so a
+        table with three writers is read twice -- once at each snapshot, once at the head --
+        rather than once per run.
+        """
+        key = (table, column, snapshot_id)
+        if key not in self._by_column:
+            if self.spark is None:
+                raise RuntimeError(f"{table} is declared column-attributed but no Spark session "
+                                   f"was started; the walk decided no pinned run touched Iceberg")
+            version = "" if snapshot_id is None else f" VERSION AS OF {snapshot_id}"
+            rows = self.spark.sql(f"SELECT {column} AS v, count(*) AS n FROM {table}{version} "
+                                  f"GROUP BY {column}").collect()
+            self._by_column[key] = {r["v"]: int(r["n"]) for r in rows if r["v"] is not None}
+        return self._by_column[key]
+
+    def attributed(self, table: str, column: str, snapshot_id: int,
+                   run_id: str) -> tuple[int, int]:
+        """(rows this run wrote at its snapshot, rows still carrying it at the table head)."""
+        return (self.rows_by(table, column, snapshot_id).get(run_id, 0),
+                self.rows_by(table, column, None).get(run_id, 0))
+
 
 def es_generation(es: Any, index: str, alias: str) -> dict[str, Any]:
     """What Elasticsearch holds for one projection generation, and who stamped its documents."""
@@ -139,9 +167,46 @@ def catalogue_rows(load_id: str) -> int:
                                 (load_id,)).fetchone()[0])
 
 
+def consumed_pins(pins: dict[str, dict[str, dict[str, Any]]], edges: Iterable[E.Edge],
+                  by_id: dict[str, dict[str, Any]]) -> list[tuple[dict[str, Any], str]]:
+    """The runs an already-pinned run recorded on an edge that lets it choose its upstream.
+
+    `theme_samples` draws one frame per run -- discovery, development, audit, training_pool --
+    so several of its outputs are live at once and `latest_success` names the wrong one for
+    any particular labelling run. An edge declared `upstream_pin = "recorded"` says the
+    downstream chooses; this walks those edges to closure, so the frame a run actually read is
+    pinned and its outputs are checked beside the published one (ticket 10a).
+
+    Returns `(upstream row, the job that consumed it)` pairs, in discovery order. A recorded
+    upstream that did not succeed is *not* pinned: the edge link then reports it as unpinned,
+    which is a chain resting on a run that never finished.
+    """
+    found: list[tuple[dict[str, Any], str]] = []
+    seen = {(job, run_id) for job, of_job in pins.items() for run_id in of_job}
+    frontier = [row for of_job in pins.values() for row in of_job.values()]
+    edges = list(edges)
+    while frontier:
+        row = frontier.pop()
+        for name, entry in sorted(row["inputs"].items()):
+            declared = E.edge_for(edges, row["job_name"], name, row["spec_version"])
+            ref = run_reference(entry)
+            if declared is None or declared.upstream_pin != "recorded" or ref is None:
+                continue
+            upstream = by_id.get(ref)
+            if upstream is None or upstream["status"] != "success":
+                continue
+            if (upstream["job_name"], ref) in seen:
+                continue
+            seen.add((upstream["job_name"], ref))
+            found.append((upstream, row["job_name"]))
+            frontier.append(upstream)
+    return found
+
+
 # ------------------------------------------------------------------ output links ----
 def check_output(name: str, entry: dict[str, Any], row: dict[str, Any], *, iceberg: Iceberg,
-                 es: Any) -> tuple[gate.Link, bool, bool]:
+                 es: Any, attributions: dict[str, E.Attribution] | None = None,
+                 ) -> tuple[gate.Link, bool, bool]:
     """One recorded output resolved against the store that holds it.
 
     Returns the link plus the two facts the walk needs beside the verdict: whether the artefact
@@ -150,8 +215,16 @@ def check_output(name: str, entry: dict[str, Any], row: dict[str, Any], *, icebe
 
     An output shape this gate cannot resolve is a crash, not a pass: a store nobody checks is
     exactly the hole the ledger exists to close.
+
+    A table declared column-attributed is one several runs write into, and the two questions
+    separate there. *Who wrote it* is still the snapshot summary when the writer could stamp
+    one (`theme_samples` writes its frames with `writeTo`), and the column when it could not
+    (`MERGE INTO` has no such write option). *Is it still current* can never be head-identity
+    on a shared table -- the next writer moves the head within the hour -- so it is answered by
+    the run's rows still being there, and still being that many (ticket 10a).
     """
     run_id, job = row["run_id"], row["job_name"]
+    attributions = attributions or {}
     table = entry.get("table")
     if isinstance(table, str) and table.startswith(ICEBERG_PREFIX):
         found = identities(entry)
@@ -160,6 +233,20 @@ def check_output(name: str, entry: dict[str, Any], row: dict[str, Any], *, icebe
                              f"exactly one (table, snapshot id)")
         (t, snap), = found
         exists, stamped_run, current = iceberg.check(t, snap)
+        declared = attributions.get(t)
+        if declared is not None:
+            written, retained = (iceberg.attributed(t, declared.column, snap, run_id)
+                                 if exists else (0, 0))
+            by_summary = stamped_run is not None
+            return (gate.output_link(
+                        job=job, run_id=run_id, output=name, store="iceberg",
+                        identity=f"{t}@{snap}", exists=exists,
+                        stamped=(stamped_run == run_id) if by_summary else written > 0,
+                        current=retained == written and written > 0,
+                        attribution=("snapshot_summary+" if by_summary else "")
+                                    + f"column:{declared.column}",
+                        detail=f"rows_written={written} rows_at_head={retained}"),
+                    exists, retained == written and written > 0)
         return (gate.output_link(job=job, run_id=run_id, output=name, store="iceberg",
                                  identity=f"{t}@{snap}", exists=exists,
                                  stamped=stamped_run == run_id, current=current,
@@ -203,13 +290,23 @@ def main() -> None:
     args = ap.parse_args()
 
     chain, edges = E.load_chain(), E.load_edges()
+    attributions = E.load_attributions()
     ledger = load_ledger()
     by_id = {r["run_id"]: r for r in ledger}
     links: list[gate.Link] = []
     extra: list[str] = []
 
     # --- pin one run per declared job, rooted in the artefacts the phases published --------
-    pinned: dict[str, dict[str, Any]] = {}
+    #: job -> {run id: ledger row}. A job usually has one pinned run; a job whose edges are
+    #: declared `upstream_pin = "recorded"` has one per live output, all of them walked.
+    pins: dict[str, dict[str, dict[str, Any]]] = {}
+
+    def pin(row: dict[str, Any]) -> None:
+        pins.setdefault(row["job_name"], {})[row["run_id"]] = row
+
+    def is_pinned(job: str | None, run_id: str | None) -> bool:
+        return run_id in pins.get(job or "", {})
+
     claimed: list[tuple[E.Capability, dict[str, Any]]] = []
     for cap in chain:
         if cap.id == SELF:
@@ -232,7 +329,7 @@ def main() -> None:
         claimed.append((cap, doc))
         row = by_id.get(doc.get("pipeline_run_id"))
         if row is not None and row["status"] == "success":
-            pinned.setdefault(row["job_name"], row)
+            pin(row)
 
     for cap, doc in claimed:
         run_id = doc.get("pipeline_run_id")
@@ -243,40 +340,56 @@ def main() -> None:
             status=row["status"] if row else None,
             job_declared=not cap.jobs or job in cap.jobs,
             scope_matches=bool(row and row["data_scope"] == doc.get("scope")),
-            pinned=bool(row and pinned.get(job, {}).get("run_id") == run_id)))
+            pinned=bool(row and is_pinned(job, run_id))))
         for job_name in cap.jobs:
-            if job_name not in pinned:
+            if job_name not in pins:
                 found = latest_success(ledger, job_name, category=args.category, scope=args.scope)
                 if found is not None:
-                    pinned[job_name] = found
-            pin = pinned.get(job_name)
+                    pin(found)
+            of_job = pins.get(job_name, {})
+            primary = of_job.get(run_id) or next(iter(of_job.values()), None)
             links.append(gate.pin_link(
-                capability=cap.id, job=job_name, run_id=pin["run_id"] if pin else None,
-                source="artifact" if pin and pin["run_id"] == run_id else "latest_success",
-                status=pin["status"] if pin else None))
+                capability=cap.id, job=job_name,
+                run_id=primary["run_id"] if primary else None,
+                source="artifact" if primary and primary["run_id"] == run_id else "latest_success",
+                status=primary["status"] if primary else None))
+
+    # --- a job with several live outputs: pin the run the downstream recorded, too ---------
+    owner = {job: cap.id for cap, _ in claimed for job in cap.jobs}
+    for upstream, consumer in consumed_pins(pins, edges, by_id):
+        pin(upstream)
+        links.append(gate.pin_link(capability=owner.get(consumer, consumer),
+                                   job=upstream["job_name"], run_id=upstream["run_id"],
+                                   source=f"consumed_by:{consumer}", status=upstream["status"]))
+    for e in edges:
+        if e.upstream_pin == "recorded" and e.status == "declared":
+            extra.append(gate.recorded_pin_line(edge=e.name, reason=e.pin_reason or ""))
 
     # --- resolve every pinned run's outputs, then join its inputs to their upstream --------
     stale = 0
     es = None
     spark = None
+    walked = [(job_name, row) for job_name, of_job in sorted(pins.items())
+              for _, row in sorted(of_job.items())]
     try:
-        if any(k in e for r in pinned.values() for e in r["outputs"].values()
+        if any(k in e for _, r in walked for e in r["outputs"].values()
                for k in ("index", "alias")):
             from src.serving.projection import client
             es = client()
-        if any(str(e.get("table", "")).startswith(ICEBERG_PREFIX)
-               for r in pinned.values() for e in list(r["outputs"].values()) + list(r["inputs"].values())):
+        if any(str(e.get("table", "")).startswith(ICEBERG_PREFIX) for _, r in walked
+               for e in list(r["outputs"].values()) + list(r["inputs"].values())):
             from src.common.spark import build
             spark = build("gate-lineage", cores="local[2]", driver_memory="2g")
         iceberg = Iceberg(spark)
 
-        for job_name, row in sorted(pinned.items()):
+        for job_name, row in walked:
             for name, entry in sorted(row["outputs"].items()):
-                link, exists, current = check_output(name, entry, row, iceberg=iceberg, es=es)
+                link, exists, current = check_output(name, entry, row, iceberg=iceberg, es=es,
+                                                     attributions=attributions)
                 links.append(link)
                 stale += int(exists and not current)
 
-        for job_name, row in sorted(pinned.items()):
+        for job_name, row in walked:
             for name, entry in sorted(row["inputs"].items()):
                 declared = E.edge_for(edges, job_name, name, row["spec_version"])
                 ref = run_reference(entry)
@@ -305,16 +418,15 @@ def main() -> None:
                     declared=bool(declared and declared.status == "declared"
                                   and declared.upstream == upstream_job),
                     resolves=resolves,
-                    pinned=pinned.get(upstream_job, {}).get("run_id") == ref))
+                    pinned=is_pinned(upstream_job, ref)))
 
         for edge in edges:
             if edge.status == "cut":
                 extra.append(gate.cut_line(what="edge", name=edge.name, reason=edge.cut_reason or ""))
                 continue
-            row = pinned.get(edge.downstream)
-            if row is None or not edge.applies_to(row["spec_version"]):
-                continue
-            if edge.input not in row["inputs"]:
+            for row in pins.get(edge.downstream, {}).values():
+                if not edge.applies_to(row["spec_version"]) or edge.input in row["inputs"]:
+                    continue
                 links.append(gate.edge_link(
                     downstream_job=edge.downstream, downstream_run=row["run_id"],
                     input_name=edge.input, upstream_job=edge.upstream, upstream_run=None,
@@ -322,7 +434,8 @@ def main() -> None:
 
         # --- a failed run keeps its partial outputs: nothing is ever rolled back ----------
         for row in [r for r in ledger if r["status"] == "failed" and r["outputs"]]:
-            present = sum(int(check_output(name, entry, row, iceberg=iceberg, es=es)[1])
+            present = sum(int(check_output(name, entry, row, iceberg=iceberg, es=es,
+                                           attributions=attributions)[1])
                           for name, entry in sorted(row["outputs"].items()))
             links.append(gate.retention_link(job=row["job_name"], run_id=row["run_id"],
                                              outputs=len(row["outputs"]), present=present,
@@ -331,25 +444,26 @@ def main() -> None:
         if spark is not None:
             spark.stop()
 
-    orphans = [r for r in ledger if r["status"] == "running" and r["run_id"] not in
-               {p["run_id"] for p in pinned.values()}]
+    walked_ids = {row["run_id"] for _, row in walked}
+    orphans = [r for r in ledger if r["status"] == "running" and r["run_id"] not in walked_ids]
     for r in orphans:
         extra.append(f"LINEAGE_ORPHAN run={r['run_id'][:8]} job={r['job_name']} "
                      f"started={r['started_at']:%Y-%m-%d %H:%M} status=running")
     failed = [r for r in ledger if r["status"] == "failed"]
-    extra.append(gate.ledger_line(runs_pinned=len(pinned), running=len(orphans),
+    extra.append(gate.ledger_line(runs_pinned=len(walked), running=len(orphans),
                                   failed=len(failed),
-                                  dirty=sum(1 for p in pinned.values() if p["worktree_dirty"])))
+                                  dirty=sum(1 for _, r in walked if r["worktree_dirty"])))
 
     pending = sum(1 for line in extra if line.startswith("LINEAGE_PENDING"))
     v = gate.verdict(links, mode=args.mode, pending=pending, stale_outputs=stale,
                      orphan_running=len(orphans), extra_lines=extra)
     v.emit()
-    primary = pinned.get("silver") or (next(iter(pinned.values())) if pinned else None)
+    primary = next((r for j, r in walked if j == "silver"), None) or next(
+        (r for _, r in walked), None)
     E.record(v, capability="lineage", phase="Lineage track", kind="reproducibility",
              protocol_hash=(primary or {}).get("git_commit_sha") or "uncommitted-worktree",
              population={"name": f"{args.category}/declared chain", "n": len(links),
-                         "runs_pinned": len(pinned), "capabilities_claimed": len(claimed),
+                         "runs_pinned": len(walked), "capabilities_claimed": len(claimed),
                          "capabilities_pending": pending},
              pipeline_run_id=(primary or {}).get("run_id") or "no-run-pinned",
              scope=args.scope,

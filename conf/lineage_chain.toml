@@ -189,6 +189,13 @@ jobs = []
 # written out; the identity is still checked for existence as an unjoined input, so cutting an
 # edge never makes it an unchecked one.
 #
+# `upstream_pin` says which run of the upstream job the edge may name. The default `chain` is
+# strict -- the run the chain pins for that job -- and catches a downstream built on a stale
+# branch. `upstream_pin = "recorded"` lets the downstream choose, for a job that has several
+# live outputs at once, and then `pin_reason` is mandatory and is printed by the gate: the
+# recorded run is pinned and walked beside the published one, so the weaker check buys more
+# checking rather than less (ticket 10a).
+#
 # Not edges: `theme_classifier_train`/`theme_classifier_score` consume a labels table and a
 # model path rather than a named run, and `rag_answers` has no ledger-run input. They appear
 # in `themes_quality`'s `jobs` above and are pinned as runs; they contribute outputs, not joins.
@@ -242,6 +249,8 @@ downstream = "theme_samples"
 input = "gold"
 upstream = "gold"
 status = "declared"
+upstream_pin = "recorded"
+pin_reason = "P6's frames were drawn on 2026-09-07 from gold run 4cd1fde7; P3 publishes the later 6e1c0d3a, whose GOLD_REPRO_GATE re-derives the same three tables from the same silver snapshot. Redrawing the frames against a run that reproduces the one they used would move a frozen sample for no gain (ticket 09: inference may repeat, measurement may not), so this edge names the run the draw recorded and that run is walked beside the published one"
 
 [[edge]]
 downstream = "theme_samples"
@@ -254,6 +263,8 @@ downstream = "theme_labels_llm"
 input = "samples"
 upstream = "theme_samples"
 status = "declared"
+upstream_pin = "recorded"
+pin_reason = "theme_samples draws one frame per run -- discovery, development, audit, training_pool -- so several of its outputs are live at once and the latest is not the right one for any particular labelling run. The frame a run read is the one it recorded, and the audit frame is sealed (ticket 09), so the recorded run is the only correct pin"
 
 [[edge]]
 downstream = "theme_labels_llm"
@@ -266,9 +277,51 @@ downstream = "theme_labels_reference"
 input = "samples"
 upstream = "theme_samples"
 status = "declared"
+upstream_pin = "recorded"
+pin_reason = "the reference labels are written blind against one frame (RR-21); like the labeller's edge above, the frame it read is the run it recorded, not whichever frame was drawn last"
 
 [[edge]]
 downstream = "theme_labels_reference"
 input = "silver"
 upstream = "silver"
 status = "declared"
+
+# ================================================= How a table says who wrote it ====
+#
+# ADR-0008 asks every Iceberg snapshot to carry the producing `run_id` in its snapshot
+# summary, and every writer that reaches the table through `writeTo` stamps it that way
+# (`src/spark/silver.py`, `src/spark/theme_samples.py`). One table cannot: three writers reach
+# `gold.review_theme_labels` through `MERGE INTO`, where the `snapshot-property.run_id` write
+# option has no equivalent on the SQL path.
+#
+# Provenance is not lost there -- every row carries `run_id` as a column -- so the fix is to
+# name the mechanism rather than to skip the check, or to re-run hours of inference for the
+# sake of a snapshot property (ticket 09: inference may repeat, measurement may not). A table
+# declared here is checked by counting the rows the run wrote: at its own snapshot, and still
+# at the table head.
+#
+# The declaration also settles what `current` can mean on a table with several writers. A
+# single-writer table's output is current when its snapshot is the table head; on a shared
+# table the head belongs to whoever wrote last, so the honest question is whether the run's
+# own rows are still there. The tables below are shared: three label sources MERGE into one
+# labels table, and `theme_samples` writes one frame per run into one assignments table.
+# Where the writer could stamp the snapshot summary it still must -- the column answers
+# `current`, never `stamped`.
+
+[[attribution]]
+table = "lake.gold.review_theme_labels"
+mechanism = "column"
+column = "run_id"
+reason = "three writers MERGE INTO this table (ADR-0003), and Iceberg's snapshot-property write option does not exist on the SQL path; every row carries run_id as a column instead (src/ai/theme_labels.py:48), so the run's rows are counted at its snapshot and at the table head"
+
+[[attribution]]
+table = "lake.gold.theme_sample_assignments"
+mechanism = "column"
+column = "run_id"
+reason = "one frame per run lives in this table at once -- discovery, development, audit, training_pool, each written to its own partition -- so the head belongs to the frame drawn last and no frame's snapshot stays the head. The writer stamps the snapshot summary (src/spark/theme_samples.py:394), which still answers who wrote it; the column answers whether the frame's rows are still there"
+
+[[attribution]]
+table = "lake.gold.matched_controls"
+mechanism = "column"
+column = "run_id"
+reason = "written beside the assignments by the same per-frame job and shared the same way, so the same two questions get the same two answers"

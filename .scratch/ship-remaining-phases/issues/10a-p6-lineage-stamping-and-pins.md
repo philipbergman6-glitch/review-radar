@@ -59,11 +59,39 @@ four days later, plus `dirty_runs=5`.
 **Blocks:** the publication-mode lineage gate, and therefore the design doc's claim that every
 capability traces back to the run that produced it.
 
-**Status:** ready-for-agent
+**Status:** done (2026-09-13)
 
-- [ ] `gold.review_theme_labels` is attributable by the mechanism the lineage gate checks —
+- [x] `gold.review_theme_labels` is attributable by the mechanism the lineage gate checks —
       stamped, or checked by column with the check named
-- [ ] `theme_samples` resolves per frame rather than by `latest_success`
-- [ ] The orphaned `running` gold run is terminated or explained
-- [ ] `make gate-lineage` prints `chain_clean=true`, or names each unwalkable link with a
+- [x] `theme_samples` resolves per frame rather than by `latest_success`
+- [x] The orphaned `running` gold run is terminated or explained
+- [x] `make gate-lineage` prints `chain_clean=true`, or names each unwalkable link with a
       declared `cut_reason` rather than a `pending`
+
+**How it closed.** Re-stamping was never on the table: a snapshot summary is immutable, so even
+teaching `merge_chunk` to stamp would leave the three existing snapshots unstamped, and
+re-running is excluded. So the gate learned the second option, declared in
+`conf/lineage_chain.toml` as `[[attribution]]`: a table several runs write into is attributed
+by its `run_id` column, and the output line prints `attribution=column:run_id rows_written=200
+rows_at_head=200` rather than hiding which check answered.
+
+The declaration turned out to own a second thing as well — `current` cannot mean head-identity
+on a shared table, where the next writer moves the head within the hour — so
+`theme_sample_assignments` and `matched_controls` are declared too. Where the writer *can*
+stamp the snapshot summary it still must: the column answers `current`, never `stamped`.
+
+The pin rule became `upstream_pin = "recorded"` on three edges, each with a mandatory
+`pin_reason` the gate prints: `theme_samples` draws one frame per run, so the frame a labelling
+run read is the one it recorded. The recorded run is pinned and walked *beside* the published
+one — the weaker pin check buys more checking, not less. The default stays strict.
+
+The orphan closed through `make reconcile-run`, which records `failed` (never `success`), keeps
+its counts null, and writes a note saying `finished_at` is the reconciliation time.
+
+`LINEAGE_GATE=PASS chain_clean=true chain_links_checked=64` (was FAIL over 54).
+
+**Left open, and printed rather than papered over:** `stale_outputs=4` still withholds
+`publication_ready` — gold run `4cd1fde7`'s three tables, superseded by the `6e1c0d3a` re-run
+that P6's frames predate, and the audit frame's `matched_controls` rows, overwritten by the
+training-pool draw (`rows_at_head=0`). Both are true statements about the lake. Ticket 19's
+publication-mode claim needs a decision on them: redraw, or declare the supersession.

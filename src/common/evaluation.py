@@ -49,6 +49,9 @@ VERDICTS = ("PASS", "FAIL", "REPORTED", "NOT_RUN")
 KINDS = ("reproducibility", "quality")
 CHAIN_STATUSES = ("declared", "cut")
 
+#: Which run of the upstream job an edge may name: the chain's pin, or the one recorded.
+UPSTREAM_PINS = ("chain", "recorded")
+
 #: Sentinel for "this key is absent", so a caller can build an artefact dict without one.
 OMIT = object()
 
@@ -217,6 +220,13 @@ class Edge:
 
     `spec_version` narrows the edge to one contract version of the downstream job -- reviews
     gained its embeddings input at v2 -- and is None when every version must show it.
+
+    `upstream_pin` says which run of the upstream job this edge is allowed to name. The
+    default, `chain`, is the strict one: the run the chain pins for that job, which is how a
+    downstream built on a stale branch is caught. `recorded` says the downstream chooses --
+    a job that draws one frame per run has several live outputs at once, and "whichever ran
+    last" names the wrong one -- and then `pin_reason` is mandatory, because the weaker check
+    has to be justified in writing rather than configured quietly (ticket 10a).
     """
     downstream: str
     input: str
@@ -224,6 +234,8 @@ class Edge:
     status: str
     cut_reason: str | None
     spec_version: str | None
+    upstream_pin: str = "chain"
+    pin_reason: str | None = None
 
     @property
     def key(self) -> tuple[str, str]:
@@ -235,6 +247,37 @@ class Edge:
 
     def applies_to(self, spec_version: str) -> bool:
         return self.spec_version is None or self.spec_version == spec_version
+
+
+@dataclass(frozen=True)
+class Attribution:
+    """How one table says which run wrote a row, when the snapshot summary cannot.
+
+    ADR-0008 asks every Iceberg snapshot to carry its `run_id` in the snapshot summary, and
+    every writer that uses `writeTo` stamps it. A table written by `MERGE INTO` cannot: the
+    SQL path has no equivalent of the `snapshot-property.run_id` write option. Declaring the
+    column here does not lower the bar -- it names the mechanism the lineage gate must check
+    instead, so the link stays checked rather than skipped (ticket 10a).
+    """
+    table: str
+    column: str
+    reason: str
+
+
+def load_attributions(path: Path = CHAIN_PATH) -> dict[str, Attribution]:
+    """Tables attributed by column rather than by snapshot summary, keyed by table name."""
+    out: dict[str, Attribution] = {}
+    for i, a in enumerate(_read_chain(path).get("attribution", [])):
+        for key in ("table", "mechanism", "column", "reason"):
+            if not str(a.get(key, "")).strip():
+                raise ValueError(f"attribution[{i}] is missing {key}")
+        if a["mechanism"] != "column":
+            raise ValueError(f"attribution[{i}]: the only mechanism the gate knows is 'column', "
+                             f"got {a['mechanism']!r}")
+        if a["table"] in out:
+            raise ValueError(f"attribution for {a['table']} is declared twice")
+        out[a["table"]] = Attribution(table=a["table"], column=a["column"], reason=a["reason"])
+    return out
 
 
 def _read_chain(path: Path) -> dict[str, Any]:
@@ -258,6 +301,15 @@ def load_edges(path: Path = CHAIN_PATH) -> tuple[Edge, ...]:
             raise ValueError(f"edge[{i}]: status is cut, so cut_reason is mandatory")
         if status == "declared" and reason:
             raise ValueError(f"edge[{i}]: cut_reason belongs to a cut edge only")
+        pin = e.get("upstream_pin", "chain")
+        if pin not in UPSTREAM_PINS:
+            raise ValueError(f"edge[{i}]: upstream_pin must be one of {UPSTREAM_PINS}, "
+                             f"got {pin!r}")
+        pin_reason = e.get("pin_reason")
+        if pin == "recorded" and not str(pin_reason or "").strip():
+            raise ValueError(f"edge[{i}]: upstream_pin is recorded, so pin_reason is mandatory")
+        if pin == "chain" and pin_reason:
+            raise ValueError(f"edge[{i}]: pin_reason belongs to a recorded pin only")
         spec = e.get("spec_version")
         ident = (e["downstream"], e["input"], spec)
         if ident in seen:
@@ -265,7 +317,8 @@ def load_edges(path: Path = CHAIN_PATH) -> tuple[Edge, ...]:
         seen.add(ident)
         out.append(Edge(downstream=e["downstream"], input=e["input"], upstream=e["upstream"],
                         status=status, cut_reason=reason,
-                        spec_version=None if spec is None else str(spec)))
+                        spec_version=None if spec is None else str(spec),
+                        upstream_pin=pin, pin_reason=pin_reason))
     return tuple(out)
 
 

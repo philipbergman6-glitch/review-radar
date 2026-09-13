@@ -52,7 +52,14 @@ def ensure_table(spark: SparkSession, table: str) -> None:
 
 
 def merge_chunk(spark: SparkSession, table: str, rows: list[dict[str, Any]]) -> None:
-    """MERGE on the idempotency key: an existing terminal row is updated, never duplicated."""
+    """MERGE on the idempotency key: an existing terminal row is updated, never duplicated.
+
+    The SQL path has no equivalent of `writeTo`'s `snapshot-property.run_id`, so the snapshots
+    this writes carry no run id in their summary and ADR-0008's usual stamp is unavailable
+    here. Provenance is the `run_id` column on every row instead, and
+    `conf/lineage_chain.toml` declares this table column-attributed so `LINEAGE_GATE` checks
+    that column rather than skipping the link (ticket 10a).
+    """
     if not rows:
         return
     df = spark.createDataFrame(rows, schema=spark.table(table).schema)
