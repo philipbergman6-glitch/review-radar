@@ -1,0 +1,1745 @@
+{
+  "alias": "reviews",
+  "answers": [
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 17.617,
+          "input_tokens": 1539,
+          "output_tokens": 230,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "ac0a0a1a97f9623ac104f942dba3bbb286784359fda4bbdbde35b95f3f582d09",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [
+          {
+            "citations": [
+              {
+                "cite_id": "R3",
+                "window": "scope"
+              }
+            ],
+            "claim": "The bottle is not leak proof."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R4",
+                "window": "scope"
+              }
+            ],
+            "claim": "The top of the bottle arrived lifted up, causing leakage."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R2",
+                "window": "scope"
+              }
+            ],
+            "claim": "The bottle does not come with a lid or cap for the applicator tip."
+          }
+        ],
+        "refusal_reason": null,
+        "refused": false,
+        "subject": "complaints about Soft 'N Style Applicator Bottle, 6 oz (ASIN B000NIZYIW) between 2019-01 and 2019-12",
+        "subject_supported": true
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-product_scoped-01",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 1,
+            "knn": 1
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 1,
+          "review_id": "a3cd2df0d47d070c8b04a148062e287d954d3ead97adeb04ac95c614b2562edf",
+          "review_month": "2019-10",
+          "score": 0.03278689,
+          "text": "Needed new applicator squeeze bottle with 0.5 oz and 1.0 oz markings to replace old Clairol Professional Applicator bottle which now leaks where the top screws on.<br /><br />All I had to do was to cut the tip to get the size opening I need.",
+          "title": "Perfect replacemnt for old, leaking applicator.",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 2,
+            "knn": 2
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 2,
+          "review_id": "837236e7461152a66d429894b7a30b68c33cbbb88dccf6b973c9234fc73de7ff",
+          "review_month": "2019-01",
+          "score": 0.03225806,
+          "text": "4 stars because it does NOT come with a lid/cap for the applicator tip. Other than that it is an inexpensive and effective applicator bottle.",
+          "title": "No cap for applicator tip but still good",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 4,
+            "knn": 3
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 3,
+          "review_id": "0578563f7b4c981a549a4886c426d874a280390f7c8e82fcebefb37ff7cc6493",
+          "review_month": "2019-06",
+          "score": 0.03149802,
+          "text": "I love this bottle. I poured my hair oils in it and I oil my hair with this bottle. It is definitely not leak proof so keep it upright.",
+          "title": "Good Value for the money",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "bm25": 6,
+            "knn": 4
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 4,
+          "review_id": "07416d6d5a3763d8a0e18f763586728845511ada94440c7bb7462a0e5228a2b2",
+          "review_month": "2019-02",
+          "score": 0.03077652,
+          "text": "Do not buy!!!! I ordered this bottle and it came with the top lifted up and it got worse! I tried using tape so my oil won\u2019t come out but it was spilling everywhere! Not worth it.",
+          "title": "DO NOT PURCHASE",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "bm25": 7,
+            "knn": 5
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 5,
+          "review_id": "d5f240ff814c3c4dcdbdf1814f554d1598499b9cd005636c2e0da330cfa28b9d",
+          "review_month": "2019-05",
+          "score": 0.03030999,
+          "text": "It does exactly what it is intended to do. I use it for shampooing my hair so that I can get directly to my scalp. It is also helping me save on shampoo so I'm not using too much.",
+          "title": "Good buy",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "bm25": 3
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 6,
+          "review_id": "a1d5d4f84951d06851b44dbe1a619774c252989115fb895eda142e11fe821bb1",
+          "review_month": "2019-03",
+          "score": 0.01587302,
+          "text": "It's a bottle. Had to cut the nozzle a little bit it's hard to mess up a bottle.",
+          "title": "It's a Bottle",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "bm25": 5
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 7,
+          "review_id": "5a9ff0167f6253e48e411b0473aebc6cdae443107f47ade361a04bd80302f138",
+          "review_month": "2019-12",
+          "score": 0.01538462,
+          "text": "Soft plastic allows for easy squeezing of contents. Bought 2. Considering getting more.",
+          "title": "Just what I needed.",
+          "window": "scope"
+        }
+      ],
+      "retrieved_digest": "fd7095f40a1b30aed05e36f34355191ba3826d8f61b401923acfdca8107b3ae8",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 16.061,
+          "input_tokens": 1748,
+          "output_tokens": 218,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "fc07c4e3ac2d834e74dadef2ca655a92665c9d5d59fadde28882d6042ddbf2da",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [
+          {
+            "citations": [
+              {
+                "cite_id": "R3",
+                "window": "scope"
+              },
+              {
+                "cite_id": "R6",
+                "window": "scope"
+              },
+              {
+                "cite_id": "R7",
+                "window": "scope"
+              }
+            ],
+            "claim": "The product was not what the customer expected."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R9",
+                "window": "scope"
+              }
+            ],
+            "claim": "The product was too sticky."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R9",
+                "window": "scope"
+              }
+            ],
+            "claim": "The product did not provide sufficient hold."
+          }
+        ],
+        "refusal_reason": null,
+        "refused": false,
+        "subject": "complaints about the product",
+        "subject_supported": true
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-product_scoped-02",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 1,
+            "knn": 1
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 1,
+          "review_id": "30435328d36c7b31e753f227fb10758c2cb223f7e6a8d5942fa1c0a2504c51f0",
+          "review_month": "2019-02",
+          "score": 0.03278689,
+          "text": "Right on the product it says: \"Mini Bed Head Manipulator\"  -- it should be advertised as such.  I assumed it was the same as my last (2oz) size and I could have gotten that one for just a couple more dollars.  :(",
+          "title": "Wow.  1 oz is tiny.  2 oz is way better deal",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 2,
+            "knn": 2
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 2,
+          "review_id": "45417e3d1cc6eaff7ccd2e9c296e4b34f5b9a613956f109a8d15c86f4a055db6",
+          "review_month": "2019-04",
+          "score": 0.03225806,
+          "text": "\" A Funky Gunk That Rocks\"<br />I love this product for it's wonderful way of showing the highlights in my cute short hair. I went a little crazy with my current color, added cobalt blue highlights. My hairdresser Jess at Supercuts in the Hollywood District called it \u201cadding a little spice\u201d.<br />What I like the most about \u201cThe Manipulator\u201d is how it performs five Stars,Stars,Stars, Stars, Stars! I do need to say that this product is Highly Concentrated, use as little as you can.<br />Thank you Tigi Bed Head,<br />Catt in Portland, Oregon",
+          "title": "\" A Funky Gunk That Rocks\"",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 3,
+            "knn": 9
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 3,
+          "review_id": "a335b3ebf7f9a300406a359ed28d374b20c564de0efe4b10db7c36955b59632e",
+          "review_month": "2019-08",
+          "score": 0.03036577,
+          "text": "This isn\u2019t what I was hoping for and I\u2019m glad I bought this small size first. I needed a bit more hold.",
+          "title": "Should have looked for a paste.",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "knn": 3
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 4,
+          "review_id": "cd5f0af1441dfa8675beb7b914a438d969099b4b0afde5309868977669674f40",
+          "review_month": "2019-06",
+          "score": 0.01587302,
+          "text": "Received it fast. Works great love this product. I use it for those small new hairs growing all around the frame of my face.",
+          "title": "Great",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "knn": 4
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 5,
+          "review_id": "333f03f70ec83c09d042156c9785ff393770d8701bfd5fd342e969bc582cea6c",
+          "review_month": "2019-07",
+          "score": 0.015625,
+          "text": "I love this stuff, it smells good and it gives your hair a lot of volume with just a little drop.",
+          "title": "I love this stuff!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "knn": 5
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 6,
+          "review_id": "95c6cea5a918740c539acbac5cead6f29f2c220d468f8e2894bcb18e90e57436",
+          "review_month": "2019-07",
+          "score": 0.01538462,
+          "text": "La foto que usan del producto es de 2 onz y aunque la descripci\u00f3n diga que es 1 onz puede ser enga\u00f1oso. Deber\u00edan cambiarla.",
+          "title": "Wrong picture",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "knn": 6
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 7,
+          "review_id": "0a9cebae2603164ff03678e90edb23cc166f454ef8922fdd0e2a0f812980b98f",
+          "review_month": "2019-10",
+          "score": 0.01515152,
+          "text": "The pic made product look bigger then it was. Paid same price that another seller charged same price for an ounce larger won't make that mistake again",
+          "title": "Pic misleading",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R8",
+          "legs": {
+            "knn": 7
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 8,
+          "review_id": "10e7dc66266f2db8c04a20a176d6df49362ead69cc415674a28f2af2e668df16",
+          "review_month": "2019-01",
+          "score": 0.01492537,
+          "text": "A little goes a long way. Its not a wax. its thick, rub a dab onto palm of your hands and style away.  Ive  been using this product for many years.",
+          "title": "I love this stuff",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R9",
+          "legs": {
+            "knn": 8
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 9,
+          "review_id": "95ad96ed3ae8516ce7384a11504a8336ed00b80ab7db92247acf2037a0884265",
+          "review_month": "2019-04",
+          "score": 0.01470588,
+          "text": "Two things I did not like: it was too sticky applying into my hair.  Also, the hold was only stiff for about 2 hours......Sorry, moving on to a new product. I  did find Old Spice putty....works perfectly!",
+          "title": "Too sticky!",
+          "window": "scope"
+        }
+      ],
+      "retrieved_digest": "c18aa6f459f7828dd7c93b78239fb94d23963aeabf9d73d03dc0a1b1f0263d9f",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 14.656,
+          "input_tokens": 2322,
+          "output_tokens": 146,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "f17e5c38c09c73ac534911ec886a93b94bd4c31725032519b8f8bf8df120eabb",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [
+          {
+            "citations": [
+              {
+                "cite_id": "R5",
+                "window": "scope"
+              }
+            ],
+            "claim": "A complaint about the smell of the brush is present in the cited reviews."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R6",
+                "window": "scope"
+              }
+            ],
+            "claim": "A complaint about the rubber breaking is present in the cited reviews."
+          }
+        ],
+        "refusal_reason": null,
+        "refused": false,
+        "subject": "complaints about the product",
+        "subject_supported": true
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-product_scoped-03",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 1,
+            "knn": 1
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 1,
+          "review_id": "e88dbbbddbfe8ec70676299bdc4a14d5ab44b8aff6389570da93a917738f7308",
+          "review_month": "2019-06",
+          "score": 0.03278689,
+          "text": "Wooden hair bristles glide through hair gently. I have long hair not quite waist length and lots of hair. This brush doesn't tear or pull on hair that leads to additional knots or frizz. You will notice you lose less hair in the brush after your done brushing. I suggest the first night you get it definitely brush your hair 50-100 strokes before bed root to end to feel how great these wood bristles feel and distribute natural oils from your scalp.<br />Tek as a company is environmentally aware of the wood and forest where they source from. They put a lot of thought into the way the brushes are made and feel when using them. Tip: don't be alarmed if you receive a Tek brush with 1 or 2 pins missing that's intentional in the design of letting the brush properly breathe and massage the scalp better.",
+          "title": "Italian, Handmade Hairbrush - superb quality",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 4,
+            "knn": 2
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 2,
+          "review_id": "d2477b7aa44c4e83558ddffc092cd99b086d35837aa0e900986bbb81bbb5ce62",
+          "review_month": "2019-04",
+          "score": 0.03175403,
+          "text": "Love this brush!! Nice medium size, soft bristles, and cleans really nice. I read that Tek brushes are easy on hair and don\u2019t cause breakage. My mom also has one that she has used for years and love it! I have long fine hair, that most brushes destroy. Wooden brushes also distribute your natural oil throughout, and stimulate the scalp.  I\u2019m looking forward to using this brush for years to come.",
+          "title": "Love this Italian brush as much as I love Italian food!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 6,
+            "knn": 4
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 3,
+          "review_id": "9932539124822c8c6cecc931c06dce18e5d77ddeb96018e611b131d55463199a",
+          "review_month": "2019-08",
+          "score": 0.03077652,
+          "text": "Love this brush! Wish it was larger. Not sure I see the value (maybe $25 I would be happier) but I get that it was handmade. Very cute and eco friendly!",
+          "title": "Love!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "bm25": 5,
+            "knn": 6
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 4,
+          "review_id": "b928eb856c9d4e1064b04eebe95b8fb1c6d556070bd9ef883bdb3472fa400627",
+          "review_month": "2019-12",
+          "score": 0.03053613,
+          "text": "I have very long hair and for the last few years have just used a wood comb of finger combed my hair after the shower, resulting in slighly frizzy but pretty decent looking hair. I was tired of hairbrushes that got lint, static, sticky and just gross. They did more damage than good to my hair. After reading about the benefits of wood brushes I researched something sustainable and decided to splurge on this brush. I AM IN LOVE. My hair is no longer frizzy. This brush adds a lovely shine. I really love this brush (and so does my boyfriend), especially that the larger wood bristles give a massage-like feel to my scalp. Do yourself a favor and spend the extra money.",
+          "title": "I am CHEAP and this is worth EVERY PENNY!!!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "bm25": 2,
+            "knn": 11
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 5,
+          "review_id": "216d56d0712c72c714ade0bf3166bce962f93194b8e2f9a913a28a399a713823",
+          "review_month": "2019-07",
+          "score": 0.03021354,
+          "text": "This brush smells awful!! I have owned other Tek brushes and loved them all when they came directly from the company website. But this one from Amazon has an awful rubber smell that won\u2019t come out despite multiple times washing it! VERY DISAPPOINTED IN AMAZON. What kind of storage causes this odor in a brush???",
+          "title": "Terrible smell! Poorly stored by Amazon!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "bm25": 8,
+            "knn": 8
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 6,
+          "review_id": "bbf75a1ca5f6b5d877217fb892f5f77f3122b59cbf827d1d452d7c2ff91ffaed",
+          "review_month": "2019-03",
+          "score": 0.02941176,
+          "text": "EDIT: I loved this brush, until the rubber came undone and I had to toss it away. It only lasted me a year and I already had to buy a new one. SUCH A WASTE OF MONEY. Yes, it is great, but IT DOES NOT LAST. So unless you wanna buy a hair brush every year, you're better off with another one, besides, there's tons of cruelty-free, vegan, bamboo, 100% wood bristles and brush in Amazon.<br /><br />What can incredible product. I suffered from split ends and freezyness, dryness and dull hair. But this is incredible. It is super soft so it's not pulling on my hair. Its also soft at the root so it moves with my scalp. It doesn't take hair out but a few, and I have hair to my butt. Detangling is a life saver. So yes, GET IT!",
+          "title": "I HATE IT, THE RUBBER BROKE",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "bm25": 16,
+            "knn": 3
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 7,
+          "review_id": "0f22b6572a89bc5f529e3c7586219bd77d93eef6428725d1a5896acf3582ddde",
+          "review_month": "2019-04",
+          "score": 0.02903091,
+          "text": "I have wanted a wooden brush for a while, but the expense has prevented me from buying one. This one is reasonably priced, but the quality seems really good. I have noticed that my hair has a bit less frizz and static since I've started using this brush. I have long, thick, wavy hair that does go frizzy easily, so this is a huge plus for me. It seems quite gentle on my hair as well.",
+          "title": "Excellent",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R8",
+          "legs": {
+            "bm25": 14,
+            "knn": 5
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 8,
+          "review_id": "9e9d70119a9e2e3d9e64d953ea393fa5a613e0a96af46c0fdd6b5a9ad01c8530",
+          "review_month": "2019-11",
+          "score": 0.02889813,
+          "text": "I purchased for my daughter. She had significant hair loss due to thyroid issues.  This brush helps with the frizzy issues she has with new hair growth.",
+          "title": "Great brush",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R9",
+          "legs": {
+            "bm25": 10,
+            "knn": 9
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 9,
+          "review_id": "e623ac37a2d7f272efdefcbcf4c7a86a62d59ca072bacfcc9631a3e6823b8edc",
+          "review_month": "2019-01",
+          "score": 0.02877847,
+          "text": "I saw this brush on holistichabits YouTube Channel and i loved how she explained all the details about the brush. Receiving the item and using it in person confirmed how great it is.",
+          "title": "Best brush I've ever owned",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R10",
+          "legs": {
+            "bm25": 7,
+            "knn": 13
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 10,
+          "review_id": "c04c5decfcc48c6993cec02675160eb92371bb50ed45418d5ca72f6151a773ce",
+          "review_month": "2019-12",
+          "score": 0.028624,
+          "text": "I do the no-poo method so I brush my hair daily. This is very gentle. Also I have very long hair as I've been growing it out a while. I brush my hair when I'm watching tv or reading because ill just focus on slowly and gently doing it for 20 minutes. It kind of feels like a massage! I love the wood and durability",
+          "title": "I use it daily",
+          "window": "scope"
+        }
+      ],
+      "retrieved_digest": "545a5a45e0121d5e0d36fcf73ad7e9434f27cd822eff791cf91c81e5b2224f8a",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 29.133,
+          "input_tokens": 2553,
+          "output_tokens": 315,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "00edf752f6fb9593f4a7ba0a014b9a260d7f1f96222eead6944f4ffc4a8da7b3",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [
+          {
+            "citations": [
+              {
+                "cite_id": "R6",
+                "window": "scope"
+              },
+              {
+                "cite_id": "R9",
+                "window": "scope"
+              }
+            ],
+            "claim": "The product does not cause a tingle or burn upon application."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R9",
+                "window": "scope"
+              }
+            ],
+            "claim": "The product does not improve hyperpigmentation or skin tone."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R9",
+                "window": "scope"
+              }
+            ],
+            "claim": "The product does not provide the expected results despite regular use."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R7",
+                "window": "scope"
+              }
+            ],
+            "claim": "The product is not effective for treating melasma or sun damage."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R8",
+                "window": "scope"
+              }
+            ],
+            "claim": "The product is not effective for exfoliating or improving skin texture."
+          }
+        ],
+        "refusal_reason": null,
+        "refused": false,
+        "subject": "complaints about the product's effectiveness",
+        "subject_supported": true
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-product_scoped-04",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 2,
+            "knn": 6
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 1,
+          "review_id": "137a3313f1119933b868457db31beae429eec4f1bc070d394a4eacda0ff411b4",
+          "review_month": "2019-03",
+          "score": 0.03128055,
+          "text": "The consistency is nice kinda of a light gel-lotion. Not heavy so it glides on nicely. On my face it really feels like a sting when first applied, not a tingle. The feeling lasts for a few minutes, then stops. Hope that means it's working. A little hand fan helps cool it down. It's 20% AHA, that's very strong and what I wanted.  On my legs no big deal, it was tingly for a few seconds but not bad at all. Legs are tougher skin I think. Only had it a few days, will update after a few weeks.",
+          "title": "Nice consistency. On my face more of a sting than a tingle",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 6,
+            "knn": 2
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 2,
+          "review_id": "eabb337e30985061ca41288814ad0cfa93bdd34462d77c5b6859d6878224944a",
+          "review_month": "2019-01",
+          "score": 0.03128055,
+          "text": "Really great product. Works splendidly. Skin is super soft. Fades dark spots (I\u2019m over 50) too after prolonged use. No fragrance which is a plus! A little goes a long way.  I have been using this for a few months now. Do not use it on my face but do on the rest of body.",
+          "title": "Great product",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 3,
+            "knn": 8
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 3,
+          "review_id": "1b7afde476a190adf3d6fc94976b692ffa08f2d03d4ae3c59bce0e467989004c",
+          "review_month": "2019-06",
+          "score": 0.0305789,
+          "text": "This product works!  and a little goes a surprising long way, so it is worth the price..  Once applied and rubbed in, you may tingle, but you can't feel any residue coating the surface of your skin at all.  I use it all over my entire body.  Coming back for my third bottle.",
+          "title": "Well worth it!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "bm25": 11,
+            "knn": 1
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 4,
+          "review_id": "277b753c80f0edfdb45fb1d4914f1f3221bf5a52eb5a7a84a8596fac82c169dc",
+          "review_month": "2019-01",
+          "score": 0.03047795,
+          "text": "My skin has changed for the good!!  The appearance is so improved.  Skin has tightened,  I have a glow!  My skins is glowing and it\u2019s healthy again.  I exfoliate in the shower.  Not everyday, but regularly makes a huge difference.",
+          "title": "\u201cLove the Skin Your In\u201d literally !",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "bm25": 8,
+            "knn": 5
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 5,
+          "review_id": "a6e631750e50db4d4d5beb37e87e6b99a2c9454897bcc7ab4bd447473dbd173d",
+          "review_month": "2019-09",
+          "score": 0.0300905,
+          "text": "Well after reading some reviews on here about some customers believing they were not getting the real product in the bottle I ordered from dermstore, paid a little more but know I'm getting the real thing.  This lotion is amazing I know it is meant for the body but I use it on my face three to four nights a week its that strong cannot use it everyday. My skin tone is even all over my face.  My complexion is brighter and a bit lighter from skin tone being even all over  this lotion gives skin a nice glow and my skin looks soft and feels soft. I cannot speak on it for wrinkles I don't have any but this lotion has the right ph and a higher percentage of glycolic acid to make wrinkles less noticeable.  I would do a patch test 3 days in a row to see if you can tolerate this 20 percent glycolic acid but i do not recommend using every single day. Oh and by the way this lotion is moisturizing in a lotion like gel based good for my mature skin",
+          "title": "the right glycolic for my mature skin",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "bm25": 5,
+            "knn": 9
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 6,
+          "review_id": "9db4b2e0b42552eebc86959e7b60a6ac8cbd50f10ff6242d505145dcfdf17603",
+          "review_month": "2019-03",
+          "score": 0.02987737,
+          "text": "No matter what they name it, it does not tingle. I am mostly Irish so a little on the sensitive side, yet using this three times a day did not make my skin even tingle a little. Also, this is just yuck! It is tacky and sticky and slimy. It feels like rubbing hair gel all over your body and then waiting for it to dry. It does not ever absorb into the skin and certainly does not fell silky and smooth, just stiff and sticky. I would give it one star but I haven\u2019t given it more than a week to succeed at its job, so I will give it the benefit of the doubt that it might improve my skin if I kept using it - which I won\u2019t.",
+          "title": "Slimy, Sticky, Gel-Like Goo",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "bm25": 9,
+            "knn": 7
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 7,
+          "review_id": "4ff78c801a2f5616152559cdfde793df12b30aa7a0f3e6e30e64a63a429d4dad",
+          "review_month": "2019-03",
+          "score": 0.02941813,
+          "text": "If you suffer from melasma or sun damage try this before throwing your money away on expensive skin bleaching products that DON'T work. I've faithfully used Obaji products for 10 years.....it never faded the melasma, just kept it from darkening. My entire face was covered with melasma! After 2 weeks of using Donell AHA 20 I cannot believe the difference!! I have no more melasma on my forehead, nose, upper lip or chin. I can't wait to see what another 2 weeks of use does for my cheeks. My cheeks, arms and chest have lightened by at least 3 shades. I'm no longer wearing layers of foundation to hide my damaged skin. This stuff really works and works fast. It gives your skin a glow, can be worn under makeup without leaving skin oily yet somehow skin is super hydrated. I apply on clean skin in the morning and clean skin before bed. My skin has improved more in 2 weeks with this product than 10 years using expensive products from the dermatologist.",
+          "title": "Melasma suffers must read!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R8",
+          "legs": {
+            "bm25": 7,
+            "knn": 10
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 8,
+          "review_id": "adebf05f3afb339668a19961adf80aca4cf352d7e03426d5eded4e3b3b0ee5b1",
+          "review_month": "2019-06",
+          "score": 0.02921109,
+          "text": "I originally thought this was a counterfeit product because after the first use it didn't tingle or have a slight burn like other glycolic acid products I've used. I even reviewed it badly. I am now editing my review to say that the second time I used, it tingled A LOT. You know that slight burning feeling? I used it the next 3 or 4 days and my face started to flake so I took a break. Now I only use once a week. It will literally exfoliate your pimple scars off but use with caution. It can be irritating until your skin gets used to it. I don't like the flaking but that's a small price to pay for clearer skin.",
+          "title": "it works",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R9",
+          "legs": {
+            "bm25": 16,
+            "knn": 3
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 9,
+          "review_id": "9cb30d11140d6b279233ea5e88ffbe9a7b1078708beafe6a7a7260b12b721a2e",
+          "review_month": "2019-05",
+          "score": 0.02903091,
+          "text": "I've been using this for about a month now and not only do I experience zero tingle upon application, it hasn't done anything for my hyperpigmentation.  Super disappointed.  Mine also did not come sealed.",
+          "title": "No tingle, no results",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R10",
+          "legs": {
+            "bm25": 4,
+            "knn": 17
+          },
+          "parent_asin": "B0007D5DS4",
+          "rank": 10,
+          "review_id": "99b3f6160a0df1462c24d3bb6a3c845ab3439589e6c0b31b1245caf0e6ac5223",
+          "review_month": "2019-07",
+          "score": 0.02861201,
+          "text": "Aside from the AHA lotions I make myself, this one seems to have the highest percentage of AHA compared to many other lotions on the market.<br /><br />Don't use after you shave (generalization across all high AHA lotions).  But otherwise I've seen the difference between using and not using it.  Great if you have Keratosis Pilaris or Ichthyosis Vulgaris!",
+          "title": "Most effective AHA lotion",
+          "window": "scope"
+        }
+      ],
+      "retrieved_digest": "a38bf58fa84bf167ce972b6b69ba31a89ccfe9a8db3a50272ef4fae9a0275f87",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 8.663,
+          "input_tokens": 1604,
+          "output_tokens": 81,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "ee54ba7b077d810a590c3955c2d3884a9f0cbd2c0a4a51759db70a5b3b1949f3",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [],
+        "refusal_reason": "The corpus cannot answer the question because none of the cited reviews complain about the subject named in the question.",
+        "refused": true,
+        "subject": "complaints about Nuk Brush (Green/White) (ASIN B001UZ31SC)",
+        "subject_supported": false
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-temporal-01",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 1,
+            "knn": 2
+          },
+          "parent_asin": "B001UZ31SC",
+          "rank": 1,
+          "review_id": "9c1dc635d648ac3078e14b792b9e04786f6d62a0ae025a930164b37a4e68863e",
+          "review_month": "2019-02",
+          "score": 0.03252247,
+          "text": "Nuk products are great! I have a niece with special needs and thus has ben great to stimulate her mouth at feedings. Durable and high quality! Thank you Nuk!",
+          "title": "Durable and High quality!",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 2,
+            "knn": 1
+          },
+          "parent_asin": "B001UZ31SC",
+          "rank": 2,
+          "review_id": "d845042b71a8ea6b2b6f6e0635baea64ea69617b532508d8e3e85bfaa720e992",
+          "review_month": "2019-03",
+          "score": 0.03252247,
+          "text": "My daughters, 2 & 4, enjoy munching on their toothbrushes which would make it to we were going through toothbrushes very quickly. Trying to stop them was frustrating and caused unnecessary battles. We purchased these for them to \u201cchew on\u201d and rub on their gums after tooth brushing. It has stopped the problem for us and their current toothbrushes and not being chewed to frills! The reason I give this 4 stars is because on my 4 year olds Nuk, the bumps are coming off from the chewing. If it was used any more aggressively I don\u2019t know how it\u2019d hold up. Nevertheless, we\u2019ll buy another for our next child\u2019s teething needs!",
+          "title": "Saves our toothbrushes!",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 1,
+            "knn": 1
+          },
+          "parent_asin": "B001UZ31SC",
+          "rank": 1,
+          "review_id": "2dac01f387dab71e1c161eb0d423181c9b1c2b62e1ebe3933b336598b6a53ce1",
+          "review_month": "2019-11",
+          "score": 0.03278689,
+          "text": "Great! I use it for my son who has low muscle tone, and is just now interested in putting things in his mouth, took us a couple of trys but is amazing! He loves it and now is letting use use this to brush his teeth!!!!",
+          "title": "Great our son loves it!!!!",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "knn": 2
+          },
+          "parent_asin": "B001UZ31SC",
+          "rank": 2,
+          "review_id": "43ea3f1a1ee597c0b16745a21756500fb50d9df61d8be2c8c054b1606b94c751",
+          "review_month": "2019-10",
+          "score": 0.01612903,
+          "text": "My son does speech therapy and this was recommended to help. He really likes it. I haven\u2019t seen improvement, but hopefully it works well.",
+          "title": "Helps for speech",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "bm25": 2
+          },
+          "parent_asin": "B001UZ31SC",
+          "rank": 3,
+          "review_id": "6c73ceae31d6ebcd2e10e8f427d646a3f2e69b7338c38e022a9e158ca78c5aec",
+          "review_month": "2019-11",
+          "score": 0.01612903,
+          "text": "Useful tool",
+          "title": "What therapists use",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "knn": 3
+          },
+          "parent_asin": "B001UZ31SC",
+          "rank": 4,
+          "review_id": "8974dd501096355b8724ed27697393a08f6c317c7aa54b38f622c9b54523f5bd",
+          "review_month": "2019-10",
+          "score": 0.01587302,
+          "text": "We use this product as a tool for speech therapy. It\u2019s been great and my daughter is showing increased strength and improvement with her articulation errors",
+          "title": "Fits our needs perfectly!",
+          "window": "recent"
+        }
+      ],
+      "retrieved_digest": "1ac596511da0c6c941c98cc265ff9e562cc039c80a5e72a10efa6c30159520ee",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 8.082,
+          "input_tokens": 1783,
+          "output_tokens": 66,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "3a5a6269b2766de0efd93aaf54b090d8fd05d26ed810fa06d4091ddac811ab85",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [],
+        "refusal_reason": "The cited reviews do not contain any complaints about the product, and therefore the question cannot be answered with the provided data.",
+        "refused": true,
+        "subject": "complaints about the product",
+        "subject_supported": false
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-temporal-02",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 1,
+            "knn": 1
+          },
+          "parent_asin": "B002KC6YG0",
+          "rank": 1,
+          "review_id": "ddc93d4bbb963a3d862a28c61eece1290b64bf072e29ea5c00bebfa485f45d99",
+          "review_month": "2019-03",
+          "score": 0.03278689,
+          "text": "For me, just right...not too hard, not too soft! I hate when any kind of exfoliating / exfoliant is too soft. And I was almost feeling like this might be just maybe, kinda, a little, too soft bc it is very comfortable, but I was wrong.  This towel leaves the skin super, super smooth and exfoliated. So definitely does the trick even while feeling good!",
+          "title": "Just Right!",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 2,
+            "knn": 2
+          },
+          "parent_asin": "B002KC6YG0",
+          "rank": 2,
+          "review_id": "af2e2c34e5ecd0ca4ffcbbd94d795d8aa41d02f8bf769be617287a528c2bd7c4",
+          "review_month": "2019-01",
+          "score": 0.03225806,
+          "text": "I just bought my second one of these. The first one lasted two years, but it was getting very worn out. It actually got a little rougher the older it got. This new one reminded me how soft yet still exfoliating the cloth was when brand new.<br /><br />I think this cloth is the perfect texture--no other shower cloth I've had has come close. The thing I like about it the most is that it does not slip against itself when all soapy and get unfolded, like others I've had. The weave helps it to grip against itself so that it's easy to use with one hand when folded into quarters.",
+          "title": "Lasts a long time; perfect texture",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "knn": 3
+          },
+          "parent_asin": "B002KC6YG0",
+          "rank": 3,
+          "review_id": "45c50a275710610ae00d71520b5cefdd4740782eef5c9ca57eadfb5c5ca53c19",
+          "review_month": "2019-01",
+          "score": 0.01587302,
+          "text": "Lathers well, throw into the wash every week or so without fabric softeners, each one lasts a very long time.  I find these work a lot better than the puffs because they don\u2019t fall apart and they dry out quickly.",
+          "title": "Been using these for many years",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "bm25": 3
+          },
+          "parent_asin": "B002KC6YG0",
+          "rank": 4,
+          "review_id": "93023731c6bea6305286113ac3231d332dcde378e15ab66466f77ca1b344a2b8",
+          "review_month": "2019-05",
+          "score": 0.01587302,
+          "text": "Love the color and it works great in the shower, it\u2019s a perfect length.",
+          "title": "Exfoliating wash cloth",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "bm25": 4
+          },
+          "parent_asin": "B002KC6YG0",
+          "rank": 5,
+          "review_id": "458d43e251e7c2e9438859ad11977a510634ff9c736f90070a74d91a29094225",
+          "review_month": "2019-02",
+          "score": 0.015625,
+          "text": "Definitely worth the money. I recommend!",
+          "title": "Worth the money! Very useful towel",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "bm25": 1,
+            "knn": 1
+          },
+          "parent_asin": "B002KC6YG0",
+          "rank": 1,
+          "review_id": "9b152cb317c96fac3a35c886a8ea55e2f60f2b5fd234dc633b5015b75dc4295c",
+          "review_month": "2019-07",
+          "score": 0.03278689,
+          "text": "I have  purchased several of these for myself and for gifts. My sister sent me one for Christmas and now I am hooked. They really do a great job of making your skin so much smoother. One of the best things about this towel is that you can do your backside,  as the towel is long enough to easily accomplish that. Would give this product more stars if I could.",
+          "title": "Amazing exfoliating towel",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "bm25": 2,
+            "knn": 2
+          },
+          "parent_asin": "B002KC6YG0",
+          "rank": 2,
+          "review_id": "5876339cc5352e48cdbb2f6cf60a4fe1f91b90bdc829781a5d0e1710d539184d",
+          "review_month": "2019-09",
+          "score": 0.03225806,
+          "text": "The next one I got was the softer blue one but I went back to the<br />harder green because I had gotten used to it.",
+          "title": "Grown to really like these",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R8",
+          "legs": {
+            "bm25": 3
+          },
+          "parent_asin": "B002KC6YG0",
+          "rank": 3,
+          "review_id": "5f9df7a7649de990733875701b2f95c4bff231091654686a5c1ef94211eb2e54",
+          "review_month": "2019-09",
+          "score": 0.01587302,
+          "text": "This is do big, it wraps around the body.",
+          "title": "Great loofa",
+          "window": "recent"
+        }
+      ],
+      "retrieved_digest": "46b177058738c17b0fbe3b5548911b58ee07b0edb1fc7c7fb2bc977e416148e7",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 25.203,
+          "input_tokens": 2837,
+          "output_tokens": 253,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "c9370e22019300589085ba24669290ff477b5ba29337925cf1fa662260affb8a",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [
+          {
+            "citations": [
+              {
+                "cite_id": "R3",
+                "window": "baseline"
+              },
+              {
+                "cite_id": "R9",
+                "window": "recent"
+              }
+            ],
+            "claim": "The product stains everything it touches."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R8",
+                "window": "recent"
+              }
+            ],
+            "claim": "The product leaks in the package."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R9",
+                "window": "recent"
+              }
+            ],
+            "claim": "The product's staining issue is more severe in recent reviews."
+          },
+          {
+            "citations": [
+              {
+                "cite_id": "R8",
+                "window": "recent"
+              }
+            ],
+            "claim": "The product's leakage issue is mentioned in recent reviews."
+          }
+        ],
+        "refusal_reason": null,
+        "refused": false,
+        "subject": "complaints about the product's staining and leakage",
+        "subject_supported": true
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-temporal-03",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 1,
+            "knn": 6
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 1,
+          "review_id": "3f2db2d7503609d8b9ce6daccce7e7210ddd85d6d7200625273b6b75bea761e6",
+          "review_month": "2019-03",
+          "score": 0.03154496,
+          "text": "Update: The pink lasted a full calendar year! Stayed just as bright and vibrant as if it was freshly dyed. Last week, I bought Nuclear Red and my usual bleaching kit. My hair is as red as Pennywise\u2019s balloon. I\u2019m in love and will never buy another brand\u2019s dye.<br /><br />After years of buying red color via Manic Panic, I decided to try another for PINK! Staining my hands is like a rite I go through each time I dye my hair but this washed off almost completely in the shower. Once shampooed, the dye doesn\u2019t wash out as much as I\u2019ve previously experienced. It\u2019s BRIGHT pink - just what I wanted! I\u2019ll revisit in a few weeks and update on how long it lasts on my bleached hair.",
+          "title": "New Favorite Hair Dye!",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 3,
+            "knn": 4
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 2,
+          "review_id": "eaadf3be740a593722ca3c715fde6f7e5a489f0f1d068d9664304cc8fcacce04",
+          "review_month": "2019-06",
+          "score": 0.03149802,
+          "text": "Wow I am obsessed with my hair! It\u2019s only the 3rd day so far. I\u2019ll try to update my review after a few weeks but the color is so vivid! I actually put it on my hair and then washed it after because I was looking for a more light pink but this hot pink is amazing! I didn\u2019t use enough conditioner to make the color lighter but I\u2019m fine with that! It should hopefully just fade into the pink color I originally wanted so it\u2019s just gonna last me longer :)",
+          "title": "Easy to use and results very vibrant!",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 6,
+            "knn": 2
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 3,
+          "review_id": "32934445c533a6812018dd37cac0b15b69c092eee11d3d07febeebf90916307a",
+          "review_month": "2019-04",
+          "score": 0.03128055,
+          "text": "** Edited about shipment. Sadly this is the 2nd time from this company that my package has arrived damaged or been cancelled due to being damaged. I waited for 10 days for delivery then 10 more days for a refund and had to have Amazon complete. I\u2019m sad to say that it seems the company has gone downhill in the past 2 years. I\u2019ve been ordering for almost 10 years and never had issues before. I\u2019d rate 1 star for service but the dye is still worth every dollar. ***<br /><br />I\u2019ve been dying my hair since I was 13 and am now WELL over that. I\u2019ve used everything from kool-aid, Maniac Panic, Prevana etc in the constant search of finding a color that takes in my hair and is vivid enough to keep my attention and doesn\u2019t fade so quickly I\u2019m forced to maintain it more often than every few months. I have a lot of hair and it takes a few hours to dye. I found Atomic Pink about 9-10 years ago and fell in love! Saying it is bright really doesn\u2019t do it justice. I can easily be seen in a crowd and it is very memorable. I refer so many to this dye I should have stock options lol. On me it does fade in a natural ombr\u00e9 fashion ending in a light cotton candy/baby pink after about 4-5 months. I bleach my roots only and only wash my hair with color safe products in cold water approximately 2-3 times a week. I receive daily comments and compliments. It\u2019s a huge hit with the kids that love my \u201cmermaid\u201d hair. It also glows in black light for the first few weeks after you dye it. Word of caution. THIS DYE WILL STAIN EVERYTHING YOU TOUCH! Walls, showers, your skin etc. it will fade on your skin in a few days. Hands down worth every dollar!",
+          "title": "Only buy if you\u2019re serious about real color. Worth every dollar!",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "bm25": 9,
+            "knn": 1
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 4,
+          "review_id": "14887214a1e8073c70ad1456e4eab9b0203e3126be3b833e61fc05f774c457b5",
+          "review_month": "2019-06",
+          "score": 0.0308862,
+          "text": "I was excited to try something new and went for Atomic Pink based on reviewers pics. Was a little disappointed when it showed up in a padded envelope and had leaked (first pic) but wasn\u2019t bad enough to bother returning it or worrying about it. Super easy to use, and has lasted over a month with minimal fading!! Second pic is day one on top, three weeks later on the bottom. Today is 5 weeks and it looks the same. I also thought the blacklight effect was really cool, even though I have no \u201cuse\u201d for it like raving or anything lol",
+          "title": "New go-to for fun colors!",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "bm25": 2,
+            "knn": 9
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 5,
+          "review_id": "4456ae0618cd4e4deb30eec5a0b3bda3a8f2daff82770bde7e64622f08b336f0",
+          "review_month": "2019-03",
+          "score": 0.03062179,
+          "text": "the atomic pink turned out beautiful even on the un bleached parts on daughters hair , however the joyride purple didn't show up at all on mine with it bleached",
+          "title": "pink colors work not purple",
+          "window": "baseline"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "bm25": 1,
+            "knn": 2
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 1,
+          "review_id": "b4aa8f46f85239f9c388e9e841f505199f754bff27c96d40416f7b312ab0878f",
+          "review_month": "2019-08",
+          "score": 0.03252247,
+          "text": "It\u2019s so good I had to come back and write a review because I still have this color since I bought it months ago. Even put colors on top of my pink SFX and it\u2019s slowly coming back again. I\u2019m okay with this. It adds a unique color fade to my hair any time I change it up. I\u2019ll have streaks of pink underneath. So if you don\u2019t mind this at all and love to play with colors. I got atomic pink and it was beautiful!",
+          "title": "Atomic pink forever lol",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "bm25": 2,
+            "knn": 1
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 2,
+          "review_id": "cf5c4b2c87dde094645f8c402e6d88630a5d166a2eb6e51824adbef8f354a4e8",
+          "review_month": "2019-09",
+          "score": 0.03252247,
+          "text": "I've  been using special effects for at least a year and I've purchased 3 different colors (atomic pink, napalm orange and deep purple)  and they have all been amazing! And I'm actually currently on my second bottle of atomic pink because I love this color so much. They last literally forever (this pic i think its been at least 2 months) but the pink has previously lasted me 4+ months with very little fading.<br /><br />It's amazing highly recommend!!<br />I get so many compliments on my hair!",
+          "title": "I LOVE THIS BRAND",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R8",
+          "legs": {
+            "bm25": 4,
+            "knn": 3
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 3,
+          "review_id": "39ca48d48b1686d6b3000e8b73080baab6452d1772e4a38c2c329501035e97ba",
+          "review_month": "2019-08",
+          "score": 0.03149802,
+          "text": "I love special effects, always have, the only reason I'm giving a review on it is because my last bottle I ordered came today and it was opened inside its package and some of the dye came out into the package, shipping was quick and pricing reasonable just not happy with discovering my last bottle opened",
+          "title": "Bottle was opened and leaked in package",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R9",
+          "legs": {
+            "bm25": 5,
+            "knn": 4
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 4,
+          "review_id": "c3eb3bec420f88850401bb3a16c32aa05e09edede5283b4e594a23c7acc0eac6",
+          "review_month": "2019-08",
+          "score": 0.03100962,
+          "text": "This stuff is called \"atomic\" for a reason - it will Not leave your hair. This isn't the first time I've used this specific dye, and I know from experience that getting rid of it takes a lot of bleach, and a lot of patience. However, if you're not someone who likes to change your hair color often, I cannot recommend this stuff highly enough. It's the longest lasting dye on the market, I swear. If you don't mind roots, you can easily go months and months without redyeing. (I usually touch it up every 3 months, but that's just because of my roots. The color doesn't budge.) I've gone swimming in chlorine pools and the ocean, spent days under the midsummer sun, used really nasty hair spray, and washed my hair easily several dozen times without seeing it so much as lighten a little.<br />The only negative, and this I've only noticed this most recent dye job, is that it tends to never stop bleeding. My pillow, phone, nails - they all are still turning pink, nearly 2 months after I dyed my hair. I only wash my hair 1x/week, so if you wash more frequently you might see a sooner stop to the bleeding.<br /><br />Note: my hair is curly, and very porous. Naturally dark brown, so I bleach before dyeing. I wash my hair 1x/week, and do not heat style. I use only silicone/sulfate free hair products",
+          "title": "longest lasting pink you can get",
+          "window": "recent"
+        },
+        {
+          "cite_id": "R10",
+          "legs": {
+            "bm25": 7,
+            "knn": 5
+          },
+          "parent_asin": "B002GDKPUY",
+          "rank": 5,
+          "review_id": "f395e2451eaf691b0adf0bd3312c6350be14e2673471690fa8a22bf2781f95a2",
+          "review_month": "2019-11",
+          "score": 0.03030999,
+          "text": "Works so good.. the one color brand I use.  But u must lighten your hair to stay longer and be bright",
+          "title": "Love",
+          "window": "recent"
+        }
+      ],
+      "retrieved_digest": "0aca202c1cabb049d3df2938bde5b8467cc5111303ca47afa0f38380158e3826",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 6.356,
+          "input_tokens": 1542,
+          "output_tokens": 60,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "3e94b4e684867fa77d2c40121ce579818f17776c26f52f07f83c1dcfa913945d",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [],
+        "refusal_reason": "The corpus cannot answer the question because none of the cited reviews mention complaints about flight delays.",
+        "refused": true,
+        "subject": "complaints about flight delays",
+        "subject_supported": false
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-out_of_domain-01",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 1,
+            "knn": 2
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 1,
+          "review_id": "a3cd2df0d47d070c8b04a148062e287d954d3ead97adeb04ac95c614b2562edf",
+          "review_month": "2019-10",
+          "score": 0.03252247,
+          "text": "Needed new applicator squeeze bottle with 0.5 oz and 1.0 oz markings to replace old Clairol Professional Applicator bottle which now leaks where the top screws on.<br /><br />All I had to do was to cut the tip to get the size opening I need.",
+          "title": "Perfect replacemnt for old, leaking applicator.",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 4,
+            "knn": 1
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 2,
+          "review_id": "0578563f7b4c981a549a4886c426d874a280390f7c8e82fcebefb37ff7cc6493",
+          "review_month": "2019-06",
+          "score": 0.03201844,
+          "text": "I love this bottle. I poured my hair oils in it and I oil my hair with this bottle. It is definitely not leak proof so keep it upright.",
+          "title": "Good Value for the money",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 2,
+            "knn": 3
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 3,
+          "review_id": "837236e7461152a66d429894b7a30b68c33cbbb88dccf6b973c9234fc73de7ff",
+          "review_month": "2019-01",
+          "score": 0.03200205,
+          "text": "4 stars because it does NOT come with a lid/cap for the applicator tip. Other than that it is an inexpensive and effective applicator bottle.",
+          "title": "No cap for applicator tip but still good",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "bm25": 6,
+            "knn": 4
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 4,
+          "review_id": "07416d6d5a3763d8a0e18f763586728845511ada94440c7bb7462a0e5228a2b2",
+          "review_month": "2019-02",
+          "score": 0.03077652,
+          "text": "Do not buy!!!! I ordered this bottle and it came with the top lifted up and it got worse! I tried using tape so my oil won\u2019t come out but it was spilling everywhere! Not worth it.",
+          "title": "DO NOT PURCHASE",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "bm25": 7,
+            "knn": 5
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 5,
+          "review_id": "d5f240ff814c3c4dcdbdf1814f554d1598499b9cd005636c2e0da330cfa28b9d",
+          "review_month": "2019-05",
+          "score": 0.03030999,
+          "text": "It does exactly what it is intended to do. I use it for shampooing my hair so that I can get directly to my scalp. It is also helping me save on shampoo so I'm not using too much.",
+          "title": "Good buy",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "bm25": 3
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 6,
+          "review_id": "a1d5d4f84951d06851b44dbe1a619774c252989115fb895eda142e11fe821bb1",
+          "review_month": "2019-03",
+          "score": 0.01587302,
+          "text": "It's a bottle. Had to cut the nozzle a little bit it's hard to mess up a bottle.",
+          "title": "It's a Bottle",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "bm25": 5
+          },
+          "parent_asin": "B000NIZYIW",
+          "rank": 7,
+          "review_id": "5a9ff0167f6253e48e411b0473aebc6cdae443107f47ade361a04bd80302f138",
+          "review_month": "2019-12",
+          "score": 0.01538462,
+          "text": "Soft plastic allows for easy squeezing of contents. Bought 2. Considering getting more.",
+          "title": "Just what I needed.",
+          "window": "scope"
+        }
+      ],
+      "retrieved_digest": "eb31e6f63ae08b52cc3bb4ab8ac1dc73b373fcd52a91eab177f01739edb96ba1",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 7.136,
+          "input_tokens": 1752,
+          "output_tokens": 62,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "1f11640cebc805d138e64300d5229e6c84ddc4acc1e35330dcb75fa1da0006bc",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [],
+        "refusal_reason": "The corpus cannot answer the question because none of the cited reviews mention complaints about mortgage interest rates.",
+        "refused": true,
+        "subject": "complaints about mortgage interest rates",
+        "subject_supported": false
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-out_of_domain-02",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 2,
+            "knn": 1
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 1,
+          "review_id": "30435328d36c7b31e753f227fb10758c2cb223f7e6a8d5942fa1c0a2504c51f0",
+          "review_month": "2019-02",
+          "score": 0.03252247,
+          "text": "Right on the product it says: \"Mini Bed Head Manipulator\"  -- it should be advertised as such.  I assumed it was the same as my last (2oz) size and I could have gotten that one for just a couple more dollars.  :(",
+          "title": "Wow.  1 oz is tiny.  2 oz is way better deal",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 1,
+            "knn": 2
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 2,
+          "review_id": "45417e3d1cc6eaff7ccd2e9c296e4b34f5b9a613956f109a8d15c86f4a055db6",
+          "review_month": "2019-04",
+          "score": 0.03252247,
+          "text": "\" A Funky Gunk That Rocks\"<br />I love this product for it's wonderful way of showing the highlights in my cute short hair. I went a little crazy with my current color, added cobalt blue highlights. My hairdresser Jess at Supercuts in the Hollywood District called it \u201cadding a little spice\u201d.<br />What I like the most about \u201cThe Manipulator\u201d is how it performs five Stars,Stars,Stars, Stars, Stars! I do need to say that this product is Highly Concentrated, use as little as you can.<br />Thank you Tigi Bed Head,<br />Catt in Portland, Oregon",
+          "title": "\" A Funky Gunk That Rocks\"",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 3,
+            "knn": 9
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 3,
+          "review_id": "a335b3ebf7f9a300406a359ed28d374b20c564de0efe4b10db7c36955b59632e",
+          "review_month": "2019-08",
+          "score": 0.03036577,
+          "text": "This isn\u2019t what I was hoping for and I\u2019m glad I bought this small size first. I needed a bit more hold.",
+          "title": "Should have looked for a paste.",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "bm25": 4,
+            "knn": 8
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 4,
+          "review_id": "95ad96ed3ae8516ce7384a11504a8336ed00b80ab7db92247acf2037a0884265",
+          "review_month": "2019-04",
+          "score": 0.03033088,
+          "text": "Two things I did not like: it was too sticky applying into my hair.  Also, the hold was only stiff for about 2 hours......Sorry, moving on to a new product. I  did find Old Spice putty....works perfectly!",
+          "title": "Too sticky!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "knn": 3
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 5,
+          "review_id": "cd5f0af1441dfa8675beb7b914a438d969099b4b0afde5309868977669674f40",
+          "review_month": "2019-06",
+          "score": 0.01587302,
+          "text": "Received it fast. Works great love this product. I use it for those small new hairs growing all around the frame of my face.",
+          "title": "Great",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "knn": 4
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 6,
+          "review_id": "0a9cebae2603164ff03678e90edb23cc166f454ef8922fdd0e2a0f812980b98f",
+          "review_month": "2019-10",
+          "score": 0.015625,
+          "text": "The pic made product look bigger then it was. Paid same price that another seller charged same price for an ounce larger won't make that mistake again",
+          "title": "Pic misleading",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "knn": 5
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 7,
+          "review_id": "95c6cea5a918740c539acbac5cead6f29f2c220d468f8e2894bcb18e90e57436",
+          "review_month": "2019-07",
+          "score": 0.01538462,
+          "text": "La foto que usan del producto es de 2 onz y aunque la descripci\u00f3n diga que es 1 onz puede ser enga\u00f1oso. Deber\u00edan cambiarla.",
+          "title": "Wrong picture",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R8",
+          "legs": {
+            "knn": 6
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 8,
+          "review_id": "333f03f70ec83c09d042156c9785ff393770d8701bfd5fd342e969bc582cea6c",
+          "review_month": "2019-07",
+          "score": 0.01515152,
+          "text": "I love this stuff, it smells good and it gives your hair a lot of volume with just a little drop.",
+          "title": "I love this stuff!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R9",
+          "legs": {
+            "knn": 7
+          },
+          "parent_asin": "B001QGWKP0",
+          "rank": 9,
+          "review_id": "10e7dc66266f2db8c04a20a176d6df49362ead69cc415674a28f2af2e668df16",
+          "review_month": "2019-01",
+          "score": 0.01492537,
+          "text": "A little goes a long way. Its not a wax. its thick, rub a dab onto palm of your hands and style away.  Ive  been using this product for many years.",
+          "title": "I love this stuff",
+          "window": "scope"
+        }
+      ],
+      "retrieved_digest": "e4a1c209362656b8da37b86b790f1ff8ccd847fa47aaa7d45b6e27fc39c1ae88",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_no": 1,
+          "duration_s": 11.702,
+          "input_tokens": 2498,
+          "output_tokens": 62,
+          "validation_error": null
+        }
+      ],
+      "idempotency_key": "458a42ff89069bba8b2a26f6d2561e2cdda4617b9ea4f1e59a106e48e8656199",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+      "model_id": "qwen3:8b",
+      "parsed": {
+        "claims": [],
+        "refusal_reason": "The corpus cannot answer the question because none of the cited reviews mention complaints about engine oil viscosity.",
+        "refused": true,
+        "subject": "complaints about engine oil viscosity",
+        "subject_supported": false
+      },
+      "prompt_version": "rag-v5",
+      "question_id": "dev-out_of_domain-03",
+      "retrieved": [
+        {
+          "cite_id": "R1",
+          "legs": {
+            "bm25": 1,
+            "knn": 2
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 1,
+          "review_id": "e88dbbbddbfe8ec70676299bdc4a14d5ab44b8aff6389570da93a917738f7308",
+          "review_month": "2019-06",
+          "score": 0.03252247,
+          "text": "Wooden hair bristles glide through hair gently. I have long hair not quite waist length and lots of hair. This brush doesn't tear or pull on hair that leads to additional knots or frizz. You will notice you lose less hair in the brush after your done brushing. I suggest the first night you get it definitely brush your hair 50-100 strokes before bed root to end to feel how great these wood bristles feel and distribute natural oils from your scalp.<br />Tek as a company is environmentally aware of the wood and forest where they source from. They put a lot of thought into the way the brushes are made and feel when using them. Tip: don't be alarmed if you receive a Tek brush with 1 or 2 pins missing that's intentional in the design of letting the brush properly breathe and massage the scalp better.",
+          "title": "Italian, Handmade Hairbrush - superb quality",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R2",
+          "legs": {
+            "bm25": 3,
+            "knn": 1
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 2,
+          "review_id": "d2477b7aa44c4e83558ddffc092cd99b086d35837aa0e900986bbb81bbb5ce62",
+          "review_month": "2019-04",
+          "score": 0.03226646,
+          "text": "Love this brush!! Nice medium size, soft bristles, and cleans really nice. I read that Tek brushes are easy on hair and don\u2019t cause breakage. My mom also has one that she has used for years and love it! I have long fine hair, that most brushes destroy. Wooden brushes also distribute your natural oil throughout, and stimulate the scalp.  I\u2019m looking forward to using this brush for years to come.",
+          "title": "Love this Italian brush as much as I love Italian food!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R3",
+          "legs": {
+            "bm25": 5,
+            "knn": 6
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 3,
+          "review_id": "b928eb856c9d4e1064b04eebe95b8fb1c6d556070bd9ef883bdb3472fa400627",
+          "review_month": "2019-12",
+          "score": 0.03053613,
+          "text": "I have very long hair and for the last few years have just used a wood comb of finger combed my hair after the shower, resulting in slighly frizzy but pretty decent looking hair. I was tired of hairbrushes that got lint, static, sticky and just gross. They did more damage than good to my hair. After reading about the benefits of wood brushes I researched something sustainable and decided to splurge on this brush. I AM IN LOVE. My hair is no longer frizzy. This brush adds a lovely shine. I really love this brush (and so does my boyfriend), especially that the larger wood bristles give a massage-like feel to my scalp. Do yourself a favor and spend the extra money.",
+          "title": "I am CHEAP and this is worth EVERY PENNY!!!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R4",
+          "legs": {
+            "bm25": 8,
+            "knn": 4
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 4,
+          "review_id": "25057927ece6c94525215b40c15e31c54a5ceab3a5bc023fa7acaef1932316be",
+          "review_month": "2019-06",
+          "score": 0.03033088,
+          "text": "when i first started using it, i could see a lot of hair shedding out on the brush and i was kind of surprised.  but now i have a feel for it and the brush is almost clean by the time im done using it.  i use this and the natural boar bristle brush ive had for years to distribute the oil more.  i usually wash my hair once every three weeks.  I know that sounds disgusting but my hair is past my hips and i need as much oil as i can get to go all around my hair so it doesn't dry out.  but this is the first time i've actually had to wash my hair once a week.  im producing a lot more oil, maybe because the comb stimulates my scalp somehow?  All i know is nothing about my diet, exercise or life has changed except buying this $35 comb and I'm becoming annoyed throughout the day because my scalp is hot with oil.  and my hair looks great, so healthy and it feels good.  and combing my hair has become a much better task with this tool.  i know it's just a comb but my hair is really important so this is an important tool that people should invest in cuz everyone needs a comb so might as well get one good one.",
+          "title": "really good",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R5",
+          "legs": {
+            "bm25": 2,
+            "knn": 12
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 5,
+          "review_id": "216d56d0712c72c714ade0bf3166bce962f93194b8e2f9a913a28a399a713823",
+          "review_month": "2019-07",
+          "score": 0.03001792,
+          "text": "This brush smells awful!! I have owned other Tek brushes and loved them all when they came directly from the company website. But this one from Amazon has an awful rubber smell that won\u2019t come out despite multiple times washing it! VERY DISAPPOINTED IN AMAZON. What kind of storage causes this odor in a brush???",
+          "title": "Terrible smell! Poorly stored by Amazon!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R6",
+          "legs": {
+            "bm25": 6,
+            "knn": 9
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 6,
+          "review_id": "9932539124822c8c6cecc931c06dce18e5d77ddeb96018e611b131d55463199a",
+          "review_month": "2019-08",
+          "score": 0.02964427,
+          "text": "Love this brush! Wish it was larger. Not sure I see the value (maybe $25 I would be happier) but I get that it was handmade. Very cute and eco friendly!",
+          "title": "Love!",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R7",
+          "legs": {
+            "bm25": 9,
+            "knn": 7
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 7,
+          "review_id": "e623ac37a2d7f272efdefcbcf4c7a86a62d59ca072bacfcc9631a3e6823b8edc",
+          "review_month": "2019-01",
+          "score": 0.02941813,
+          "text": "I saw this brush on holistichabits YouTube Channel and i loved how she explained all the details about the brush. Receiving the item and using it in person confirmed how great it is.",
+          "title": "Best brush I've ever owned",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R8",
+          "legs": {
+            "bm25": 15,
+            "knn": 3
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 8,
+          "review_id": "9e9d70119a9e2e3d9e64d953ea393fa5a613e0a96af46c0fdd6b5a9ad01c8530",
+          "review_month": "2019-11",
+          "score": 0.02920635,
+          "text": "I purchased for my daughter. She had significant hair loss due to thyroid issues.  This brush helps with the frizzy issues she has with new hair growth.",
+          "title": "Great brush",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R9",
+          "legs": {
+            "bm25": 10,
+            "knn": 8
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 9,
+          "review_id": "bbf75a1ca5f6b5d877217fb892f5f77f3122b59cbf827d1d452d7c2ff91ffaed",
+          "review_month": "2019-03",
+          "score": 0.0289916,
+          "text": "EDIT: I loved this brush, until the rubber came undone and I had to toss it away. It only lasted me a year and I already had to buy a new one. SUCH A WASTE OF MONEY. Yes, it is great, but IT DOES NOT LAST. So unless you wanna buy a hair brush every year, you're better off with another one, besides, there's tons of cruelty-free, vegan, bamboo, 100% wood bristles and brush in Amazon.<br /><br />What can incredible product. I suffered from split ends and freezyness, dryness and dull hair. But this is incredible. It is super soft so it's not pulling on my hair. Its also soft at the root so it moves with my scalp. It doesn't take hair out but a few, and I have hair to my butt. Detangling is a life saver. So yes, GET IT!",
+          "title": "I HATE IT, THE RUBBER BROKE",
+          "window": "scope"
+        },
+        {
+          "cite_id": "R10",
+          "legs": {
+            "bm25": 7,
+            "knn": 13
+          },
+          "parent_asin": "B002C6G7O8",
+          "rank": 10,
+          "review_id": "c04c5decfcc48c6993cec02675160eb92371bb50ed45418d5ca72f6151a773ce",
+          "review_month": "2019-12",
+          "score": 0.028624,
+          "text": "I do the no-poo method so I brush my hair daily. This is very gentle. Also I have very long hair as I've been growing it out a while. I brush my hair when I'm watching tv or reading because ill just focus on slowly and gently doing it for 20 minutes. It kind of feels like a massage! I love the wood and durability",
+          "title": "I use it daily",
+          "window": "scope"
+        }
+      ],
+      "retrieved_digest": "3fe593c527958158951a9fdef597ce5883e0853c666208dfc72302d79cee83f8",
+      "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+      "status": "succeeded"
+    }
+  ],
+  "created_at": "2026-09-13T16:17:44+00:00",
+  "generation": "reviews_s8507728480475534879_d2e56c46",
+  "identity": {
+    "answer_spec_version": "1",
+    "generation": "reviews_s8507728480475534879_d2e56c46",
+    "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+    "model_id": "qwen3:8b",
+    "prompt_version": "rag-v5",
+    "question_spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
+    "retrieval_hash": "00e4c4449eac4f95566f45d888e6e4aa06be06ed71f783e22322543292fb5bc3"
+  },
+  "question_set": "development",
+  "question_spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
+  "questions_path": "eval/rag/dev/questions.json",
+  "questions_version": "1",
+  "run_id": "623bc38a-9466-497a-b54e-98e067da005b",
+  "scope": "full",
+  "search_run_id": "d2e56c46-6e05-40d5-9c8b-e24415ab92f9"
+}

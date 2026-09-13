@@ -111,6 +111,45 @@ def hybrid(es: Elasticsearch, alias: str, query: str, query_vector: list[float],
     return [Hit(rid, i + 1, score, sources[rid], parts) for i, (rid, score, parts) in enumerate(fused[:size])]
 
 
+# ------------------------------------------------------------ scoped retrieval (P7) ----
+# A P7 question is about one product between two months, and its answer may only cite reviews
+# from inside those bounds (ADR-0006). So the scope is a *filter on both legs before fusion*,
+# not a post-filter on the fused list: filtering afterwards would let a window with few
+# in-scope reviews come back short because the top 50 of each leg were spent elsewhere, and
+# "the retriever found nothing" would then be an artefact of the fusion window.
+#
+# `review_month` is `date_trunc('month')` in silver (`src/spark/silver.py:372`), so it is always
+# the first of the month and an inclusive `YYYY-MM-01` range is exactly the declared window.
+def scope_filter(*, parent_asin: str, start: str, end: str) -> list[dict[str, Any]]:
+    """The ES filter clauses for one product and one inclusive `YYYY-MM` window."""
+    return [{"term": {"parent_asin": parent_asin}},
+            {"range": {"review_month": {"gte": f"{start}-01", "lte": f"{end}-01",
+                                        "format": "yyyy-MM-dd"}}}]
+
+
+def scoped_hybrid(es: Elasticsearch, alias: str, query: str, query_vector: list[float], *,
+                  parent_asin: str, start: str, end: str, analyzer: str = "review_english",
+                  size: int = 10, rrf_window: int = RRF_WINDOW, knn_k: int = KNN_K,
+                  num_candidates: int = KNN_NUM_CANDIDATES) -> list[Hit]:
+    """The production hybrid, both legs restricted to one product-window before fusion."""
+    filters = scope_filter(parent_asin=parent_asin, start=start, end=end)
+    fields = ANALYZER_FIELDS[analyzer]
+    lex_q = {"bool": {"must": {"multi_match": {"query": query, "fields": [f"{fields[0]}^2", fields[1]],
+                                               "type": "best_fields"}},
+                      "filter": filters}}
+    lex = _hits(es.search(index=alias, size=rrf_window, query=lex_q, _source=DISPLAY_FIELDS,
+                          sort=TIE_SORT))
+    knn_body = {"field": VECTOR_FIELD, "query_vector": query_vector, "k": knn_k,
+                "num_candidates": num_candidates, "filter": {"bool": {"filter": filters}}}
+    vec = _hits(es.search(index=alias, size=rrf_window, knn=knn_body, _source=DISPLAY_FIELDS,
+                          sort=TIE_SORT))
+    sources = {h.review_id: h.source for h in lex + vec}
+    fused = rrf({"bm25": [h.review_id for h in lex], "knn": [h.review_id for h in vec]},
+                window=rrf_window)
+    return [Hit(rid, i + 1, score, sources[rid], parts)
+            for i, (rid, score, parts) in enumerate(fused[:size])]
+
+
 # `table` says which evaluation table a system belongs to (ADR-0005: never merged):
 # production = ranked over every review in the alias; controlled = restricted to the vector cohort.
 SYSTEMS: dict[str, dict[str, Any]] = {

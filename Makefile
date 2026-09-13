@@ -10,8 +10,11 @@ SAMPLE_NAME ?= development
 # The frozen prompt (conf/theme-label-spec.json frozen_prompt, ticket 06). Keep these in step:
 # a stale default here would label the training pool with a superseded teacher.
 PROMPT ?= label_v5
+# P7's frozen answering prompt (conf/rag-answer-spec.json frozen_prompt, ticket 12). Only the
+# development target reads it -- the evaluation run refuses any prompt but the frozen one.
+RAG_PROMPT ?= rag_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy eval-table gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers gate-rag eval-table gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -240,6 +243,18 @@ rag-questions-draft:  ## build the thirty questions and check every invariant, w
 
 rag-freeze:  ## freeze conf/rag-questions.json; refuses if any answer already exists (ADR-0006)
 	$(RUN) scripts/rag_freeze_questions.py --freeze
+
+rag-dev-questions:  ## draw the ten development questions (pre-2020, non-candidate products); prompt development only
+	$(RUN) scripts/rag_dev_questions.py
+
+rag-dev-answers:  ## answer the development set, for prompt development; never scored, never in the table
+	$(RUN) -m src.ai.rag_run --questions eval/rag/dev/questions.json --question-set development --prompt $(RAG_PROMPT)
+
+rag-answers:  ## answer the thirty frozen questions ONCE under the frozen prompt; writes eval/rag/answers.json and the seal
+	$(RUN) -m src.ai.rag_run --questions conf/rag-questions.json --question-set evaluation
+
+gate-rag:  ## re-derive every P7 constituent from the manifest, the seal, the retrieval and the call ledger; prints RAG_GATE
+	$(RUN) scripts/gate_rag.py --scope full
 
 eval-table:  ## the whole evaluation table from conf/lineage_chain.toml + eval/*/gate.json; non-zero on a capability that is neither a number nor a written reason
 	$(RUN) scripts/eval_table.py

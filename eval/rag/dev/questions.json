@@ -1,0 +1,339 @@
+{
+  "created_at": "2026-09-13T16:00:01+00:00",
+  "excluded_products": [
+    "B0010VSH3K",
+    "B001D0812A",
+    "B0052YFCSO",
+    "B00HFTINH6",
+    "B00JJV2XL0",
+    "B00JZRTZVY",
+    "B00K70U7NI",
+    "B00KCTER3U",
+    "B00R1TAN7I",
+    "B00RPJZMUM",
+    "B00SH5WGNE",
+    "B00U4O3YHI",
+    "B00V8ZCT1Y",
+    "B00X6QE9MK",
+    "B00Y3DF9X8",
+    "B0113GT5Q4",
+    "B012Q9NGE4",
+    "B013Q1TSLQ",
+    "B0145XI8RO",
+    "B016LD3C04",
+    "B0184ABLDW",
+    "B01BIDW19K",
+    "B01BYWYNUA",
+    "B01C8404OC",
+    "B01CE23EEA",
+    "B01CS3OWBY",
+    "B01EMMH0KY",
+    "B01FK1IUIM",
+    "B01G7SKNC8",
+    "B01IDOV7TC",
+    "B01IMEH6GG",
+    "B01LAV3O6E",
+    "B01LVXCGG0",
+    "B01MDLG6II",
+    "B01MXLP1T1",
+    "B01N00UFDV",
+    "B01N32BEJM",
+    "B01N5GPXG2",
+    "B06XH3Y6VZ",
+    "B074J6FFTZ",
+    "B074KD4PX2",
+    "B074M6XPXW",
+    "B074R5ZVKN",
+    "B0753JC12P",
+    "B075GK4249",
+    "B075RB3XJV",
+    "B076JLNGS5",
+    "B077D3MNHF",
+    "B0792Q3T59",
+    "B07CVHWC68",
+    "B07D1B499B",
+    "B07FCHMPKC",
+    "B07FDWYCTL",
+    "B07FMR3PJK",
+    "B07KXM94BT",
+    "B07L2SJZYB",
+    "B07MB1HM15",
+    "B07N6JN34N",
+    "B07NZYRLDS",
+    "B07QZML9BZ",
+    "B084JLBN7C",
+    "B09FR54XLC",
+    "B09X9BG4FC",
+    "B0BM4GX6TT"
+  ],
+  "note": "Prompt development only (ADR-0006): pre-2020 windows of non-candidate products, no answer keys, no answerability verdict, never scored and never in the evaluation table.",
+  "question_set": "development",
+  "questions": [
+    {
+      "answerability": "development_unscored",
+      "family": "product_scoped",
+      "parent_asin": "B000NIZYIW",
+      "product_title": "Soft 'N Style Applicator Bottle, 6 oz",
+      "question": "What complaints appear in the cited reviews for Soft 'N Style Applicator Bottle, 6 oz (ASIN B000NIZYIW) between 2019-01 and 2019-12?",
+      "question_id": "dev-product_scoped-01",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-12",
+            "start": "2019-01"
+          }
+        }
+      },
+      "slot_role": "filler"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "product_scoped",
+      "parent_asin": "B001QGWKP0",
+      "product_title": "Tigi Bed Head Manipulator 30 ml",
+      "question": "What complaints appear in the cited reviews for Tigi Bed Head Manipulator 30 ml (ASIN B001QGWKP0) between 2019-01 and 2019-12?",
+      "question_id": "dev-product_scoped-02",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-12",
+            "start": "2019-01"
+          }
+        }
+      },
+      "slot_role": "filler"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "product_scoped",
+      "parent_asin": "B002C6G7O8",
+      "product_title": "TEK - Large Oval Ash Wood Brush Handmade in Italy, with Short Tooth, Universal for All Hair Types - 22 x 6 cm",
+      "question": "What complaints appear in the cited reviews for TEK - Large Oval Ash Wood Brush Handmade in Italy, with Short Tooth, Universal for All Hair Types - 22 x 6 cm (ASIN B002C6G7O8) between 2019-01 and 2019-12?",
+      "question_id": "dev-product_scoped-03",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-12",
+            "start": "2019-01"
+          }
+        }
+      },
+      "slot_role": "filler"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "product_scoped",
+      "parent_asin": "B0007D5DS4",
+      "product_title": "Donell AHA 20 Face and Body Care Exfoliating Body Moisturizer Body Tingle",
+      "question": "What complaints appear in the cited reviews for Donell AHA 20 Face and Body Care Exfoliating Body Moisturizer Body Tingle (ASIN B0007D5DS4) between 2019-01 and 2019-12?",
+      "question_id": "dev-product_scoped-04",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-12",
+            "start": "2019-01"
+          }
+        }
+      },
+      "slot_role": "filler"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "temporal",
+      "parent_asin": "B001UZ31SC",
+      "product_title": "Nuk Brush (Green/White)",
+      "question": "What complaints appear in the cited reviews for Nuk Brush (Green/White) (ASIN B001UZ31SC) from 2019-07 to 2019-12, and how do those examples contrast with cited reviews from 2019-01 to 2019-06?",
+      "question_id": "dev-temporal-01",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2019-06",
+            "start": "2019-01"
+          },
+          "recent": {
+            "end": "2019-12",
+            "start": "2019-07"
+          }
+        }
+      },
+      "slot_role": "filler"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "temporal",
+      "parent_asin": "B002KC6YG0",
+      "product_title": "Cure Series Japanese Exfoliating Bath Towel from OHE - Hard Weave - Green, 110cm",
+      "question": "What complaints appear in the cited reviews for Cure Series Japanese Exfoliating Bath Towel from OHE - Hard Weave - Green, 110cm (ASIN B002KC6YG0) from 2019-07 to 2019-12, and how do those examples contrast with cited reviews from 2019-01 to 2019-06?",
+      "question_id": "dev-temporal-02",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2019-06",
+            "start": "2019-01"
+          },
+          "recent": {
+            "end": "2019-12",
+            "start": "2019-07"
+          }
+        }
+      },
+      "slot_role": "filler"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "temporal",
+      "parent_asin": "B002GDKPUY",
+      "product_title": "Special Effects SFX Hair Color Hair Dye Atomic Pink",
+      "question": "What complaints appear in the cited reviews for Special Effects SFX Hair Color Hair Dye Atomic Pink (ASIN B002GDKPUY) from 2019-07 to 2019-12, and how do those examples contrast with cited reviews from 2019-01 to 2019-06?",
+      "question_id": "dev-temporal-03",
+      "retrieval": {
+        "mode": "hybrid_per_window",
+        "per_window_k": 5,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "baseline": {
+            "end": "2019-06",
+            "start": "2019-01"
+          },
+          "recent": {
+            "end": "2019-12",
+            "start": "2019-07"
+          }
+        }
+      },
+      "slot_role": "filler"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "product_scoped",
+      "parent_asin": "B000NIZYIW",
+      "probe": {
+        "id": "flight_delays",
+        "label": "flight delays"
+      },
+      "product_title": "Soft 'N Style Applicator Bottle, 6 oz",
+      "question": "What complaints about flight delays appear in the cited reviews for Soft 'N Style Applicator Bottle, 6 oz (ASIN B000NIZYIW) between 2019-01 and 2019-12?",
+      "question_id": "dev-out_of_domain-01",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-12",
+            "start": "2019-01"
+          }
+        }
+      },
+      "slot_role": "filler",
+      "stratum": "out_of_domain"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "product_scoped",
+      "parent_asin": "B001QGWKP0",
+      "probe": {
+        "id": "mortgage_rates",
+        "label": "mortgage interest rates"
+      },
+      "product_title": "Tigi Bed Head Manipulator 30 ml",
+      "question": "What complaints about mortgage interest rates appear in the cited reviews for Tigi Bed Head Manipulator 30 ml (ASIN B001QGWKP0) between 2019-01 and 2019-12?",
+      "question_id": "dev-out_of_domain-02",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-12",
+            "start": "2019-01"
+          }
+        }
+      },
+      "slot_role": "filler",
+      "stratum": "out_of_domain"
+    },
+    {
+      "answerability": "development_unscored",
+      "family": "product_scoped",
+      "parent_asin": "B002C6G7O8",
+      "probe": {
+        "id": "engine_oil",
+        "label": "engine oil viscosity"
+      },
+      "product_title": "TEK - Large Oval Ash Wood Brush Handmade in Italy, with Short Tooth, Universal for All Hair Types - 22 x 6 cm",
+      "question": "What complaints about engine oil viscosity appear in the cited reviews for TEK - Large Oval Ash Wood Brush Handmade in Italy, with Short Tooth, Universal for All Hair Types - 22 x 6 cm (ASIN B002C6G7O8) between 2019-01 and 2019-12?",
+      "question_id": "dev-out_of_domain-03",
+      "retrieval": {
+        "mode": "hybrid_filtered",
+        "per_window_k": null,
+        "top_k": 10
+      },
+      "scope": {
+        "windows": {
+          "scope": {
+            "end": "2019-12",
+            "start": "2019-01"
+          }
+        }
+      },
+      "slot_role": "filler",
+      "stratum": "out_of_domain"
+    }
+  ],
+  "questions_version": "1",
+  "scope": "full",
+  "seed": 20260911,
+  "spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
+  "status": "development",
+  "window": {
+    "baseline": [
+      "2019-01",
+      "2019-06"
+    ],
+    "recent": [
+      "2019-07",
+      "2019-12"
+    ],
+    "scope": [
+      "2019-01",
+      "2019-12"
+    ]
+  }
+}

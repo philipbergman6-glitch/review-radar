@@ -1,0 +1,59 @@
+{
+  "answer_spec_version": "1",
+  "status": "provisional",
+  "decided_in": "ticket 12 (ADR-0006, RR-17)",
+  "note": "How a P7 answer is produced, and under what identity. The generator sees the question, its declared windows, and the retrieved reviews -- never the answer key, never the theme-shift direction, never a rating or a product's decline rank. `retrieval` is the retriever identity the evaluation run must match: changing any of it changes what every answer rests on, so it is hashed into the inference config alongside the prompt and the decoding schema.",
+  "host": "ollama",
+  "endpoint": "http://localhost:11434",
+  "model_id": "qwen3:8b",
+  "api_mode": "local",
+  "inference": {
+    "temperature": 0,
+    "num_predict": 1024,
+    "think": false,
+    "seed": 20260913
+  },
+  "retrieval": {
+    "alias": "reviews",
+    "analyzer": "review_english",
+    "product_scoped_top_k": 10,
+    "temporal_per_window_k": 5,
+    "rrf_k": 60,
+    "rrf_window": 50,
+    "knn_k": 50,
+    "knn_num_candidates": 200,
+    "embedding_spec_version": "1",
+    "note": "The production hybrid of ADR-0005, with the question's scope filter applied to both legs before fusion. Product-scoped questions retrieve ten over one window; temporal questions retrieve five per window, each window fused on its own, so an empty window cannot be filled from the other."
+  },
+  "limits": {
+    "max_attempts": 2,
+    "max_claims": 6,
+    "max_citations_per_claim": 6,
+    "claim_max_words": 45,
+    "refusal_reason_max_words": 60,
+    "call_ceiling": 200,
+    "subject_max_words": 15
+  },
+  "prompts": {
+    "rag_v1": {
+      "path": "conf/prompts/rag-v1.txt",
+      "version": "rag-v1"
+    },
+    "rag_v2": {
+      "path": "conf/prompts/rag-v2.txt",
+      "version": "rag-v2"
+    },
+    "rag_v3": {
+      "path": "conf/prompts/rag-v3.txt",
+      "version": "rag-v3"
+    },
+    "rag_v4": {
+      "path": "conf/prompts/rag-v4.txt",
+      "version": "rag-v4"
+    },
+    "rag_v5": {
+      "path": "conf/prompts/rag-v5.txt",
+      "version": "rag-v5"
+    }
+  }
+}

@@ -55,6 +55,7 @@ THEME_REFERENCE_SPEC_VERSION = "1"
 # correlated-error number this exists to publish unverifiable after the fact.
 THEME_HUMAN_SPEC_VERSION = "1"
 THEME_CLASSIFIER_SPEC_VERSION = "1"
+RAG_ANSWERS_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -560,8 +561,51 @@ _register(Contract(
     identity=_classifier_score_identity))
 
 # Registered by its own phase (ADR-0008 §2); in the vocabulary now so the CHECK constraint and
-# this registry stay in step.
+# this registry stay in step. v0 is the placeholder it was registered under before P7 existed
+# and is kept so a run written under it still validates.
 _register(Contract("rag_answers", "0", inputs={}, outputs={}, counts=()))
+
+
+def _rag_answers_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Every question reaches exactly one terminal state, and the answer file holds them all.
+
+    The failure this refuses is a generator that quietly answers twenty of thirty: `records_in`
+    is the question count, and the four terminal tallies must add back up to it, so a question
+    that was skipped cannot disappear between the manifest and the artefact.
+    """
+    fails: list[str] = []
+    total = _n(counts, "questions_total")
+    if total is None:
+        return ["counts.questions_total must be set on success"]
+    if records.get("records_in") != total:
+        fails.append(f"identity: records_in {records.get('records_in')} != questions_total {total}")
+    parts = [_n(counts, k) for k in ("answered", "refused", "parse_failed", "api_failed")]
+    if None in parts:
+        fails.append("counts.answered/refused/parse_failed/api_failed must all be set")
+    elif sum(parts) != total:  # type: ignore[arg-type]
+        fails.append(f"identity: answered+refused+parse_failed+api_failed {sum(parts)} "  # type: ignore[arg-type]
+                     f"!= questions_total {total}")
+    else:
+        if records.get("records_out") != parts[0] + parts[1]:  # type: ignore[operator]
+            fails.append(f"identity: records_out {records.get('records_out')} != answered+refused")
+        if records.get("records_rejected") != parts[2] + parts[3]:  # type: ignore[operator]
+            fails.append(f"identity: records_rejected {records.get('records_rejected')} != "
+                         "parse_failed+api_failed")
+    ledger, ceiling = _n(counts, "calls_in_ledger"), _n(counts, "call_ceiling")
+    if ledger is not None and ceiling is not None and ledger > ceiling:
+        fails.append(f"identity: P7's call ledger holds {ledger} calls, over the ceiling {ceiling}")
+    return fails
+
+
+_register(Contract(
+    "rag_answers", RAG_ANSWERS_SPEC_VERSION,
+    inputs={"questions": ("path", "version", "spec_hash"),
+            "spec": ("path", "version", "model_id", "prompt_version", "config_hash"),
+            "search": ("run_id", "alias", "generation")},
+    outputs={"eval.rag_answers": ("path", "questions", "sha256")},
+    counts=("questions_total", "answered", "refused", "parse_failed", "api_failed", "calls",
+            "calls_in_ledger", "call_ceiling", "cache_hits", "retrieved_total", "elapsed_s"),
+    identity=_rag_answers_identity))
 
 
 def contract_for(job_name: str, spec_version: str | None = None) -> Contract | None:
