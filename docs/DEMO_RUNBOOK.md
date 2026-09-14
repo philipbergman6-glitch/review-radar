@@ -169,10 +169,14 @@ cold, plus ~15 s if the reload in §1 is needed.
 **T-1 day**
 
 - [ ] `retention.ms=-1` applied to `reviews.raw` and `reviews.eos` (§1)
-- [ ] Full rehearsal of every command you plan to run live, in order
+- [ ] `make rehearse` twice, then `make gate-demo` — the gate counts the exports, it does
+      not take your word for it. `rehearsals=2/2` is the bar (ADR-0009, RR-13)
+- [ ] `docs/demo/kibana-dashboard.png` and `docs/demo/exactly-once.txt` exist — the runner
+      screenshots the dashboard with headless Chrome and copies the transcript in; make the
+      transcript once with `make eos | tee docs/demo/exactly-once.txt`
 - [ ] After the rehearsal, leave **no** stream stopped mid-topic — let every
       `--trigger once` run finish, or re-drain until the checkpoint matches the
-      log end (§1)
+      log end (§1). `make rehearse` does this for the demo topic itself
 
 **T-30 min**
 
@@ -223,14 +227,21 @@ Two things it no longer contains, and why:
   paced replay onto the stream's own topic, which is where event order and the watermark are
   demonstrated (ADR-0010).
 
-Move 2 as wired today resets `reviews.stream`, so the control run's `STREAM_GATE` cannot be
-re-derived from the topic afterwards — intended on the day, destructive on a working
-machine, so do not run move 2 during development. Ticket 16 gives the demo run a topic of
-its own (`reviews.stream.demo`, replayed by `stream_producer --inject`, projected by
-`stream_product_month --run-kind demo`), so move 2 can be pointed at that one and stop
-touching the control topic; wiring it is ticket 18's. Move 10 prints `STREAM_GATE` — the
-alerts table ADR-0010's move list mentions is not built, so the gate line is all it
-prints.
+Move 2 runs the **demo** run, on its own topic: the kernel empties `reviews.stream.demo`,
+starts the projection on it, and starts `stream_producer --inject` behind it, which releases
+the near slice 7 days late and the far slice 730 days late in counts frozen before the run
+(ADR-0010). The control topic the control run's `STREAM_GATE` re-reads is never touched, so
+a rehearsal costs nothing and move 2 is safe to run during development.
+
+The reset happens in the kernel, before the query subscribes, and the producer then only
+appends (`reset=False`). Handing the reset to the producer instead is what makes a query die
+with `failOnDataLoss`: its topic is deleted underneath it, which really is data loss.
+
+Because the rehearsal's own replay is the newest thing on the demo topic, `make rehearse`
+re-derives the demo run afterwards (`make stream-aggregate-demo gate-stream-demo`) so
+`eval/stream_demo/gate.json` describes the topic as it now stands — which is the artefact
+move 10 reads back. Move 10 prints `STREAM_GATE` and the reconciliation it carries; the
+alerts table ADR-0010's move list mentions is not built, so the gate line is all it prints.
 
 **If something fails live**
 

@@ -14,7 +14,7 @@ PROMPT ?= label_v5
 # development target reads it -- the evaluation run refuses any prompt but the frozen one.
 RAG_PROMPT ?= rag_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample stream-produce-demo stream-aggregate stream-aggregate-sample stream-aggregate-demo gate-stream gate-stream-demo stream-demo bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers rag-judge-export rag-judge rag-judge-check rag-judge-import gate-rag eval-table demo demo-run-sheet gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample stream-produce-demo stream-aggregate stream-aggregate-sample stream-aggregate-demo gate-stream gate-stream-demo stream-demo bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers rag-judge-export rag-judge rag-judge-check rag-judge-import gate-rag eval-table demo demo-run-sheet rehearse gate-demo gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -312,6 +312,13 @@ demo:  ## open the demo notebook (ten moves, one kernel) in Jupyter Lab
 
 demo-run-sheet:  ## print the running order, its seconds and any move marked pending
 	$(RUN) -c "from src.serving import demo; print(demo.run_sheet().to_string(index=False)); print(demo.budget())"
+
+rehearse:  ## one rehearsal: execute the notebook into docs/demo/<date>/, then re-derive the demo run it replayed
+	$(RUN) scripts/rehearse_demo.py --scope full
+	$(MAKE) stream-aggregate-demo gate-stream-demo
+
+gate-demo:  ## DEMO_GATE: rehearsals counted from the exported notebooks and the ledger, four documents checked
+	$(RUN) scripts/gate_demo.py --scope full
 
 eval-table:  ## the whole evaluation table from conf/lineage_chain.toml + eval/*/gate.json; non-zero on a capability that is neither a number nor a written reason
 	$(RUN) scripts/eval_table.py

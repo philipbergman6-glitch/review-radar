@@ -7,14 +7,24 @@ not asserted is anything a run decides: no verdict, no count, no retrieval resul
 """
 from __future__ import annotations
 
+import importlib.util
 import json
+from datetime import UTC, datetime
 
 import pandas as pd
 import pytest
 
 from src.common import config as C
 from src.common import evaluation as E
+from src.gates import demo as demo_gate
+from src.ingest.replay_config import load_replay_config
 from src.serving import demo
+
+#: `scripts/` is not a package, so the rehearsal runner is loaded by path.
+_spec = importlib.util.spec_from_file_location(
+    "rehearse_demo", C.PROJECT_ROOT / "scripts" / "rehearse_demo.py")
+rehearse = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(rehearse)
 
 NOTEBOOK = C.PROJECT_ROOT / "notebooks" / "demo.ipynb"
 
@@ -201,3 +211,86 @@ def test_the_notebook_is_committed_with_outputs_stripped():
             continue
         assert cell["outputs"] == [], f"code cell {i} carries committed output"
         assert cell["execution_count"] is None, f"code cell {i} carries an execution count"
+
+
+# ------------------------------------------------ the line the rehearsal gate reads ----
+def test_move_ten_prints_a_grepable_line_the_demo_gate_can_read():
+    """The rendered table is for the room; `DEMO_LIVE` is for `DEMO_GATE` (ticket 18)."""
+    live = demo.Live(replay=None, query=None, topic="reviews.stream",
+                     started_at=datetime(2026, 9, 14, tzinfo=UTC),
+                     seen={"batches": 6, "rows": 412887, "product_months": 90,
+                           "max_event_month": "2019-04"})
+    assert demo.live_line(live, elapsed_s=207.6) == (
+        "DEMO_LIVE topic=reviews.stream batches=6 rows=412887 product_months=90 "
+        "event_time_reached=2019-04 elapsed_s=208")
+    assert demo_gate.live_counts(demo.live_line(live, elapsed_s=1)) == {"batches": 6,
+                                                                       "rows": 412887}
+
+
+def test_a_projection_that_saw_nothing_says_so_rather_than_printing_a_blank():
+    live = demo.Live(replay=None, query=None, topic="reviews.stream",
+                     started_at=datetime(2026, 9, 14, tzinfo=UTC), seen={})
+    line = demo.live_line(live, elapsed_s=0)
+    assert "batches=0 rows=0" in line and "event_time_reached=none" in line
+    assert demo_gate.live_counts(line) == {"batches": 0, "rows": 0}
+
+
+# ------------------------------------------------------------- the rehearsal runner ----
+def test_a_second_rehearsal_on_the_same_day_is_a_second_directory(tmp_path):
+    """"Run clean twice" is two exports, so the runner never reuses a day's directory."""
+    now = datetime(2026, 9, 14, tzinfo=UTC)
+    first = rehearse.export_dir(tmp_path, now=now)
+    assert first.name == "2026-09-14"
+    first.mkdir()
+    second = rehearse.export_dir(tmp_path, now=now)
+    assert second.name == "2026-09-14-2"
+    second.mkdir()
+    assert rehearse.export_dir(tmp_path, now=now).name == "2026-09-14-3"
+
+
+def test_the_stand_ins_the_runner_copies_are_the_two_it_cannot_derive(tmp_path):
+    assert set(rehearse.STAND_INS) == {demo_gate.EXPORT_KIBANA, demo_gate.EXPORT_TRANSCRIPT}
+    out = tmp_path / "out"
+    out.mkdir()
+    (tmp_path / demo_gate.EXPORT_TRANSCRIPT).write_text("EOS_GATE=PASS")
+    assert rehearse.copy_stand_ins(out, tmp_path) == [demo_gate.EXPORT_KIBANA]
+    assert (out / demo_gate.EXPORT_TRANSCRIPT).read_text() == "EOS_GATE=PASS"
+
+
+# ------------------------------------------------------- move 2 is the P8 demo run ----
+def test_move_two_replays_with_lateness_injected_onto_the_demo_topic():
+    """Injection is what makes moves 2 and 10 the demo run rather than a second control run:
+    a watermark with nothing to drop demonstrates nothing (ADR-0010, ticket 16)."""
+    assert demo.RUN_KIND == "demo"
+    assert demo.replay_command(scope="full", reset=False)[-1] == "--inject"
+    assert demo.replay_command(scope="full")[-2:] == ["--inject", "--reset"]
+    assert "--inject" not in demo.replay_command(scope="full", run_kind="control")
+
+
+def test_the_demo_topic_is_not_the_topic_the_control_gate_re_reads():
+    """A rehearsal must not cost the control run, which is the other half of P8's claim."""
+    cfg = load_replay_config()
+    assert cfg.topic_for("full", demo.RUN_KIND) != cfg.topic_for("full", "control")
+
+
+def test_move_ten_shows_the_demo_run_s_recorded_gate():
+    code = "".join(_notebook()["cells"][21]["source"])
+    assert 'demo.show_gate("stream_demo")' in code
+
+
+def test_move_ten_holds_the_stage_to_the_talk_s_clock():
+    """Under nbconvert the nine moves before move 10 take seconds, not four minutes; without
+    the hold the projection would be stopped before Kafka delivered anything (ticket 18)."""
+    assert demo.MOVE_TEN_STARTS_S == sum(m.seconds for m in demo.MOVES if m.n < 10) \
+        + demo.SURFACE_SWITCH_S == 255
+    assert demo.MOVE_TEN_STARTS_S + demo.MOVES[-1].seconds < demo.budget()["ceiling_s"], \
+        "the hold plus move 10 has to leave the rehearsal inside the 300 s ceiling"
+    code = "".join(_notebook()["cells"][21]["source"])
+    assert "stop_live_projection(live, stage=stage)" in code
+
+
+def test_move_two_starts_the_replay_before_the_projection_subscribes():
+    """`--reset` deletes the topic; a query already on it dies with failOnDataLoss."""
+    code = "".join(_notebook()["cells"][5]["source"])
+    assert code.index("demo.reset_replay_topic(") < code.index("demo.start_live_projection(")
+    assert "reset=False" in code, "the producer must not delete a topic the query is reading"

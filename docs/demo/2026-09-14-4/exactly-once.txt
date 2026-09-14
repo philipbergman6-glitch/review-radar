@@ -1,0 +1,33 @@
+./run.sh python scripts/prove_exactly_once.py --records 120000 --kill-after 25
+==========================================================================
+STEP 1 - load a known number of records onto a clean topic
+==========================================================================
+%3|1789380447.821|FAIL|rdkafka#producer-1| [thrd:localhost:9092/bootstrap]: localhost:9092/bootstrap: Connect to ipv6#[::1]:9092 failed: Connection refused (after 0ms in state CONNECT)
+%3|1789380447.933|FAIL|rdkafka#producer-1| [thrd:localhost:9092/1]: localhost:9092/1: Connect to ipv6#[::1]:9092 failed: Connection refused (after 0ms in state CONNECT)
+%3|1789380447.989|FAIL|rdkafka#producer-1| [thrd:localhost:9092/bootstrap]: localhost:9092/bootstrap: Connect to ipv6#[::1]:9092 failed: Connection refused (after 0ms in state CONNECT)
+%3|1789380448.189|FAIL|rdkafka#producer-2| [thrd:localhost:9092/1]: localhost:9092/1: Connect to ipv6#[::1]:9092 failed: Connection refused (after 0ms in state CONNECT)
+  120,000 records on topic 'reviews.eos'
+  reset (0 rows): lake.bronze.reviews_eos, /Users/philipbergman/Documents/Coding_Projects/Big_Data/checkpoints/bronze_reviews_eos
+
+==========================================================================
+STEP 2 - start bronze, then SIGKILL it after 25s
+==========================================================================
+  killed (SIGKILL -- no graceful shutdown, nothing flushed on the way out)
+  rows landed before the kill: 89,964
+
+==========================================================================
+STEP 3 - restart from the checkpoint and drain
+==========================================================================
+  drained (full output in /Users/philipbergman/Documents/Coding_Projects/Big_Data/checkpoints/eos_run.log)
+
+==========================================================================
+RESULT
+==========================================================================
+  expected rows            : 120,000
+  rows before the kill     : 89,964
+  rows after the restart   : 120,000
+  recovered by the restart : 30,036
+  duplicate (partition, offset) pairs : 0
+  table under test         : lake.bronze.reviews_eos
+
+  PASS - no loss, no duplication across an unclean restart.

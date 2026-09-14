@@ -29,7 +29,7 @@ import os
 import subprocess
 import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +47,11 @@ from src.common.spark import build
 from src.ingest.replay_config import load_replay_config
 from src.serving import search as S
 from src.spark.silver import silver_names
+
+#: Which P8 run the stage puts on screen. The demo run carries the injected lateness slices
+#: (ADR-0010), so moves 2 and 10 show a watermark with something to drop; the control run is
+#: the one `make gate-stream` re-derives and no rehearsal disturbs it.
+RUN_KIND = "demo"
 
 #: Where a background replay's console output lands, so move 10 can show the clock it printed.
 REPLAY_LOG = C.PROJECT_ROOT / "logs" / "demo-replay.log"
@@ -89,12 +94,9 @@ MOVES: tuple[Move, ...] = (
     Move(1, "The stack is real", "terminal", 10,
          "four services proved usable from Python, in a real shell, before the notebook opens"),
     Move(2, "The paced replay and the streaming projection", "notebook", 20,
-         "the file goes onto its own topic in event order at a constant rate; the event-time "
-         "clock moves while the rest of the demo runs",
-         pending="the injected near/far slices, the demo run's own topic and its own "
-                 "STREAM_GATE are the P8 demo run (ADR-0010, ticket 16); until it exists this "
-                 "replays the control topic without injection and move 10 prints the control "
-                 "run's recorded gate"),
+         "the file goes onto its own topic in event order at a constant rate, with lateness "
+         "injected in counts frozen before the run; the event-time clock moves while the rest "
+         "of the demo runs"),
     Move(3, "Silver's reconciliation identity", "notebook", 15,
          "every bronze row is accounted for: rejected, survived, or removed as a duplicate"),
     Move(4, "Every run this data went through", "notebook", 30,
@@ -113,9 +115,10 @@ MOVES: tuple[Move, ...] = (
          "every claim cites a review inside the window the question declared; it contrasts "
          "cited examples and never says a complaint increased"),
     Move(10, "The stream's own gate", "notebook", 25,
-         "the projection is reconciled against batch product-month by product-month",
-         pending="the alerts table and the demo run's watermark drops come with the P8 demo "
-                 "run (ticket 16)"),
+         "the near slice was accepted and the far slice dropped, in exactly the counts frozen "
+         "before the run, and every differing product-month is explained by a dropped row",
+         pending="the stream.alerts table ADR-0010 sketches is not built; move 10 shows the "
+                 "recorded STREAM_GATE and the reconciliation it carries, not an alerts feed"),
 )
 
 
@@ -124,6 +127,11 @@ def run_sheet() -> pd.DataFrame:
     return pd.DataFrame([{"move": m.n, "title": m.title, "surface": m.surface,
                           "s": m.seconds, "says": m.says, "pending": m.pending or ""}
                          for m in MOVES])
+
+
+#: Where move 10 falls on the talk's clock: everything before it, plus the surface switches.
+#: The projection is live from move 2 to here, so this is how long a rehearsal holds it open.
+MOVE_TEN_STARTS_S = sum(m.seconds for m in MOVES if m.n < 10) + SURFACE_SWITCH_S
 
 
 def budget() -> dict[str, int]:
@@ -482,14 +490,23 @@ class Live:
         return self.replay is not None and self.replay.poll() is None
 
 
-def replay_command(*, scope: str = "full", reset: bool = True) -> list[str]:
-    """The argv move 2 runs: `make stream-produce`, spelled out so a test can read it."""
+def replay_command(*, scope: str = "full", reset: bool = True,
+                   run_kind: str = RUN_KIND) -> list[str]:
+    """The argv move 2 runs: `make stream-produce-demo`, spelled out so a test can read it.
+
+    `--inject` is what makes this the *demo* run: it releases the frozen near and far lateness
+    slices onto `reviews.stream.demo` (ADR-0010, ticket 16), so the stage shows a watermark
+    doing its job rather than a replay with nothing to drop -- and the control topic the
+    control run's gate re-reads is never touched by a rehearsal.
+    """
     cmd = ["./run.sh", "python", "-m", "src.ingest.stream_producer",
            "--category", C.CATEGORY, "--scope", scope]
+    if run_kind == "demo":
+        cmd.append("--inject")
     return [*cmd, "--reset"] if reset else cmd
 
 
-def start_replay(*, scope: str = "full", reset: bool = True,
+def start_replay(*, scope: str = "full", reset: bool = True, run_kind: str = RUN_KIND,
                  log: Path = REPLAY_LOG) -> subprocess.Popen:
     """Start the paced replay of the sorted file in the background (move 2).
 
@@ -499,13 +516,46 @@ def start_replay(*, scope: str = "full", reset: bool = True,
     event-time clock -- goes to `log`, which `replay_clock()` shows.
 
     `reset` is the destructive flag the demo wants and development does not: it deletes the
-    stream topic so it holds exactly this replay.
+    demo topic so it holds exactly this replay.
     """
     log.parent.mkdir(parents=True, exist_ok=True)
     handle = log.open("w")
-    return subprocess.Popen(replay_command(scope=scope, reset=reset), cwd=C.PROJECT_ROOT,
+    return subprocess.Popen(replay_command(scope=scope, reset=reset, run_kind=run_kind),
+                            cwd=C.PROJECT_ROOT,
                             stdout=handle,
                             stderr=subprocess.STDOUT, text=True)
+
+
+def reset_replay_topic(scope: str = "full", *, run_kind: str = RUN_KIND,
+                       timeout: float = 60.0) -> str:
+    """Delete and recreate the replay's topic from the kernel, before anything subscribes.
+
+    Move 2 used to leave the reset to the producer's own `--reset`, which is right for
+    `make stream-produce-demo` and wrong on stage: the projection subscribes in the same
+    breath, and a query whose topic is deleted underneath it dies with `failOnDataLoss` --
+    which is exactly what it should do, because that really is data loss. Doing the reset
+    here makes the order explicit. The topic is empty and stable before the query starts,
+    the replay then only appends, and the lineage gate's "topic count == acked count" check
+    is untouched because nothing else ever wrote to it.
+    """
+    from confluent_kafka.admin import AdminClient, NewTopic
+
+    from src.ingest.stream_producer import reset_topic
+
+    cfg = load_replay_config()
+    topic = cfg.topic_for(scope, run_kind)
+    reset_topic(C.KAFKA_BOOTSTRAP, topic, timeout=timeout)
+    admin = AdminClient({"bootstrap.servers": C.KAFKA_BOOTSTRAP, "broker.address.family": "v4"})
+    for fut in admin.create_topics(
+            [NewTopic(topic, num_partitions=cfg.partitions, replication_factor=1)]).values():
+        fut.result(timeout=30)
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if topic in admin.list_topics(timeout=10).topics:
+            print(f"[stream] topic '{topic}' is empty and ready for the replay", flush=True)
+            return topic
+        time.sleep(1)
+    raise TimeoutError(f"topic {topic!r} was not visible {timeout:.0f}s after being created")
 
 
 def replay_clock(*, lines: int = 6, log: Path = REPLAY_LOG) -> list[str]:
@@ -515,8 +565,13 @@ def replay_clock(*, lines: int = 6, log: Path = REPLAY_LOG) -> list[str]:
     return log.read_text().splitlines()[-lines:]
 
 
-def start_live_projection(stage: Stage, *, trigger_s: int = 5) -> Live:
+def start_live_projection(stage: Stage, *, replay: subprocess.Popen | None = None,
+                          trigger_s: int = 5, run_kind: str = RUN_KIND) -> Live:
     """Start the projection's own transformations over the stream topic, in this kernel.
+
+    `replay` is the background process this projection reads behind. `reset_replay_topic()`
+    has already emptied the topic, so the two can start in either order and the query only
+    ever sees offsets that are still there.
 
     Deliberately *not* the gated projection run. `make stream-aggregate` is the run the ledger
     records and `make gate-stream` re-derives; this is the same four functions from
@@ -530,7 +585,7 @@ def start_live_projection(stage: Stage, *, trigger_s: int = 5) -> Live:
     from src.spark import stream_product_month as SP
 
     cfg = load_replay_config()
-    topic = cfg.topic_for(stage.scope)
+    topic = cfg.topic_for(stage.scope, run_kind)
     seen = {"batches": 0, "rows": 0, "product_months": 0, "max_event_month": ""}
 
     def observe(batch, batch_id: int) -> None:
@@ -563,21 +618,49 @@ def start_live_projection(stage: Stage, *, trigger_s: int = 5) -> Live:
              .foreachBatch(observe)
              .trigger(processingTime=f"{trigger_s} seconds")
              .start())
-    return Live(replay=None, query=query, topic=topic, started_at=datetime.now(UTC), seen=seen)
+    return Live(replay=replay, query=query, topic=topic, started_at=datetime.now(UTC), seen=seen)
 
 
-def stop_live_projection(live: Live, *, drain_s: int = 10) -> pd.DataFrame:
-    """Stop the live query and report what it saw (move 10, first half)."""
+def live_line(live: Live, *, elapsed_s: float) -> str:
+    """What the projection saw, on one grep-able line (`DEMO_GATE`, ticket 18).
+
+    The rendered table beside it is for the room; this line is for the rehearsal gate, which
+    reads the exported notebook back and has to find the batch count without parsing a
+    DataFrame's repr. Printed by `stop_live_projection`, so an export cannot carry the table
+    without carrying the number.
+    """
+    seen = live.seen
+    return (f"DEMO_LIVE topic={live.topic} batches={seen.get('batches', 0)} "
+            f"rows={seen.get('rows', 0)} product_months={seen.get('product_months', 0)} "
+            f"event_time_reached={seen.get('max_event_month') or 'none'} "
+            f"elapsed_s={elapsed_s:.0f}")
+
+
+def stop_live_projection(live: Live, *, stage: Stage | None = None,
+                         drain_s: int = 10) -> pd.DataFrame:
+    """Stop the live query and report what it saw (move 10, first half).
+
+    `stage` makes the cell wait until the stage has been open as long as the talk's clock says
+    it should be when move 10 begins. On stage the wait is zero -- the nine moves before this
+    one have already spent it on talking. Under `nbconvert` they take seconds, and without the
+    hold move 10 would stop a projection that Kafka had not yet delivered anything to, which
+    is a rehearsal of a demo nobody is going to give (ticket 18).
+    """
+    if stage is not None:
+        floor = stage.opened_at + timedelta(seconds=MOVE_TEN_STARTS_S)
+        while datetime.now(UTC) < floor and live.query.isActive:
+            time.sleep(1)
     deadline = time.time() + drain_s
     while time.time() < deadline and live.query.status.get("isDataAvailable"):
         time.sleep(1)
     live.query.stop()
     seen = live.seen
+    elapsed = (datetime.now(UTC) - live.started_at).total_seconds()
+    print(live_line(live, elapsed_s=elapsed), flush=True)
     return pd.DataFrame([
         {"fact": "topic", "value": live.topic},
         {"fact": "micro-batches", "value": str(seen.get("batches", 0))},
         {"fact": "deduplicated rows", "value": f"{seen.get('rows', 0):,}"},
         {"fact": "event time reached", "value": seen.get("max_event_month", "")},
-        {"fact": "elapsed_s",
-         "value": f"{(datetime.now(UTC) - live.started_at).total_seconds():.0f}"},
+        {"fact": "elapsed_s", "value": f"{elapsed:.0f}"},
     ])
