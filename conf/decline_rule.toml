@@ -27,3 +27,25 @@ unevaluable_resets_persistence = true
 
 [reproduction]
 metric_tolerance = 1e-9            # pandas reproduction vs Spark, absolute, on means/shares
+
+# Calibration targets (ADR-0001, ADR-0011, ADR-0012). Chosen by convention BEFORE the
+# calibration is run and committed ahead of the producer, so the history shows the bar
+# preceded the measurement. `GOLD_CALIBRATION` FAILs if the placebo rate exceeds the ceiling
+# or the power falls below the target; the rule may not then be retuned to clear them
+# without saying so, because `status = "frozen"` comes after this and never moves.
+#
+# Placebo: a product's calendar spine is permuted in month order within the product,
+# preserving every month's review count and rating distribution and destroying only the
+# temporal ordering the rule looks for. Under that null there is no sustained decline to
+# find, so any alert is a false positive (ADR-0012).
+#
+# Power: a product the rule does not fire on is given an injected step decline of
+# `injected_delta` stars beginning at a uniformly drawn evaluable month, and the rule is
+# re-run over the altered spine.
+
+[calibration]
+placebo_ceiling = 0.05             # max share of permuted spines on which an alert fires
+power_target = 0.80                # min share of injected declines the rule detects
+injected_delta = 0.5               # stars, the injected step (> [rule] delta = 0.3)
+draws = 1000                       # permutations / injections, seeded
+seed = 20260914
