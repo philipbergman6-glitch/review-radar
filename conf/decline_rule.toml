@@ -11,18 +11,18 @@
 # run ledger, so a changed rule is visible in lineage.
 
 [rule]
-status = "provisional"
+status = "frozen"
 holdout_start = "2020-01"          # first holdout evaluation point (month)
 
-baseline_months = 6                # B: trailing window ending at the evaluation point
-recent_months = 6                  # R: window starting the month after the point
-delta = 0.3                        # alert if recent_mean <= baseline_mean - delta (stars)
-persistence = 2                    # P: consecutive evaluable points with the condition true
-max_gap = 3                        # G: > G consecutive unevaluable points close an episode
-recovery_points = 2                # K: consecutive evaluable false points close an episode
+baseline_months = 6  # B: trailing window ending at the evaluation point
+recent_months = 12  # R: window starting the month after the point
+delta = 0.3  # alert if recent_mean <= baseline_mean - delta (stars)
+persistence = 3  # P: consecutive evaluable points with the condition true
+max_gap = 3  # G: > G consecutive unevaluable points close an episode
+recovery_points = 2  # K: consecutive evaluable false points close an episode
 
-min_reviews = 10                   # per window
-min_active_months = 3              # per window (months with >= 1 review)
+min_reviews = 20  # per window
+min_active_months = 3  # per window (months with >= 1 review)
 unevaluable_resets_persistence = true
 
 [reproduction]
@@ -84,3 +84,7 @@ recent_months = [6, 12]
 delta = [0.3, 0.5, 0.75, 1.0]
 persistence = [2, 3, 4]
 min_reviews = [10, 20, 40]
+
+# Frozen 2026-09-14 by scripts/freeze_rule.py from eval/gold_calibration/gate.json.
+# The values above are the configuration calibration chose; they do not move again (ADR-0001).
+# Power shortfall accepted: power at the primary effect was 0.18574 against a target of 0.8; the ceiling was held rather than weakened (RR-09 round 5), and the shortfall is published in the evaluation table's verdict column
