@@ -1,0 +1,182 @@
+{
+  "what_this_is": "second-agent consistency: agent_reference vs a second in-session agent annotator over the RR-21 stratified 50",
+  "what_this_is_not": "THEMES_AGREEMENT, which RR-21 defines as agent_reference vs Philip and which remains NOT_RUN",
+  "caveat": "both sides are the same model family, so correlated error is unbounded here; a high number is evidence of reproducibility, not of accuracy",
+  "reference": "eval/themes/reference-audit.jsonl",
+  "annotator_b": "eval/themes/agent2-agreement-audit.jsonl",
+  "subset": null,
+  "reviews": 50,
+  "themes": 10,
+  "n": 500,
+  "agreed": 495,
+  "agreement": 0.99,
+  "wilson_95": [
+    0.9768069002442693,
+    0.9957212461034096
+  ],
+  "kappa": 0.9261229314420804,
+  "exact_set_match": 46,
+  "exact_set_match_rate": 0.92,
+  "per_theme": [
+    {
+      "theme_id": "does_not_work",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 6,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 6,
+      "human_positives": 6,
+      "kappa": 1.0
+    },
+    {
+      "theme_id": "poor_build_quality",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 5,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 5,
+      "human_positives": 5,
+      "kappa": 1.0
+    },
+    {
+      "theme_id": "overpriced",
+      "n": 50,
+      "agree": 48,
+      "agreement": 0.96,
+      "wilson_95": [
+        0.8653990931249297,
+        0.9889611156723802
+      ],
+      "both": 2,
+      "agent_only": 2,
+      "human_only": 0,
+      "agent_positives": 4,
+      "human_positives": 2,
+      "kappa": 0.6478873239436618
+    },
+    {
+      "theme_id": "wrong_size_or_fit",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 3,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 3,
+      "human_positives": 3,
+      "kappa": 1.0
+    },
+    {
+      "theme_id": "unpleasant_texture",
+      "n": 50,
+      "agree": 49,
+      "agreement": 0.98,
+      "wilson_95": [
+        0.8950455641036219,
+        0.9964607407283539
+      ],
+      "both": 1,
+      "agent_only": 1,
+      "human_only": 0,
+      "agent_positives": 2,
+      "human_positives": 1,
+      "kappa": 0.6575342465753422
+    },
+    {
+      "theme_id": "hard_to_use",
+      "n": 50,
+      "agree": 49,
+      "agreement": 0.98,
+      "wilson_95": [
+        0.8950455641036219,
+        0.9964607407283539
+      ],
+      "both": 5,
+      "agent_only": 0,
+      "human_only": 1,
+      "agent_positives": 5,
+      "human_positives": 6,
+      "kappa": 0.8979591836734693
+    },
+    {
+      "theme_id": "unpleasant_scent",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 3,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 3,
+      "human_positives": 3,
+      "kappa": 1.0
+    },
+    {
+      "theme_id": "not_as_described",
+      "n": 50,
+      "agree": 49,
+      "agreement": 0.98,
+      "wilson_95": [
+        0.8950455641036219,
+        0.9964607407283539
+      ],
+      "both": 4,
+      "agent_only": 1,
+      "human_only": 0,
+      "agent_positives": 5,
+      "human_positives": 4,
+      "kappa": 0.8780487804878047
+    },
+    {
+      "theme_id": "irritation_or_harm",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 3,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 3,
+      "human_positives": 3,
+      "kappa": 1.0
+    },
+    {
+      "theme_id": "arrived_damaged",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 2,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 2,
+      "human_positives": 2,
+      "kappa": 1.0
+    }
+  ]
+}

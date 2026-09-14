@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agreement 50 — blind hand-labelling</title>
+<style>
+  :root {
+    --bg: #f6f5f3; --panel: #ffffff; --ink: #14161a; --muted: #5d6470;
+    --line: #dfdcd6; --accent: #1f6feb; --accent-ink: #ffffff;
+    --ok: #17794a; --ok-bg: #e6f4ec; --bad: #b42318; --bad-bg: #fdecea;
+    --warn: #8a6100; --warn-bg: #fdf3d8; --sel: #ffe58a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --panel: #1c1f26; --ink: #eceef2; --muted: #98a1b0;
+      --line: #2c313b; --accent: #4f8ff7; --accent-ink: #0b0d11;
+      --ok: #5cd6a0; --ok-bg: #13291f; --bad: #ff8b80; --bad-bg: #2c1614;
+      --warn: #e5b95c; --warn-bg: #2a2212; --sel: #6b5a1e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  header {
+    position: sticky; top: 0; z-index: 10; background: var(--panel);
+    border-bottom: 1px solid var(--line); padding: 10px 16px;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  header h1 { font-size: 14px; margin: 0; font-weight: 650; letter-spacing: .01em; }
+  .spacer { flex: 1 1 auto; }
+  .pill {
+    font-size: 12px; padding: 3px 9px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+  }
+  .pill.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+  .pill.bad { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
+  button {
+    font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 7px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  button:disabled { opacity: .45; cursor: not-allowed; border-color: var(--line); }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 16px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px;
+  }
+  .card h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--muted); margin: 0 0 10px; font-weight: 650;
+  }
+  .review-title { font-size: 17px; font-weight: 650; margin: 0 0 10px; }
+  .review-text { font-size: 15px; white-space: pre-wrap; margin: 0; }
+  .selectable { cursor: text; }
+  .selectable::selection, .selectable *::selection { background: var(--sel); }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 12px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+
+  .theme { border-top: 1px solid var(--line); padding: 8px 0; }
+  .theme:first-of-type { border-top: 0; }
+  .theme-head { display: flex; gap: 8px; align-items: baseline; }
+  .theme-head label { display: flex; gap: 8px; align-items: baseline; cursor: pointer; flex: 1; }
+  .theme-head input[type=checkbox] { margin: 0; width: 16px; height: 16px; accent-color: var(--accent); }
+  .kbd {
+    font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; min-width: 17px;
+    text-align: center;
+  }
+  .theme-name { font-weight: 550; }
+  .theme.on .theme-name { color: var(--accent); }
+  .defn { font-size: 12.5px; color: var(--muted); margin: 4px 0 0 42px; display: none; }
+  .theme.on .defn, .theme.show .defn { display: block; }
+  .defn ul { margin: 4px 0 0; padding-left: 16px; }
+  .info {
+    border: 0; background: none; color: var(--muted); font-size: 12px;
+    padding: 0 4px; cursor: pointer;
+  }
+  .ev { margin: 6px 0 0 42px; display: none; gap: 6px; }
+  .theme.on .ev { display: flex; flex-wrap: wrap; }
+  .ev input[type=text] {
+    flex: 1 1 220px; font: inherit; font-size: 13px; padding: 5px 8px;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink);
+  }
+  .ev .status { font-size: 11.5px; flex-basis: 100%; }
+  .status.ok { color: var(--ok); }
+  .status.bad { color: var(--bad); }
+
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+  .row .lbl { font-size: 12px; color: var(--muted); min-width: 78px; }
+  .chip {
+    font-size: 12.5px; padding: 4px 11px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer;
+  }
+  .chip.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  input[type=text].phrase {
+    font: inherit; font-size: 13px; padding: 5px 8px; border: 1px solid var(--line);
+    border-radius: 6px; background: var(--bg); color: var(--ink); flex: 1 1 160px;
+  }
+
+  .grid { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+  .cell {
+    width: 34px; height: 26px; font-size: 11px; border-radius: 5px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--muted); cursor: pointer; padding: 0;
+  }
+  .cell.done { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+  .cell.invalid { background: var(--bad-bg); color: var(--bad); border-color: transparent; }
+  .cell.cur { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .errs { margin-top: 10px; font-size: 12.5px; color: var(--bad); }
+  .errs div { margin-top: 2px; }
+  dialog {
+    border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+    color: var(--ink); max-width: 720px; width: calc(100% - 32px); padding: 18px;
+  }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  textarea {
+    width: 100%; height: 260px; font-family: ui-monospace, monospace; font-size: 11px;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink);
+    padding: 8px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Agreement 50 — blind hand-labelling</h1>
+  <span class="pill" id="pill-progress">0 / 50</span>
+  <span class="pill" id="pill-valid">0 valid</span>
+  <span class="spacer"></span>
+  <button id="btn-prev">← Prev</button>
+  <button id="btn-next">Next →</button>
+  <button id="btn-export" class="primary">Export JSONL</button>
+  <button id="btn-help">?</button>
+</header>
+
+<main>
+  <div class="cols">
+    <section>
+      <div class="card">
+        <h2>Review <span id="rv-id"></span> · <span id="rv-pos"></span></h2>
+        <p class="review-title selectable" id="rv-title"></p>
+        <p class="review-text selectable" id="rv-text"></p>
+        <p class="hint">
+          Select any run of words above, then press <span class="kbd">Use selection</span> on a
+          theme to make it that theme's evidence quote. Max 15 words, verbatim — the selection is
+          checked against the review as you go.
+        </p>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h2>The fifty</h2>
+        <div class="grid" id="grid"></div>
+        <div class="errs" id="errs"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Complaint themes — label only what the review complains about</h2>
+      <div id="themes"></div>
+
+      <div class="row" style="margin-top:14px; border-top:1px solid var(--line); padding-top:12px">
+        <span class="lbl">Other</span>
+        <button class="chip" id="other-toggle">a complaint outside the ten</button>
+        <input type="text" class="phrase" id="other-phrase" placeholder="phrase, max 5 words" hidden>
+      </div>
+      <div class="row"><span class="lbl">Sentiment</span><span id="sent-chips"></span></div>
+      <div class="row"><span class="lbl">Confidence</span><span id="conf-chips"></span></div>
+      <div class="row">
+        <span class="lbl">Abstain</span>
+        <button class="chip" id="abstain-toggle">unlabellable — no themes, no other</button>
+      </div>
+      <div class="hint" id="row-status"></div>
+    </section>
+  </div>
+</main>
+
+<dialog id="dlg-export">
+  <h3 style="margin:0 0 8px; font-size:15px">human-agreement-audit.jsonl</h3>
+  <p style="margin:0 0 10px; font-size:13px; color:var(--muted)" id="export-note"></p>
+  <textarea id="export-text" readonly spellcheck="false"></textarea>
+  <div class="row" style="margin-top:10px">
+    <button class="primary" id="btn-download">Download file</button>
+    <button id="btn-copy">Copy to clipboard</button>
+    <span class="spacer"></span>
+    <button id="btn-close-export">Close</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-help">
+  <h3 style="margin:0 0 10px; font-size:15px">How to use this</h3>
+  <div style="font-size:13.5px">
+    <p><strong>Rules</strong> (frozen taxonomy, <code>conf/theme-taxonomy.json</code>):</p>
+    <ul>
+      <li>Label a theme <strong>only when the review complains about it</strong>. Praise is never
+        labelled; a neutral mention is not a complaint.</li>
+      <li>Every labelled theme carries an <strong>exact contiguous quote</strong> from the title or
+        the text, at most 15 words. Never paraphrase or repair.</li>
+      <li>Themes the review does not complain about are <strong>omitted</strong>, not marked absent.</li>
+      <li><em>Other</em> is a complaint fitting none of the ten, with a phrase of at most 5 words.</li>
+      <li><em>Abstain</em> means the review cannot be labelled at all — it carries no themes and no
+        other, and its confidence is forced to low.</li>
+    </ul>
+    <p><strong>Keys:</strong> <span class="kbd">1</span>–<span class="kbd">9</span>,
+      <span class="kbd">0</span> toggle themes 1–10 · <span class="kbd">←</span>
+      <span class="kbd">→</span> prev/next review · <span class="kbd">o</span> other ·
+      <span class="kbd">/</span> abstain · <span class="kbd">u</span> use selection for the last
+      theme you turned on.</p>
+    <p><strong>Your work is saved in this browser</strong> as you go, but it only reaches the repo
+      when you export. Export early and often.</p>
+  </div>
+  <div class="row" style="margin-top:10px"><button id="btn-close-help">Close</button></div>
+</dialog>
+
+<script>
+const REVIEWS = /*__REVIEWS__*/;
+const TAXONOMY = /*__TAXONOMY__*/;
+const LIMITS = /*__LIMITS__*/;
+const STORAGE_KEY = "agreement-50-v1";
+const SENTIMENTS = ["positive", "negative", "mixed", "none"];
+const CONFIDENCES = ["high", "medium", "low"];
+
+// ---- validation, mirroring src/ai/labels.py -------------------------------
+const norm = s => (s || "").split(/\s+/).filter(Boolean).join(" ").toLowerCase();
+const words = s => (s || "").split(/\s+/).filter(Boolean).length;
+const isEvidence = (q, r) => {
+  const n = norm(q);
+  return !!n && (norm(r.title).includes(n) || norm(r.text).includes(n));
+};
+
+function quoteFault(q, r) {
+  if (!q || !q.trim()) return "evidence quote is required";
+  if (q !== q.trim()) return "quote has leading or trailing whitespace";
+  if (words(q) > LIMITS.label_quote_max_words)
+    return `${words(q)} words, limit ${LIMITS.label_quote_max_words}`;
+  if (!isEvidence(q, r)) return "not found verbatim in this review";
+  return null;
+}
+
+function faults(id) {
+  const st = state[id], r = byId[id], out = [];
+  if (!st) return ["not labelled"];
+  if (st.abstain) {
+    if (Object.keys(st.themes).length) out.push("an abstention must carry no themes");
+    if (st.otherPresent) out.push("an abstention must have other.present false");
+    if (st.confidence !== "low") out.push("an abstention must have confidence low");
+  }
+  for (const [tid, q] of Object.entries(st.themes)) {
+    const f = quoteFault(q, r);
+    if (f) out.push(`${tid}: ${f}`);
+  }
+  if (st.otherPresent) {
+    const p = (st.otherPhrase || "").trim();
+    if (!p) out.push("other.phrase is required when other is on");
+    else if (words(p) > LIMITS.other_phrase_max_words)
+      out.push(`other.phrase has ${words(p)} words, limit ${LIMITS.other_phrase_max_words}`);
+  }
+  if (!SENTIMENTS.includes(st.sentiment)) out.push("pick an overall sentiment");
+  if (!CONFIDENCES.includes(st.confidence)) out.push("pick a label confidence");
+  return out;
+}
+
+const touched = id => {
+  const st = state[id];
+  return !!st && (st.seen === true);
+};
+
+// ---- state ----------------------------------------------------------------
+const byId = Object.fromEntries(REVIEWS.map(r => [r.blind_id, r]));
+let state = {};
+let cur = 0;
+let lastTheme = null;
+
+function blank() {
+  return { themes: {}, otherPresent: false, otherPhrase: "", abstain: false,
+           sentiment: null, confidence: "high", seen: false };
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch (e) { /* private window or blocked storage: start empty */ }
+  for (const r of REVIEWS) if (!state[r.blind_id]) state[r.blind_id] = blank();
+}
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+// ---- rendering ------------------------------------------------------------
+const $ = s => document.querySelector(s);
+const themesEl = $("#themes");
+
+TAXONOMY.themes.forEach((t, i) => {
+  const key = i === 9 ? "0" : String(i + 1);
+  const d = document.createElement("div");
+  d.className = "theme"; d.dataset.tid = t.id;
+  d.innerHTML = `
+    <div class="theme-head">
+      <label>
+        <input type="checkbox" data-tid="${t.id}">
+        <span class="kbd">${key}</span>
+        <span class="theme-name">${t.name}</span>
+      </label>
+      <button class="info" title="show definition">ⓘ</button>
+    </div>
+    <div class="defn">
+      <div>${t.definition}</div>
+      <ul>${(t.includes || []).map(x => `<li>${x}</li>`).join("")}</ul>
+      ${(t.excludes || []).length ? `<div style="margin-top:4px"><em>Not this:</em> ${
+        t.excludes.join("; ")}</div>` : ""}
+      ${t.boundary_note ? `<div style="margin-top:4px"><em>Boundary:</em> ${t.boundary_note}</div>` : ""}
+    </div>
+    <div class="ev">
+      <input type="text" data-tid="${t.id}" placeholder="exact quote from the review">
+      <button data-use="${t.id}">Use selection</button>
+      <span class="status"></span>
+    </div>`;
+  themesEl.appendChild(d);
+});
+
+$("#sent-chips").innerHTML = SENTIMENTS
+  .map(s => `<button class="chip" data-sent="${s}">${s}</button>`).join(" ");
+$("#conf-chips").innerHTML = CONFIDENCES
+  .map(c => `<button class="chip" data-conf="${c}">${c}</button>`).join(" ");
+
+const grid = $("#grid");
+REVIEWS.forEach((r, i) => {
+  const b = document.createElement("button");
+  b.className = "cell"; b.textContent = i + 1; b.dataset.idx = i;
+  b.title = r.blind_id;
+  grid.appendChild(b);
+});
+
+function render() {
+  const r = REVIEWS[cur], st = state[r.blind_id];
+  $("#rv-id").textContent = r.blind_id;
+  $("#rv-pos").textContent = `${cur + 1} of ${REVIEWS.length}`;
+  $("#rv-title").textContent = r.title || "(no title)";
+  $("#rv-text").textContent = r.text || "(no text)";
+
+  for (const el of document.querySelectorAll(".theme")) {
+    const tid = el.dataset.tid, on = tid in st.themes;
+    el.classList.toggle("on", on);
+    el.querySelector("input[type=checkbox]").checked = on;
+    const inp = el.querySelector("input[type=text]");
+    inp.value = on ? st.themes[tid] : "";
+    const stat = el.querySelector(".status");
+    if (on) {
+      const f = quoteFault(st.themes[tid], r);
+      stat.textContent = f ? "✗ " + f : "✓ found in review, " + words(st.themes[tid]) + " words";
+      stat.className = "status " + (f ? "bad" : "ok");
+    } else { stat.textContent = ""; }
+  }
+  $("#other-toggle").classList.toggle("on", st.otherPresent);
+  const ph = $("#other-phrase");
+  ph.hidden = !st.otherPresent; ph.value = st.otherPhrase || "";
+  $("#abstain-toggle").classList.toggle("on", st.abstain);
+  for (const b of document.querySelectorAll("[data-sent]"))
+    b.classList.toggle("on", b.dataset.sent === st.sentiment);
+  for (const b of document.querySelectorAll("[data-conf]"))
+    b.classList.toggle("on", b.dataset.conf === st.confidence);
+
+  const f = faults(r.blind_id);
+  $("#row-status").innerHTML = f.length
+    ? `<span style="color:var(--bad)">${f.length} thing(s) to fix on this review</span>`
+    : `<span style="color:var(--ok)">this review is valid</span>`;
+
+  let done = 0, bad = 0;
+  REVIEWS.forEach((rr, i) => {
+    const cell = grid.children[i], f2 = faults(rr.blind_id), t = touched(rr.blind_id);
+    cell.classList.toggle("cur", i === cur);
+    cell.classList.toggle("done", t && f2.length === 0);
+    cell.classList.toggle("invalid", t && f2.length > 0);
+    if (t && f2.length === 0) done++;
+    if (t && f2.length > 0) bad++;
+  });
+  $("#pill-progress").textContent = `${done + bad} / ${REVIEWS.length} labelled`;
+  const pv = $("#pill-valid");
+  pv.textContent = bad ? `${bad} invalid` : `${done} valid`;
+  pv.className = "pill " + (bad ? "bad" : (done === REVIEWS.length ? "ok" : ""));
+  $("#errs").innerHTML = f.map(x => `<div>• ${x}</div>`).join("");
+  $("#btn-prev").disabled = cur === 0;
+  $("#btn-next").disabled = cur === REVIEWS.length - 1;
+  save();
+}
+
+function mark() { state[REVIEWS[cur].blind_id].seen = true; }
+function go(i) { cur = Math.max(0, Math.min(REVIEWS.length - 1, i)); lastTheme = null; render(); }
+
+// ---- interaction ----------------------------------------------------------
+function toggleTheme(tid) {
+  const st = state[REVIEWS[cur].blind_id];
+  if (tid in st.themes) { delete st.themes[tid]; if (lastTheme === tid) lastTheme = null; }
+  else {
+    st.themes[tid] = grabSelection() || "";
+    st.abstain = false;
+    lastTheme = tid;
+  }
+  mark(); render();
+}
+
+function grabSelection() {
+  const s = window.getSelection();
+  if (!s || s.isCollapsed) return null;
+  const t = s.toString().trim().replace(/\s+/g, " ");
+  return t || null;
+}
+
+themesEl.addEventListener("change", e => {
+  if (e.target.matches("input[type=checkbox]")) toggleTheme(e.target.dataset.tid);
+});
+themesEl.addEventListener("input", e => {
+  if (e.target.matches("input[type=text]")) {
+    state[REVIEWS[cur].blind_id].themes[e.target.dataset.tid] = e.target.value;
+    mark(); render(); e.target.focus();
+  }
+});
+themesEl.addEventListener("click", e => {
+  if (e.target.matches("[data-use]")) {
+    const sel = grabSelection();
+    if (!sel) { alert("Select some words in the review first."); return; }
+    state[REVIEWS[cur].blind_id].themes[e.target.dataset.use] = sel;
+    mark(); render();
+  }
+  if (e.target.matches(".info")) e.target.closest(".theme").classList.toggle("show");
+});
+
+$("#other-toggle").onclick = () => {
+  const st = state[REVIEWS[cur].blind_id];
+  st.otherPresent = !st.otherPresent;
+  if (st.otherPresent) st.abstain = false; else st.otherPhrase = "";
+  mark(); render();
+  if (st.otherPresent) $("#other-phrase").focus();
+};
+$("#other-phrase").oninput = e => {
+  state[REVIEWS[cur].blind_id].otherPhrase = e.target.value; mark(); render(); e.target.focus();
+};
+$("#abstain-toggle").onclick = () => {
+  const st = state[REVIEWS[cur].blind_id];
+  st.abstain = !st.abstain;
+  if (st.abstain) { st.themes = {}; st.otherPresent = false; st.otherPhrase = ""; st.confidence = "low"; }
+  mark(); render();
+};
+document.addEventListener("click", e => {
+  if (e.target.matches("[data-sent]")) {
+    state[REVIEWS[cur].blind_id].sentiment = e.target.dataset.sent; mark(); render();
+  }
+  if (e.target.matches("[data-conf]")) {
+    state[REVIEWS[cur].blind_id].confidence = e.target.dataset.conf; mark(); render();
+  }
+  if (e.target.matches(".cell")) go(+e.target.dataset.idx);
+});
+
+$("#btn-prev").onclick = () => go(cur - 1);
+$("#btn-next").onclick = () => go(cur + 1);
+
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (document.querySelector("dialog[open]")) return;
+  const k = e.key;
+  if (k === "ArrowRight") { e.preventDefault(); go(cur + 1); }
+  else if (k === "ArrowLeft") { e.preventDefault(); go(cur - 1); }
+  else if (/^[0-9]$/.test(k)) {
+    const i = k === "0" ? 9 : (+k - 1);
+    if (i < TAXONOMY.themes.length) { e.preventDefault(); toggleTheme(TAXONOMY.themes[i].id); }
+  }
+  else if (k === "o") { e.preventDefault(); $("#other-toggle").click(); }
+  else if (k === "/") { e.preventDefault(); $("#abstain-toggle").click(); }
+  else if (k === "u" && lastTheme) {
+    e.preventDefault();
+    const sel = grabSelection();
+    if (sel) { state[REVIEWS[cur].blind_id].themes[lastTheme] = sel; mark(); render(); }
+  }
+});
+
+// ---- export ---------------------------------------------------------------
+function jsonl() {
+  return REVIEWS.map(r => {
+    const st = state[r.blind_id];
+    return JSON.stringify({
+      blind_id: r.blind_id,
+      themes: Object.entries(st.themes).map(([theme_id, evidence_quote]) =>
+        ({ theme_id, evidence_quote })),
+      other: { present: !!st.otherPresent,
+               phrase: st.otherPresent ? (st.otherPhrase || "").trim() : null },
+      abstain: !!st.abstain,
+      overall_sentiment: st.sentiment,
+      label_confidence: st.confidence,
+    });
+  }).join("\n") + "\n";
+}
+
+$("#btn-export").onclick = () => {
+  const bad = REVIEWS.filter(r => faults(r.blind_id).length);
+  const untouched = REVIEWS.filter(r => !touched(r.blind_id));
+  $("#export-note").textContent = bad.length
+    ? `${bad.length} row(s) are still invalid (${untouched.length} untouched). ` +
+      `The importer is all-or-nothing, so it will refuse this file — export anyway to keep a ` +
+      `backup, and run \`make agreement-check\` to see the same failures from the repo side.`
+    : `All ${REVIEWS.length} rows are valid. Save as eval/themes/human-agreement-audit.jsonl.`;
+  $("#export-text").value = jsonl();
+  $("#dlg-export").showModal();
+};
+$("#btn-download").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([jsonl()], { type: "application/x-ndjson" }));
+  a.download = "human-agreement-audit.jsonl";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$("#btn-copy").onclick = async () => {
+  try { await navigator.clipboard.writeText(jsonl()); $("#btn-copy").textContent = "Copied"; }
+  catch (e) { $("#export-text").select(); document.execCommand("copy"); }
+  setTimeout(() => { $("#btn-copy").textContent = "Copy to clipboard"; }, 1500);
+};
+$("#btn-close-export").onclick = () => $("#dlg-export").close();
+$("#btn-help").onclick = () => $("#dlg-help").showModal();
+$("#btn-close-help").onclick = () => $("#dlg-help").close();
+
+load();
+render();
+</script>
+</body>
+</html>
