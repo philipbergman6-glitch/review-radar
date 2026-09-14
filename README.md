@@ -9,8 +9,8 @@ carries them through silver and gold into two Elasticsearch serving projections,
 AI layer reads the review text. **P2–P8 are built and every reproducibility gate passes; the
 written deliverables are complete. Two things are open and printed rather than hidden:
 `THEMES_QUALITY` is a measured miss, and `THEMES_AGREEMENT` / `RAG_QUALITY` wait on human
-judging. `LINEAGE_GATE` FAILs on one undeclared edge and `make eval-table` exits non-zero on
-`gold_calibration`, which has neither a number nor a `cut_reason`.**
+judging. `make eval-table` exits non-zero on `gold_calibration`, which has neither a number
+nor a `cut_reason`.**
 The table below is the honest split, and it stays in this README until it is all in the
 "built" column. The two-page version is [`docs/DESIGN.md`](docs/DESIGN.md); the talk is
 [`docs/SLIDES.md`](docs/SLIDES.md).

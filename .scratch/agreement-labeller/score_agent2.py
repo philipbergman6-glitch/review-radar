@@ -19,8 +19,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.ai.agreement import agreement_report  # noqa: E402
-from src.ai.labels import load_taxonomy  # noqa: E402
+from src.ai.agreement import agreement_report
+from src.ai.labels import load_taxonomy
 
 OUT_DIR = ROOT / "eval" / "themes"
 REFERENCE = OUT_DIR / "reference-audit.jsonl"
@@ -74,7 +74,7 @@ def main() -> None:
           f"agreement={rep['agreement']:.4f} wilson95=[{lo:.4f}, {hi:.4f}] "
           f"kappa={'none' if rep['kappa'] is None else round(rep['kappa'], 4)} "
           f"exact_set_match={rep['exact_set_match']}/{rep['reviews']}")
-    print(f"AGENT2_NOTE this is not THEMES_AGREEMENT; the human slot is still empty")
+    print("AGENT2_NOTE this is not THEMES_AGREEMENT; the human slot is still empty")
 
 
 if __name__ == "__main__":

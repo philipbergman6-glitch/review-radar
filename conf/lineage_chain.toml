@@ -207,8 +207,20 @@ jobs = []
 # checking rather than less (ticket 10a).
 #
 # Not edges: `theme_classifier_train`/`theme_classifier_score` consume a labels table and a
-# model path rather than a named run, and `rag_answers` has no ledger-run input. They appear
-# in `themes_quality`'s `jobs` above and are pinned as runs; they contribute outputs, not joins.
+# model path rather than a named run. They appear in `themes_quality`'s `jobs` above and are
+# pinned as runs; they contribute outputs, not joins. `rag_answers` was listed here too, on
+# the reading that it had no ledger-run input; the ledger disagreed -- it records the search
+# generation it retrieved from -- and the gate caught the omission, so the edge is declared
+# below rather than the absence asserted here.
+
+[[edge]]
+downstream = "rag_answers"
+input = "search"
+upstream = "search_index_reviews"
+status = "declared"
+# The answerer retrieves from the `reviews` alias, so the generation behind that alias is a
+# real input: a run answered against an index it can name. The default `chain` pin is right
+# here -- one generation is live at a time, and it is the run SEARCH_GATE published.
 
 [[edge]]
 downstream = "rag_judgements"

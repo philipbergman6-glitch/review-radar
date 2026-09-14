@@ -184,24 +184,24 @@ LABELS: dict[str, dict] = {
 # Changes Pass B made to Pass A, kept so the second read is auditable rather than asserted.
 PASS_B_CHANGES = [
     ("aud-0066", "removed does_not_work",
-     "the 8-minute heat complaint is retracted in the next sentence as true of every mask "
-     "the reviewer has tried, and the review closes on continuing to buy it"),
+     ("the 8-minute heat complaint is retracted in the next sentence as true of every mask "
+      "the reviewer has tried, and the review closes on continuing to buy it")),
     ("aud-0118", "kept does_not_work off",
      "re-checked: the hair removal worked, so labelling does_not_work would contradict the text"),
     ("aud-0148", "dropped other=missing cable",
-     "the cable was 'supposed to come with' per the listing, which not_as_described already "
-     "covers; `other` is for complaints fitting none of the ten"),
+     ("the cable was 'supposed to come with' per the listing, which not_as_described already "
+      "covers; `other` is for complaints fitting none of the ten")),
     ("aud-0167", "dropped other=CVS sticker",
-     "ambiguous whether the sticker or the colour is the grievance; restraint over an "
-     "uninterpretable `other`"),
+     ("ambiguous whether the sticker or the colour is the grievance; restraint over an "
+      "uninterpretable `other`")),
     ("aud-0170", "removed overpriced",
-     "overpriced's definition requires the complaint to be about value rather than the "
-     "product's behaviour; here the money is a consequence of the failure"),
+     ("overpriced's definition requires the complaint to be about value rather than the "
+      "product's behaviour; here the money is a consequence of the failure")),
     ("aud-0163", "removed does_not_work",
      "sheer/not vibrant is the same grievance as the picture mismatch, not a second theme"),
     ("aud-0159", "removed unpleasant_texture",
-     "the scraping feel is dismissed in the same sentence; complaint_only excludes a theme "
-     "mentioned and set aside"),
+     ("the scraping feel is dismissed in the same sentence; complaint_only excludes a theme "
+      "mentioned and set aside")),
     ("aud-0042", "kept unpleasant_scent off",
      "re-checked the one-word title 'Chemically' against the body, which never mentions smell"),
 ]

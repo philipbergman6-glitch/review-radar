@@ -20,10 +20,16 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 
-from agent2_labels import LABELS, PASS_B_CHANGES  # noqa: E402
+from agent2_labels import LABELS, PASS_B_CHANGES
 
 sys.path.insert(0, str(ROOT))
-from src.ai.labels import load_spec, load_taxonomy, quote_is_evidence, validate_label, word_count  # noqa: E402
+from src.ai.labels import (
+    load_spec,
+    load_taxonomy,
+    quote_is_evidence,
+    validate_label,
+    word_count,
+)
 
 BLIND = ROOT / "eval" / "themes" / "blind-agreement-audit.jsonl"
 OUT = ROOT / "eval" / "themes" / "agent2-agreement-audit.jsonl"

@@ -70,7 +70,7 @@ reopens a phase ([ADR-0011](adr/0011-phase-gates-print-a-number-and-only-reprodu
 | P7 RAG | `rag_quality` | `RAG_QUALITY` | **NOT_RUN** | 0/30 judged; the four targets stay unmeasured |
 | P8 Stream | `stream_control` | `STREAM_GATE` | **PASS** | 11/11 · 193,939 product-months vs gold, 0 differing |
 | P8 Stream | `stream_demo` | `STREAM_GATE` | **PASS** | 18/18 · 2,000 far-slice rows dropped exactly, 1,322 diffs all explained |
-| Lineage track | `lineage` | `LINEAGE_GATE` | **FAIL** | 6/7 over 94 links · one undeclared edge |
+| Lineage track | `lineage` | `LINEAGE_GATE` | **PASS** | 7/7 · `chain_clean=true` over 95 links |
 | Deliverables track | `demo` | `DEMO_GATE` | **PASS** | 5/5 · 2 rehearsals, 259 s of 300 s, 4/4 documents |
 
 A capability is either a number or a written reason; the command exits non-zero on one that is
@@ -109,7 +109,7 @@ A **temporal holdout and protocol freeze** enforced in code, not left to the ana
 importing nothing from the Spark jobs (13 and 10 checks, 0 mismatched fields); **bars set before
 the measurement and not moved** — when the labeller dropped from hosted Haiku to a local 8B
 model, 0.70 stayed 0.70; and **every number joined back to a run**, `make gate-lineage` printing
-how many links it walked (`chain_links_checked=94`) so a pass over an empty chain is impossible.
+how many links it walked (`chain_links_checked=95`) so a pass over an empty chain is impossible.
 
 **P6's outcome, stated as the miss it is.** On the once-opened, held-out audit set of 200 reviews
 the labeller scores **macro-F1 0.4583 [0.3647, 0.5223]** against **0.70** → `THEMES_QUALITY=FAIL`,
