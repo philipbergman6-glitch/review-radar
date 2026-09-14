@@ -58,7 +58,7 @@ reopens a phase ([ADR-0011](adr/0011-phase-gates-print-a-number-and-only-reprodu
 | P2 Silver | `silver_repro` | `SILVER_REPRO_GATE` | **PASS** | 13/13 · re-derived in pandas, no shared code |
 | P3 Gold | `gold` | `GOLD_GATE` | **PASS** | 3/3 · 473,268 product-months, 964 alerts = 964 episodes |
 | P3 Gold | `gold_repro` | `GOLD_REPRO_GATE` | **PASS** | 10/10 · 0 mismatched fields |
-| P3 Gold | `gold_calibration` | `GOLD_CALIBRATION` | **MISSING** | no artefact **and** no `cut_reason` — the freeze has not happened, so `make eval-table` exits non-zero |
+| P3 Gold | `gold_calibration` | `GOLD_CALIBRATION` | **FAIL** | power **0.186** [0.168, 0.205] at the 0.3★ step vs bar 0.80, at 0.80 placebo alerts/month under a ceiling of 1.0 — §7 |
 | P3 Gold | `gold_analytical` | `GOLD_ANALYTICAL` | **REPORTED** | 964 alerts on 757 of 1,599 evaluable products, development only |
 | P4 Search | `search` | `SEARCH_GATE` | **PASS** | 7/7 · 693,547 + 473,268 docs, 7/7 analyzer cases |
 | P5 Embeddings | `embeddings` | `EMBED_GATE` | **PASS** | 7/7 · 345,418 vectors, ANN recall@10 0.96 |
@@ -74,7 +74,8 @@ reopens a phase ([ADR-0011](adr/0011-phase-gates-print-a-number-and-only-reprodu
 | Deliverables track | `demo` | `DEMO_GATE` | **PASS** | 5/5 · 2 rehearsals, 259 s of 300 s, 4/4 documents |
 
 A capability is either a number or a written reason; the command exits non-zero on one that is
-neither — as it does today, on `gold_calibration`.
+neither. Every row above is now one or the other, so the command exits 0; the two `NOT_RUN`
+rows waiting on a human judgement carry their reason.
 
 ## 5. The AI capability, and why this one
 

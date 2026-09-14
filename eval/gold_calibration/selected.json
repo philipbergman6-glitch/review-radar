@@ -1,0 +1,19 @@
+{
+  "chosen": {
+    "baseline_months": 6,
+    "delta": 0.3,
+    "max_gap": 3,
+    "min_active_months": 3,
+    "min_reviews": 20,
+    "persistence": 3,
+    "recent_months": 12,
+    "recovery_points": 2,
+    "unevaluable_resets_persistence": true
+  },
+  "key": "B6R12d0.3P3n20a3K2G3",
+  "placebo_alerts_per_month": 0.802144,
+  "power_at_primary": 0.18574,
+  "protocol_hash": "e5dd5c960dc8f700ddc1b3bad4a08a1e9d8a1696e9ba6c8838a025b5c802eeb5",
+  "reason": "highest power (0.186) among 116 configurations under the ceiling; the 0.80 power target is not met and is reported as missed rather than bought by a weaker ceiling",
+  "verdict": "FAIL"
+}

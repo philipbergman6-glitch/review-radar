@@ -110,7 +110,7 @@
     "LINEAGE_LEDGER runs_pinned=19 orphan_running=0 failed_runs=7 dirty_runs=13",
     "LINEAGE_GATE gate_mode=development chain_clean=true publication_ready=false chain_links_checked=95 LINEAGE_GATE=PASS"
   ],
-  "created_at": "2026-09-14T11:46:15+00:00",
+  "created_at": "2026-09-14T12:00:49+00:00",
   "gate_name": "LINEAGE_GATE",
   "kind": "reproducibility",
   "metric": {

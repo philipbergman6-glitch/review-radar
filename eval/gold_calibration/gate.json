@@ -1,0 +1,62 @@
+{
+  "artifact_version": "1",
+  "capability": "gold_calibration",
+  "constituents": [
+    "GOLD_CALIBRATION_FASTPATH points_reference=18344 points_fast=18344 alerts_reference=442 alerts_fast=442 agrees=true",
+    "GOLD_PLACEBO config=B6R12d0.3P3n20a3K2G3 replicates=24 block_months=6 alerts=3292 evaluable_points=114839 surveillance_months=171 alerts_per_month=0.8021 ceiling=1 alerts_per_eligible_product_year=0.34399 verdict=PASS",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=severe effect=0.2 ramp_months=1 eligible=2172 delivered=1669 detected=208 power=0.1246 ci=[0.1096,0.1413] median_delay_points=2 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=severe effect=0.3 ramp_months=1 eligible=2172 delivered=1669 detected=310 power=0.1857 ci=[0.1678,0.2051] median_delay_points=1 window_points=6 target=0.8 verdict=FAIL",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=severe effect=0.5 ramp_months=1 eligible=2172 delivered=1669 detected=462 power=0.2768 ci=[0.2559,0.2988] median_delay_points=1 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=severe effect=0.2 ramp_months=6 eligible=2172 delivered=1669 detected=203 power=0.1216 ci=[0.1068,0.1382] median_delay_points=2 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=severe effect=0.3 ramp_months=6 eligible=2172 delivered=1669 detected=318 power=0.1905 ci=[0.1724,0.2101] median_delay_points=2 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=severe effect=0.5 ramp_months=6 eligible=2172 delivered=1669 detected=506 power=0.3032 ci=[0.2816,0.3257] median_delay_points=2 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=moderate effect=0.2 ramp_months=1 eligible=2172 delivered=1669 detected=197 power=0.1180 ci=[0.1034,0.1344] median_delay_points=1 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=moderate effect=0.3 ramp_months=1 eligible=2172 delivered=1669 detected=315 power=0.1887 ci=[0.1707,0.2082] median_delay_points=1 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=moderate effect=0.5 ramp_months=1 eligible=2172 delivered=1669 detected=451 power=0.2702 ci=[0.2495,0.2920] median_delay_points=1 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=moderate effect=0.2 ramp_months=6 eligible=2172 delivered=1669 detected=205 power=0.1228 ci=[0.1079,0.1394] median_delay_points=2 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=moderate effect=0.3 ramp_months=6 eligible=2172 delivered=1669 detected=321 power=0.1923 ci=[0.1741,0.2119] median_delay_points=2 window_points=6 target=- verdict=REPORTED",
+    "GOLD_POWER config=B6R12d0.3P3n20a3K2G3 mechanism=moderate effect=0.5 ramp_months=6 eligible=2172 delivered=1669 detected=505 power=0.3026 ci=[0.2810,0.3250] median_delay_points=2 window_points=6 target=- verdict=REPORTED",
+    "GOLD_CALIBRATION_FRONTIER config=B6R12d0.3P2n10a3K2G3 alerts_per_month=3.9890 power=0.4604 under_ceiling=false",
+    "GOLD_CALIBRATION_FRONTIER config=B6R12d0.3P3n10a3K2G3 alerts_per_month=2.5456 power=0.4060 under_ceiling=false",
+    "GOLD_CALIBRATION_FRONTIER config=B6R6d0.3P3n10a3K2G3 alerts_per_month=2.3102 power=0.3707 under_ceiling=false",
+    "GOLD_CALIBRATION_FRONTIER config=B6R6d0.3P4n10a3K2G3 alerts_per_month=1.3877 power=0.2449 under_ceiling=false",
+    "GOLD_CALIBRATION_FRONTIER config=B12R12d0.5P3n20a3K2G3 alerts_per_month=0.4581 power=0.1135 under_ceiling=true",
+    "GOLD_CALIBRATION_SELECT considered=144 admissible=116 ceiling_alerts_per_month=1 power_target=0.8 chosen=B6R12d0.3P3n20a3K2G3 reason='highest power (0.186) among 116 configurations under the ceiling; the 0.80 power target is not met and is reported as missed rather than bought by a weaker ceiling'",
+    "GOLD_CALIBRATION scope=full chosen=B6R12d0.3P3n20a3K2G3 placebo_under_ceiling=true power=0.1857 target=0.8 power_target_met=false fastpath_agrees=true verdict=FAIL"
+  ],
+  "created_at": "2026-09-14T12:24:52+00:00",
+  "gate_name": "GOLD_CALIBRATION",
+  "kind": "quality",
+  "metric": {
+    "direction": "gte",
+    "interval": [
+      0.1678,
+      0.2051
+    ],
+    "name": "detection_power_at_primary_effect",
+    "threshold": 0.8,
+    "value": 0.1857
+  },
+  "model": null,
+  "notes": [
+    "thresholds were searched over the grid committed in conf/decline_rule.toml before this ran; the search is confined to evaluation points before holdout_start and ends at the freeze commit (ADR-0001)",
+    "spines are truncated at holdout_start, so no calibration window reaches a holdout rating -- stricter than the gold job, which stops at the first holdout point and still averages later ratings into the recent window of a 2019 point",
+    "the placebo null is a circular block permutation of each product's monthly aggregates; it preserves volume, seasonality and dependence shorter than a block, and removes trend",
+    "power is measured only on products that do not already alert inside their own detection window, so a decline the rule would have caught anyway is never counted as a detection"
+  ],
+  "phase": "P3 Gold",
+  "pipeline_run_id": "6e1c0d3a-85e8-4458-8109-57b76331ad38",
+  "population": {
+    "grid_configs": 144,
+    "injection_replicates": 3,
+    "n": 5880,
+    "name": "All_Beauty products with pre-2020-01 evaluation points",
+    "placebo_replicates": 24,
+    "silver_snapshot_id": 8507728480475534879,
+    "surveillance_months": 171
+  },
+  "prompt": null,
+  "protocol_hash": "e5dd5c960dc8f700ddc1b3bad4a08a1e9d8a1696e9ba6c8838a025b5c802eeb5",
+  "scope": "full",
+  "status": "FAIL"
+}

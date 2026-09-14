@@ -28,24 +28,59 @@ unevaluable_resets_persistence = true
 [reproduction]
 metric_tolerance = 1e-9            # pandas reproduction vs Spark, absolute, on means/shares
 
-# Calibration targets (ADR-0001, ADR-0011, ADR-0012). Chosen by convention BEFORE the
-# calibration is run and committed ahead of the producer, so the history shows the bar
-# preceded the measurement. `GOLD_CALIBRATION` FAILs if the placebo rate exceeds the ceiling
-# or the power falls below the target; the rule may not then be retuned to clear them
-# without saying so, because `status = "frozen"` comes after this and never moves.
+# ------------------------------------------------------------------ calibration ----
+# The protocol `GOLD_CALIBRATION` runs under (ADR-0001, ADR-0011; RR-09 rounds 4-5, RR-13).
+# Committed before the producer runs, so the history shows the bar preceded the measurement.
+# A rule that fails this must not be frozen -- and RR-09 round 5 forbids the obvious escape:
+# if nothing reaches power under an honest ceiling, the ceiling stays and the shortfall is
+# reported, routed through the investigate/watchlist split. The ceiling never moves to buy a
+# pass.
 #
-# Placebo: a product's calendar spine is permuted in month order within the product,
-# preserving every month's review count and rating distribution and destroying only the
-# temporal ordering the rule looks for. Under that null there is no sustained decline to
-# find, so any alert is a false positive (ADR-0012).
+# Supersedes the block added in 6178411, which cited ADR-0012 -- a document that does not
+# exist -- set the ceiling as a share of permuted spines rather than the investigation load
+# the capacity argument is stated in, and injected 0.5 stars where RR-09 round 5 fixed 0.3 as
+# primary. Nothing read it. Both corrections make the bar harder, which is the point: the bar
+# was not chosen by looking at which one the rule would clear.
 #
-# Power: a product the rule does not fire on is given an injected step decline of
-# `injected_delta` stars beginning at a uniformly drawn evaluable month, and the rule is
-# re-run over the altered spine.
+# Placebo null: each product's monthly aggregates are cut into blocks of `placebo_block_months`
+# and the blocks are circularly rotated and shuffled. Volume, seasonality and dependence
+# shorter than a block survive; trend longer than a block does not. Under that null there is
+# no sustained decline to find, so every alert is a placebo trigger.
+#
+# Power: reviews inside a product's own history are relabelled downward from a drawn eligible
+# month so its mean falls by `effects` stars -- timestamps, volume, verification and identity
+# untouched -- and the rule is re-run over the altered spine.
 
 [calibration]
-placebo_ceiling = 0.05             # max share of permuted spines on which an alert fires
-power_target = 0.80                # min share of injected declines the rule detects
-injected_delta = 0.5               # stars, the injected step (> [rule] delta = 0.3)
-draws = 1000                       # permutations / injections, seeded
+# The ceiling, in the unit the persona argument is stated in: a category manager has capacity
+# for 4 new investigations a month and at most a quarter of them may be noise (RR-09 round 5).
+ceiling_alerts_per_month = 1.0
+power_target = 0.80                # share of delivered injections detected in the window
+primary_effect = 0.3               # stars; the effect the power bar is stated at
+primary_mechanism = "severe"       # 5-star reviews relabelled to 1-2 stars
+effects = [0.2, 0.3, 0.5]          # the predeclared effect grid; all three reported
+mechanisms = ["severe", "moderate"]  # severe = 5 -> 1|2, moderate = 5 -> 3
+detection_window_points = 6        # evaluable points, from the first point that can see it
+# Injection shape. RR-09 round 5 states the power bar at the *step* and keeps the ramp as a
+# reported figure -- "ramp reported, not required to match" -- because a decline that arrives
+# over six months is a strictly harder thing to catch inside a fixed horizon, and scoring the
+# bar against it would be measuring a different claim. 1 = pure step; 6 = linear over six
+# months to the same terminal size, then it persists.
+ramps = [1, 6]
+primary_ramp_months = 1
+placebo_replicates = 24            # permutation draws, seeded
+placebo_block_months = 6           # block length, = baseline_months, so a window's worth holds
+injection_replicates = 3           # redraws of the injection month and of which rows take it
 seed = 20260914
+
+# The candidate grid. Calibration varies these and holds every other [rule] field fixed, so a
+# frozen rule differs from the provisional one in named ways only. The selection rule is
+# committed here too, in `src/gold/calibration.py:select`: admissible = under the ceiling;
+# winner = highest power at the primary effect, ties to the lower median delay, then to the
+# larger delta and the longer persistence -- the more conservative rule.
+[calibration.grid]
+baseline_months = [6, 12]
+recent_months = [6, 12]
+delta = [0.3, 0.5, 0.75, 1.0]
+persistence = [2, 3, 4]
+min_reviews = [10, 20, 40]
