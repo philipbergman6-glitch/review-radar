@@ -43,7 +43,10 @@ def _handle_sigint(signum, frame):
 
 def ensure_topic(bootstrap: str, topic: str, partitions: int) -> None:
     """Create the topic if absent. Idempotent -- safe to run before every replay."""
-    admin = AdminClient({"bootstrap.servers": bootstrap})
+    # v4 only: `localhost` resolves to ::1 first here and the broker listens on IPv4, so the
+    # default dual-stack attempt prints a red FAIL line before falling back. Cosmetic, but
+    # this runs first on a demo terminal.
+    admin = AdminClient({"bootstrap.servers": bootstrap, "broker.address.family": "v4"})
     existing = admin.list_topics(timeout=10).topics
     if topic in existing:
         n = len(existing[topic].partitions)

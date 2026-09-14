@@ -6,10 +6,11 @@ Reviews replay through Kafka into a Spark Structured Streaming job that lands th
 unparsed — and exactly once across an unclean restart — as an Iceberg table on a MinIO
 object store, with the Iceberg catalogue in PostgreSQL. From there a batch lakehouse
 carries them through silver and gold into two Elasticsearch serving projections, and an
-AI layer reads the review text. **Phases P2–P5 are built with passing gates; P6 Themes is
-mid-flight; P7 RAG, P8 Stream and the presentation deliverables are designed but not
-built.** The table below is the honest split, and it stays in this README until it is all
-in the "built" column.
+AI layer reads the review text. **Phases P2–P5 are built with passing gates; P6 Themes and
+P7 RAG are mid-flight; P8 Stream's sorted topic and paced replay are built and its
+streaming projection is not; the presentation deliverables are designed but not built.**
+The table below is the honest split, and it stays in this README until it is all in the
+"built" column.
 
 The project answers one question, fixed before the analysis was run (ADR-0001):
 
@@ -40,7 +41,8 @@ is complete only at `scope=full`.
 | ↳ ground-truth agreement | *planned* | `THEMES_AGREEMENT` → `REPORTED` | The agent labels all 400 blind (`label_source="agent_reference"`, never `human`); Philip hand-labels a stratified 50 of the audit set and the agreement is **published as a number** — per-theme and overall Cohen's kappa with Wilson intervals. Repeat-kappa is `NOT_RUN`: intra-annotator stability is undefined for a deterministic labeller |
 | ↳ MLlib classifier baseline | *planned* | scored inside `THEMES_QUALITY` | `spark.ml` CountVectorizer → IDF → per-theme logistic regression, trained on the 3,000-row LLM-labelled pool, scored beside the LLM labeller and a per-theme star-only baseline. A baseline, never a predictor; `label_source="classifier"` (ADR-0002) |
 | P7 RAG — grounded, cited answers | *planned* (conditional) | `RAG_GATE` = the 30/30 citation and scope contract; `RAG_QUALITY` non-blocking | 30 frozen questions (20 answerable, 10 unanswerable in three strata); thresholds are fixed-denominator integers set before measurement — grounded ≥ 16/20, adequate ≥ 14/20, abstention ≥ 8/10, false refusal ≤ 2/20; Philip is sole judge. ADR-0006 |
-| P8 Stream — reconciled projection beside batch | *planned* (conditional) | `STREAM_GATE=PASS\|FAIL run_kind=control\|demo` | Paced replay of the **sorted** file into its own topic `reviews.stream`; `withWatermark` 30 d + `dropDuplicatesWithinWatermark`; lateness is **injected** (near lag 7 d must be accepted, far lag 730 d must be dropped, counts known before the run) and a control run must print zero natural drops. ADR-0010 |
+| P8 Stream — sorted topic + paced replay | **built** | run contracts `sort_replay`, `stream_produce` | `conf/stream_replay.toml` frozen *before* the first run (3,000 rec/s, slice sizes, lags). `src/ingest/sort_replay.py` orders the file by `(timestamp, review_id, line digest)` in 4.8 s — 701,528 rows, 0 rejects, 2000-11-01 → 2023-09-09, input and output digests in the ledger. `src/ingest/stream_producer.py` paces it into `reviews.stream` with an event-time clock; measured 2,999 rec/s against the frozen 3,000 and the contract fails a run more than 10% off. The sort reproduces silver's dedupe arithmetic independently — see below |
+| ↳ P8 Stream — reconciled projection beside batch | *planned* (conditional) | `STREAM_GATE=PASS\|FAIL run_kind=control\|demo` | `withWatermark` 30 d + `dropDuplicatesWithinWatermark`; lateness is **injected** (near lag 7 d must be accepted, far lag 730 d must be dropped, counts known before the run) and a control run must print zero natural drops. ADR-0010 |
 | Lineage — the run ledger | **built** | `LINEAGE_GATE gate_mode= chain_clean= publication_ready= chain_links_checked=N` — `make gate-lineage` | `pipeline_runs` is the run ledger: one row per execution attempt of every job, UUID `run_id` stamped into every Iceberg snapshot, ES doc and eval artefact (ADR-0008). [`scripts/gate_lineage.py`](scripts/gate_lineage.py) walks the chain declared in [`conf/lineage_chain.toml`](conf/lineage_chain.toml) — artefact → ledger row → its outputs and the runs its inputs name — and prints how many links it checked, so a pass over an empty chain is impossible. `chain_clean` is the verdict; `publication_ready` is the stricter question and stays false while phases are pending. Every phase gate prints `run_contract_registered` for the jobs the chain gives it |
 | Deliverables — demo notebook | *planned* | `DEMO_GATE … rehearsals=N max_elapsed_s= docs_present=`, threshold `rehearsals ≥ 2` | `notebooks/` empty. Stage is one notebook kernel + Kibana, **not Streamlit**; ten live moves in 4:40 of a 5:00 budget, recorded backup under `docs/demo/<date>/` (ADR-0009) |
 | Deliverables — demo runbook | **built** | — | [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md) — Kafka retention, memory, pre-demo checklist. §3's move list is superseded by ADR-0009/ADR-0010 and is rewritten when the notebook is built |
@@ -91,6 +93,15 @@ Measured with Spark over all 701,528 dev-category reviews — full output in
 | review→product join match | 112,565 / 112,565 (100%) | the join is clean |
 | collision groups on `(user, product, ts)` | 6,139 groups over 13,415 rows | justifies a real dedupe step. 6,138 groups are byte-exact, 1 conflicts on `helpful_vote`, **0 disagree on rating** — so silver removed 7,276 rows keeping one survivor each. The group count is not the removed-row count |
 
+**The stream's sort reproduces silver's dedupe arithmetic, from raw JSONL, sharing no code
+with it.** `make sort-replay` orders the file by `(timestamp, review_id, line digest)` and
+records what it saw: 701,528 rows, **694,252 distinct review ids**, **7,276 key-collision
+rows**, of which **7,275 are byte-identical and exactly one is not**. Those are silver's
+numbers — 694,252 surviving rows, 7,276 removed, 6,138 byte-exact groups and one conflicting
+on `helpful_vote` — arrived at by a different program reading the source file directly. The
+count is stored in the sort's ledger row because ADR-0010 dedupes the stream on `review_id`,
+so it is also the number of rows the streaming job will drop, known before that job exists.
+
 Two real dirt findings that shaped the design:
 
 1. Product `details` is a free-form dict whose keys collide under Spark's default
@@ -109,7 +120,7 @@ data/raw/*.jsonl
       ▼
 ┌───────────────────────────────────────┐
 │                Kafka                  │  reviews.raw, 6 partitions [built]
-│                                       │  reviews.stream, paced + sorted [planned]
+│                                       │  reviews.stream, paced + sorted [built]
 └──────┬─────────────────────────┬──────┘
        ▼                         ▼
 ┌────────────────────────┐  ┌──────────────────────┐    ┌────────────────────────┐
@@ -322,6 +333,32 @@ num_candidates=200, cohort only), `hybrid` (client-side RRF, k=60, window 50, ti
 review_id; the ES RRF endpoint needs an Enterprise licence). Labels are model-judged
 (`claude`) with a 4-label human audit set; the decision doc states this.
 
+**6 — the sorted topic and the paced replay** (P8). The replay protocol
+`conf/stream_replay.toml` is frozen: rate, slice sizes and lags were committed before the
+first run, because a rate chosen after watching a run would make the demo's timing claim a
+description rather than a prediction. Both jobs refuse to start while it says
+`status = "provisional"`.
+
+```bash
+make sort-replay          # raw -> All_Beauty.sorted.jsonl, event-time order, digests in the ledger
+make stream-produce       # paced replay into reviews.stream at 3,000 rec/s, event-time clock printed
+#  --limit N     stop after N records (0 = the whole file, the default)
+#  --scope sample  replay the sorted sample into reviews.stream.sample -- never the full topic
+```
+
+The sort is over an *index* of `(timestamp, review_id, line digest, byte offset)`, not over
+the file: the 16 GB envelope does not hold 0.33 GB of JSON plus a sorted copy of it. It
+takes 4.8 s for the full category. The digest is in the sort key because `review_id` is not
+unique in this source — that is the key-collision finding above — so without it the order of
+7,276 rows would depend on how the file was downloaded.
+
+The replay paces against an absolute schedule rather than sleeping a fixed interval per
+record, and the run contract fails a run whose measured rate is more than 10% off the frozen
+target: `701,528 / 3,000 = 234 s`, so twenty-three years of event time pass in 3:54 of wall
+clock while the rest of the demo runs. Lateness is **not** injected here — that is the
+control run ADR-0010 requires, and the held-back slices are frozen in the same config for
+the injected run to release.
+
 ### Measured producer throughput
 
 The producer replays the full 701,528-review file in roughly 1.5–3 s: **232,000–484,000
@@ -375,7 +412,8 @@ docker ps --format '{{.Names}}'      # expect only bd-* containers
 ```
 .github/workflows/    CI: ruff + pytest on every push (no JDK yet — see the comment in ci.yml)
 conf/                 frozen artifacts: es/ mapping contracts, kibana/ dashboard, search/ queries,
-                      prompts/, decline_rule.toml, embedding-spec.json, theme-taxonomy.json,
+                      prompts/, decline_rule.toml, stream_replay.toml, embedding-spec.json,
+                      theme-taxonomy.json,
                       theme-terms.json, theme_sampling.toml, postgres-init/ + postgres-migrations/
 data/raw/             downloaded JSONL (git-ignored)
 data/sample/          10k reviews + 5k products, committed (see "Running on the sample")
@@ -390,7 +428,7 @@ scripts/              download, sample, profile, healthcheck, verify, EOS gate; 
                       star baseline, sentiment check
 src/common/           config, Spark schemas, canonical review identity, run ledger
 src/catalogue/        product catalogue loader (Postgres, COPY under a catalogue_load_id)
-src/ingest/           Kafka producer
+src/ingest/           Kafka producer; the P8 event-time sort and its paced stream replay
 src/spark/            bronze + silver + gold jobs
 src/gold/             the decline rule (conf/decline_rule.toml), provisional until the freeze
 src/ai/               embedding spec + hash, MiniLM encoder, Spark embeddings job, theme labelling

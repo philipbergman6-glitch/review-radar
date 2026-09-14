@@ -14,7 +14,7 @@ PROMPT ?= label_v5
 # development target reads it -- the evaluation run refuses any prompt but the frozen one.
 RAG_PROMPT ?= rag_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers gate-rag eval-table gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers gate-rag eval-table gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -43,6 +43,18 @@ produce:  ## replay the full $(CATEGORY) review file into Kafka
 
 produce-sample:  ## replay the committed 10k-review sample into the $(TOPIC).sample topic
 	$(RUN) -m src.ingest.producer --source $(SAMPLE) --topic $(TOPIC).sample
+
+sort-replay:  ## order the raw file by event time once -> $(CATEGORY).sorted.jsonl, digest in the ledger
+	$(RUN) -m src.ingest.sort_replay --category $(CATEGORY) --scope full
+
+sort-replay-sample:  ## same, over the committed 10k-review sample
+	$(RUN) -m src.ingest.sort_replay --source $(SAMPLE) --scope sample
+
+stream-produce:  ## paced replay of the sorted file into reviews.stream (control run, no injection)
+	$(RUN) -m src.ingest.stream_producer --category $(CATEGORY) --scope full
+
+stream-produce-sample:  ## same, over the sorted sample -> reviews.stream.sample
+	$(RUN) -m src.ingest.stream_producer --source $(SAMPLE:.jsonl=.sorted.jsonl) --scope sample
 
 bronze:  ## drain the topic into the bronze Iceberg table, one trigger
 	$(RUN) -m src.spark.bronze --trigger once --max-per-trigger 150000

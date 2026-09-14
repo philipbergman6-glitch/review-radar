@@ -12,9 +12,10 @@ failures ("identity: records_in 101 != records_out 80 + ...") and hard-fails by 
 a run whose numbers do not add up is `failed`, never quietly `success`.
 
 Contracts registered here: silver, gold, search_index_reviews (v1 text only, v2 with
-vectors), search_index_product_month, embeddings, catalogue_load, bronze_drain, produce. Bronze and
-produce are declared so the CHECK list and the registry agree from day one; their drivers
-are instrumented in their own sessions (ADR-0008 §3), not in silver's.
+vectors), search_index_product_month, embeddings, catalogue_load, bronze_drain, produce, sort_replay,
+stream_produce. Bronze and produce are declared so the CHECK list and the registry agree
+from day one; their drivers are instrumented in their own sessions (ADR-0008 §3), not in
+silver's.
 """
 from __future__ import annotations
 
@@ -36,6 +37,7 @@ JOB_NAMES: tuple[str, ...] = (
     "search_index_reviews", "search_index_product_month", "embeddings",
     "theme_samples", "theme_labels_llm", "theme_labels_reference", "theme_labels_human",
     "theme_classifier_train", "theme_classifier_score", "rag_answers",
+    "sort_replay", "stream_produce",
 )
 
 SILVER_SPEC_VERSION = "1"
@@ -59,6 +61,12 @@ RAG_ANSWERS_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
+# P8 (ADR-0010, ticket 14). `sort_replay` orders the file by event time once; `stream_produce`
+# paces that file into the stream topic. Two jobs and not one because the sort is a durable
+# artefact with its own digest: a replay names the file it sent, and that file names the run
+# that ordered it.
+SORT_REPLAY_SPEC_VERSION = "1"
+STREAM_PRODUCE_SPEC_VERSION = "1"
 
 # Files whose state decides `worktree_dirty`. data/ and notebooks/ are excluded on
 # purpose: they are inputs and presentation, not the code that produced the run.
@@ -223,6 +231,93 @@ def _produce_identity(records: dict[str, int | None], counts: dict[str, Any]) ->
     return []
 
 
+def _sort_replay_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Every input line is either ordered into the output or rejected with a named reason.
+
+    The failure this refuses is a sort that quietly loses rows: an index built from a partly
+    read file still sorts, still writes, and still looks plausible, so `rows_sorted +
+    rows_rejected` must reconstruct the input.
+
+    The reproducibility claim is about *sort keys*, not review ids. review_id is not unique
+    in this source -- 6,139 key collision groups over 13,415 rows is the measured fact silver
+    dedupes for -- so the key carries the line's content digest as its last component. Rows
+    that still tie after that are byte-identical, and which of them is written first cannot
+    change the output. What must hold is that the two accountings agree: distinct keys plus
+    byte-identical rows is every row, and there are at least as many keys as review ids.
+    """
+    fails: list[str] = []
+    sorted_, rejected = _n(counts, "rows_sorted"), _n(counts, "rows_rejected")
+    if None in (sorted_, rejected):
+        return ["identity: rows_sorted and rows_rejected must both be set on success"]
+    if records.get("records_out") != sorted_:
+        fails.append(f"identity: records_out {records.get('records_out')} != rows_sorted {sorted_}")
+    if records.get("records_rejected") != rejected:
+        fails.append(f"identity: records_rejected {records.get('records_rejected')} != "
+                     f"rows_rejected {rejected}")
+    if records.get("records_in") != sorted_ + rejected:
+        fails.append(f"identity: records_in {records.get('records_in')} != rows_sorted {sorted_} "
+                     f"+ rows_rejected {rejected}")
+    reasons = counts.get("reject_reasons") or {}
+    if sum(int(v) for v in reasons.values()) != rejected:
+        fails.append(f"reject_reasons sum {sum(int(v) for v in reasons.values())} != "
+                     f"rows_rejected {rejected}")
+    ids, keys = _n(counts, "distinct_review_ids"), _n(counts, "distinct_sort_keys")
+    collisions, identical = _n(counts, "key_collision_rows"), _n(counts, "byte_identical_rows")
+    if None in (ids, keys, collisions, identical):
+        fails.append("identity: distinct_review_ids/distinct_sort_keys/key_collision_rows/"
+                     "byte_identical_rows must all be set on success")
+        return fails
+    if keys + identical != sorted_:
+        fails.append(f"identity: distinct_sort_keys {keys} + byte_identical_rows {identical} "
+                     f"!= rows_sorted {sorted_}")
+    if ids + collisions != sorted_:
+        fails.append(f"identity: distinct_review_ids {ids} + key_collision_rows {collisions} "
+                     f"!= rows_sorted {sorted_}")
+    if keys < ids:
+        fails.append(f"distinct_sort_keys {keys} < distinct_review_ids {ids}: the content "
+                     "digest cannot merge rows the review id kept apart")
+    first, last = _n(counts, "first_event_ms"), _n(counts, "last_event_ms")
+    if None not in (first, last) and first > last:
+        fails.append(f"first_event_ms {first} > last_event_ms {last}: the output is not sorted")
+    return fails
+
+
+def _stream_produce_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Everything attempted was acknowledged, and the replay ran at the rate it claims.
+
+    The rate check is part of the contract rather than a printed nicety: ADR-0010's demo
+    claim is that event time is compressed at a *constant* record rate, and a run that
+    silently paced at half its target would leave that claim unfalsifiable afterwards. 10%
+    is the tolerance -- wide enough for a laptop sharing a VM with the stack, narrow enough
+    that a stalled broker or a mis-set rate shows up as a failed run.
+    """
+    fails: list[str] = []
+    attempted, acked = _n(counts, "records_attempted"), _n(counts, "records_acked")
+    if None in (attempted, acked):
+        return ["identity: records_attempted and records_acked must both be set on success"]
+    if records.get("records_in") != attempted:
+        fails.append(f"identity: records_in {records.get('records_in')} != "
+                     f"records_attempted {attempted}")
+    if records.get("records_out") != acked:
+        fails.append(f"identity: records_out {records.get('records_out')} != records_acked {acked}")
+    if acked != attempted:
+        fails.append(f"identity: records_acked {acked} != records_attempted {attempted}: "
+                     "a stream run acknowledges everything it sent or it failed")
+    first, last = _n(counts, "first_event_ms"), _n(counts, "last_event_ms")
+    if None in (first, last):
+        fails.append("counts.first_event_ms and counts.last_event_ms must be set on success")
+    elif first > last:
+        fails.append(f"first_event_ms {first} > last_event_ms {last}: the replay was not in "
+                     "event-time order")
+    target = counts.get("records_per_second_target")
+    actual = counts.get("records_per_second_actual")
+    if target is None or actual is None:
+        fails.append("counts.records_per_second_target/_actual must both be set on success")
+    elif float(target) and abs(float(actual) - float(target)) / float(target) > 0.10:
+        fails.append(f"pacing: {actual} rec/s is more than 10% from the frozen target {target}")
+    return fails
+
+
 REGISTRY: dict[tuple[str, str], Contract] = {}
 
 
@@ -304,6 +399,27 @@ _register(Contract(
     outputs={"reviews_raw": ("table", "snapshot_ids")},
     counts=("micro_batches", "records_replayed"),
     identity=_bronze_identity))
+
+_register(Contract(
+    "sort_replay", SORT_REPLAY_SPEC_VERSION,
+    inputs={"source": ("path", "sha256", "bytes"),
+            "protocol": ("path", "status", "config_hash")},
+    outputs={"sorted_file": ("path", "sha256", "rows")},
+    counts=("rows_sorted", "rows_rejected", "reject_reasons", "distinct_review_ids",
+            "key_collision_rows", "distinct_sort_keys", "byte_identical_rows",
+            "first_event_ms", "last_event_ms", "output_sha256", "output_bytes",
+            "reject_path", "replay_config_hash"),
+    identity=_sort_replay_identity))
+
+_register(Contract(
+    "stream_produce", STREAM_PRODUCE_SPEC_VERSION,
+    inputs={"source": ("path", "sha256", "bytes"),
+            "protocol": ("path", "status", "config_hash")},
+    outputs={"kafka": ("topic",)},
+    counts=("records_attempted", "records_acked", "first_event_ms", "last_event_ms",
+            "records_per_second_target", "records_per_second_actual", "elapsed_s",
+            "replay_config_hash"),
+    identity=_stream_produce_identity))
 
 _register(Contract(
     "produce", PRODUCE_SPEC_VERSION,

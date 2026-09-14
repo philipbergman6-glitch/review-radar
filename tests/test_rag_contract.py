@@ -146,9 +146,8 @@ def test_the_window_bounds_are_inclusive(month):
 
 
 # ============================================== validation is shape, the gate is grounding ====
-LIMITS = {"max_attempts": 2, "max_claims": 6, "max_citations_per_claim": 6,
-          "claim_max_words": 45, "refusal_reason_max_words": 60, "subject_max_words": 15,
-          "call_ceiling": 200}
+LIMITS = {"max_attempts": 1, "max_claims": 6, "max_citations_per_claim": 6,
+          "claim_max_words": 45, "refusal_reason_max_words": 60, "call_ceiling": 200}
 
 
 def test_validation_accepts_an_invented_citation_so_the_gate_can_catch_it():
@@ -156,6 +155,15 @@ def test_validation_accepts_an_invented_citation_so_the_gate_can_catch_it():
     parsed = answered(claims=claims(("a cracked handle", [("not-a-retrieved-id", "baseline")])))
     assert R.validate_answer(parsed, limits=LIMITS) == []
     assert R.contract_violations(answer(parsed), question(), BASE) != []
+
+
+def test_a_long_subject_is_reported_never_rejected():
+    """RR-24: the 15-word `subject` cap rejected two of the thirty on a field nothing
+    downstream reads. Length is a number to record, not a reason to lose the answer."""
+    long = " ".join(["word"] * 40)
+    parsed = answered(subject=long, claims=claims(("x", [("R1", "baseline")])))
+    assert R.validate_answer(parsed, limits=LIMITS) == []
+    assert R.subject_words(parsed) == 40
 
 
 def test_validation_rejects_a_refusal_that_carries_claims():
@@ -191,6 +199,7 @@ def facts(qs, answers, **over):
                        "wrong_size": 0, "out_of_scope": 0, "empty_windows": 0, "ok": True},
          "ledger": {"calls": len(answers), "ceiling": 200, "unattributed": 0, "runs": 1,
                     "covered": len(qs), "expected_covered": len(qs), "ok": True},
+         "reopen": {"reopened": False, "ok": True},
          "contract": gate.contract_facts(qs, answers)}
     for k, v in over.items():
         f[k] = {**f[k], **v}
@@ -208,21 +217,50 @@ def test_thirty_clean_answers_pass():
     assert "contract=30/30" in v.terminal
 
 
-def test_one_violation_fails_the_whole_gate():
-    """30/30 is the denominator: a contract that blocks at a rate is not the contract."""
+def test_thirty_clean_answers_report_the_contract_at_its_bar():
+    v = gate.verdict(facts(THIRTY, CLEAN), scope="full")
+    line = next(x for x in v.constituents if x.startswith("RAG_CONTRACT "))
+    assert "answers_ok=30/30" in line and "bar=30/30" in line and line.endswith("verdict=PASS")
+
+
+def test_generator_behaviour_trips_the_contract_and_not_the_gate():
+    """RR-24: a refusal carrying a citation is what the frozen model wrote, so it is measured
+    -- `RAG_CONTRACT … bar=30/30 verdict=FAIL`, bar unmoved -- and never blocks. Blocking on
+    it after the thirty are seen would be a reason to tune on the held-out set."""
     broken = [*CLEAN[:-1], answer(REFUSAL | {"claims": claims(("x", [("R1", "baseline")]))},
                                   qid=THIRTY[-1]["question_id"])]
     v = gate.verdict(facts(THIRTY, broken), scope="full")
-    assert v.status == "FAIL"
+    assert v.status == "PASS"
     assert "contract=29/30" in v.terminal
-    assert "citation_scope_contract" in v.terminal
+    line = next(x for x in v.constituents if x.startswith("RAG_CONTRACT "))
+    assert "answers_ok=29/30 bar=30/30" in line and line.endswith("verdict=FAIL")
+
+
+@pytest.mark.parametrize("parsed", [
+    answered(claims=claims(("a cracked handle", [("R99", "baseline")]))),
+    answered(claims=claims(("a cracked handle", [("R1", "recent")]))),
+], ids=["handle_not_retrieved", "month_outside_window"])
+def test_a_citation_that_does_not_resolve_in_scope_fails_the_gate(parsed):
+    """The mechanical half: a handle the retrieved set never supplied, or a review outside its
+    declared window, puts a citation on the slide that points nowhere -- that blocks."""
+    broken = [*CLEAN[:-1], answer(parsed, qid=THIRTY[-1]["question_id"])]
+    v = gate.verdict(facts(THIRTY, broken), scope="full")
+    assert v.status == "FAIL"
+    assert "citations_resolve" in v.terminal
+
+
+def test_a_parse_failure_is_measured_not_blocking():
+    broken = [*CLEAN[:-1], answer(None, status="parse_failed", qid=THIRTY[-1]["question_id"])]
+    v = gate.verdict(facts(THIRTY, broken), scope="full")
+    assert v.status == "PASS"
+    assert "answers_ok=29/30" in "\n".join(v.constituents)
 
 
 def test_a_vacuous_run_cannot_print_pass():
     v = gate.verdict(facts(THIRTY, []), scope="full")
     assert v.status == "FAIL"
     assert "contract=0/30" in v.terminal
-    assert "answers_checked" in v.terminal and "citation_scope_contract" in v.terminal
+    assert "answers_checked" in v.terminal
 
 
 def test_a_missing_answer_is_named_rather_than_skipped():

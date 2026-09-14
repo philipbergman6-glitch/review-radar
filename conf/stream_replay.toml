@@ -1,0 +1,70 @@
+# How the P8 stream is replayed (ADR-0010, ticket 14).
+#
+# Read by src/ingest/sort_replay.py (the sort job) and src/ingest/stream_producer.py (the
+# paced replay). The SHA-256 of this whole document is printed by every run and stored in
+# the run ledger, so a changed replay protocol is visible in lineage.
+#
+# status = "frozen" means pacing and slice sizes were committed to version control *before*
+# the first replay run. That ordering is the point: a rate chosen after watching a run, or a
+# slice size chosen after seeing how many rows were dropped, would make the lateness numbers
+# a description of what happened rather than a prediction the gate can fail. Both producers
+# refuse to run while status is "provisional".
+#
+# Frozen 2026-09-14, before any replay run existed.
+
+[protocol]
+status = "frozen"
+spec_version = "1"
+
+[topic]
+# ADR-0008: sample and full never share a topic, and the stream never shares the batch
+# topic. `reviews.raw` carries the file in line order for bronze; this carries it in event
+# order for the watermark job. Two orderings of the same file are two different streams.
+name = "reviews.stream"
+sample_name = "reviews.stream.sample"
+partitions = 6
+
+[sort]
+# The sort is over an index of (timestamp, review_id, line digest, byte offset), not over
+# the file: the 16 GB envelope does not hold 0.33 GB of JSON plus a sorted copy of it in
+# memory at once.
+#
+# Ties on timestamp are broken by review_id, then by the SHA-256 of the line's bytes. Both
+# components are needed. review_id is a hash of (user, product, timestamp) and is *not*
+# unique in this source — 6,139 key collision groups over 13,415 rows, the measured fact
+# silver's dedupe exists for — so review_id alone would leave those rows in whatever order
+# the file happened to hold them. With the digest, rows that still tie are byte-identical
+# and their order cannot change the output. Breaking ties by line number instead would make
+# event order depend on how the file was downloaded.
+tiebreak = "review_id+line_sha256"
+suffix = ".sorted.jsonl"
+
+[pacing]
+# Constant record rate, not event-time-linear compression (ADR-0010): 61% of the demo clock
+# would otherwise go to the 5% of rows before 2015.
+#
+# 701,528 records / 3,000 per second = 234 s ≈ 3:54. The demo budget is 4:40 and the replay
+# starts at move 2 and is read at the closing move, so the stream is still moving while the
+# other moves run and has drained by the last one. Rehearsal (ticket 18) may show this is
+# wrong; if so the number changes here, in a commit, before the run it applies to — never
+# after seeing a run it would flatter.
+records_per_second = 3000
+# Event-time clock: how many records between printed clock lines. At 3,000 rec/s that is a
+# line every ~1.7 s, which is visible to an audience without scrolling the terminal.
+clock_every_records = 5000
+
+[slices]
+# The held-back slices (ADR-0010). Ticket 16 injects them; the sizes and lags are frozen
+# HERE, now, because the gate's claim is that the drop count was known before the run.
+#
+# `near` is released 7 days late in event time and must be accepted by the 30-day watermark;
+# `far` is released 730 days late and must be dropped. Selection is deterministic: the rows
+# whose SHA-256(seed | salt | review_id) ranks lowest, so the same file always yields the
+# same slices and the expected counts are computable without a run.
+seed = 20260914
+near_lag_days = 7
+near_rows = 2000
+near_salt = "held_back_near"
+far_lag_days = 730
+far_rows = 2000
+far_salt = "held_back_far"

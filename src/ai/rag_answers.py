@@ -18,8 +18,9 @@ Three separations decide the whole design, and each one is easier to collapse th
   rather than a hedge wearing a refusal flag. It never checks whether a cited id was retrieved
   or whether a cited review falls inside its declared window. Those are the contract
   `RAG_GATE` blocks on, so they must survive generation to reach it. A response that fails
-  validation twice is terminal `parse_failed`, and the gate counts that as a violation too:
-  an answer that is not an answer cites nothing.
+  validation is terminal `parse_failed` -- one attempt, because an identical retry of a
+  `temperature 0`, seeded decoder returned identical bytes both times (RR-24) -- and the
+  contract counts that as a violation too: an answer that is not an answer cites nothing.
 
 * **Windows are verified from stored metadata, never from the citation.** A citation names a
   window; the check reads that review's `review_month` out of the retrieved set and asks
@@ -275,6 +276,11 @@ def render_question(question: dict[str, Any], retrieved: list[dict[str, Any]]) -
 
 
 # -------------------------------------------------------------------- validation ----
+def subject_words(parsed: dict[str, Any]) -> int:
+    """How long the model's `subject` line was -- recorded beside the answer, not enforced."""
+    return word_count(str(parsed.get("subject") or ""))
+
+
 def validate_answer(obj: Any, *, limits: dict[str, Any]) -> list[str]:
     """Shape only. Named failures, never repairs; see the module docstring for the split."""
     fails: list[str] = []
@@ -286,11 +292,11 @@ def validate_answer(obj: Any, *, limits: dict[str, Any]) -> list[str]:
         return ["refused must be a boolean"]
     if not isinstance(obj["subject_supported"], bool):
         return ["subject_supported must be a boolean"]
+    # The subject's length is reported (`subject_words`), never a rejection reason: a 15-word
+    # cap on this field rejected two of the thirty evaluation answers unread, on a field no
+    # downstream consumer reads (RR-24). The caps that stay bound what the judge reads.
     if not isinstance(obj["subject"], str) or not obj["subject"].strip():
         fails.append("subject must be a non-empty string")
-    elif word_count(obj["subject"]) > int(limits["subject_max_words"]):
-        fails.append(f"subject has {word_count(obj['subject'])} words, limit "
-                     f"{limits['subject_max_words']}")
     # Internal consistency, not grounding: an answer that judges its own subject unsupported and
     # then answers anyway is contradicting itself on the same page, and the retry exists for
     # exactly that. Whether the judgement was *right* is RAG_QUALITY's abstention metric.
