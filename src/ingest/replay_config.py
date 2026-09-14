@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import tomllib
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -23,6 +24,21 @@ from typing import Any
 from src.common.config import PROJECT_ROOT
 
 CONFIG_PATH = PROJECT_ROOT / "conf" / "stream_replay.toml"
+
+#: The one watermark spelling this project uses. Spark accepts a whole interval grammar;
+#: accepting all of it here would mean the loader could not compare the delay against the two
+#: injected lags, which is the check that makes the slice counts falsifiable.
+WATERMARK_GRAMMAR = re.compile(r"^(\d+) days?$")
+
+
+def watermark_days(text: str) -> int:
+    """`"30 days"` -> 30. Anything else is a hard failure, not a default."""
+    m = WATERMARK_GRAMMAR.match(str(text).strip())
+    if m is None:
+        raise ValueError(f"stream.watermark must read '<n> days', got {text!r}: the delay is "
+                         "compared against the injected lags in days, so a unit this loader "
+                         "cannot compare is refused rather than passed through to Spark")
+    return int(m.group(1))
 
 
 @dataclass(frozen=True)
@@ -36,6 +52,8 @@ class ReplayConfig:
     suffix: str
     records_per_second: int
     clock_every_records: int
+    watermark: str
+    max_offsets_per_trigger: int
     seed: int
     near_lag_days: int
     near_rows: int
@@ -49,6 +67,10 @@ class ReplayConfig:
     @property
     def frozen(self) -> bool:
         return self.status == "frozen"
+
+    @property
+    def watermark_days(self) -> int:
+        return watermark_days(self.watermark)
 
     def topic_for(self, scope: str) -> str:
         """`full` -> the stream topic, `sample` -> its own. They never share (ADR-0008)."""
@@ -75,9 +97,16 @@ def load_replay_config(path: Path = CONFIG_PATH) -> ReplayConfig:
             "first run (ADR-0010); freeze the protocol, then replay.")
 
     topic, sort, pacing, sl = doc["topic"], doc["sort"], doc["pacing"], doc["slices"]
+    stream = doc["stream"]
 
     if topic["name"] == topic["sample_name"]:
         raise ValueError("topic.name and topic.sample_name must differ (ADR-0008)")
+    if int(topic["partitions"]) != 1:
+        raise ValueError(
+            f"topic.partitions must be 1, got {topic['partitions']}. Kafka orders records "
+            "within a partition and nowhere else, so a multi-partition stream topic does not "
+            "carry the sort job's event-time order and the watermark would drop rows the "
+            "partitioning reordered rather than rows that were actually late (ticket 15)")
     if sort["tiebreak"] != "review_id+line_sha256":
         raise ValueError(
             f"sort.tiebreak must be 'review_id+line_sha256', got {sort['tiebreak']!r}. "
@@ -87,13 +116,22 @@ def load_replay_config(path: Path = CONFIG_PATH) -> ReplayConfig:
                        ("pacing.clock_every_records", pacing["clock_every_records"]),
                        ("topic.partitions", topic["partitions"]),
                        ("slices.near_rows", sl["near_rows"]),
-                       ("slices.far_rows", sl["far_rows"])):
+                       ("slices.far_rows", sl["far_rows"]),
+                       ("stream.max_offsets_per_trigger", stream["max_offsets_per_trigger"])):
         if int(value) < 1:
             raise ValueError(f"{key} must be >= 1, got {value}")
     if int(sl["near_lag_days"]) >= int(sl["far_lag_days"]):
         raise ValueError("slices.near_lag_days must be shorter than slices.far_lag_days")
     if sl["near_salt"] == sl["far_salt"]:
         raise ValueError("the two slices must draw under different salts, or they overlap")
+    if not watermark_days(stream["watermark"]) > int(sl["near_lag_days"]) \
+            or not watermark_days(stream["watermark"]) < int(sl["far_lag_days"]):
+        raise ValueError(
+            f"stream.watermark {stream['watermark']!r} does not separate the two slices: it "
+            f"must be longer than slices.near_lag_days ({sl['near_lag_days']}) so the near "
+            f"slice is accepted and shorter than slices.far_lag_days ({sl['far_lag_days']}) so "
+            "the far slice is dropped. A watermark that does not sit between them makes the "
+            "injected counts unfalsifiable (ADR-0010)")
 
     config_hash = hashlib.sha256(json.dumps(doc, sort_keys=True).encode()).hexdigest()
     return ReplayConfig(
@@ -103,6 +141,8 @@ def load_replay_config(path: Path = CONFIG_PATH) -> ReplayConfig:
         tiebreak=sort["tiebreak"], suffix=sort["suffix"],
         records_per_second=int(pacing["records_per_second"]),
         clock_every_records=int(pacing["clock_every_records"]),
+        watermark=stream["watermark"],
+        max_offsets_per_trigger=int(stream["max_offsets_per_trigger"]),
         seed=int(sl["seed"]),
         near_lag_days=int(sl["near_lag_days"]), near_rows=int(sl["near_rows"]),
         near_salt=sl["near_salt"],

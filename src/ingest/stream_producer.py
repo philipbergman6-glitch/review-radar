@@ -52,6 +52,56 @@ def _event_date(ms: int) -> str:
     return datetime.fromtimestamp(ms / 1000, UTC).strftime("%Y-%m-%d")
 
 
+def reset_topic(bootstrap: str, topic: str, *, timeout: float = 60.0) -> None:
+    """Delete the topic and wait for the broker to forget it.
+
+    The stream topic is meant to hold exactly one replay: the lineage gate resolves the
+    producer's Kafka output by comparing the topic's record count with the run's acked count,
+    and two replays on one topic make that count belong to neither of them. Appending a second
+    replay would also interleave two orderings of the same file, which is the one thing the
+    sort job exists to prevent.
+    """
+    from confluent_kafka.admin import AdminClient
+
+    admin = AdminClient({"bootstrap.servers": bootstrap, "broker.address.family": "v4"})
+    if topic not in admin.list_topics(timeout=10).topics:
+        return
+    print(f"[stream] RESET: deleting topic '{topic}'", flush=True)
+    for fut in admin.delete_topics([topic], operation_timeout=30).values():
+        fut.result(timeout=30)
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if topic not in admin.list_topics(timeout=10).topics:
+            return
+        time.sleep(1)
+    raise SystemExit(f"[stream] topic '{topic}' was still present {timeout:.0f}s after the "
+                     "delete request; the broker has not finished removing it")
+
+
+def sort_run_for(src_sha: str, *, category: str, scope: str) -> dict:
+    """The `sort_replay` run that wrote the file about to be replayed, by digest.
+
+    Matched on the output digest rather than on "the latest sort run": the replay's whole
+    claim is that it carried one particular ordering, and a file left over from an earlier
+    sort would otherwise be replayed under the newest sort's run id. A file no sort run
+    produced is a hard failure -- an ordering with no lineage is what ticket 14 split this job
+    in two to prevent.
+    """
+    run = runs.latest_success("sort_replay", category=category, data_scope=scope)
+    if run is None:
+        raise SystemExit(f"no successful sort_replay run for {category}/{scope}. Run "
+                         "`make sort-replay` first -- the replay names the run that ordered "
+                         "the file it sends.")
+    recorded = run["outputs"]["sorted_file"]["sha256"]
+    if recorded != src_sha:
+        raise SystemExit(
+            f"the file on disk (sha256 {src_sha[:12]}…) is not the file sort_replay "
+            f"{run['run_id'][:8]} wrote (sha256 {recorded[:12]}…). Re-run `make sort-replay`, "
+            "or point --source at the file that run produced; an ordering with no lineage is "
+            "the thing ticket 14 split this job in two to prevent.")
+    return run
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--category", default=CATEGORY)
@@ -60,6 +110,8 @@ def main() -> None:
                     help="override the sorted .jsonl path (default: the sort job's output)")
     ap.add_argument("--topic", default=None, help="override the topic from the frozen config")
     ap.add_argument("--limit", type=int, default=0, help="stop after N records (0 = whole file)")
+    ap.add_argument("--reset", action="store_true",
+                    help="delete the topic first, so it holds exactly this replay (destructive)")
     args = ap.parse_args()
 
     cfg = load_replay_config()
@@ -72,11 +124,24 @@ def main() -> None:
             "file, and the sort is its own ledgered job (ticket 14).")
 
     src_sha, src_bytes = file_sha256(src)
+    sort_run = sort_run_for(src_sha, category=args.category, scope=args.scope)
     print(f"[stream] topic={topic} rate={cfg.records_per_second:,}/s "
-          f"source={src.name} sha256={src_sha[:12]}…", flush=True)
+          f"source={src.name} sha256={src_sha[:12]}… "
+          f"ordered_by={sort_run['run_id'][:8]}", flush=True)
 
     signal.signal(signal.SIGINT, _handle_sigint)
-    ensure_topic(KAFKA_BOOTSTRAP, topic, cfg.partitions)
+    if args.reset:
+        reset_topic(KAFKA_BOOTSTRAP, topic)
+    # Retention off, and not as a convenience. Every record on this topic carries its *event*
+    # time as its Kafka timestamp -- that is what makes the replay an event-time stream and
+    # what lets a console consumer show 2003 going past -- and Kafka's log cleaner deletes
+    # segments by that same timestamp. Under the broker's default 168 hours a replay of
+    # twenty-three years of history is therefore deleted within minutes of being written: the
+    # first control run read 212,469 of 701,528 records because 489,059 had already aged out
+    # between the replay finishing and the projection starting. The topic holds a fixed
+    # historical replay, so wall-clock retention has nothing to express about it.
+    ensure_topic(KAFKA_BOOTSTRAP, topic, cfg.partitions,
+                 config={"retention.ms": "-1", "retention.bytes": "-1"})
 
     producer = Producer({
         "bootstrap.servers": KAFKA_BOOTSTRAP,
@@ -99,7 +164,7 @@ def main() -> None:
     run = runs.start(
         "stream_produce", runs.STREAM_PRODUCE_SPEC_VERSION,
         category=args.category, data_scope=args.scope,
-        inputs={"source": {"path": rel(src),
+        inputs={"source": {"run_id": sort_run["run_id"], "path": rel(src),
                            "sha256": src_sha, "bytes": src_bytes},
                 "protocol": {"path": rel(cfg.path),
                              "status": cfg.status, "config_hash": cfg.config_hash}},

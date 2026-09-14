@@ -83,6 +83,67 @@ def identities(entry: dict[str, Any]) -> list[tuple[str, int]]:
     return out
 
 
+def claimed_by(entry: dict[str, Any], upstream: dict[str, Any]) -> tuple[str, ...] | None:
+    """The keys on which an upstream output carries the identity this input names, or None.
+
+    For an input that names an Iceberg snapshot the join is exact and is done by the caller.
+    This is the other case: an input whose identity is a load id, a topic or a file digest.
+    Such an entry resolves when some upstream output agrees on every key the two of them both
+    name, and they name at least one besides the run reference itself.
+
+    Keys that only one side records are not held against the join, and that is deliberate:
+    the replay records the `bytes` it read and the sort job records the `rows` it wrote, and
+    neither absence says anything about whether they mean the same file. What decides it is
+    the key they *do* share -- for the file, its sha256; for the catalogue, the load id; for
+    the topic, its name.
+
+    The matched keys come back rather than a bare True because they are not equally
+    identifying. A join on `sha256` pins one file; a join on `alias` pins nothing, since every
+    run of a job writes the same alias. The gate prints them in the link's `identity`, so a
+    join that checks little says so instead of reading like a join that checks a lot.
+    """
+    claim = {k: v for k, v in entry.items() if k != "run_id"}
+    for out in upstream["outputs"].values():
+        if not isinstance(out, dict):
+            continue
+        shared = tuple(k for k in claim if k in out)
+        if shared and all(out[k] == claim[k] for k in shared):
+            return shared
+    return None
+
+
+def kafka_topic(topic: str) -> dict[str, Any]:
+    """(the topic exists, how many records it holds) from the broker's own watermarks.
+
+    A topic carries no run id, so "who wrote this" cannot be answered the way an Iceberg
+    snapshot answers it. What can be answered, and is what the link checks, is whether the
+    topic holds exactly what the run said it put there: a second replay onto the same topic
+    doubles the count and a topic that aged out or was deleted loses it. Either is a claim the
+    chain should not be making.
+    """
+    from confluent_kafka import Consumer, KafkaException, TopicPartition
+
+    consumer = Consumer({"bootstrap.servers": C.KAFKA_BOOTSTRAP,
+                         "group.id": "gate-lineage", "enable.auto.commit": False,
+                         "broker.address.family": "v4"})
+    try:
+        meta = consumer.list_topics(topic, timeout=15)
+        found = meta.topics.get(topic)
+        if found is None or found.error is not None:
+            return {"exists": False, "records": 0}
+        total = 0
+        for partition in found.partitions:
+            try:
+                low, high = consumer.get_watermark_offsets(
+                    TopicPartition(topic, partition), timeout=15, cached=False)
+            except KafkaException:
+                return {"exists": False, "records": 0}
+            total += high - low
+        return {"exists": True, "records": total}
+    finally:
+        consumer.close()
+
+
 def run_reference(entry: dict[str, Any]) -> str | None:
     """The upstream run an input entry names, if it names one.
 
@@ -271,6 +332,16 @@ def check_output(name: str, entry: dict[str, Any], row: dict[str, Any], *, icebe
                                  exists=rows > 0, stamped=entry["catalogue_load_id"] == run_id,
                                  current=current, detail=f"rows={rows}"),
                 rows > 0, current)
+    if entry.get("topic") and "index" not in entry:
+        held = kafka_topic(entry["topic"])
+        expected = row.get("records_out")
+        exact = expected is not None and held["records"] == expected
+        return (gate.output_link(job=job, run_id=run_id, output=name, store="kafka",
+                                 identity=entry["topic"], exists=held["exists"],
+                                 stamped=held["exists"] and exact, current=exact,
+                                 attribution="kafka_offsets",
+                                 detail=f"records={held['records']} recorded={expected}"),
+                held["exists"], exact)
     if entry.get("path"):
         present = (C.PROJECT_ROOT / entry["path"]).exists()
         return (gate.output_link(job=job, run_id=run_id, output=name, store="file",
@@ -407,14 +478,18 @@ def main() -> None:
                 wanted = identities(entry)
                 have = [i for e in (upstream["outputs"].values() if upstream else [])
                         for i in identities(e)]
-                resolves = bool(upstream) and all(i in have for i in wanted)
-                if upstream and not wanted:      # the catalogue names an id, not a snapshot
-                    resolves = any(e.get("catalogue_load_id") == ref
-                                   for e in upstream["outputs"].values())
+                # An Iceberg identity joins exactly; anything else -- a catalogue load id, a
+                # topic, a sorted file's digest -- joins on the keys both sides name, and the
+                # link prints which ones so a weak join is legible as one.
+                on = None if (wanted or not upstream) else claimed_by(entry, upstream)
+                resolves = bool(upstream) and (all(i in have for i in wanted) if wanted
+                                               else on is not None)
+                identity = (",".join(f"{t}@{s}" for t, s in wanted)
+                            or (f"{gate.short_id(ref)} on {'+'.join(on)}" if on
+                                else gate.short_id(ref)))
                 links.append(gate.edge_link(
                     downstream_job=job_name, downstream_run=row["run_id"], input_name=name,
-                    upstream_job=upstream_job, upstream_run=ref,
-                    identity=",".join(f"{t}@{s}" for t, s in wanted) or gate.short_id(ref),
+                    upstream_job=upstream_job, upstream_run=ref, identity=identity,
                     declared=bool(declared and declared.status == "declared"
                                   and declared.upstream == upstream_job),
                     resolves=resolves,

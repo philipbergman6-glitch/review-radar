@@ -38,6 +38,7 @@ def test_config_hash_covers_the_whole_document():
         "topic.name", "topic.sample_name", "topic.partitions",
         "sort.tiebreak", "sort.suffix",
         "pacing.records_per_second", "pacing.clock_every_records",
+        "stream.watermark", "stream.max_offsets_per_trigger",
         "slices.seed", "slices.near_lag_days", "slices.near_rows", "slices.near_salt",
         "slices.far_lag_days", "slices.far_rows", "slices.far_salt",
     }, "a new key needs a decision about whether it changes what a run means"
@@ -75,6 +76,34 @@ def test_the_two_slices_must_draw_under_different_salts(tmp_path):
     p = _write_config(tmp_path,
                       **{'far_salt = "held_back_far"': 'far_salt = "held_back_near"'})
     with pytest.raises(ValueError, match="or they overlap"):
+        load_replay_config(p)
+
+
+def test_the_stream_topic_has_exactly_one_partition(tmp_path):
+    """Order is a per-partition property in Kafka, and the watermark rests on order."""
+    assert load_replay_config().partitions == 1
+    p = _write_config(tmp_path, **{"partitions = 1": "partitions = 6"})
+    with pytest.raises(ValueError, match="topic.partitions must be 1"):
+        load_replay_config(p)
+
+
+def test_watermark_sits_between_the_two_injected_lags():
+    """The property ticket 16's assertion rests on, checked at load rather than assumed."""
+    cfg = load_replay_config()
+    assert cfg.near_lag_days < cfg.watermark_days < cfg.far_lag_days
+
+
+@pytest.mark.parametrize("delay", ['watermark = "3 days"', 'watermark = "900 days"'])
+def test_a_watermark_that_cannot_separate_the_slices_refuses_to_load(tmp_path, delay):
+    p = _write_config(tmp_path, **{'watermark = "30 days"': delay})
+    with pytest.raises(ValueError, match="does not separate the two slices"):
+        load_replay_config(p)
+
+
+def test_a_watermark_this_loader_cannot_compare_is_refused(tmp_path):
+    """Spark would accept '4 weeks'; this loader may not, because it compares days."""
+    p = _write_config(tmp_path, **{'watermark = "30 days"': 'watermark = "4 weeks"'})
+    with pytest.raises(ValueError, match="must read '<n> days'"):
         load_replay_config(p)
 
 

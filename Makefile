@@ -14,7 +14,7 @@ PROMPT ?= label_v5
 # development target reads it -- the evaluation run refuses any prompt but the frozen one.
 RAG_PROMPT ?= rag_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers gate-rag eval-table gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample stream-aggregate stream-aggregate-sample gate-stream bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers rag-judge-export rag-judge rag-judge-check rag-judge-import gate-rag eval-table gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -50,11 +50,20 @@ sort-replay:  ## order the raw file by event time once -> $(CATEGORY).sorted.jso
 sort-replay-sample:  ## same, over the committed 10k-review sample
 	$(RUN) -m src.ingest.sort_replay --source $(SAMPLE) --scope sample
 
-stream-produce:  ## paced replay of the sorted file into reviews.stream (control run, no injection)
-	$(RUN) -m src.ingest.stream_producer --category $(CATEGORY) --scope full
+stream-produce:  ## paced replay of the sorted file into a freshly reset reviews.stream (control run, no injection)
+	$(RUN) -m src.ingest.stream_producer --category $(CATEGORY) --scope full --reset
 
 stream-produce-sample:  ## same, over the sorted sample -> reviews.stream.sample
 	$(RUN) -m src.ingest.stream_producer --source $(SAMPLE:.jsonl=.sorted.jsonl) --scope sample
+
+stream-aggregate:  ## the watermarked product-month projection beside batch; drains reviews.stream and stops
+	$(RUN) -m src.spark.stream_product_month --scope full
+
+stream-aggregate-sample:  ## same, over reviews.stream.sample
+	$(RUN) -m src.spark.stream_product_month --scope sample
+
+gate-stream:  ## re-read the topic and reconcile the projection against gold; prints STREAM_GATE
+	$(RUN) scripts/gate_stream.py --scope full
 
 bronze:  ## drain the topic into the bronze Iceberg table, one trigger
 	$(RUN) -m src.spark.bronze --trigger once --max-per-trigger 150000
@@ -272,7 +281,19 @@ rag-reopen:  ## the one sanctioned second run of the thirty (RR-24): REASON="…
 	@test -n "$(REASON)" || (echo "rag-reopen needs REASON=\"why the thirty are opened again\"" >&2; exit 2)
 	$(RUN) -m src.ai.rag_run --questions conf/rag-questions.json --question-set evaluation --reopen "$(REASON)"
 
-gate-rag:  ## re-derive every P7 constituent from the manifest, the seal, the retrieval and the call ledger; prints RAG_GATE
+rag-judge-export:  ## the judging worksheet for the sealed thirty -> eval/rag/judging-worksheet.json (hides slot role and decline rank)
+	$(RUN) scripts/rag_judge.py --export
+
+rag-judge:  ## build the offline judging page for Philip -> .scratch/rag-judge/index.html
+	$(RUN) .scratch/rag-judge/build.py
+
+rag-judge-check:  ## validate eval/rag/judgements.jsonl row by row without importing it
+	$(RUN) scripts/rag_judge.py --check
+
+rag-judge-import:  ## import Philip's thirty judgements as a rag_judgements ledger run; all thirty or none, judged once
+	$(RUN) scripts/rag_judge.py --import
+
+gate-rag:  ## re-derive every P7 constituent from the manifest, the seal, the retrieval and the call ledger; prints RAG_GATE, then RAG_QUALITY (reported)
 	$(RUN) scripts/gate_rag.py --scope full
 
 eval-table:  ## the whole evaluation table from conf/lineage_chain.toml + eval/*/gate.json; non-zero on a capability that is neither a number nor a written reason

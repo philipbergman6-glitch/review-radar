@@ -13,7 +13,7 @@ a run whose numbers do not add up is `failed`, never quietly `success`.
 
 Contracts registered here: silver, gold, search_index_reviews (v1 text only, v2 with
 vectors), search_index_product_month, embeddings, catalogue_load, bronze_drain, produce, sort_replay,
-stream_produce. Bronze and produce are declared so the CHECK list and the registry agree
+stream_produce, stream_aggregate. Bronze and produce are declared so the CHECK list and the registry agree
 from day one; their drivers are instrumented in their own sessions (ADR-0008 §3), not in
 silver's.
 """
@@ -36,8 +36,8 @@ JOB_NAMES: tuple[str, ...] = (
     "produce", "catalogue_load", "bronze_drain", "silver", "gold",
     "search_index_reviews", "search_index_product_month", "embeddings",
     "theme_samples", "theme_labels_llm", "theme_labels_reference", "theme_labels_human",
-    "theme_classifier_train", "theme_classifier_score", "rag_answers",
-    "sort_replay", "stream_produce",
+    "theme_classifier_train", "theme_classifier_score", "rag_answers", "rag_judgements",
+    "sort_replay", "stream_produce", "stream_aggregate",
 )
 
 SILVER_SPEC_VERSION = "1"
@@ -58,6 +58,7 @@ THEME_REFERENCE_SPEC_VERSION = "1"
 THEME_HUMAN_SPEC_VERSION = "1"
 THEME_CLASSIFIER_SPEC_VERSION = "1"
 RAG_ANSWERS_SPEC_VERSION = "1"
+RAG_JUDGEMENTS_SPEC_VERSION = "1"
 CATALOGUE_LOAD_SPEC_VERSION = "1"
 BRONZE_SPEC_VERSION = "1"
 PRODUCE_SPEC_VERSION = "1"
@@ -66,7 +67,14 @@ PRODUCE_SPEC_VERSION = "1"
 # artefact with its own digest: a replay names the file it sent, and that file names the run
 # that ordered it.
 SORT_REPLAY_SPEC_VERSION = "1"
-STREAM_PRODUCE_SPEC_VERSION = "1"
+# v2 names the `sort_replay` run whose file it is replaying, so the ordering a replay carried
+# is a join rather than a matching digest someone eyeballed. v1 recorded the digest alone and
+# is kept so the smoke replays made under it still validate.
+STREAM_PRODUCE_SPEC_VERSION = "2"
+# `stream_aggregate` is the watermarked projection beside batch (ticket 15). Its numbers are
+# an accounting of one topic: everything read is a row the projection counted or a duplicate
+# the watermark removed, and nothing else may go missing in between.
+STREAM_AGGREGATE_SPEC_VERSION = "1"
 
 # Files whose state decides `worktree_dirty`. data/ and notebooks/ are excluded on
 # purpose: they are inputs and presentation, not the code that produced the run.
@@ -411,15 +419,82 @@ _register(Contract(
             "reject_path", "replay_config_hash"),
     identity=_sort_replay_identity))
 
+_STREAM_PRODUCE_COUNTS = ("records_attempted", "records_acked", "first_event_ms",
+                          "last_event_ms", "records_per_second_target",
+                          "records_per_second_actual", "elapsed_s", "replay_config_hash")
+
 _register(Contract(
-    "stream_produce", STREAM_PRODUCE_SPEC_VERSION,
+    "stream_produce", "1",
     inputs={"source": ("path", "sha256", "bytes"),
             "protocol": ("path", "status", "config_hash")},
     outputs={"kafka": ("topic",)},
-    counts=("records_attempted", "records_acked", "first_event_ms", "last_event_ms",
-            "records_per_second_target", "records_per_second_actual", "elapsed_s",
-            "replay_config_hash"),
+    counts=_STREAM_PRODUCE_COUNTS,
     identity=_stream_produce_identity))
+
+_register(Contract(
+    "stream_produce", STREAM_PRODUCE_SPEC_VERSION,
+    inputs={"source": ("run_id", "path", "sha256", "bytes"),
+            "protocol": ("path", "status", "config_hash")},
+    outputs={"kafka": ("topic",)},
+    counts=_STREAM_PRODUCE_COUNTS,
+    identity=_stream_produce_identity))
+
+def _stream_aggregate_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """What the topic held, what reached the projection, and what the projection holds.
+
+    Every count here is one the job *observed*: `records_read` and `natural_drops` come from
+    the query's own progress, `unique_review_ids` is tallied per micro-batch as the rows are
+    written, and `reviews_on_projection` is summed back off the materialised table. The split
+    of the rows that never reached the projection -- validation rejects, duplicates, late rows
+    -- is deliberately not decided here: it is a claim about the topic, so `STREAM_GATE`
+    re-reads the same offsets and makes it, rather than the job grading its own arithmetic.
+
+    The cross-check that earns its place is the last one. `unique_review_ids` is a running
+    tally taken while the stream ran; `reviews_on_projection` is a sum over the Iceberg table
+    afterwards. A micro-batch written twice, or one whose write failed silently, moves one and
+    not the other.
+    """
+    fails: list[str] = []
+    read, unique, late = (_n(counts, k) for k in
+                          ("records_read", "unique_review_ids", "natural_drops"))
+    months, on_projection = _n(counts, "product_months"), _n(counts, "reviews_on_projection")
+    batches = _n(counts, "micro_batches")
+    if None in (read, unique, late, months, on_projection, batches):
+        return [("identity: records_read/unique_review_ids/natural_drops/product_months/"
+                 "reviews_on_projection/micro_batches must all be set on success")]
+    if records.get("records_in") != read:
+        fails.append(f"identity: records_in {records.get('records_in')} != records_read {read}")
+    if records.get("records_out") != months:
+        fails.append(f"identity: records_out {records.get('records_out')} != "
+                     f"product_months {months}")
+    if records.get("records_rejected") != read - unique:
+        fails.append(f"identity: records_rejected {records.get('records_rejected')} != "
+                     f"records_read {read} - unique_review_ids {unique}")
+    if late > read - unique:
+        fails.append(f"identity: natural_drops {late} > the {read - unique} rows that never "
+                     "reached the projection: more rows were dropped as late than went "
+                     "unprojected at all")
+    if on_projection != unique:
+        fails.append(f"identity: reviews_on_projection {on_projection} != unique_review_ids "
+                     f"{unique}: the projection holds rows the stream never counted, or lost "
+                     "rows it did")
+    if batches < 1:
+        fails.append("identity: micro_batches 0 -- a stream that processed no batch has "
+                     "projected nothing")
+    return fails
+
+
+_register(Contract(
+    "stream_aggregate", STREAM_AGGREGATE_SPEC_VERSION,
+    inputs={"replay": ("run_id", "topic"),
+            "source": ("run_id", "path", "sha256"),
+            "protocol": ("path", "status", "config_hash")},
+    outputs={"stream.product_month": ("table", "snapshot_id"),
+             "stream.product_month_batches": ("table", "snapshot_id")},
+    counts=("records_read", "unique_review_ids", "natural_drops", "micro_batches",
+            "product_months", "reviews_on_projection", "ingested_at", "watermark",
+            "validation_source_sha256", "replay_config_hash", "elapsed_s"),
+    identity=_stream_aggregate_identity))
 
 _register(Contract(
     "produce", PRODUCE_SPEC_VERSION,
@@ -724,6 +799,47 @@ _register(Contract(
     identity=_rag_answers_identity))
 
 
+def _rag_judgements_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
+    """Judging is total or it is nothing: every manifest question carries exactly one judgement.
+
+    The failure this refuses is a partial judging pass that shrinks a denominator -- the four
+    `RAG_QUALITY` rows are counted over the manifest's 20 and 10 (ADR-0006), so an import that
+    accepted twenty-eight rows would publish a number over a population nobody froze. All
+    thirty or none, exactly like Philip's 50 (`theme_labels_human`).
+    """
+    fails: list[str] = []
+    total, judged = _n(counts, "questions_total"), _n(counts, "judged")
+    if None in (total, judged):
+        return ["counts.questions_total and counts.judged must be set on success"]
+    if judged != total:
+        fails.append(f"identity: judged {judged} != questions_total {total}")
+    if records.get("records_in") != total or records.get("records_out") != judged:
+        fails.append(f"identity: records_in {records.get('records_in')} must equal "
+                     f"questions_total {total} and records_out {records.get('records_out')} "
+                     f"must equal judged {judged}")
+    if records.get("records_rejected") not in (0, None):
+        fails.append("identity: an import that rejected a row must not succeed")
+    ans, un = _n(counts, "answerable"), _n(counts, "unanswerable")
+    if None not in (ans, un) and ans + un != total:  # type: ignore[operator]
+        fails.append(f"identity: answerable {ans} + unanswerable {un} != questions_total {total}")
+    return fails
+
+
+# The judge's pass over the thirty (ticket 13). Its input names the `rag_answers` run it judged,
+# by run id and by the answers file's digest, so the lineage walk joins the judgement to the
+# exact bytes that were judged; a judgement of run 1 cannot be imported against run 2.
+_register(Contract(
+    "rag_judgements", RAG_JUDGEMENTS_SPEC_VERSION,
+    inputs={"answers": ("run_id", "path", "questions", "sha256"),
+            "questions": ("path", "version", "spec_hash"),
+            "rubric": ("path", "sha256")},
+    outputs={"eval.rag_judgements": ("path", "rows", "sha256")},
+    counts=("questions_total", "answerable", "unanswerable", "judged", "answered_answerable",
+            "refused_answerable", "refused_unanswerable", "answered_unanswerable", "malformed",
+            "uncertain", "elapsed_s"),
+    identity=_rag_judgements_identity))
+
+
 def contract_for(job_name: str, spec_version: str | None = None) -> Contract | None:
     if spec_version is not None:
         return REGISTRY.get((job_name, spec_version))
@@ -863,6 +979,29 @@ def failed(run: Run, *, notes: str, outputs: dict[str, Any] | None = None,
     print(f"[ledger] {run.job_name} run {run.run_id} FAILED: {notes}", flush=True)
 
 
+#: The ledger columns a reader gets back, in order. One list, so `by_id` and `latest_success`
+#: hand back the same shape and a caller can swap one for the other.
+_LEDGER_COLUMNS = ("run_id", "spec_version", "status", "started_at", "finished_at",
+                   "records_in", "records_out", "records_rejected", "inputs", "outputs",
+                   "counts", "params", "git_commit_sha", "worktree_dirty")
+
+
+def by_id(run_id: str) -> dict[str, Any] | None:
+    """One ledger row by its id, in the same shape `latest_success` returns.
+
+    For a consumer that recorded *which* upstream run it read: pinning by id is the difference
+    between re-deriving a claim against the run that produced it and re-deriving it against
+    whichever run of that job happens to be newest (ticket 15).
+    """
+    with connect() as conn:
+        row = conn.execute(
+            f"""SELECT {', '.join(_LEDGER_COLUMNS)} FROM pipeline_runs WHERE run_id = %s""",
+            (run_id,)).fetchone()
+    if row is None:
+        return None
+    return {k: (str(v) if k == "run_id" else v) for k, v in zip(_LEDGER_COLUMNS, row)}
+
+
 def latest_success(job_name: str, *, category: str, data_scope: str,
                    params_match: dict[str, Any] | None = None) -> dict[str, Any] | None:
     """The newest successful run of a job, optionally narrowed to one set of params.
@@ -878,16 +1017,11 @@ def latest_success(job_name: str, *, category: str, data_scope: str,
         args.append(json.dumps(params_match))
     with connect() as conn:
         row = conn.execute(
-            f"""SELECT run_id, spec_version, started_at, finished_at, records_in, records_out,
-                      records_rejected, inputs, outputs, counts, params, git_commit_sha,
-                      worktree_dirty
+            f"""SELECT {', '.join(_LEDGER_COLUMNS)}
                FROM pipeline_runs
                WHERE job_name=%s AND status='success' AND category=%s AND data_scope=%s{clause}
                ORDER BY started_at DESC LIMIT 1""",
             tuple(args)).fetchone()
     if row is None:
         return None
-    keys = ("run_id", "spec_version", "started_at", "finished_at", "records_in", "records_out",
-            "records_rejected", "inputs", "outputs", "counts", "params", "git_commit_sha",
-            "worktree_dirty")
-    return {k: (str(v) if k == "run_id" else v) for k, v in zip(keys, row)}
+    return {k: (str(v) if k == "run_id" else v) for k, v in zip(_LEDGER_COLUMNS, row)}

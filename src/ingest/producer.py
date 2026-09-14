@@ -41,8 +41,14 @@ def _handle_sigint(signum, frame):
     print("\n[producer] stop requested, flushing...", flush=True)
 
 
-def ensure_topic(bootstrap: str, topic: str, partitions: int) -> None:
-    """Create the topic if absent. Idempotent -- safe to run before every replay."""
+def ensure_topic(bootstrap: str, topic: str, partitions: int,
+                 config: dict[str, str] | None = None) -> None:
+    """Create the topic if absent, and apply `config` whether it was just created or not.
+
+    `config` is applied to an existing topic too, on purpose. A retention setting that only
+    took effect on a freshly created topic would be a setting that silently did not apply to
+    the topic anybody is actually using.
+    """
     # v4 only: `localhost` resolves to ::1 first here and the broker listens on IPv4, so the
     # default dual-stack attempt prints a red FAIL line before falling back. Cosmetic, but
     # this runs first on a demo terminal.
@@ -51,10 +57,25 @@ def ensure_topic(bootstrap: str, topic: str, partitions: int) -> None:
     if topic in existing:
         n = len(existing[topic].partitions)
         print(f"[producer] topic '{topic}' exists with {n} partition(s)")
-        return
-    fut = admin.create_topics([NewTopic(topic, num_partitions=partitions, replication_factor=1)])
-    fut[topic].result(timeout=20)
-    print(f"[producer] created topic '{topic}' with {partitions} partitions")
+    else:
+        fut = admin.create_topics([NewTopic(topic, num_partitions=partitions,
+                                            replication_factor=1, config=dict(config or {}))])
+        fut[topic].result(timeout=20)
+        print(f"[producer] created topic '{topic}' with {partitions} partitions")
+    if config:
+        _set_topic_config(admin, topic, config)
+
+
+def _set_topic_config(admin: AdminClient, topic: str, config: dict[str, str]) -> None:
+    from confluent_kafka.admin import ConfigResource
+
+    resource = ConfigResource(ConfigResource.Type.TOPIC, topic)
+    for key, value in config.items():
+        resource.set_config(key, value)
+    for fut in admin.alter_configs([resource]).values():
+        fut.result(timeout=20)
+    print(f"[producer] topic '{topic}' config: "
+          + ", ".join(f"{k}={v}" for k, v in sorted(config.items())))
 
 
 def main() -> None:

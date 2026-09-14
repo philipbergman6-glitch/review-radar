@@ -22,7 +22,21 @@ spec_version = "1"
 # order for the watermark job. Two orderings of the same file are two different streams.
 name = "reviews.stream"
 sample_name = "reviews.stream.sample"
-partitions = 6
+# One partition, where the batch topic has six (ticket 15). Kafka orders records within a
+# partition and nowhere else, so a six-partition stream topic does not carry the sort job's
+# output in event-time order -- it carries six interleavings of it, and a consumer reading a
+# bounded offset range from each reassembles them out of order by however far the partitions
+# have drifted. In the sparse early years a drift of a few hundred records is years of event
+# time, so a 30-day watermark would drop rows and the control run would report lateness that
+# the partitioning invented. ADR-0010 already refused to let partition interleaving produce
+# the late events, on the grounds that the sort produced order and the skew is not
+# reproducible; this is the same decision applied to the topic that carries the order.
+#
+# Frozen at 6 on 2026-09-14 before any stream existed and corrected to 1 the same day, still
+# before the first control run. Throughput is not the constraint here: 3,000 records per
+# second is well inside one partition, and the parallelism that matters is Spark's, which
+# comes from the shuffle, not from the topic.
+partitions = 1
 
 [sort]
 # The sort is over an index of (timestamp, review_id, line digest, byte offset), not over
@@ -52,6 +66,26 @@ records_per_second = 3000
 # Event-time clock: how many records between printed clock lines. At 3,000 rec/s that is a
 # line every ~1.7 s, which is visible to an audience without scrolling the terminal.
 clock_every_records = 5000
+
+[stream]
+# The watermark the aggregation job runs under (ADR-0010, ticket 15). Frozen here rather than
+# passed on the command line for the same reason the rate is: the drop counts ticket 16
+# asserts are only evidence if the delay they were measured under was committed first.
+#
+# 30 days is chosen against the injected lags, not against the data: the near slice is
+# released 7 days late and must be accepted, the far slice 730 days late and must be dropped,
+# so any delay strictly between those two separates them. 30 days sits far from both edges,
+# which means a rounding difference in how Spark advances the watermark cannot decide the
+# gate.
+#
+# `dropDuplicatesWithinWatermark` is exact for this source's duplicates: review_id hashes
+# (user, product, timestamp), so two rows sharing an id share a timestamp and can never fall
+# on opposite sides of any watermark.
+watermark = "30 days"
+# Rows per micro-batch when the control run drains the topic. Batch size is part of the
+# protocol because it decides how many partial aggregates the projection is the sum of, and
+# therefore what `stream.product_month_batches` holds.
+max_offsets_per_trigger = 50000
 
 [slices]
 # The held-back slices (ADR-0010). Ticket 16 injects them; the sizes and lags are frozen
