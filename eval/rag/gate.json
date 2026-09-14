@@ -12,7 +12,7 @@
     "RUN_CONTRACTS gate=RAG_GATE jobs=rag_answers registered=1/1 missing=none run_contract_registered=true",
     "RAG_GATE scope=full contract=29/30 constituents_ok=7/7 failed=none kind=reproducibility RAG_GATE=PASS"
   ],
-  "created_at": "2026-09-14T08:57:08+00:00",
+  "created_at": "2026-09-14T12:33:16+00:00",
   "gate_name": "RAG_GATE",
   "kind": "reproducibility",
   "metric": {

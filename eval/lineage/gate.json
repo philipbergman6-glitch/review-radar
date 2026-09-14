@@ -103,9 +103,9 @@
     "LINEAGE_EDGE downstream=theme_samples/aa4cccbf input=silver upstream=silver/4447727f identity=lake.silver.reviews@8507728480475534879 declared=true resolves=true pinned=true ok=true",
     "LINEAGE_RETENTION run=1b31d8e4 job=sort_replay status=failed outputs=1 present=1 reason=contract: distinct_review_ids 9987 != rows_sorted 10000: the ok=true",
     "LINEAGE_RETENTION run=554cee6f job=stream_aggregate status=failed outputs=2 present=2 reason=contract: identity: reviews_on_projection 0 != unique_review ok=true",
-    "LINEAGE_PENDING capability=themes_agreement reason=Philip's blind stratified 50 of the audit set are drawn and exported but not yet hand-labelled, so no agreement number exists (RR-21); the draw is frozen and cannot be re-tuned once it is",
-    "LINEAGE_CUT capability=themes_repeat_kappa reason=the labeller is deterministic (temperature 0, fixed seed), so a repeat-run kappa measures nothing; the published agreement number is THEMES_AGREEMENT (ADR-0011, RR-21)",
-    "LINEAGE_PENDING capability=rag_quality reason=the thirty answers exist under RAG_GATE=PASS but Philip has not judged them; the four targets stay unmeasured until `make rag-judge-import` accepts all thirty judgement rows (ticket 13). The bars do not move while they wait",
+    "LINEAGE_CUT capability=themes_agreement reason=Philip declined the hand-labelling pass on 2026-09-14 (ADR-0003 amendment e): the number RR-21 defined is agent_reference against a human, and no human label exists. Two in-session agent passes over the same blind 50 are published beside it as consistency checks (eval/themes/agent2-consistency-audit.json, kappa 0.926; eval/themes/agent3-adjudication-audit.json, kappa 0.864), and each file states it is not this measurement: the same model family wrote both sides, so correlated error is unbounded",
+    "LINEAGE_CUT capability=themes_repeat_kappa reason=the labeller is deterministic (temperature 0, fixed seed), so a repeat-run kappa measures nothing; the agreement row RR-21 pointed at, THEMES_AGREEMENT, is itself cut since 2026-09-14 (ADR-0011, RR-21)",
+    "LINEAGE_CUT capability=rag_quality reason=Philip declined the judging pass on 2026-09-14 (ADR-0006 amendment): the four targets ADR-0006 defines are Philip's judgement over the sealed thirty, and no human judgement exists. An agent pass by a different model family (annotator=claude, eval/rag/agent-judged-quality.json) is published beside it as a pre-check, not as this measurement: grounded 11/20 and adequate 10/20 under their bars, abstention 10/10 and false refusal 1/20 over theirs. The bars did not move",
     "LINEAGE_SELF capability=lineage reason=this gate writes this artefact at the end of the walk, so checking it would only ever check the previous walk",
     "LINEAGE_RECORDED_PIN edge=theme_samples<-gold.gold reason=P6's frames were drawn on 2026-09-07 from gold run 4cd1fde7; P3 publishes the later 6e1c0d3a, whose GOLD_REPRO_GATE re-derives the same three tables from the same silver snapshot. Redrawing the frames against a run that reproduces the one they used would move a frozen sample for no gain (ticket 09: inference may repeat, measurement may not), so this edge names the run the draw recorded and that run is walked beside the published one",
     "LINEAGE_RECORDED_PIN edge=theme_labels_llm<-theme_samples.samples reason=theme_samples draws one frame per run -- discovery, development, audit, training_pool -- so several of its outputs are live at once and the latest is not the right one for any particular labelling run. The frame a run read is the one it recorded, and the audit frame is sealed (ticket 09), so the recorded run is the only correct pin",
@@ -115,7 +115,7 @@
     "LINEAGE_LEDGER runs_pinned=20 orphan_running=0 failed_runs=7 dirty_runs=12",
     "LINEAGE_GATE gate_mode=development chain_clean=true publication_ready=false chain_links_checked=101 LINEAGE_GATE=PASS"
   ],
-  "created_at": "2026-09-14T12:34:19+00:00",
+  "created_at": "2026-09-14T12:41:56+00:00",
   "gate_name": "LINEAGE_GATE",
   "kind": "reproducibility",
   "metric": {
@@ -134,7 +134,7 @@
   "pipeline_run_id": "4447727f-ee66-48eb-be9e-8a23e061d708",
   "population": {
     "capabilities_claimed": 14,
-    "capabilities_pending": 2,
+    "capabilities_pending": 0,
     "n": 101,
     "name": "All_Beauty/declared chain",
     "runs_pinned": 20

@@ -14,7 +14,7 @@
     "RUN_CONTRACTS gate=THEMES_GATE jobs=theme_samples,theme_labels_llm,theme_labels_reference registered=3/3 missing=none run_contract_registered=true",
     "THEMES_GATE scope=full constituents_ok=6/6 failed=none kind=reproducibility THEMES_GATE=PASS"
   ],
-  "created_at": "2026-09-11T06:44:33+00:00",
+  "created_at": "2026-09-14T12:33:14+00:00",
   "gate_name": "THEMES_GATE",
   "kind": "reproducibility",
   "metric": {
