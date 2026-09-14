@@ -2,12 +2,13 @@
   "artifact_version": "1",
   "capability": "demo",
   "constituents": [
+    "DEMO_REHEARSAL 2026-09-14 cells=12 all_cells_ok=true elapsed_s=258 batches=50 rows=692252 replay_run=b5c2b752 commit=91133f46 backup_playable=true backup_missing=none counts=true",
     "DEMO_REHEARSAL 2026-09-14-3 cells=12 all_cells_ok=true elapsed_s=259 batches=50 rows=692252 replay_run=4c8a2df3 commit=4ccc4e4a backup_playable=true backup_missing=none counts=true",
     "DEMO_REHEARSAL 2026-09-14-4 cells=12 all_cells_ok=true elapsed_s=258 batches=49 rows=692252 replay_run=0e3528ac commit=4ccc4e4a backup_playable=true backup_missing=none counts=true",
     "DEMO_DOCS present=4/4 missing=none",
-    "DEMO_GATE rehearsals=2/2 max_elapsed_s=259 all_cells_ok=true stream_running=true backup_playable=true docs_present=4/4 gate_scope=full DEMO_GATE=PASS"
+    "DEMO_GATE rehearsals=3/2 max_elapsed_s=259 all_cells_ok=true stream_running=true backup_playable=true docs_present=4/4 gate_scope=full DEMO_GATE=PASS"
   ],
-  "created_at": "2026-09-14T10:44:49+00:00",
+  "created_at": "2026-09-14T12:58:02+00:00",
   "gate_name": "DEMO_GATE",
   "kind": "reproducibility",
   "metric": {
@@ -23,8 +24,8 @@
   "phase": "Deliverables track",
   "pipeline_run_id": "0e3528ac-6048-47a9-8561-523c756115e6",
   "population": {
-    "counted": 2,
-    "n": 2,
+    "counted": 3,
+    "n": 3,
     "name": "committed exports under demo/",
     "required": 2
   },
