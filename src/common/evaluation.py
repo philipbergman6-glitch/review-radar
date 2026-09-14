@@ -35,7 +35,7 @@ from __future__ import annotations
 import json
 import tomllib
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -455,8 +455,7 @@ def _prior_row(cap: Capability, doc: dict, *, superseded_by: str) -> Row:
     row = _row(cap, doc)
     note = (f"prior run, superseded by {superseded_by[:8]} through a sanctioned reopen "
             f"(RR-24); kept as the first result on record")
-    return Row(**{**row.__dict__, "note": f"{note}; {row.note}" if row.note else note,
-                  "prior": True})
+    return replace(row, note=f"{note}; {row.note}" if row.note else note, prior=True)
 
 
 def _row(cap: Capability, doc: dict) -> Row:

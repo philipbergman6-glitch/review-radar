@@ -159,8 +159,15 @@ class ReopenCheck:
     moved: tuple[str, ...]
 
 
+#: Limits that bound what the judge reads (RR-24 §1). They may not move under a reopen: a
+#: longer claim or a seventh claim would change what is judged, not just what is rejected.
+JUDGE_BOUND_LIMITS = ("max_claims", "max_citations_per_claim", "claim_max_words",
+                      "refusal_reason_max_words")
+
+
 def check_reopen(seal: dict[str, Any] | None, *, reason: str, identity: dict[str, Any],
-                 sealed_hash_recomputed: str) -> ReopenCheck:
+                 sealed_hash_recomputed: str, sealed_limits: dict[str, Any],
+                 limits: dict[str, Any]) -> ReopenCheck:
     """Allow the reopen only if the sole movement is one the held-out answers could not have
     chosen -- a validator limit.
 
@@ -177,6 +184,10 @@ def check_reopen(seal: dict[str, Any] | None, *, reason: str, identity: dict[str
     if seal is None:
         raise ValueError("nothing to reopen: no seal exists, so the thirty have not been "
                          "answered yet; run without --reopen")
+    if seal.get("reopened_from"):
+        raise ValueError(f"the thirty were already reopened once (seal {seal.get('seal_no')}, "
+                         f"from run {str(seal['reopened_from'].get('run_id'))[:8]}); ADR-0006 "
+                         "sanctions one second run, not a series")
     sealed = seal["identity"]
     moved = tuple(sorted(k for k, v in identity.items() if sealed.get(k) != v))
     other = [k for k in moved if k != "inference_config_hash"]
@@ -195,6 +206,10 @@ def check_reopen(seal: dict[str, Any] | None, *, reason: str, identity: dict[str
                          f"commit's limits give {sealed_hash_recomputed[:12]}, but the seal "
                          f"recorded {sealed['inference_config_hash'][:12]}. Only a validator "
                          "limit may move under --reopen (RR-24)")
+    bound = [k for k in JUDGE_BOUND_LIMITS if sealed_limits.get(k) != limits.get(k)]
+    if bound:
+        raise ValueError(f"a reopen may not move a limit that bounds what the judge reads, and "
+                         f"this one moved {', '.join(bound)} (RR-24 §1)")
     return ReopenCheck(reason=reason.strip(), prior_run_id=seal["run_id"],
                        seal_no=int(seal.get("seal_no", 1)), moved=moved)
 
@@ -283,7 +298,8 @@ def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, cate
                                       generation=generation, model_id=model,
                                       limits=limits_then) if seal else ""
         reopening = check_reopen(seal, reason=reopen, identity=identity,
-                                 sealed_hash_recomputed=recomputed)
+                                 sealed_hash_recomputed=recomputed,
+                                 sealed_limits=limits_then, limits=spec.limits)
         if limit:
             raise ValueError("a reopen answers all thirty; --limit would leave the seal "
                              "naming a partial run")
@@ -405,7 +421,10 @@ def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, cate
         archived: dict[str, str] = {}
         if reopening:
             # Only now, with every answer in hand: a reopen that failed halfway leaves run 1
-            # exactly where it was, and a second attempt starts from the same seal.
+            # exactly where it was, and a second attempt starts from the same seal. The window
+            # between this move and `write_seal` below is two file writes; a crash inside it
+            # leaves the archive beside a seal still naming run 1, and the next attempt
+            # hard-fails in `archive_prior` rather than overwriting the archive.
             archived = archive_prior(out_dir, seal_no=reopening.seal_no)
             print(f"[rag] archived run {reopening.prior_run_id[:8]} as "
                   f"{', '.join(sorted(archived.values()))}")

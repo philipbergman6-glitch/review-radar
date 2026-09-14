@@ -201,7 +201,10 @@ def main() -> None:
                                      "unanswerable in three strata)",
                              "n": len(manifest.get("questions", [])),
                              "generation": facts["retrieval"]["generation"],
-                             "search_run_id": (answers or {}).get("search_run_id")},
+                             "search_run_id": (answers or {}).get("search_run_id"),
+                             **({"reopened_from": facts["reopen"]["reopened_from"],
+                                 "reopen_reason": facts["reopen"]["reason"]}
+                                if facts["reopen"].get("reopened") else {})},
                  pipeline_run_id=run_id, scope=args.scope, notes=gate.notes(facts))
     else:
         print("RAG_ARTEFACT not written: eval/rag/answers.json names no run id, so there is "

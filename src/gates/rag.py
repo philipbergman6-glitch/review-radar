@@ -172,15 +172,38 @@ def reopen_facts(seal: Mapping[str, Any], *, prior_seal: Mapping[str, Any] | Non
                        if q not in current_rows or parsed_hash(current_rows[q]) != h)
     reason = str(ro.get("reason") or "").strip()
     prior_run = ro.get("run_id")
-    evidence = (prior_seal is not None and prior is not None and current is not None
-                and bool(prior_run) and prior_seal.get("run_id") == prior_run
-                and prior.get("run_id") == prior_run
-                and current.get("run_id") == seal.get("run_id") != prior_run)
+    # Every hole is named, never folded into one boolean: the line has to say which piece of
+    # evidence is missing, or the FAIL cannot be acted on.
+    holes: list[str] = []
+    if not reason:
+        holes.append("no_reason")
+    if not prior_run:
+        holes.append("no_prior_run_id")
+    if prior_seal is None:
+        holes.append("prior_seal_missing")
+    elif prior_seal.get("run_id") != prior_run:
+        holes.append("prior_seal_names_another_run")
+    if prior is None:
+        holes.append("prior_answers_missing")
+    elif prior.get("run_id") != prior_run:
+        holes.append("prior_answers_from_another_run")
+    if current is None:
+        holes.append("current_answers_missing")
+    elif current.get("run_id") != seal.get("run_id") or current.get("run_id") == prior_run:
+        holes.append("current_answers_not_this_seal's_run")
+    if not prior_hashes:
+        holes.append("prior_run_parsed_nothing")
+    # Re-derived, not trusted from the seal's own `moved`: between the two seals, the one
+    # identity field allowed to move is the config hash (the limits live inside it).
+    moved = sorted(k for k, v in seal.get("identity", {}).items()
+                   if prior_seal is not None and prior_seal.get("identity", {}).get(k) != v)
+    if prior_seal is not None and moved != ["inference_config_hash"]:
+        holes.append("identity_moved_beyond_config_hash")
     return {"reopened": True, "reopened_from": prior_run, "reason": reason,
             "prior_seal": ro.get("prior_seal"), "prior_answers": ro.get("prior_answers"),
+            "moved": moved, "holes": holes,
             "prior_parsed": len(prior_hashes), "identical": len(prior_hashes) - len(differing),
-            "differing": differing,
-            "ok": evidence and bool(reason) and bool(prior_hashes) and not differing}
+            "differing": differing, "ok": not holes and not differing}
 
 
 def reopen_line(f: Mapping[str, Any]) -> str:
@@ -188,9 +211,10 @@ def reopen_line(f: Mapping[str, Any]) -> str:
         return "RAG_REOPEN reopened_from=none ok=true"
     return (f"RAG_REOPEN reopened_from={(f.get('reopened_from') or 'none')[:8]} "
             f"prior_seal={f.get('prior_seal') or 'missing'} "
+            f"moved={','.join(f.get('moved') or []) or 'none'} "
             f"answers_identical_to_run1={f['identical']}/{f['prior_parsed']} "
             f"differing={','.join(f.get('differing') or []) or 'none'} "
-            f"reason={'written' if f.get('reason') else 'missing'} ok={b(f['ok'])}")
+            f"holes={','.join(f.get('holes') or []) or 'none'} ok={b(f['ok'])}")
 
 
 # ----------------------------------------------------------------------- verdict ----
@@ -244,7 +268,7 @@ def notes(facts: Mapping[str, Any]) -> list[str]:
             "fixed, and scores as a failure in RAG_QUALITY (ticket 13; RR-24)")]
     if c["violations"]:
         rules = ", ".join(f"{r}={c['per_rule'][r]}" for r in CONTRACT_RULES if c["per_rule"][r])
-        out.append(f"RAG_CONTRACT verdict={'PASS' if contract_met(c) else 'FAIL'}: "
+        out.append(f"{contract_lines(c)[0].rsplit(' ', 1)[-1]}: "
                    f"{len(c['violations'])} contract violation(s) over "
                    f"{c['questions'] - c['ok']} question(s): {rules}")
     r = facts.get("reopen") or {}

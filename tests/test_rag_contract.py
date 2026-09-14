@@ -311,13 +311,14 @@ RUN1, RUN2 = "ffbbe884-0000-4000-8000-000000000001", "0a1b2c3d-0000-4000-8000-00
 
 def seal(run_id, **over):
     return {"opened_at": "2026-09-14T01:24:06+00:00", "run_id": run_id, "questions": 30,
-            "identity": {"prompt_version": "rag-v5"}, **over}
+            "identity": {"prompt_version": "rag-v5", "inference_config_hash": run_id[:8] * 8},
+            **over}
 
 
 def reopened_seal(reason="the validator rejected a field nobody reads"):
     return seal(RUN2, seal_no=2, reopened_from={"run_id": RUN1, "reason": reason,
-                                                "prior_seal": "eval/rag/answer-seal.1.json",
-                                                "prior_answers": "eval/rag/answers.1.json"})
+                                                "prior_seal": "answer-seal.1.json",
+                                                "prior_answers": "answers.1.json"})
 
 
 def answers_doc(run_id, rows):
@@ -365,8 +366,9 @@ def test_a_prior_answer_the_rerun_failed_to_parse_is_a_difference():
 
 
 @pytest.mark.parametrize("hole", ["no_prior_seal", "no_prior_answers", "no_reason",
-                                  "prior_seal_names_another_run", "current_is_the_prior_run"])
-def test_a_reopen_missing_its_evidence_cannot_hold(hole):
+                                  "prior_seal_names_another_run", "current_is_the_prior_run",
+                                  "prompt_moved_between_seals"])
+def test_a_reopen_missing_its_evidence_cannot_hold_and_names_the_hole(hole):
     current_seal, prior_seal, prior, current = (
         reopened_seal(), seal(RUN1), answers_doc(RUN1, PRIOR), answers_doc(RUN2, RERUN))
     if hole == "no_prior_seal":
@@ -379,5 +381,9 @@ def test_a_reopen_missing_its_evidence_cannot_hold(hole):
         prior_seal = seal("someone-else")
     elif hole == "current_is_the_prior_run":
         current = answers_doc(RUN1, RERUN)
+    elif hole == "prompt_moved_between_seals":
+        prior_seal = seal(RUN1, identity={"prompt_version": "rag-v4",
+                                          "inference_config_hash": RUN1[:8] * 8})
     f = gate.reopen_facts(current_seal, prior_seal=prior_seal, prior=prior, current=current)
-    assert f["reopened"] and not f["ok"]
+    assert f["reopened"] and not f["ok"] and f["holes"]
+    assert "holes=" + f["holes"][0] in gate.reopen_line(f)

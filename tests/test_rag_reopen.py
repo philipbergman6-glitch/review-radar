@@ -25,11 +25,22 @@ SEAL = {"opened_at": "2026-09-14T01:24:06+00:00", "git_commit_sha": "5e8358b7" *
         "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106", "questions": 30, "identity": IDENTITY}
 TODAY = IDENTITY | {"inference_config_hash": "aaaaaaaa" * 8}
 REASON = "subject_max_words rejected two answers unread; it stops being a rejection reason"
+LIMITS_THEN = {"max_attempts": 2, "max_claims": 6, "max_citations_per_claim": 6,
+               "claim_max_words": 45, "refusal_reason_max_words": 60, "subject_max_words": 15,
+               "call_ceiling": 200}
+LIMITS_NOW = {k: v for k, v in LIMITS_THEN.items() if k != "subject_max_words"} | {"max_attempts": 1}
+
+
+def check(seal=SEAL, *, reason=REASON, identity=TODAY,
+          sealed_hash_recomputed=IDENTITY["inference_config_hash"],
+          sealed_limits=LIMITS_THEN, limits=LIMITS_NOW):
+    return rag_run.check_reopen(seal, reason=reason, identity=identity,
+                                sealed_hash_recomputed=sealed_hash_recomputed,
+                                sealed_limits=sealed_limits, limits=limits)
 
 
 def test_a_reopen_that_moved_only_the_limits_is_allowed():
-    c = rag_run.check_reopen(SEAL, reason=REASON, identity=TODAY,
-                             sealed_hash_recomputed=IDENTITY["inference_config_hash"])
+    c = check()
     assert c.prior_run_id == SEAL["run_id"] and c.seal_no == 1
     assert c.moved == ("inference_config_hash",) and c.reason == REASON
 
@@ -37,22 +48,19 @@ def test_a_reopen_that_moved_only_the_limits_is_allowed():
 @pytest.mark.parametrize("reason", ["", "   "])
 def test_a_reopen_without_a_written_reason_is_refused(reason):
     with pytest.raises(ValueError, match="reason"):
-        rag_run.check_reopen(SEAL, reason=reason, identity=TODAY,
-                             sealed_hash_recomputed=IDENTITY["inference_config_hash"])
+        check(reason=reason)
 
 
 def test_a_reopen_with_no_seal_is_refused():
     with pytest.raises(ValueError, match="nothing to reopen"):
-        rag_run.check_reopen(None, reason=REASON, identity=TODAY,
-                             sealed_hash_recomputed=IDENTITY["inference_config_hash"])
+        check(None)
 
 
 @pytest.mark.parametrize("field", ["prompt_version", "model_id", "retrieval_hash",
                                    "question_spec_hash", "generation"])
 def test_a_reopen_that_moved_the_prompt_model_retrieval_or_questions_is_refused(field):
     with pytest.raises(ValueError, match=field):
-        rag_run.check_reopen(SEAL, reason=REASON, identity=TODAY | {field: "moved"},
-                             sealed_hash_recomputed=IDENTITY["inference_config_hash"])
+        check(identity=TODAY | {field: "moved"})
 
 
 def test_a_reopen_whose_hash_moved_for_more_than_the_limits_is_refused():
@@ -60,20 +68,25 @@ def test_a_reopen_whose_hash_moved_for_more_than_the_limits_is_refused():
     the sealed hash comes back from today's spec with the sealed limits -- if it does not,
     something other than a limit moved, and that is tuning."""
     with pytest.raises(ValueError, match="limits"):
-        rag_run.check_reopen(SEAL, reason=REASON, identity=TODAY,
-                             sealed_hash_recomputed="bbbbbbbb" * 8)
+        check(sealed_hash_recomputed="bbbbbbbb" * 8)
 
 
 def test_a_reopen_under_an_unchanged_identity_is_refused():
     with pytest.raises(ValueError, match="unchanged"):
-        rag_run.check_reopen(SEAL, reason=REASON, identity=IDENTITY,
-                             sealed_hash_recomputed=IDENTITY["inference_config_hash"])
+        check(identity=IDENTITY)
 
 
-def test_a_second_reopen_numbers_its_archive_after_the_first():
-    c = rag_run.check_reopen(SEAL | {"seal_no": 2}, reason=REASON, identity=TODAY,
-                             sealed_hash_recomputed=IDENTITY["inference_config_hash"])
-    assert c.seal_no == 2
+def test_a_second_reopen_is_refused():
+    """ADR-0006 sanctions one second run, not a series."""
+    with pytest.raises(ValueError, match="already reopened once"):
+        check(SEAL | {"seal_no": 2, "reopened_from": {"run_id": SEAL["run_id"]}})
+
+
+@pytest.mark.parametrize("limit", ["max_claims", "claim_max_words", "refusal_reason_max_words"])
+def test_a_reopen_that_moved_a_limit_the_judge_reads_is_refused(limit):
+    """RR-24 §1: `claim_max_words` and `max_claims` stay -- they bound what the judge reads."""
+    with pytest.raises(ValueError, match=limit):
+        check(limits=LIMITS_NOW | {limit: 99})
 
 
 # ---------------------------------------------------------------------- the archive ----

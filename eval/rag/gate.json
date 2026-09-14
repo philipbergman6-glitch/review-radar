@@ -6,13 +6,13 @@
     "RAG_SEAL opened_at=2026-09-14T08:33:29+00:00 commit=91565f31 run=c4ae0dc5 prompt=rag-v5 config=b31a55efedf3 generation=reviews_s8507728480475534879_d2e56c46 moved=none run_matches=true ok=true",
     "RAG_RETRIEVAL generation=reviews_s8507728480475534879_d2e56c46 questions_with_hits=27/30 retrieved_total=270 wrong_size=0 out_of_scope_rows=0 empty_windows=3 ok=true",
     "RAG_LEDGER calls=62 ceiling=200 unattributed=0 runs=2 answers_covered=30/30 ok=true",
-    "RAG_REOPEN reopened_from=ffbbe884 prior_seal=answer-seal.1.json answers_identical_to_run1=28/28 differing=none reason=written ok=true",
+    "RAG_REOPEN reopened_from=ffbbe884 prior_seal=answer-seal.1.json moved=inference_config_hash answers_identical_to_run1=28/28 differing=none holes=none ok=true",
     "RAG_CONTRACT answers_ok=29/30 bar=30/30 answers_recorded=30 violations=1 terminal=0 refusal_empty=0 claims_cite=1 citations_retrieved=0 citations_in_scope=0 verdict=FAIL",
     "RAG_VIOLATION temporal-01: claim 2 carries no citation",
     "RUN_CONTRACTS gate=RAG_GATE jobs=rag_answers registered=1/1 missing=none run_contract_registered=true",
     "RAG_GATE scope=full contract=29/30 constituents_ok=7/7 failed=none kind=reproducibility RAG_GATE=PASS"
   ],
-  "created_at": "2026-09-14T08:35:01+00:00",
+  "created_at": "2026-09-14T08:40:46+00:00",
   "gate_name": "RAG_GATE",
   "kind": "reproducibility",
   "metric": {
@@ -24,7 +24,7 @@
   "model": "qwen3:8b",
   "notes": [
     "RAG_GATE blocks on mechanical facts only: the frozen thirty answered once under the sealed identity, every retrieved row recorded from the sealed generation inside its window, every call in P7's own ledger, every cited handle resolving to the question's own retrieved set and to a stored month inside the declared window, and a reopened run reproducing the prior run's answers. The 30/30 citation and scope contract is reported at its bar (RAG_CONTRACT); an uncited claim, a refusal carrying claims or a parse failure is generator behaviour, measured once and never fixed, and scores as a failure in RAG_QUALITY (ticket 13; RR-24)",
-    "RAG_CONTRACT verdict=FAIL: 1 contract violation(s) over 1 question(s): claims_cite=1",
+    "verdict=FAIL: 1 contract violation(s) over 1 question(s): claims_cite=1",
     "reopened from run ffbbe884-5425-4ce8-9ecd-90f5a6201106: RR-24: limits.subject_max_words (15) rejected product_scoped-02 and zero_review_scope-02 unread, on a field nothing downstream consumes; the cap stops being a rejection reason (subject_words is recorded instead) and max_attempts becomes 1 because an identical retry of the seeded temperature-0 decoder returned identical output both times. Prompt rag-v5, model, seed and retrieval untouched; temporal-01's uncited absence claim is generator behaviour and is not fixed.",
     "3 declared window(s) retrieved nothing; an empty window is a retrieval result, not a contract violation, and it is the abstention half of RAG_QUALITY that decides whether refusing was right"
   ],
@@ -34,6 +34,8 @@
     "generation": "reviews_s8507728480475534879_d2e56c46",
     "n": 30,
     "name": "the thirty frozen P7 questions (20 answerable, 10 unanswerable in three strata)",
+    "reopen_reason": "RR-24: limits.subject_max_words (15) rejected product_scoped-02 and zero_review_scope-02 unread, on a field nothing downstream consumes; the cap stops being a rejection reason (subject_words is recorded instead) and max_attempts becomes 1 because an identical retry of the seeded temperature-0 decoder returned identical output both times. Prompt rag-v5, model, seed and retrieval untouched; temporal-01's uncited absence claim is generator behaviour and is not fixed.",
+    "reopened_from": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
     "search_run_id": "d2e56c46-6e05-40d5-9c8b-e24415ab92f9"
   },
   "prompt": "rag-v5",
