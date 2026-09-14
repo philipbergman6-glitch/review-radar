@@ -1,0 +1,293 @@
+{
+  "what_this_is": "third-annotator adjudication: agent_reference vs an agent applying the frozen taxonomy's includes/excludes over the RR-21 stratified 50",
+  "what_this_is_not": "THEMES_AGREEMENT, which RR-21 defines as agent_reference vs Philip and which remains NOT_RUN",
+  "caveat": "the same model family wrote both sides, so correlated error is unbounded; this measures how much of the reference survives a deliberate reading of the taxonomy, not whether either side is right",
+  "reference": "eval/themes/reference-audit.jsonl",
+  "annotator_b": "eval/themes/agent3-agreement-audit.jsonl",
+  "subset": null,
+  "disagreements": [
+    {
+      "blind_id": "aud-0096",
+      "reference": [
+        "does_not_work",
+        "hard_to_use"
+      ],
+      "adjudicated": [
+        "hard_to_use",
+        "poor_build_quality"
+      ],
+      "agent2": [
+        "does_not_work",
+        "hard_to_use"
+      ]
+    },
+    {
+      "blind_id": "aud-0148",
+      "reference": [
+        "not_as_described",
+        "poor_build_quality",
+        "unpleasant_texture"
+      ],
+      "adjudicated": [
+        "hard_to_use",
+        "not_as_described",
+        "poor_build_quality"
+      ],
+      "agent2": [
+        "hard_to_use",
+        "not_as_described",
+        "poor_build_quality"
+      ]
+    },
+    {
+      "blind_id": "aud-0154",
+      "reference": [
+        "irritation_or_harm",
+        "unpleasant_scent"
+      ],
+      "adjudicated": [
+        "unpleasant_scent"
+      ],
+      "agent2": [
+        "irritation_or_harm",
+        "unpleasant_scent"
+      ]
+    },
+    {
+      "blind_id": "aud-0170",
+      "reference": [
+        "overpriced",
+        "poor_build_quality"
+      ],
+      "adjudicated": [
+        "poor_build_quality"
+      ],
+      "agent2": [
+        "poor_build_quality"
+      ]
+    },
+    {
+      "blind_id": "aud-0171",
+      "reference": [
+        "does_not_work",
+        "hard_to_use",
+        "overpriced"
+      ],
+      "adjudicated": [
+        "does_not_work",
+        "hard_to_use"
+      ],
+      "agent2": [
+        "does_not_work",
+        "hard_to_use"
+      ]
+    },
+    {
+      "blind_id": "aud-0189",
+      "reference": [
+        "does_not_work",
+        "overpriced",
+        "poor_build_quality"
+      ],
+      "adjudicated": [
+        "overpriced",
+        "poor_build_quality"
+      ],
+      "agent2": [
+        "does_not_work",
+        "overpriced",
+        "poor_build_quality"
+      ]
+    },
+    {
+      "blind_id": "aud-0190",
+      "reference": [
+        "does_not_work",
+        "not_as_described",
+        "poor_build_quality"
+      ],
+      "adjudicated": [
+        "does_not_work",
+        "poor_build_quality"
+      ],
+      "agent2": [
+        "does_not_work",
+        "poor_build_quality"
+      ]
+    }
+  ],
+  "reviews": 50,
+  "themes": 10,
+  "n": 500,
+  "agreed": 491,
+  "agreement": 0.982,
+  "wilson_95": [
+    0.9661483290912607,
+    0.990501806703803
+  ],
+  "kappa": 0.863603297769156,
+  "exact_set_match": 43,
+  "exact_set_match_rate": 0.86,
+  "per_theme": [
+    {
+      "theme_id": "does_not_work",
+      "n": 50,
+      "agree": 48,
+      "agreement": 0.96,
+      "wilson_95": [
+        0.8653990931249297,
+        0.9889611156723802
+      ],
+      "both": 4,
+      "agent_only": 2,
+      "human_only": 0,
+      "agent_positives": 6,
+      "human_positives": 4,
+      "kappa": 0.7787610619469024
+    },
+    {
+      "theme_id": "poor_build_quality",
+      "n": 50,
+      "agree": 49,
+      "agreement": 0.98,
+      "wilson_95": [
+        0.8950455641036219,
+        0.9964607407283539
+      ],
+      "both": 5,
+      "agent_only": 0,
+      "human_only": 1,
+      "agent_positives": 5,
+      "human_positives": 6,
+      "kappa": 0.8979591836734693
+    },
+    {
+      "theme_id": "overpriced",
+      "n": 50,
+      "agree": 48,
+      "agreement": 0.96,
+      "wilson_95": [
+        0.8653990931249297,
+        0.9889611156723802
+      ],
+      "both": 2,
+      "agent_only": 2,
+      "human_only": 0,
+      "agent_positives": 4,
+      "human_positives": 2,
+      "kappa": 0.6478873239436618
+    },
+    {
+      "theme_id": "wrong_size_or_fit",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 3,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 3,
+      "human_positives": 3,
+      "kappa": 1.0
+    },
+    {
+      "theme_id": "unpleasant_texture",
+      "n": 50,
+      "agree": 49,
+      "agreement": 0.98,
+      "wilson_95": [
+        0.8950455641036219,
+        0.9964607407283539
+      ],
+      "both": 1,
+      "agent_only": 1,
+      "human_only": 0,
+      "agent_positives": 2,
+      "human_positives": 1,
+      "kappa": 0.6575342465753422
+    },
+    {
+      "theme_id": "hard_to_use",
+      "n": 50,
+      "agree": 49,
+      "agreement": 0.98,
+      "wilson_95": [
+        0.8950455641036219,
+        0.9964607407283539
+      ],
+      "both": 5,
+      "agent_only": 0,
+      "human_only": 1,
+      "agent_positives": 5,
+      "human_positives": 6,
+      "kappa": 0.8979591836734693
+    },
+    {
+      "theme_id": "unpleasant_scent",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 3,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 3,
+      "human_positives": 3,
+      "kappa": 1.0
+    },
+    {
+      "theme_id": "not_as_described",
+      "n": 50,
+      "agree": 49,
+      "agreement": 0.98,
+      "wilson_95": [
+        0.8950455641036219,
+        0.9964607407283539
+      ],
+      "both": 4,
+      "agent_only": 1,
+      "human_only": 0,
+      "agent_positives": 5,
+      "human_positives": 4,
+      "kappa": 0.8780487804878047
+    },
+    {
+      "theme_id": "irritation_or_harm",
+      "n": 50,
+      "agree": 49,
+      "agreement": 0.98,
+      "wilson_95": [
+        0.8950455641036219,
+        0.9964607407283539
+      ],
+      "both": 2,
+      "agent_only": 1,
+      "human_only": 0,
+      "agent_positives": 3,
+      "human_positives": 2,
+      "kappa": 0.7899159663865548
+    },
+    {
+      "theme_id": "arrived_damaged",
+      "n": 50,
+      "agree": 50,
+      "agreement": 1.0,
+      "wilson_95": [
+        0.9286524008666414,
+        1.0
+      ],
+      "both": 2,
+      "agent_only": 0,
+      "human_only": 0,
+      "agent_positives": 2,
+      "human_positives": 2,
+      "kappa": 1.0
+    }
+  ]
+}
