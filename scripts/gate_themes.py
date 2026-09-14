@@ -233,7 +233,9 @@ def main() -> None:
     repro = L.attest(gate.verdict(facts, scope=args.scope), "themes")
     q = gate.quality(score, scope=args.scope, sample="audit", systems=systems,
                      development=development)
-    agree = gate.agreement((agreement_report or {}).get("overall"), scope=args.scope)
+    agreement_cut = E.cut_reason_for("themes_agreement")
+    agree = gate.agreement((agreement_report or {}).get("overall"), scope=args.scope,
+                           cut_reason=agreement_cut)
     for v in (repro, q, agree):
         v.emit()
 
@@ -265,17 +267,22 @@ def main() -> None:
                      protocol_hash=protocol_hash, model=facts["audit"].get("model_id"),
                      prompt=frozen.get("version"), population=population, pipeline_run_id=run_id,
                      scope=args.scope)
-        E.record(agree, capability="themes_agreement", phase="P6 Themes", kind="quality",
-                 protocol_hash=protocol_hash,
-                 model=(agreement_report or {}).get("human_annotator"),
-                 prompt=None,
-                 population={"name": "audit adjudication subset (Philip, blind)",
-                             "n": (agreement_report or {}).get("reviews",
-                                                               gate.AGREEMENT_ROWS)},
-                 pipeline_run_id=(agreement_report or {}).get("run_id") or run_id,
-                 scope=args.scope,
-                 notes=[(agreement_report or {}).get("note")] if (agreement_report or {}).get("note")
-                 else ())
+        if agreement_cut is not None:
+            # Cut in the chain (ADR-0003 amendment e): the table carries the written reason and
+            # refuses an artefact beside it, so a stale one from before the cut is removed.
+            E.retire_artifact("themes_agreement")
+        else:
+            E.record(agree, capability="themes_agreement", phase="P6 Themes", kind="quality",
+                     protocol_hash=protocol_hash,
+                     model=(agreement_report or {}).get("human_annotator"),
+                     prompt=None,
+                     population={"name": "audit adjudication subset (Philip, blind)",
+                                 "n": (agreement_report or {}).get("reviews",
+                                                                   gate.AGREEMENT_ROWS)},
+                     pipeline_run_id=(agreement_report or {}).get("run_id") or run_id,
+                     scope=args.scope,
+                     notes=[(agreement_report or {}).get("note")]
+                     if (agreement_report or {}).get("note") else ())
 
     sys.exit(0 if repro.passed else 1)
 

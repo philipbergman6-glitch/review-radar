@@ -3,7 +3,7 @@
   "capability": "search",
   "constituents": [
     "SEARCH_REVIEWS run_id=d2e56c46-6e05-40d5-9c8b-e24415ab92f9 alias=reviews alias_targets=reviews_s8507728480475534879_d2e56c46 ledger_index=reviews_s8507728480475534879_d2e56c46 alias_matches_ledger=true es_count=693547 records_out=693547 silver_rows=694252 excluded_empty_text=705 identity=true ok=true",
-    "SEARCH_PRODUCT_MONTH run_id=7af29070-d76f-4614-8543-86d9474e5a45 alias=product_month alias_targets=product_month_s2967561192178189477_7af29070 alias_matches_ledger=true es_count=473268 gold_rows=473268 alias_snapshot=2967561192178189477 ledger_snapshot=2967561192178189477 latest_gold_snapshot=2967561192178189477 lineage=true ok=true",
+    "SEARCH_PRODUCT_MONTH run_id=37b972a5-8a00-415d-8d85-9e439c4e076a alias=product_month alias_targets=product_month_s2307669679262212750_37b972a5 alias_matches_ledger=true es_count=263792 gold_rows=263792 alias_snapshot=2307669679262212750 ledger_snapshot=2307669679262212750 latest_gold_snapshot=2307669679262212750 lineage=true ok=true",
     "SEARCH_CONTRACT path=conf/es/reviews.contract.json hash=3472f7d7927f unchanged_since_index=true analyzer_cases=7/7 required_field_rejects=true unknown_field_rejected_by_es=true ok=true",
     "SEARCH_KIBANA host=http://localhost:5601 dashboard=pm-dashboard present=true ok=true",
     "SEARCH_JUDGEMENTS set_version=1 hash=570f31717e1b queries=20 systems=bm25_plain,bm25_stemmed pooled=273 judged=273 complete_queries=20/20 ok=true",
@@ -11,7 +11,7 @@
     "RUN_CONTRACTS gate=SEARCH_GATE jobs=search_index_reviews,search_index_product_month registered=2/2 missing=none run_contract_registered=true",
     "SEARCH_GATE scope=full reviews=true product_month=true contract=true kibana=true judgements=true analyzer=true SEARCH_GATE=PASS"
   ],
-  "created_at": "2026-09-10T12:43:40+00:00",
+  "created_at": "2026-09-14T12:32:05+00:00",
   "gate_name": "SEARCH_GATE",
   "kind": "reproducibility",
   "metric": {
@@ -27,10 +27,10 @@
   "phase": "P4 Search",
   "pipeline_run_id": "d2e56c46-6e05-40d5-9c8b-e24415ab92f9",
   "population": {
-    "gold_snapshot_id": 2967561192178189477,
+    "gold_snapshot_id": 2307669679262212750,
     "n": 693547,
     "name": "reviews + product_month aliases",
-    "product_month_docs": 473268
+    "product_month_docs": 263792
   },
   "prompt": null,
   "protocol_hash": "3472f7d7927fdf4864283d4a3eb2b0f08be47b3fbc0e8b6b6c42910614fbe19c",

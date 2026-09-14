@@ -70,6 +70,18 @@ theme-shift table remains the only quantitative authority on the opening questio
   `subject` cap that sat on the boundary in development; the cap stopped being a rejection
   reason and `max_attempts` became 1, because an identical retry of a `temperature 0`, seeded
   decoder returned identical output both times.
+- **Cut, 2026-09-14: Philip declines the judging pass.** `RAG_QUALITY` is defined above as
+  Philip's judgement over the sealed thirty, and no human judgement exists, so the capability
+  is **cut** in `conf/lineage_chain.toml` with a written reason (ADR-0011's word for "a reason
+  instead of a number"; the row prints `NOT_RUN`). What exists instead is one agent pass by a
+  different model family (`annotator=claude`, `label_source=model`,
+  `eval/rag/agent-judged-quality.json`, judgements in `eval/rag/judgements-agent.jsonl`):
+  grounded 11/20 and adequate 10/20 sit under their bars of 16 and 14; abstention 10/10 and
+  false refusal 1/20 clear theirs of 8 and ≤ 2. Its header states it is not `RAG_QUALITY` and
+  that a human pass supersedes it entirely; it is published as a pre-check, not as the
+  measurement. The four bars do not move. `make gate-rag` no longer writes
+  `eval/rag_quality/gate.json` and removes a stale one; the judging worksheet and importer stay
+  in place, so reversing the cut is the human pass plus a one-line `status` change.
 
 ## Consequences
 

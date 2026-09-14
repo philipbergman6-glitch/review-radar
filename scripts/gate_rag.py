@@ -215,7 +215,8 @@ def main() -> None:
     v = L.attest(gate.verdict(facts, scope=args.scope), "rag")
     v.emit()
     judgements = judgement_facts(manifest, answers)
-    q = Q.verdict(judgements["score"], scope=args.scope)
+    quality_cut = E.cut_reason_for("rag_quality")
+    q = Q.verdict(judgements["score"], scope=args.scope, cut_reason=quality_cut)
     q.emit()
 
     run_id = (answers or {}).get("run_id")
@@ -240,18 +241,25 @@ def main() -> None:
         # the judgements exist, then PASS or FAIL against bars that did not move. Its run id is
         # the judging run when there is one: the number was made by Philip's pass over the
         # answers, and the lineage walk joins that run to the answers run it judged.
-        E.record(q, capability="rag_quality", phase="P7 RAG", kind="quality",
-                 protocol_hash=manifest.get("spec_hash", ""),
-                 model=(answers or {}).get("identity", {}).get("model_id"),
-                 prompt=facts["seal"].get("prompt_version"),
-                 population={"name": "the thirty frozen P7 questions (20 answerable, 10 "
-                                     "unanswerable in three strata), judged by Philip",
-                             "n": len(manifest.get("questions", [])),
-                             "answerable": Q.ANSWERABLE_N, "unanswerable": Q.UNANSWERABLE_N,
-                             "answers_run_id": run_id, "annotator": judgements.get("annotator"),
-                             "rubric_sha256": (judgements.get("rubric") or {}).get("sha256")},
-                 pipeline_run_id=judgements.get("run_id") or run_id, scope=args.scope,
-                 notes=Q.notes(judgements["score"]) if judgements["score"] else ())
+        # Cut in the chain (ADR-0006, 2026-09-14): the table carries the written reason and
+        # refuses an artefact beside it, so a stale one from before the cut is removed.
+        if quality_cut is not None:
+            E.retire_artifact("rag_quality")
+        else:
+            E.record(q, capability="rag_quality", phase="P7 RAG", kind="quality",
+                     protocol_hash=manifest.get("spec_hash", ""),
+                     model=(answers or {}).get("identity", {}).get("model_id"),
+                     prompt=facts["seal"].get("prompt_version"),
+                     population={"name": "the thirty frozen P7 questions (20 answerable, 10 "
+                                         "unanswerable in three strata), judged by Philip",
+                                 "n": len(manifest.get("questions", [])),
+                                 "answerable": Q.ANSWERABLE_N,
+                                 "unanswerable": Q.UNANSWERABLE_N,
+                                 "answers_run_id": run_id,
+                                 "annotator": judgements.get("annotator"),
+                                 "rubric_sha256": (judgements.get("rubric") or {}).get("sha256")},
+                     pipeline_run_id=judgements.get("run_id") or run_id, scope=args.scope,
+                     notes=Q.notes(judgements["score"]) if judgements["score"] else ())
     else:
         print("RAG_ARTEFACT not written: eval/rag/answers.json names no run id, so there is "
               "nothing to attribute the result to", file=sys.stderr)

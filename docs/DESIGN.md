@@ -56,21 +56,21 @@ reopens a phase ([ADR-0011](adr/0011-phase-gates-print-a-number-and-only-reprodu
 |---|---|---|---|---|
 | P2 Silver | `silver` | `SILVER_GATE` | **PASS** | 8/8 · 701,528 → 694,252 rows, 0 rejects |
 | P2 Silver | `silver_repro` | `SILVER_REPRO_GATE` | **PASS** | 13/13 · re-derived in pandas, no shared code |
-| P3 Gold | `gold` | `GOLD_GATE` | **PASS** | 3/3 · 473,268 product-months, 964 alerts = 964 episodes |
-| P3 Gold | `gold_repro` | `GOLD_REPRO_GATE` | **PASS** | 10/10 · 0 mismatched fields |
+| P3 Gold | `gold` | `GOLD_GATE` | **PASS** | 4/4 · 263,792 product-months, 425 alerts = 425 episodes, rule frozen |
+| P3 Gold | `gold_repro` | `GOLD_REPRO_GATE` | **PASS** | 11/11 · 0 mismatched fields over 263,792 + 167,518 + 425 rows |
 | P3 Gold | `gold_calibration` | `GOLD_CALIBRATION` | **FAIL** | power **0.186** [0.168, 0.205] at the 0.3★ step vs bar 0.80, at 0.80 placebo alerts/month under a ceiling of 1.0 — §7 |
-| P3 Gold | `gold_analytical` | `GOLD_ANALYTICAL` | **REPORTED** | 964 alerts on 757 of 1,599 evaluable products, development only |
-| P4 Search | `search` | `SEARCH_GATE` | **PASS** | 7/7 · 693,547 + 473,268 docs, 7/7 analyzer cases |
+| P3 Gold | `gold_analytical` | `GOLD_ANALYTICAL` | **REPORTED** | **139 of 502 eligible products alerted in 2020–2023** (0.2769), 148 holdout episodes |
+| P4 Search | `search` | `SEARCH_GATE` | **PASS** | 7/7 · 693,547 + 263,792 docs, 7/7 analyzer cases |
 | P5 Embeddings | `embeddings` | `EMBED_GATE` | **PASS** | 7/7 · 345,418 vectors, ANN recall@10 0.96 |
 | P6 Themes | `themes` | `THEMES_GATE` | **PASS** | 7/7 · taxonomy frozen, audit set opened once, 200/200 |
 | P6 Themes | `themes_quality` | `THEMES_QUALITY` | **FAIL** | macro-F1 **0.4583** vs bar 0.70 — §7 |
-| P6 Themes | `themes_agreement` | `THEMES_AGREEMENT` | **NOT_RUN** | the blind 50 are drawn and exported, not yet hand-labelled |
+| P6 Themes | `themes_agreement` | `THEMES_AGREEMENT` | **NOT_RUN** | cut: Philip declined the hand-labelling pass (2026-09-14); two agent passes beside it, kappa 0.926 / 0.864, same model family — §7 |
 | P6 Themes | `themes_repeat_kappa` | `THEMES_REPEAT_KAPPA` | **NOT_RUN** | cut: a deterministic labeller has no repeat kappa |
 | P7 RAG | `rag` | `RAG_GATE` | **PASS** | 8/8 · 30/30 answered; 29/30 clear the reported contract |
-| P7 RAG | `rag_quality` | `RAG_QUALITY` | **NOT_RUN** | 0/30 judged; the four targets stay unmeasured |
-| P8 Stream | `stream_control` | `STREAM_GATE` | **PASS** | 11/11 · 193,939 product-months vs gold, 0 differing |
-| P8 Stream | `stream_demo` | `STREAM_GATE` | **PASS** | 18/18 · 2,000 far-slice rows dropped exactly, 1,322 diffs all explained |
-| Lineage track | `lineage` | `LINEAGE_GATE` | **PASS** | 7/7 · `chain_clean=true` over 95 links |
+| P7 RAG | `rag_quality` | `RAG_QUALITY` | **NOT_RUN** | cut: Philip declined the judging pass (2026-09-14); one agent pass beside it, 2 of 4 targets over their bars — §7 |
+| P8 Stream | `stream_control` | `STREAM_GATE` | **PASS** | 11/11 · 129,330 product-months vs gold, 0 differing |
+| P8 Stream | `stream_demo` | `STREAM_GATE` | **PASS** | 18/18 · 2,000 far-slice rows dropped exactly, 882 diffs all explained |
+| Lineage track | `lineage` | `LINEAGE_GATE` | **PASS** | 7/7 · `chain_clean=true` over 101 links |
 | Deliverables track | `demo` | `DEMO_GATE` | **PASS** | 5/5 · 2 rehearsals, 259 s of 300 s, 4/4 documents |
 
 A capability is either a number or a written reason; the command exits non-zero on one that is
@@ -92,12 +92,21 @@ labelled by local `qwen3:8b` because `ANTHROPIC_API_KEY` is empty.
 
 ## 6. Results and insights
 
-**The headline is narrower than the question, deliberately.** `conf/decline_rule.toml` is still
-`provisional`, so the gold job *refuses* any evaluation point on or after the `2020-01` holdout
-start: **757 of 1,599 evaluable products** raised at least one sustained-decline alert before
-2020-01 — 964 alerts, 964 episodes, over a 473,268 product-month spine and 217,325 points, with
-episodes closed by recovery 555, gap 275, end of data 134. The holdout claim — *N of M during 2020–2023 under a rule applied unchanged* —
-**does not exist yet**, because the protocol freeze has not happened. Worked example (demo move
+**139 of 502 eligible products raised at least one sustained-decline alert during 2020–2023,
+under a rule developed on pre-2020 data and then applied unchanged** — 148 holdout alerts, 148
+holdout episodes, 27.7% of the eligible population. The rule was sealed in one commit
+(`conf/decline_rule.toml`, `status = "frozen"`) *before* a single holdout point was evaluated,
+and the calibration that chose its thresholds is the commit before that. Over the whole spine:
+263,792 product-months across 5,966 materialised products, 167,518 evaluation points of which
+12,109 are evaluable, 425 alerts and 425 episodes, closed by recovery 207, gap 165, end of data
+53.
+
+**The alert rate is the number; the detection rate is the caveat.** The same calibration that
+licensed the freeze also measured what the rule misses: **power 0.186 [0.168, 0.205]** against a
+pre-registered bar of 0.80, at a placebo rate of **0.80 alerts/month** under a ceiling of 1.0
+([ADR-0012](adr/0012-calibration-precedes-the-freeze-and-the-ceiling-never-moves.md)). So an
+alert here is unlikely to be noise, and the 139 products are a floor rather than a census. *The
+rule finds declining products* does not follow from this and is not claimed. Worked example (demo
 7): `B00RPJZMUM`, an ionic hair dryer at decline rank 3, where `hard_to_use` and
 `not_as_described` in 2016-10…2017-03 give way to `does_not_work` (*"motor stopped working"*) in
 2017-04…2017-09. **An alert is not causal proof**, and a shift over 18 baseline and 3 recent
@@ -107,10 +116,10 @@ labelled mentions illustrates; it does not estimate.
 
 A **temporal holdout and protocol freeze** enforced in code, not left to the analyst;
 **reproducibility separated from outcome**, with two gates re-deriving the tables in pandas
-importing nothing from the Spark jobs (13 and 10 checks, 0 mismatched fields); **bars set before
+importing nothing from the Spark jobs (13 and 11 checks, 0 mismatched fields); **bars set before
 the measurement and not moved** — when the labeller dropped from hosted Haiku to a local 8B
 model, 0.70 stayed 0.70; and **every number joined back to a run**, `make gate-lineage` printing
-how many links it walked (`chain_links_checked=95`) so a pass over an empty chain is impossible.
+how many links it walked (`chain_links_checked=101`) so a pass over an empty chain is impossible.
 
 **P6's outcome, stated as the miss it is.** On the once-opened, held-out audit set of 200 reviews
 the labeller scores **macro-F1 0.4583 [0.3647, 0.5223]** against **0.70** → `THEMES_QUALITY=FAIL`,
@@ -121,6 +130,17 @@ the **star-only floor 0.2968 [0.2612, 0.3493]**. The labeller's interval and the
 overlapped; the holdout *reverses* that smaller-sample reading rather than confirming it. 27 of
 200 labellings failed to parse (13.5%), each scoring as an empty prediction, so part of the gap
 precedes any judgement about themes.
+
+**Two human passes declined, and the rows cut rather than filled.** `THEMES_AGREEMENT` was
+defined as the agent's ground truth against Philip's blind 50, and `RAG_QUALITY` as Philip's
+four-target judgement over the sealed thirty. Philip declined both on 2026-09-14, so both
+capabilities are **cut** in `conf/lineage_chain.toml` with the reason printed in the table, and
+the correlated-error risk of machine-made ground truth is now **unpriced** rather than priced.
+The agent passes that exist beside them are published as what they are: two same-model-family
+consistency checks on the 50 (kappa 0.926 and 0.864, reproducibility not accuracy) and one
+different-model-family pre-check on the thirty (grounded 11/20 and adequate 10/20 under their
+bars, abstention 10/10 and false refusal 1/20 over theirs). No agent label is presented as human,
+and no bar moved (ADR-0003 amendment e, ADR-0006).
 
 ## 8. Trade-offs, and what was declined out loud
 

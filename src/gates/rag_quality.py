@@ -346,7 +346,8 @@ NOT_JUDGED = ("the thirty answers exist under RAG_GATE=PASS but Philip has not j
               "thirty judgement rows (ticket 13). The bars do not move while they wait")
 
 
-def verdict(s: Mapping[str, Any] | None, *, scope: str) -> Verdict:
+def verdict(s: Mapping[str, Any] | None, *, scope: str,
+            cut_reason: str | None = None) -> Verdict:
     """`RAG_QUALITY`: four bars, one terminal line, no power to block.
 
     The artefact's single `metric` is `targets_met` against 4 -- the headline the table shows --
@@ -361,7 +362,8 @@ def verdict(s: Mapping[str, Any] | None, *, scope: str) -> Verdict:
                                  f"scope={scope} blocks=false verdict=NOT_RUN"),
                        metric={"name": "targets_met", "value": 0, "threshold": 4,
                                "direction": "gte"},
-                       checks=(("judged_by_philip", False),), cut_reason=NOT_JUDGED)
+                       checks=(("judged_by_philip", False),),
+                       cut_reason=cut_reason or NOT_JUDGED)
     checks = tuple((f"{t['name']}_at_bar", t["verdict"] == "PASS") for t in s["targets"])
     met = sum(1 for _, ok in checks if ok)
     constituents = [*(target_line(t) for t in s["targets"]), strata_line(s["strata"]),

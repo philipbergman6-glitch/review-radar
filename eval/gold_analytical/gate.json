@@ -2,31 +2,31 @@
   "artifact_version": "1",
   "capability": "gold_analytical",
   "constituents": [
-    "GOLD_ANALYTICAL period=development(before 2020-01) evaluable_products=1599 alerts=964 episodes=964 rule_status=provisional rule_config_hash=cbe5400be465 verdict=REPORTED"
+    "GOLD_ANALYTICAL period=holdout eligible_products=502 alerted_products=139 share_of_eligible=0.2769 holdout_alerts=148 holdout_episodes=148 rule_status=frozen rule_config_hash=64d1ecb2a0e0 verdict=REPORTED"
   ],
-  "created_at": "2026-09-10T12:05:08+00:00",
+  "created_at": "2026-09-14T12:30:24+00:00",
   "gate_name": "GOLD_ANALYTICAL",
   "kind": "quality",
   "metric": {
     "direction": "none",
-    "name": "development_alerts",
+    "name": "holdout_alerted_share_of_eligible",
     "threshold": null,
-    "value": 964
+    "value": 0.2769
   },
   "model": null,
   "notes": [
-    "decline rule provisional at decline_rule.toml; holdout starts 2020-01"
+    "decline rule frozen at decline_rule.toml; holdout starts 2020-01"
   ],
   "phase": "P3 Gold",
-  "pipeline_run_id": "6e1c0d3a-85e8-4458-8109-57b76331ad38",
+  "pipeline_run_id": "0cbdcc0d-a9e1-40e2-99c2-ad993c99b123",
   "population": {
-    "evaluable": 15835,
-    "n": 1599,
-    "name": "development evaluable products",
-    "points": 217325
+    "holdout_evaluable": 4142,
+    "holdout_points": 49113,
+    "n": 502,
+    "name": "holdout eligible products"
   },
   "prompt": null,
-  "protocol_hash": "cbe5400be465a92245b147f6d4b3f0635cce827bc223ad3b3d6a24e113f8dc26",
+  "protocol_hash": "64d1ecb2a0e08481ebe806129718e473f308427b5a52609a0b8882888d187010",
   "scope": "full",
   "status": "REPORTED"
 }

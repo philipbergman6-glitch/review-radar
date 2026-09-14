@@ -222,3 +222,30 @@ on, and `make select-prompt` re-derives the selection from the committed artefac
   and the worst supported theme's recall is 0.2941. Both are well under the bars, which are for
   the audit set and were frozen in 2026-09-06 before any of this existed. The audit run happens
   against the frozen prompt and reports what it reports.
+
+## Amendment 2026-09-14 (e) — Philip declines the 50, and the agreement row is cut, not faked
+
+Philip decided on 2026-09-14 not to hand-label the blind stratified 50. Amendment (c) defined
+`THEMES_AGREEMENT` as `agent_reference` against a **human**, and no human label exists, so the
+capability is **cut** in `conf/lineage_chain.toml` with this reason. Cut is the chain's word
+for "a written reason instead of a number" (ADR-0011); it is not a pass, and the row prints
+`NOT_RUN` with the reason beside it.
+
+- **What exists instead, and what it is not.** Two in-session agent passes over the same
+  blind 50: `eval/themes/agent2-consistency-audit.json` (a second agent annotator, kappa
+  0.926, 495/500 cells agreed) and `eval/themes/agent3-adjudication-audit.json` (an agent
+  applying the taxonomy's includes/excludes, kappa 0.864, 491/500). Each file states in its
+  own header that it is not `THEMES_AGREEMENT`: the same model family wrote both sides, so
+  correlated error is unbounded, and a high number is evidence of reproducibility, not of
+  accuracy. They stay published as what they are.
+- **`label_source="human"` stays reserved and unused.** No output presents an agent label as
+  a human one; the draw of the 50 (`eval/themes/blind-agreement-audit.jsonl`) stays frozen
+  and exported, so the pass can still be run later without re-tuning anything.
+- **The 0.70 macro-F1 bar and the 0.50 recall floor do not move**, for the fourth time. The
+  correlated-error caveat that amendment (c) priced is now unpriced, and the evaluation table
+  and the theme-shift table carry that in the verdict column, not a footnote.
+- **The gate script respects the cut.** `make gate-themes` no longer writes
+  `eval/themes_agreement/gate.json`; it removes a stale one, because the table refuses to print
+  while a cut capability has an artefact. Reversing the cut is a one-line change of `status`
+  in the chain plus the human labels.
+

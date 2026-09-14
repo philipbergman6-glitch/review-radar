@@ -21,7 +21,7 @@ insurance, and buying it twice costs the narrative.
 | 5 | The AI capability, and why this one | 35 | deck 5's own `BM25 does not consider the semantic meaning`; embeddings + client-side RRF; ANN recall@10 0.96; H-E1 not held |
 | — | **LIVE DEMO** — ten moves, one kernel | 280 | `demo.run_sheet()`; 260 s of moves + 20 s for the two surface switches |
 | 6 | How we avoided fooling ourselves | 40 | ADR-0001's holdout + protocol freeze; ADR-0011's split; the audit set opened once |
-| 7 | Results, zoomed out | 35 | 964 alerts on 757 of 1,599 evaluable products; episodes closed 555 / 275 / 134; macro-F1 0.4583 vs the star-only floor 0.2968 |
+| 7 | Results, zoomed out | 35 | 139 of 502 eligible products alerted in the 2020–2023 holdout; 425 episodes overall, closed 207 / 165 / 53; detection power 0.186 vs bar 0.80; macro-F1 0.4583 vs the star-only floor 0.2968 |
 | 8 | Trade-offs, and what we declined | 30 | three trade-offs, four declines |
 
 **290 s of slides + 280 s of demo = 570 s, 9:30 of the 10:00 ceiling.**
@@ -36,8 +36,13 @@ the room.
 
 ### Slide 2, variant A — the wide claim
 
-> **757 of 1,599 evaluable products** raised at least one sustained rating decline — 964
-> alerts, 964 episodes — and the complaint themes behind them are labelled from the review text.
+> **139 of 502 eligible products** raised at least one sustained rating decline during
+> **2020–2023**, under a rule developed on pre-2020 data and applied unchanged — 148 alerts,
+> 148 episodes — and the complaint themes behind them are labelled from the review text.
+>
+> The rule was sealed before a single holdout point was evaluated. It raises **0.80 false
+> alerts a month** against a budget of one, and catches **18.6%** of declines its own size —
+> so this is a floor, not a census.
 >
 > Hero: `B00RPJZMUM`, decline rank 3 — baseline 2016-10…2017-03 against recent
 > 2017-04…2017-09; `hard_to_use` and `not_as_described` give way to `does_not_work`
@@ -48,8 +53,9 @@ the room.
 ### Slide 2, variant B — the narrow claim
 
 > **The completed result identifies sustained rating declines; aspect-level explanation is
-> preliminary.** 757 of 1,599 evaluable products raised an alert on pre-2020 data under a rule
-> that is still provisional, so the 2020–2023 holdout claim is not made.
+> preliminary.** 139 of 502 eligible products raised an alert during **2020–2023** under a rule
+> frozen beforehand, at 0.80 false alerts a month and 18.6% detection — the decline claim
+> stands, the theme claim is illustrative.
 >
 > Hero: `B00RPJZMUM` — the same two windows and the same theme shift, shown as an
 > illustration over 18 baseline and 3 recent labelled mentions, not as an estimate.

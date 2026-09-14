@@ -196,9 +196,43 @@ def write_artifact(doc: dict[str, Any], *, root: Path = EVAL_ROOT) -> Path:
     return path
 
 
-def record(v: Verdict, *, root: Path = EVAL_ROOT, **kw: Any) -> Path:
-    """Build and write in one step -- what every gate script calls after it prints."""
+def record(v: Verdict, *, root: Path = EVAL_ROOT, chain: Path = CHAIN_PATH,
+           **kw: Any) -> Path:
+    """Build and write in one step -- what every gate script calls after it prints.
+
+    Refuses a capability the chain declares cut: a cut capability has no result to publish,
+    and the table would reject the artefact anyway. The script should `retire_artifact` instead.
+    """
+    reason = cut_reason_for(kw["capability"], path=chain)
+    if reason is not None:
+        raise ValueError(f"{kw['capability']} is declared cut in {chain.name} and has no "
+                         f"result to publish: {reason}")
     return write_artifact(build_artifact(v, **kw), root=root)
+
+
+def retire_artifact(capability: str, *, root: Path = EVAL_ROOT) -> Path | None:
+    """Remove `eval/<capability>/gate.json` for a capability the chain has since cut.
+
+    Returns the path removed, or None when nothing was there. The table refuses to print while
+    a cut capability still has an artefact, so the gate script that used to write it removes it.
+    """
+    path = root / capability / "gate.json"
+    if not path.exists():
+        return None
+    path.unlink()
+    try:
+        path.parent.rmdir()
+    except OSError:
+        pass
+    return path
+
+
+def cut_reason_for(capability: str, *, path: Path = CHAIN_PATH) -> str | None:
+    """The chain's written reason when `capability` is cut; None when it is declared."""
+    for cap in load_chain(path):
+        if cap.id == capability:
+            return cap.cut_reason if cap.status == "cut" else None
+    raise ValueError(f"{capability} is not declared in {path.name}")
 
 
 # ---------------------------------------------------------------------- chain ----

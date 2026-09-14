@@ -261,3 +261,50 @@ def test_the_schema_file_is_the_only_source_of_the_contract():
     before = copy.deepcopy(E.load_schema())
     E.validate_artifact(artifact())
     assert E.load_schema() == before
+
+
+# ------------------------------------------------------ a cut capability writes nothing ----
+def write_chain(tmp_path, status, reason=None):
+    body = ('[[capability]]\nid = "x"\nphase = "P"\ngate_name = "X"\nkind = "quality"\n'
+            f'status = "{status}"\n')
+    if reason:
+        body += f'cut_reason = "{reason}"\n'
+    path = tmp_path / "chain.toml"
+    path.write_text(body)
+    return path
+
+
+def test_cut_reason_for_returns_the_reason_only_for_a_cut_capability(tmp_path):
+    assert E.cut_reason_for("x", path=write_chain(tmp_path, "cut", "declined")) == "declined"
+    assert E.cut_reason_for("x", path=write_chain(tmp_path, "declared")) is None
+    with pytest.raises(ValueError, match="not declared"):
+        E.cut_reason_for("y", path=write_chain(tmp_path, "declared"))
+
+
+def test_record_refuses_a_capability_the_chain_has_cut(tmp_path):
+    chain = write_chain(tmp_path, "cut", "declined")
+    v = E.Verdict(gate_name="X", status="NOT_RUN", constituents=(), terminal="X verdict=NOT_RUN",
+                  metric={"name": "m", "value": 0.0, "threshold": None, "direction": "none"},
+                  checks=(("done", False),), cut_reason="declined")
+    with pytest.raises(ValueError, match="declared cut"):
+        E.record(v, root=tmp_path, chain=chain, capability="x", phase="P", kind="quality",
+                 protocol_hash="f" * 64, population={"name": "n", "n": 1},
+                 pipeline_run_id="r", scope="full")
+    assert not (tmp_path / "x").exists()
+
+
+def test_retire_artifact_removes_a_stale_artefact_and_tolerates_none(tmp_path):
+    assert E.retire_artifact("x", root=tmp_path) is None
+    stale = tmp_path / "x" / "gate.json"
+    stale.parent.mkdir()
+    stale.write_text("{}")
+    assert E.retire_artifact("x", root=tmp_path) == stale
+    assert not stale.exists() and not stale.parent.exists()
+
+
+def test_the_two_declined_human_passes_are_cut_in_the_real_chain_with_no_artefact():
+    for cap_id in ("themes_agreement", "rag_quality"):
+        reason = E.cut_reason_for(cap_id)
+        assert reason and "Philip declined" in reason, cap_id
+        assert not (E.EVAL_ROOT / cap_id / "gate.json").exists(), cap_id
+

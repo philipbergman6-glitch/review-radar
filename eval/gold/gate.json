@@ -2,31 +2,32 @@
   "artifact_version": "1",
   "capability": "gold",
   "constituents": [
-    "GOLD_SPINE products_total=112565 products_materialised=13122 below_min_reviews=99443 product_months=473268 active_product_months=193939 reviews_on_spine=456041",
-    "GOLD_POINTS points=217325 evaluable=15835 condition_true=4524 alerts=964 evaluable_products=1599 unevaluable_baseline_reviews=189052 unevaluable_baseline_active_months=47 unevaluable_recent_reviews=12379 unevaluable_recent_active_months=12",
-    "GOLD_EPISODES episodes=964 recovery=555 gap=275 end_of_data=134",
-    "GOLD_GATE run_id=6e1c0d3a-85e8-4458-8109-57b76331ad38 scope=full spine_complete=true reviews_on_spine=456041 silver_rows=694252 alerts_equal_episodes=true rule_status=provisional GOLD_GATE=PASS"
+    "GOLD_SPINE products_total=112565 products_materialised=5966 below_min_reviews=106599 product_months=263792 active_product_months=129330 reviews_on_spine=360291",
+    "GOLD_POINTS points=167518 evaluable=12109 condition_true=3167 alerts=425 evaluable_products=1145 unevaluable_baseline_reviews=150873 unevaluable_baseline_active_months=10 unevaluable_recent_reviews=4526 unevaluable_recent_active_months=0",
+    "GOLD_EPISODES episodes=425 recovery=207 gap=165 end_of_data=53",
+    "RUN_CONTRACTS gate=GOLD_GATE jobs=gold registered=1/1 missing=none run_contract_registered=true",
+    "GOLD_GATE run_id=0cbdcc0d-a9e1-40e2-99c2-ad993c99b123 scope=full spine_complete=true reviews_on_spine=360291 silver_rows=694252 alerts_equal_episodes=true rule_status=frozen GOLD_GATE=PASS"
   ],
-  "created_at": "2026-09-10T12:05:08+00:00",
+  "created_at": "2026-09-14T12:30:24+00:00",
   "gate_name": "GOLD_GATE",
   "kind": "reproducibility",
   "metric": {
     "direction": "eq",
     "name": "constituents_ok",
-    "threshold": 3,
-    "value": 3
+    "threshold": 4,
+    "value": 4
   },
   "model": null,
   "phase": "P3 Gold",
-  "pipeline_run_id": "6e1c0d3a-85e8-4458-8109-57b76331ad38",
+  "pipeline_run_id": "0cbdcc0d-a9e1-40e2-99c2-ad993c99b123",
   "population": {
-    "n": 473268,
+    "n": 263792,
     "name": "All_Beauty/gold.product_month",
-    "products_materialised": 13122,
+    "products_materialised": 5966,
     "silver_rows": 694252
   },
   "prompt": null,
-  "protocol_hash": "cbe5400be465a92245b147f6d4b3f0635cce827bc223ad3b3d6a24e113f8dc26",
+  "protocol_hash": "64d1ecb2a0e08481ebe806129718e473f308427b5a52609a0b8882888d187010",
   "scope": "full",
   "status": "PASS"
 }

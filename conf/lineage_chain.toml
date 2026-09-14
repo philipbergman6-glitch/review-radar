@@ -113,8 +113,8 @@ id = "themes_agreement"
 phase = "P6 Themes"
 gate_name = "THEMES_AGREEMENT"
 kind = "quality"
-status = "declared"
-jobs = ["theme_labels_reference"]
+status = "cut"
+cut_reason = "Philip declined the hand-labelling pass on 2026-09-14 (ADR-0003 amendment e): the number RR-21 defined is agent_reference against a human, and no human label exists. Two in-session agent passes over the same blind 50 are published beside it as consistency checks (eval/themes/agent2-consistency-audit.json, kappa 0.926; eval/themes/agent3-adjudication-audit.json, kappa 0.864), and each file states it is not this measurement: the same model family wrote both sides, so correlated error is unbounded"
 
 [[capability]]
 id = "themes_repeat_kappa"
@@ -122,7 +122,7 @@ phase = "P6 Themes"
 gate_name = "THEMES_REPEAT_KAPPA"
 kind = "quality"
 status = "cut"
-cut_reason = "the labeller is deterministic (temperature 0, fixed seed), so a repeat-run kappa measures nothing; the published agreement number is THEMES_AGREEMENT (ADR-0011, RR-21)"
+cut_reason = "the labeller is deterministic (temperature 0, fixed seed), so a repeat-run kappa measures nothing; the agreement row RR-21 pointed at, THEMES_AGREEMENT, is itself cut since 2026-09-14 (ADR-0011, RR-21)"
 
 # ------------------------------------------------------------------------ P7 RAG ----
 [[capability]]
@@ -138,11 +138,10 @@ id = "rag_quality"
 phase = "P7 RAG"
 gate_name = "RAG_QUALITY"
 kind = "quality"
-status = "declared"
-# The quality artefact names the judging run: Philip's pass over the thirty is a ledger job
-# (`rag_judgements`, ticket 13) exactly as his 50 are (`theme_labels_human`), and its input
-# joins to the `rag_answers` run whose bytes were judged.
-jobs = ["rag_answers", "rag_judgements"]
+status = "cut"
+# Declared as Philip's judging run (`rag_judgements`, ticket 13) joined to the `rag_answers`
+# run whose bytes were judged; cut before the run existed, so there is no artefact and no job.
+cut_reason = "Philip declined the judging pass on 2026-09-14 (ADR-0006 amendment): the four targets ADR-0006 defines are Philip's judgement over the sealed thirty, and no human judgement exists. An agent pass by a different model family (annotator=claude, eval/rag/agent-judged-quality.json) is published beside it as a pre-check, not as this measurement: grounded 11/20 and adequate 10/20 under their bars, abstention 10/10 and false refusal 1/20 over theirs. The bars did not move"
 
 # --------------------------------------------------------------------- P8 Stream ----
 [[capability]]

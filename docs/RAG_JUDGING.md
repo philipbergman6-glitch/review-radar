@@ -1,5 +1,11 @@
 # Judging the thirty — the `RAG_QUALITY` worksheet
 
+> **Status 2026-09-14: not run, by decision.** Philip declined this pass, so `rag_quality` is
+> cut in `conf/lineage_chain.toml` and the table prints the reason instead of a number
+> (ADR-0006). The worksheet, the page and the importer below all still work; running the pass
+> and flipping the chain's `status` back to `declared` reverses the cut. The agent pre-check in
+> `eval/rag/agent-judged-quality.json` is not this measurement.
+
 **Why you are doing this.** P7's blocking gate already passed: `RAG_GATE=PASS` says the thirty
 frozen questions were answered once under the sealed identity and every citation resolves to
 the question's own retrieved set inside its window. It says nothing about whether the answers
