@@ -136,6 +136,33 @@ def test_five_prepared_answers_each_contain_a_number():
         assert re.search(r"\d", a), f"prepared answer {i} contains no number"
 
 
+# ------------------------------------------------------------------- the two FAILs ----
+#: The viva sheet restates two gate headlines in prose. Prose drifts; the artefacts do not.
+FAIL_SHEET_FIGURES = (
+    ("eval/gold_calibration/gate.json", "0.1857", "0.8"),
+    ("eval/themes_quality/gate.json", "0.4583", "0.7"),
+)
+
+
+@pytest.mark.parametrize("artifact,value,threshold", FAIL_SHEET_FIGURES)
+def test_fail_sheet_quotes_the_gate_artefacts(artifact, value, threshold):
+    doc = json.loads(read(E.PROJECT_ROOT / artifact))
+    assert f"{doc['metric']['value']:.4f}".startswith(value), \
+        f"{artifact} moved to {doc['metric']['value']} -- docs/QA-FAILS.md still says {value}"
+    assert doc["metric"]["threshold"] == float(threshold), \
+        f"{artifact} bar moved to {doc['metric']['threshold']} -- bars do not move (ADR-0012)"
+    assert doc["status"] == "FAIL", f"{artifact} is no longer a FAIL -- docs/QA-FAILS.md is stale"
+    text = read(E.PROJECT_ROOT / "docs" / "QA-FAILS.md")
+    assert value in text, f"docs/QA-FAILS.md drops the {artifact} headline {value}"
+
+
+def test_fail_sheet_never_claims_the_rule_finds_declines():
+    """The one sentence ADR-0012 forbids, checked where it would be said out loud."""
+    text = read(E.PROJECT_ROOT / "docs" / "QA-FAILS.md")
+    assert "Does not survive:" in text, "the forbidden claim must be named, not just avoided"
+    assert "floor, not a census" in text
+
+
 # ------------------------------------------------------------------------ the README ----
 def test_readme_only_names_make_targets_that_exist():
     targets = set(re.findall(r"^([a-zA-Z0-9_.-]+):", (E.PROJECT_ROOT / "Makefile").read_text(), re.MULTILINE))
