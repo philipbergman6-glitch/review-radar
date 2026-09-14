@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG thirty — judging</title>
+<style>
+  :root {
+    --bg: #f6f5f3; --panel: #ffffff; --ink: #14161a; --muted: #5d6470;
+    --line: #dfdcd6; --accent: #1f6feb; --accent-ink: #ffffff;
+    --ok: #17794a; --ok-bg: #e6f4ec; --bad: #b42318; --bad-bg: #fdecea;
+    --warn: #8a6100; --warn-bg: #fdf3d8; --sel: #ffe58a; --key: #6b3fa0; --key-bg: #f1eaf9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --panel: #1c1f26; --ink: #eceef2; --muted: #98a1b0;
+      --line: #2c313b; --accent: #4f8ff7; --accent-ink: #0b0d11;
+      --ok: #5cd6a0; --ok-bg: #13291f; --bad: #ff8b80; --bad-bg: #2c1614;
+      --warn: #e5b95c; --warn-bg: #2a2212; --sel: #6b5a1e; --key: #c9a6ff; --key-bg: #251b33;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 10; background: var(--panel);
+           border-bottom: 1px solid var(--line); padding: 10px 16px;
+           display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  header h1 { font-size: 14px; margin: 0; font-weight: 650; }
+  .spacer { flex: 1 1 auto; }
+  .pill { font-size: 12px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line);
+          color: var(--muted); white-space: nowrap; }
+  .pill.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+  .pill.bad { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
+  .pill.warn { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  .pill.key { color: var(--key); background: var(--key-bg); border-color: transparent; }
+  button { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 7px;
+           border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  main { max-width: 1280px; margin: 0 auto; padding: 16px; }
+  .cols { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 960px) { .cols { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+          padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted);
+             margin: 0 0 10px; font-weight: 650; }
+  .q { font-size: 15px; margin: 0 0 8px; }
+  .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .claim { border-top: 1px solid var(--line); padding: 8px 0; }
+  .claim:first-of-type { border-top: 0; }
+  .claim.uncited { background: var(--bad-bg); border-radius: 6px; padding: 8px; }
+  .cite { display: inline-block; font-family: ui-monospace, monospace; font-size: 12px;
+          padding: 1px 7px; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent);
+          cursor: pointer; margin-right: 4px; }
+  .cite:hover { background: var(--accent); color: var(--accent-ink); }
+  .subject { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  .refusal { background: var(--warn-bg); border-radius: 6px; padding: 8px; }
+  .key li { margin-bottom: 4px; }
+  .key ul { margin: 4px 0 8px; padding-left: 18px; }
+  .key .lbl { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .review { border-top: 1px solid var(--line); padding: 10px 0; }
+  .review:first-of-type { border-top: 0; }
+  .review.hl { background: var(--sel); border-radius: 6px; padding: 10px; }
+  .review .head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: 12.5px;
+                  color: var(--muted); margin-bottom: 4px; }
+  .review .handle { font-family: ui-monospace, monospace; font-weight: 650; color: var(--accent); }
+  .review .title { font-weight: 600; color: var(--ink); }
+  .review .text { white-space: pre-wrap; font-size: 14px; margin: 0; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+  .row .lbl { font-size: 12px; color: var(--muted); min-width: 150px; }
+  .chip { font-size: 12.5px; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--panel); color: var(--ink); cursor: pointer; }
+  .chip.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  .chip.na { opacity: .4; cursor: not-allowed; }
+  select, textarea { font: inherit; font-size: 13px; border: 1px solid var(--line); border-radius: 6px;
+                     background: var(--bg); color: var(--ink); padding: 5px 8px; }
+  textarea { width: 100%; height: 70px; }
+  .derived { font-size: 12.5px; color: var(--muted); background: var(--bg); border-radius: 6px; padding: 8px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+  .cell { width: 44px; height: 26px; font-size: 10px; border-radius: 5px; border: 1px solid var(--line);
+          background: var(--panel); color: var(--muted); cursor: pointer; padding: 0; }
+  .cell.done { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+  .cell.invalid { background: var(--bad-bg); color: var(--bad); border-color: transparent; }
+  .cell.cur { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .errs { margin-top: 8px; font-size: 12.5px; color: var(--bad); }
+  dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink);
+           max-width: 760px; width: calc(100% - 32px); padding: 18px; }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  textarea.export { height: 260px; font-family: ui-monospace, monospace; font-size: 11px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  code { font-family: ui-monospace, monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>RAG thirty — judging</h1>
+  <span class="pill" id="pill-run"></span>
+  <span class="pill" id="pill-pos"></span>
+  <span class="pill" id="pill-progress"></span>
+  <span class="spacer"></span>
+  <button id="btn-prev">← prev</button>
+  <button id="btn-next">next →</button>
+  <button id="btn-help">rubric</button>
+  <button class="primary" id="btn-export">Export judgements.jsonl</button>
+</header>
+<main>
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h2>Question</h2>
+        <div class="meta" id="meta"></div>
+        <p class="q" id="question"></p>
+        <div class="derived" id="windows"></div>
+      </div>
+      <div class="card">
+        <h2>Answer</h2>
+        <div id="answer"></div>
+      </div>
+      <div class="card key">
+        <h2>Answer key</h2>
+        <div id="key"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>Your judgement</h2>
+        <div id="form"></div>
+        <div class="errs" id="errs"></div>
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="card">
+        <h2>Retrieved reviews <span class="pill" id="pill-retrieved"></span></h2>
+        <div id="retrieved"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<dialog id="dlg-export">
+  <h3 style="margin:0 0 8px; font-size:15px">judgements.jsonl</h3>
+  <div class="hint" id="export-note"></div>
+  <textarea class="export" id="export-text" readonly></textarea>
+  <div class="row">
+    <button class="primary" id="btn-download">Download file</button>
+    <button id="btn-copy">Copy to clipboard</button>
+    <span class="spacer"></span>
+    <button id="btn-close-export">Close</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-help">
+  <h3 style="margin:0 0 8px; font-size:15px">The rubric, in short</h3>
+  <p><b>Groundedness</b> — every <i>material claim</i> supported by the text of the review(s) it cites,
+  in the window it names → <b>fully</b>. Some supported, some not → <b>partially</b>. None → <b>unsupported</b>.
+  A claim with no citation is unsupported; the scorer caps <i>fully</i> to <i>partially</i> on such a row.</p>
+  <p><b>Adequacy</b> — every required proposition satisfied by <i>cited</i> claims and no forbidden claim →
+  <b>fully</b>. Some, or all-but-a-forbidden-claim → <b>partially</b>. None → <b>does_not</b>.</p>
+  <p><b>Forbidden claim present</b> — tick whenever the answer asserts prevalence, direction,
+  representativeness or causation. The scorer caps adequacy to <i>partially</i>.</p>
+  <p><b>Refusal reason matches key</b> — on the ten unanswerable refusals only; diagnostic, never scored.</p>
+  <p><b>Derived rows</b> — a refusal of an answerable question is a false refusal by definition; you only
+  mark it reviewed. Keys: <code>1/2/3</code> groundedness · <code>q/w/e</code> adequacy ·
+  <code>f</code> forbidden · <code>y/n</code> reason · <code>←/→</code> move.</p>
+  <p>Full rubric: <code>docs/RAG_JUDGING.md</code>.</p>
+  <div class="row"><span class="spacer"></span><button id="btn-close-help">Close</button></div>
+</dialog>
+
+<script>
+const WS = /*__WORKSHEET__*/;
+const ROWS = WS.rows;
+const STORAGE_KEY = "rag-judge:" + WS.answers_run_id;
+const G = WS.groundedness, A = WS.adequacy, LABELS = WS.labels;
+
+// ---- state ----------------------------------------------------------------
+let state = {};
+let cur = 0;
+function blank() {
+  return { reviewed: false, groundedness: null, adequacy: null, forbidden: null,
+           reason: null, uncertain: false, secondary: null, note: "" };
+}
+function load() {
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) state = JSON.parse(raw); } catch (e) {}
+  for (const r of ROWS) if (!state[r.question_id]) state[r.question_id] = blank();
+}
+function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+// ---- validation (mirrors src/gates/rag_quality.py judgement_faults) --------
+function faults(r) {
+  const st = state[r.question_id], f = [];
+  if (!st.reviewed) f.push("mark the row reviewed");
+  if (r.kind === "answered_answerable") {
+    if (!G.includes(st.groundedness)) f.push("groundedness is required");
+    if (!A.includes(st.adequacy)) f.push("adequacy is required");
+    if (typeof st.forbidden !== "boolean") f.push("forbidden claim present: yes or no");
+  } else if (r.kind === "refused_unanswerable") {
+    if (typeof st.reason !== "boolean") f.push("refusal reason matches key: yes or no");
+  }
+  if (st.note && st.note.length > 1000) f.push("note is over 1000 characters");
+  return f;
+}
+function touched(r) {
+  const st = state[r.question_id];
+  return st.reviewed || st.groundedness || st.adequacy || st.forbidden !== null || st.reason !== null;
+}
+
+// ---- rendering ------------------------------------------------------------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function pill(text, cls) { return `<span class="pill ${cls || ""}">${esc(text)}</span>`; }
+
+function render() {
+  const r = ROWS[cur], st = state[r.question_id];
+  $("#pill-run").textContent = "answers run " + WS.answers_run_id.slice(0, 8);
+  $("#pill-pos").textContent = `${cur + 1} / ${ROWS.length} · ${r.question_id}`;
+  const done = ROWS.filter(x => faults(x).length === 0).length;
+  $("#pill-progress").textContent = `${done} / ${ROWS.length} valid`;
+  $("#pill-progress").className = "pill " + (done === ROWS.length ? "ok" : "");
+
+  $("#meta").innerHTML = [
+    pill(r.family), pill(r.answerability, r.answerability === "answerable" ? "ok" : "warn"),
+    r.stratum ? pill(r.stratum, "warn") : "", pill(r.kind.replace(/_/g, " ")),
+    r.facts.uncited_claims ? pill(`${r.facts.uncited_claims} uncited claim(s)`, "bad") : "",
+    r.facts.contract_rules_violated.length ? pill("contract: " + r.facts.contract_rules_violated.join(","), "bad") : "",
+    r.answerability === "answerable"
+      ? pill(`validated support retrieved ${r.facts.support_retrieved}/${r.facts.support_in_key}`,
+             r.facts.support_retrieved ? "key" : "bad") : "",
+  ].join("");
+  $("#question").textContent = r.question;
+  $("#windows").innerHTML = Object.entries(r.windows).map(([n, w]) =>
+    `<b>${esc(n)}</b> ${esc(w.start)} → ${esc(w.end)}`).join(" &nbsp;·&nbsp; ");
+
+  const a = r.answer;
+  let html = "";
+  if (a.status !== "succeeded") {
+    html = `<div class="refusal">malformed output (${esc(a.status)}): ${esc(a.validation_error || "no detail")}</div>`;
+  } else if (a.refused) {
+    html = `<div class="refusal"><b>refused</b> — ${esc(a.refusal_reason)}</div>`;
+    if (a.claims.length) html += `<div class="errs">a refusal carrying ${a.claims.length} claim(s) — contract violation</div>`;
+  } else {
+    html = `<div class="subject">subject: ${esc(a.subject)} · subject_supported=${a.subject_supported}</div>`;
+    html += a.claims.map((c, i) => `
+      <div class="claim ${c.uncited ? "uncited" : ""}">
+        <div><b>${i + 1}.</b> ${esc(c.claim)}</div>
+        <div style="margin-top:4px">${c.uncited
+          ? '<span class="pill bad">no citation — unsupported by rule</span>'
+          : c.citations.map(x => `<span class="cite" data-h="${esc(x.cite_id)}">${esc(x.cite_id)} · ${esc(x.window)}</span>`).join("")}</div>
+      </div>`).join("");
+  }
+  $("#answer").innerHTML = html;
+  document.querySelectorAll(".cite").forEach(el => el.onclick = () => highlight(el.dataset.h));
+
+  const k = r.key;
+  $("#key").innerHTML = (r.answerability === "answerable" ? `
+    <div class="lbl">required propositions (all must hold)</div>
+    <ul>${(k.required_propositions || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+    <div class="lbl">acceptable themes</div>
+    <ul><li>${(k.acceptable_themes || []).map(esc).join(", ") || "—"}</li></ul>` : `
+    <div class="lbl">expected refusal reason</div>
+    <ul><li>${esc(k.expected_refusal_reason)}</li></ul>`) + `
+    <div class="lbl">forbidden claims</div>
+    <ul>${(k.forbidden_claims || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>`;
+
+  $("#pill-retrieved").textContent = `${r.retrieved.length}`;
+  $("#retrieved").innerHTML = r.retrieved.length ? r.retrieved.map(x => `
+    <div class="review" id="rv-${esc(x.cite_id)}">
+      <div class="head"><span class="handle">${esc(x.cite_id)}</span>
+        <span>${esc(x.window)}</span><span>${esc(x.review_month)}</span>
+        ${x.in_key ? '<span class="pill key">validated complaint in key</span>' : ""}
+        <span class="title">${esc(x.title)}</span></div>
+      <p class="text">${esc(x.text)}</p>
+    </div>`).join("") : `<div class="derived">nothing retrieved — the window holds no reviews</div>`;
+
+  renderForm(r, st);
+  renderGrid();
+}
+
+function chips(name, values, current, labels) {
+  return values.map((v, i) => `<button class="chip ${current === v ? "on" : ""}" data-f="${name}" data-v="${esc(v)}">${esc(labels ? labels[i] : v)}</button>`).join("");
+}
+function yesno(name, current) {
+  return `<button class="chip ${current === true ? "on" : ""}" data-f="${name}" data-v="true">yes</button>
+          <button class="chip ${current === false ? "on" : ""}" data-f="${name}" data-v="false">no</button>`;
+}
+function renderForm(r, st) {
+  let html = "";
+  if (r.kind === "answered_answerable") {
+    html += `<div class="row"><span class="lbl">groundedness</span>${chips("groundedness", G, st.groundedness, ["1 fully", "2 partially", "3 unsupported"])}</div>`;
+    html += `<div class="row"><span class="lbl">adequacy</span>${chips("adequacy", A, st.adequacy, ["q fully", "w partially", "e does_not"])}</div>`;
+    html += `<div class="row"><span class="lbl">forbidden claim present</span>${yesno("forbidden", st.forbidden)}</div>`;
+    if (r.facts.uncited_claims) html += `<div class="derived">this row carries an uncited claim: a <i>fully</i> groundedness will be recorded as <i>partially</i> by the scorer (RR-24 §5); judge adequacy on the cited claims only</div>`;
+  } else if (r.kind === "refused_unanswerable") {
+    html += `<div class="derived">unanswerable question, refused: counted as a <b>correct abstention</b> from the refusal itself</div>`;
+    html += `<div class="row"><span class="lbl">refusal reason matches key</span>${yesno("reason", st.reason)}</div>`;
+  } else if (r.kind === "refused_answerable") {
+    html += `<div class="derived">answerable question, refused: a <b>false refusal</b> by definition and a failure on both axes; nothing to grade — read it and mark reviewed. Primary label: ${r.facts.support_retrieved ? "over_refusal (validated support was retrieved)" : "retrieval_miss (none of the validated support was retrieved)"}</div>`;
+  } else if (r.kind === "answered_unanswerable") {
+    html += `<div class="derived">unanswerable question, answered: a <b>failed abstention</b> by definition; read it and mark reviewed</div>`;
+  } else {
+    html += `<div class="derived">malformed output: derived (${r.answerability === "answerable" ? "false refusal" : "failed abstention"}); mark reviewed</div>`;
+  }
+  html += `<div class="row"><span class="lbl">uncertain</span>${yesno("uncertain", st.uncertain)}</div>`;
+  html += `<div class="row"><span class="lbl">secondary label</span><select id="secondary"><option value="">none</option>${LABELS.map(l => `<option value="${l}" ${st.secondary === l ? "selected" : ""}>${l}</option>`).join("")}</select></div>`;
+  html += `<div class="row"><span class="lbl">note</span></div><textarea id="note" placeholder="why, if the primary label misses the cause, or anything the rubric did not cover">${esc(st.note)}</textarea>`;
+  html += `<div class="row"><button class="chip ${st.reviewed ? "on" : ""}" data-f="reviewed" data-v="true">reviewed ✓</button></div>`;
+  $("#form").innerHTML = html;
+  document.querySelectorAll("#form .chip").forEach(el => el.onclick = () => set(el.dataset.f, el.dataset.v));
+  $("#secondary").onchange = e => { st.secondary = e.target.value || null; save(); };
+  $("#note").oninput = e => { st.note = e.target.value; save(); };
+  const f = faults(r);
+  $("#errs").innerHTML = f.map(x => `<div>${esc(x)}</div>`).join("");
+}
+function set(field, value) {
+  const st = state[ROWS[cur].question_id];
+  const v = value === "true" ? true : value === "false" ? false : value;
+  if (field === "reviewed") st.reviewed = !st.reviewed;
+  else if (field === "uncertain") st.uncertain = v;
+  else st[field] = (st[field] === v ? null : v);
+  save(); render();
+}
+function renderGrid() {
+  $("#grid").innerHTML = ROWS.map((r, i) => {
+    const f = faults(r).length, t = touched(r);
+    const cls = f === 0 ? "done" : (t ? "invalid" : "");
+    const short = r.question_id.replace(/^([a-z])[a-z]*(?:_([a-z])[a-z]*)*-/, (m, a, b) => a + (b || "") + "-");
+    return `<button class="cell ${cls} ${i === cur ? "cur" : ""}" data-i="${i}" title="${esc(r.question_id)}">${esc(short)}</button>`;
+  }).join("");
+  document.querySelectorAll(".cell").forEach(el => el.onclick = () => { cur = +el.dataset.i; render(); window.scrollTo(0, 0); });
+}
+function highlight(h) {
+  document.querySelectorAll(".review").forEach(el => el.classList.remove("hl"));
+  const el = document.getElementById("rv-" + h);
+  if (el) { el.classList.add("hl"); el.scrollIntoView({ block: "center", behavior: "smooth" }); }
+}
+
+// ---- navigation -----------------------------------------------------------
+function move(d) { cur = (cur + d + ROWS.length) % ROWS.length; render(); window.scrollTo(0, 0); }
+$("#btn-prev").onclick = () => move(-1);
+$("#btn-next").onclick = () => move(1);
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT") return;
+  const r = ROWS[cur], k = e.key;
+  if (k === "ArrowLeft") move(-1); else if (k === "ArrowRight") move(1);
+  else if (r.kind === "answered_answerable" && "123".includes(k) && k) set("groundedness", G[+k - 1]);
+  else if (r.kind === "answered_answerable" && "qwe".includes(k) && k) set("adequacy", A["qwe".indexOf(k)]);
+  else if (r.kind === "answered_answerable" && k === "f") set("forbidden", String(!(state[r.question_id].forbidden === true)));
+  else if (r.kind === "refused_unanswerable" && (k === "y" || k === "n")) set("reason", String(k === "y"));
+  else if (k === "r") set("reviewed", "true");
+});
+
+// ---- export ---------------------------------------------------------------
+function jsonl() {
+  return ROWS.map(r => {
+    const st = state[r.question_id];
+    const answered = r.kind === "answered_answerable";
+    return JSON.stringify({
+      question_id: r.question_id,
+      answers_run_id: WS.answers_run_id,
+      reviewed: !!st.reviewed,
+      groundedness: answered ? st.groundedness : null,
+      adequacy: answered ? st.adequacy : null,
+      forbidden_claim_present: answered ? st.forbidden : null,
+      refusal_reason_matches_key: r.kind === "refused_unanswerable" ? st.reason : null,
+      uncertain: !!st.uncertain,
+      secondary_label: st.secondary || null,
+      note: (st.note || "").trim() || null,
+    });
+  }).join("\n") + "\n";
+}
+$("#btn-export").onclick = () => {
+  const bad = ROWS.filter(r => faults(r).length);
+  $("#export-note").textContent = bad.length
+    ? `${bad.length} row(s) are still invalid. The importer is all-or-nothing and will refuse this file; export anyway as a backup and run \`make rag-judge-check\` to see the same faults from the repo side.`
+    : `All ${ROWS.length} rows are valid. Save as eval/rag/judgements.jsonl, then \`make rag-judge-check\` and \`make rag-judge-import\`.`;
+  $("#export-text").value = jsonl();
+  $("#dlg-export").showModal();
+};
+$("#btn-download").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([jsonl()], { type: "application/x-ndjson" }));
+  a.download = "judgements.jsonl"; a.click(); URL.revokeObjectURL(a.href);
+};
+$("#btn-copy").onclick = async () => {
+  try { await navigator.clipboard.writeText(jsonl()); $("#btn-copy").textContent = "Copied"; }
+  catch (e) { $("#export-text").select(); document.execCommand("copy"); }
+  setTimeout(() => { $("#btn-copy").textContent = "Copy to clipboard"; }, 1500);
+};
+$("#btn-close-export").onclick = () => $("#dlg-export").close();
+$("#btn-help").onclick = () => $("#dlg-help").showModal();
+$("#btn-close-help").onclick = () => $("#dlg-help").close();
+
+load(); render();
+</script>
+</body>
+</html>

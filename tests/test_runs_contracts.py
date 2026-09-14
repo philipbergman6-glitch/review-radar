@@ -116,3 +116,38 @@ def test_job_check_list_matches_code_registry():
     sql = (runs.PROJECT_ROOT / "conf" / "postgres-init" / "01_schema.sql").read_text()
     for job in JOB_NAMES:
         assert f"'{job}'" in sql, f"{job} missing from the job_name CHECK in 01_schema.sql"
+
+
+# ------------------------------------------------------------- rag_judgements (ticket 13) ----
+JUDGE_INPUTS = {
+    "answers": {"run_id": "c4ae0dc5-0000-4000-8000-000000000000", "path": "eval/rag/answers.json",
+                "questions": 30, "sha256": "a" * 64},
+    "questions": {"path": "conf/rag-questions.json", "version": "1", "spec_hash": "f" * 64},
+    "rubric": {"path": "docs/RAG_JUDGING.md", "sha256": "b" * 64},
+}
+JUDGE_OUTPUTS = {"eval.rag_judgements": {"path": "eval/rag/judgements.json", "rows": 30,
+                                         "sha256": "c" * 64}}
+JUDGE_COUNTS = {"questions_total": 30, "answerable": 20, "unanswerable": 10, "judged": 30,
+                "answered_answerable": 19, "refused_answerable": 1, "refused_unanswerable": 10,
+                "answered_unanswerable": 0, "malformed": 0, "uncertain": 0, "elapsed_s": 1.0}
+
+
+def test_rag_judgements_contract_accepts_a_full_pass():
+    validate_start("rag_judgements", "1", inputs=JUDGE_INPUTS, params={"annotator": "philip"})
+    validate_finish("rag_judgements", "1",
+                    records={"records_in": 30, "records_out": 30, "records_rejected": 0},
+                    outputs=JUDGE_OUTPUTS, counts=JUDGE_COUNTS)
+
+
+def test_rag_judgements_contract_refuses_a_partial_pass():
+    """Twenty-eight judged rows would shrink a denominator nobody froze: all thirty or none."""
+    with pytest.raises(ContractViolation, match="judged 28 != questions_total 30"):
+        validate_finish("rag_judgements", "1",
+                        records={"records_in": 30, "records_out": 28, "records_rejected": 0},
+                        outputs=JUDGE_OUTPUTS, counts=JUDGE_COUNTS | {"judged": 28})
+
+
+def test_rag_judgements_input_names_the_answers_run_by_digest():
+    bad = {**JUDGE_INPUTS, "answers": {"run_id": "x", "path": "eval/rag/answers.json"}}
+    with pytest.raises(ContractViolation, match="sha256"):
+        validate_start("rag_judgements", "1", inputs=bad, params={})

@@ -139,7 +139,10 @@ phase = "P7 RAG"
 gate_name = "RAG_QUALITY"
 kind = "quality"
 status = "declared"
-jobs = ["rag_answers"]
+# The quality artefact names the judging run: Philip's pass over the thirty is a ledger job
+# (`rag_judgements`, ticket 13) exactly as his 50 are (`theme_labels_human`), and its input
+# joins to the `rag_answers` run whose bytes were judged.
+jobs = ["rag_answers", "rag_judgements"]
 
 # --------------------------------------------------------------------- P8 Stream ----
 [[capability]]
@@ -148,7 +151,11 @@ phase = "P8 Stream"
 gate_name = "STREAM_GATE"
 kind = "reproducibility"
 status = "declared"
-jobs = []
+# All three P8 jobs, because the control run's claim rests on all three: the sort produced the
+# event order, the replay carried it onto the topic in that order, and the projection
+# aggregated it under the watermark. A claim that named only the projection would leave the
+# order -- the premise of every watermark number -- outside the chain.
+jobs = ["sort_replay", "stream_produce", "stream_aggregate"]
 
 [[capability]]
 id = "stream_demo"
@@ -199,6 +206,14 @@ jobs = []
 # Not edges: `theme_classifier_train`/`theme_classifier_score` consume a labels table and a
 # model path rather than a named run, and `rag_answers` has no ledger-run input. They appear
 # in `themes_quality`'s `jobs` above and are pinned as runs; they contribute outputs, not joins.
+
+[[edge]]
+downstream = "rag_judgements"
+input = "answers"
+upstream = "rag_answers"
+# The judgement names the answers run by id and by the answers file's sha256; the join is on
+# the digest the two rows both record, so a judgement of run 1's bytes cannot be filed
+# against run 2 (ticket 13).
 
 [[edge]]
 downstream = "silver"
@@ -284,6 +299,29 @@ pin_reason = "the reference labels are written blind against one frame (RR-21); 
 downstream = "theme_labels_reference"
 input = "silver"
 upstream = "silver"
+status = "declared"
+
+[[edge]]
+downstream = "stream_aggregate"
+input = "replay"
+upstream = "stream_produce"
+status = "declared"
+
+[[edge]]
+downstream = "stream_aggregate"
+input = "source"
+upstream = "sort_replay"
+status = "declared"
+
+# The replay reads a file, not a run, so the join is the file's identity: the producer records
+# the path and sha256 it sent and the sort job records the path and sha256 it wrote. That is
+# the whole point of splitting the two jobs (ticket 14) -- event order is a property of a
+# named artefact, so a replay can say which ordering it carried.
+[[edge]]
+downstream = "stream_produce"
+input = "source"
+upstream = "sort_replay"
+spec_version = "2"
 status = "declared"
 
 # ================================================= How a table says who wrote it ====

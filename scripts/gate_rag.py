@@ -12,7 +12,11 @@ over the answers that happen to exist.
   RAG_CONTRACT  the 30/30 citation and scope contract, **reported** at its unmoved bar:
              generator behaviour is measured once and never fixed.
 
-`RAG_QUALITY` is ticket 13's and is not printed here. Exit 0 when `RAG_GATE` passes.
+  RAG_QUALITY   the four judged targets (ticket 13), **reported** beside their frozen bars from
+             `eval/rag/judgements.json`; `NOT_RUN` with its reason until Philip's thirty
+             judgements are imported. Never blocks and never touches `RAG_GATE`'s verdict.
+
+Exit 0 when `RAG_GATE` passes -- `RAG_QUALITY` has no say in the exit code.
 
 Run:  ./run.sh python scripts/gate_rag.py [--scope full]   (or `make gate-rag`)
 """
@@ -31,10 +35,12 @@ from src.common import evaluation as E
 from src.common import runs
 from src.gates import lineage as L
 from src.gates import rag as gate
+from src.gates import rag_quality as Q
 
 ANSWERS_PATH = EVAL_ROOT / "answers.json"
 LEDGER_PATH = EVAL_ROOT / "call-ledger.jsonl"
 MANIFEST_PATH = C.PROJECT_ROOT / "conf" / "rag-questions.json"
+JUDGEMENTS_PATH = EVAL_ROOT / "judgements.json"
 
 
 def _load(path: Path) -> dict[str, Any] | None:
@@ -160,6 +166,27 @@ def reopen_facts(answers: dict[str, Any] | None) -> dict[str, Any]:
     return gate.reopen_facts(seal, prior_seal=prior_seal, prior=prior, current=answers)
 
 
+def judgement_facts(manifest: dict[str, Any], answers: dict[str, Any] | None) -> dict[str, Any]:
+    """Philip's imported judgements, scored -- or nothing, when the thirty are not yet judged.
+
+    A judgements file for another answers run is not a partial result, it is the wrong result:
+    it is refused outright rather than scored, so a stale judgement can never publish a number
+    over answers nobody read.
+    """
+    doc = _load(JUDGEMENTS_PATH)
+    if doc is None or answers is None:
+        return {"score": None}
+    if doc.get("answers_run_id") != answers.get("run_id"):
+        raise SystemExit(f"{JUDGEMENTS_PATH.relative_to(C.PROJECT_ROOT)} judged answers run "
+                         f"{doc.get('answers_run_id')}, but the sealed answers are run "
+                         f"{answers.get('run_id')}; re-judge or remove the stale file")
+    if doc.get("question_spec_hash") != manifest.get("spec_hash"):
+        raise SystemExit("the judgements were made against another question spec hash")
+    score = Q.score(manifest.get("questions", []), answers.get("answers", []), doc["rows"])
+    return {"score": score, "run_id": doc.get("run_id"), "annotator": doc.get("annotator"),
+            "rubric": doc.get("rubric")}
+
+
 # ----------------------------------------------------------------------------- main ----
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
@@ -187,6 +214,9 @@ def main() -> None:
     }
     v = L.attest(gate.verdict(facts, scope=args.scope), "rag")
     v.emit()
+    judgements = judgement_facts(manifest, answers)
+    q = Q.verdict(judgements["score"], scope=args.scope)
+    q.emit()
 
     run_id = (answers or {}).get("run_id")
     if run_id:
@@ -206,6 +236,22 @@ def main() -> None:
                                  "reopen_reason": facts["reopen"]["reason"]}
                                 if facts["reopen"].get("reopened") else {})},
                  pipeline_run_id=run_id, scope=args.scope, notes=gate.notes(facts))
+        # The quality artefact is published whatever it reads -- NOT_RUN with its reason until
+        # the judgements exist, then PASS or FAIL against bars that did not move. Its run id is
+        # the judging run when there is one: the number was made by Philip's pass over the
+        # answers, and the lineage walk joins that run to the answers run it judged.
+        E.record(q, capability="rag_quality", phase="P7 RAG", kind="quality",
+                 protocol_hash=manifest.get("spec_hash", ""),
+                 model=(answers or {}).get("identity", {}).get("model_id"),
+                 prompt=facts["seal"].get("prompt_version"),
+                 population={"name": "the thirty frozen P7 questions (20 answerable, 10 "
+                                     "unanswerable in three strata), judged by Philip",
+                             "n": len(manifest.get("questions", [])),
+                             "answerable": Q.ANSWERABLE_N, "unanswerable": Q.UNANSWERABLE_N,
+                             "answers_run_id": run_id, "annotator": judgements.get("annotator"),
+                             "rubric_sha256": (judgements.get("rubric") or {}).get("sha256")},
+                 pipeline_run_id=judgements.get("run_id") or run_id, scope=args.scope,
+                 notes=Q.notes(judgements["score"]) if judgements["score"] else ())
     else:
         print("RAG_ARTEFACT not written: eval/rag/answers.json names no run id, so there is "
               "nothing to attribute the result to", file=sys.stderr)
