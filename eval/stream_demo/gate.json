@@ -2,19 +2,19 @@
   "artifact_version": "1",
   "capability": "stream_demo",
   "constituents": [
-    "STREAM_SOURCE run_kind=demo replay_run=0e3528ac topic=reviews.stream.demo records_acked=701528 sorted_file_sha256=3a532607ee9c replay_config_hash=4c8bccff40bd",
+    "STREAM_SOURCE run_kind=demo replay_run=d0192a62 topic=reviews.stream.demo records_acked=701528 sorted_file_sha256=3a532607ee9c replay_config_hash=4c8bccff40bd",
     "STREAM_VALIDATION function=src.spark.silver.parse_and_validate digest=3940f34067d6 silver_digest=3940f34067d6 shared=true",
     "STREAM_DEDUPE records_read=701528 ledger_records_read=701528 rows_valid=701528 rows_rejected=0 unique_review_ids=692252 duplicates_dropped=7276 expected_from_sort=7276 sort_run=756fb1f2",
-    "STREAM_WATERMARK delay=30 days injected_drops=2000 source_order=event_time_sorted ingested_at=2026-09-14T10:18:25.679209+00:00",
+    "STREAM_WATERMARK delay=30 days injected_drops=2000 source_order=event_time_sorted ingested_at=2026-09-14T13:15:28.776214+00:00",
     "STREAM_SURVIVOR silver_run=4447727f collision_groups=6139 exact=6138 conflicting=1 unresolvable=0 stream_rule=first_arrival batch_rule=helpful_vote,text_length,canonical_hash",
     "STREAM_RECONCILE gold_run=0cbdcc0d product_months_compared=129153 differing=882 only_in_stream=0 only_in_gold=177 only_in_stream_unmaterialised=274495 columns=review_count,rating_sum,neg_count,verified_count,verified_rating_sum,nonempty_text_count,long_text_count not_projected=distinct_users",
     "STREAM_INJECTION near_rows=2000 near_lag_days=7 far_rows=2000 far_lag_days=730 held_back_sha256=962a54989a9b near_on_topic=2000 far_on_topic=2000 expected_drops=2000 observed_drops=2000 near_accepted=derived",
     "STREAM_EXPLAINED differing=882 explained=882 unexplained=0 only_in_gold=177 only_in_gold_explained=177 only_in_gold_unexplained=0 dropped_product_months=1986 dropped_outside_gold=927",
     "STREAM_CONTROL control_run=74dde108 status=PASS scope=full ledger_status=success natural_drops=0 differing=0 protocol_hash=4c8bccff40bd same_protocol=true",
     "RUN_CONTRACTS gate=STREAM_GATE jobs=sort_replay,stream_produce,stream_aggregate registered=3/3 missing=none run_contract_registered=true",
-    "STREAM_GATE run_kind=demo run_id=c95be84a-0886-4323-b65e-ac5d47235d3d scope=full dropped_by_watermark=2000 expected_drops=2000 differing_product_months=882 unexplained=0 control_run=74dde108 failed=none STREAM_GATE=PASS"
+    "STREAM_GATE run_kind=demo run_id=c08e5aa9-9dd7-4e4d-8bda-39c556653421 scope=full dropped_by_watermark=2000 expected_drops=2000 differing_product_months=882 unexplained=0 control_run=74dde108 failed=none STREAM_GATE=PASS"
   ],
-  "created_at": "2026-09-14T12:33:08+00:00",
+  "created_at": "2026-09-14T13:21:30+00:00",
   "gate_name": "STREAM_GATE",
   "kind": "reproducibility",
   "metric": {
@@ -32,7 +32,7 @@
     "control run 74dde108 from eval/stream_control/gate.json"
   ],
   "phase": "P8 Stream",
-  "pipeline_run_id": "c95be84a-0886-4323-b65e-ac5d47235d3d",
+  "pipeline_run_id": "c08e5aa9-9dd7-4e4d-8bda-39c556653421",
   "population": {
     "control_run_id": "74dde108-676a-49cf-a2a9-b3c6a8263bae",
     "far_rows": 2000,
@@ -41,7 +41,7 @@
     "name": "All_Beauty/stream.product_month vs gold.product_month",
     "near_rows": 2000,
     "records_read": 701528,
-    "replay_run_id": "0e3528ac-6048-47a9-8561-523c756115e6",
+    "replay_run_id": "d0192a62-a823-4736-821b-0c83951153c7",
     "unique_review_ids": 692252
   },
   "prompt": null,
