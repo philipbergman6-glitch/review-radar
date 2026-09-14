@@ -1,16 +1,27 @@
 {
-  "git_commit_sha": "5e8358b7554491b28e6ab33c4f4bd1bcb5e42d7a",
+  "git_commit_sha": "91565f313a04624ca013c15ef99572708834cef7",
   "identity": {
     "answer_spec_version": "1",
     "generation": "reviews_s8507728480475534879_d2e56c46",
-    "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+    "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
     "model_id": "qwen3:8b",
     "prompt_version": "rag-v5",
     "question_spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
     "retrieval_hash": "00e4c4449eac4f95566f45d888e6e4aa06be06ed71f783e22322543292fb5bc3"
   },
-  "note": "the evaluation question set is answered once (ADR-0006); a later run under a different identity is refused before any call is made",
-  "opened_at": "2026-09-14T01:24:06+00:00",
+  "note": "the evaluation question set is answered once per identity (ADR-0006); a later run under a different identity is refused before any call is made, and the one sanctioned reopen (--reopen, RR-24) records its reason here",
+  "opened_at": "2026-09-14T08:33:29+00:00",
   "questions": 30,
-  "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106"
+  "reopened_from": {
+    "moved": [
+      "inference_config_hash"
+    ],
+    "prior_answers": "answers.1.json",
+    "prior_gate": "gate.1.json",
+    "prior_seal": "answer-seal.1.json",
+    "reason": "RR-24: limits.subject_max_words (15) rejected product_scoped-02 and zero_review_scope-02 unread, on a field nothing downstream consumes; the cap stops being a rejection reason (subject_words is recorded instead) and max_attempts becomes 1 because an identical retry of the seeded temperature-0 decoder returned identical output both times. Prompt rag-v5, model, seed and retrieval untouched; temporal-01's uncited absence claim is generator behaviour and is not fixed.",
+    "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106"
+  },
+  "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
+  "seal_no": 2
 }

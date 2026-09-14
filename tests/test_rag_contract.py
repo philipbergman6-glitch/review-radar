@@ -303,3 +303,81 @@ def test_an_answer_that_contradicts_its_own_verdict_is_rejected():
 def test_refusing_a_supported_subject_is_rejected():
     fails = R.validate_answer(refusal(subject_supported=True), limits=LIMITS)
     assert any("contradicts" in f for f in fails)
+
+
+# ============================================================ the reopen, re-derived ====
+RUN1, RUN2 = "ffbbe884-0000-4000-8000-000000000001", "0a1b2c3d-0000-4000-8000-000000000002"
+
+
+def seal(run_id, **over):
+    return {"opened_at": "2026-09-14T01:24:06+00:00", "run_id": run_id, "questions": 30,
+            "identity": {"prompt_version": "rag-v5"}, **over}
+
+
+def reopened_seal(reason="the validator rejected a field nobody reads"):
+    return seal(RUN2, seal_no=2, reopened_from={"run_id": RUN1, "reason": reason,
+                                                "prior_seal": "eval/rag/answer-seal.1.json",
+                                                "prior_answers": "eval/rag/answers.1.json"})
+
+
+def answers_doc(run_id, rows):
+    return {"run_id": run_id, "answers": rows}
+
+
+PRIOR = [*[answer(GOOD, qid=q["question_id"]) for q in THIRTY[:28]],
+         *[answer(None, status="parse_failed", qid=q["question_id"]) for q in THIRTY[28:]]]
+RERUN = [answer(GOOD, qid=q["question_id"]) for q in THIRTY]
+
+
+def test_a_first_run_is_not_a_reopen():
+    f = gate.reopen_facts(seal(RUN1), prior_seal=None, prior=None, current=answers_doc(RUN1, RERUN))
+    assert f == {"reopened": False, "ok": True}
+    assert gate.reopen_line(f) == "RAG_REOPEN reopened_from=none ok=true"
+
+
+def test_a_reopened_run_that_reproduced_every_prior_answer_holds():
+    f = gate.reopen_facts(reopened_seal(), prior_seal=seal(RUN1),
+                          prior=answers_doc(RUN1, PRIOR), current=answers_doc(RUN2, RERUN))
+    assert f["ok"] and f["identical"] == 28 and f["prior_parsed"] == 28
+    line = gate.reopen_line(f)
+    assert "reopened_from=ffbbe884" in line and "answers_identical_to_run1=28/28" in line
+    assert line.endswith("ok=true")
+
+
+def test_one_altered_parsed_answer_fails_the_reopen():
+    """Determinism is asserted, not assumed: a seeded decoder that gave a different answer to
+    a question it had already parsed means the rerun measured something else."""
+    altered = [*RERUN[:5], answer(GOOD | {"subject": "something else"},
+                                  qid=THIRTY[5]["question_id"]), *RERUN[6:]]
+    f = gate.reopen_facts(reopened_seal(), prior_seal=seal(RUN1),
+                          prior=answers_doc(RUN1, PRIOR), current=answers_doc(RUN2, altered))
+    assert not f["ok"] and f["identical"] == 27 and f["differing"] == ["q-05"]
+    v = gate.verdict(facts(THIRTY, altered, reopen=f), scope="full")
+    assert v.status == "FAIL" and "prior_run_reproduced" in v.terminal
+    assert "answers_identical_to_run1=27/28" in "\n".join(v.constituents)
+
+
+def test_a_prior_answer_the_rerun_failed_to_parse_is_a_difference():
+    regressed = [answer(None, status="parse_failed", qid=THIRTY[0]["question_id"]), *RERUN[1:]]
+    f = gate.reopen_facts(reopened_seal(), prior_seal=seal(RUN1),
+                          prior=answers_doc(RUN1, PRIOR), current=answers_doc(RUN2, regressed))
+    assert not f["ok"] and f["identical"] == 27
+
+
+@pytest.mark.parametrize("hole", ["no_prior_seal", "no_prior_answers", "no_reason",
+                                  "prior_seal_names_another_run", "current_is_the_prior_run"])
+def test_a_reopen_missing_its_evidence_cannot_hold(hole):
+    current_seal, prior_seal, prior, current = (
+        reopened_seal(), seal(RUN1), answers_doc(RUN1, PRIOR), answers_doc(RUN2, RERUN))
+    if hole == "no_prior_seal":
+        prior_seal = None
+    elif hole == "no_prior_answers":
+        prior = None
+    elif hole == "no_reason":
+        current_seal = reopened_seal(reason="  ")
+    elif hole == "prior_seal_names_another_run":
+        prior_seal = seal("someone-else")
+    elif hole == "current_is_the_prior_run":
+        current = answers_doc(RUN1, RERUN)
+    f = gate.reopen_facts(current_seal, prior_seal=prior_seal, prior=prior, current=current)
+    assert f["reopened"] and not f["ok"]

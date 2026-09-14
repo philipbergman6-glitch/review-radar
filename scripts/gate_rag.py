@@ -6,8 +6,11 @@ against the seal written when the thirty were opened, every retrieved row is re-
 the window it was retrieved for, and the contract is re-run over all thirty questions -- not
 over the answers that happen to exist.
 
-  RAG_GATE   **blocks.** Six constituents: the frozen manifest, the seal, the recorded
-             retrieval, P7's own call ledger, the vacuity refusal, and the 30/30 contract.
+  RAG_GATE   **blocks**, on mechanical facts only (RR-24): the frozen manifest, the seal, the
+             recorded retrieval, P7's own call ledger, a reopened run reproducing the run it
+             reopened, the vacuity refusal, and every cited handle resolving in scope.
+  RAG_CONTRACT  the 30/30 citation and scope contract, **reported** at its unmoved bar:
+             generator behaviour is measured once and never fixed.
 
 `RAG_QUALITY` is ticket 13's and is not printed here. Exit 0 when `RAG_GATE` passes.
 
@@ -145,6 +148,18 @@ def ledger_facts(answers: dict[str, Any] | None, ceiling: int, expected: int) ->
             and covered == expected}
 
 
+def reopen_facts(answers: dict[str, Any] | None) -> dict[str, Any]:
+    """The seal names what it reopened; the archived seal and answers are read from where it
+    says they are, never from the current files."""
+    seal = _load(SEAL_PATH)
+    if seal is None:
+        return {"reopened": False, "ok": True}
+    ro = seal.get("reopened_from") or {}
+    prior_seal = _load(EVAL_ROOT / ro["prior_seal"]) if ro.get("prior_seal") else None
+    prior = _load(EVAL_ROOT / ro["prior_answers"]) if ro.get("prior_answers") else None
+    return gate.reopen_facts(seal, prior_seal=prior_seal, prior=prior, current=answers)
+
+
 # ----------------------------------------------------------------------------- main ----
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
@@ -166,6 +181,7 @@ def main() -> None:
         "seal": seal_facts(manifest, answers),
         "retrieval": retrieval_facts(manifest, answers, spec),
         "ledger": ledger_facts(answers, ceiling, len(manifest.get("questions", []))),
+        "reopen": reopen_facts(answers),
         "contract": gate.contract_facts(manifest.get("questions", []),
                                         (answers or {}).get("answers", [])),
     }

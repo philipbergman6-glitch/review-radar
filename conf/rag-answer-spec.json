@@ -26,13 +26,12 @@
     "note": "The production hybrid of ADR-0005, with the question's scope filter applied to both legs before fusion. Product-scoped questions retrieve ten over one window; temporal questions retrieve five per window, each window fused on its own, so an empty window cannot be filled from the other."
   },
   "limits": {
-    "max_attempts": 2,
+    "max_attempts": 1,
     "max_claims": 6,
     "max_citations_per_claim": 6,
     "claim_max_words": 45,
     "refusal_reason_max_words": 60,
-    "call_ceiling": 200,
-    "subject_max_words": 15
+    "call_ceiling": 200
   },
   "prompts": {
     "rag_v1": {
@@ -69,5 +68,11 @@
       "reason": "rag-v1 and its successors were selected on contract behaviour alone -- no answer quality was scored, because scoring it would need answer keys and the only keyed set is the held-out thirty. rag-v2 fixed the citation vocabulary (contract 10/10, still 0 of 3 out-of-domain refusals). rag-v3 and rag-v4 added the subject test and the no-absence-as-a-claim rule in prose and moved 1 of 3. rag-v5 pairs the same prose with the decision-first schema and refused 3 of 3, plus two development products whose retrieved reviews are all praise, with the contract still clean at 10/10."
     },
     "note": "freeze_commit is the commit the development runs were made at; the commit recording this block is its child, so both are ancestors of the evaluation run."
+  },
+  "amended": {
+    "date": "2026-09-14",
+    "decided_in": "RR-24 (ADR-0006)",
+    "reopened_run": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+    "change": "limits.subject_max_words (15) removed: it rejected two of the thirty evaluation answers unread, on a field nothing downstream consumes; the subject's length is now recorded per answer as subject_words. limits.max_attempts 2 -> 1: an identical retry of a temperature-0, seeded decoder returned identical token counts both times, so the retry is a no-op. Prompt rag-v5, model, seed and retrieval are untouched; the config hash moves because limits are hashed, and --reopen proves that is the only movement by recomputing the sealed hash with the sealed commit's limits."
   }
 }

@@ -172,6 +172,49 @@ def test_a_full_scope_artefact_renders_its_own_verdict():
     assert rows[0].value == "0.4298" and rows[0].threshold == "0.70"
 
 
+def rag_cap():
+    return capability(id="rag", phase="P7 RAG", gate_name="RAG_GATE", kind="reproducibility")
+
+
+def rag_artifact(run_id, status, **over):
+    return artifact(capability="rag", phase="P7 RAG", gate_name="RAG_GATE",
+                    kind="reproducibility", pipeline_run_id=run_id, status=status,
+                    metric={"name": "constituents_ok", "value": 8 if status == "PASS" else 7,
+                            "threshold": 8, "direction": "eq"}, **over)
+
+
+RUN1 = "ffbbe884-5425-4ce8-9ecd-90f5a6201106"
+RUN2 = "0a1b2c3d-0000-4000-8000-000000000002"
+
+
+def test_a_reopened_run_keeps_its_prior_run_as_a_row_beside_it():
+    """RR-24: run 1's FAIL is the first result on record. It is never erased -- the archived
+    artefact renders as a prior row, marked as superseded by the run that reopened it."""
+    rows, errors = E.build_rows([rag_cap()], {"rag": rag_artifact(RUN2, "PASS")},
+                                priors={"rag": [rag_artifact(RUN1, "FAIL")]})
+    assert errors == []
+    assert [(r.verdict, r.run_id[:8], r.prior) for r in rows] == [
+        ("PASS", "0a1b2c3d", False), ("FAIL", "ffbbe884", True)]
+    assert "prior run" in rows[1].note and "superseded by 0a1b2c3d" in rows[1].note
+    text = E.render(rows, errors)
+    assert "ffbbe884" in text and "FAIL" in text
+    assert "capabilities=1" in text and "prior_rows=1" in text
+
+
+def test_a_prior_artefact_that_does_not_validate_fails_the_command():
+    bad = rag_artifact(RUN1, "FAIL")
+    bad.pop("population")
+    _, errors = E.build_rows([rag_cap()], {"rag": rag_artifact(RUN2, "PASS")},
+                             priors={"rag": [bad]})
+    assert errors and "rag" in errors[0] and "prior" in errors[0]
+
+
+def test_a_prior_artefact_never_stands_in_for_the_current_one():
+    rows, errors = E.build_rows([rag_cap()], {"rag": None},
+                                priors={"rag": [rag_artifact(RUN1, "FAIL")]})
+    assert errors and rows[0].verdict == "MISSING"
+
+
 def test_an_artefact_filed_under_the_wrong_capability_fails_the_command():
     _, errors = E.build_rows([capability()], {"themes_quality": artifact(capability="rag")})
     assert errors and any("capability" in e for e in errors)

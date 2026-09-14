@@ -1,16 +1,19 @@
-"""`RAG_GATE`: the citation and scope contract, at 30/30, and nothing else (ADR-0006, ADR-0011).
+"""`RAG_GATE`: the mechanical facts behind the thirty answers, and the contract reported beside
+them (ADR-0006, ADR-0011, amended by RR-24).
 
-P7's blocking gate asks one question about each of the thirty answers: **does this answer rest
-on its own retrieved evidence, inside the scope the frozen question declared?** A system that
-cites nothing cannot ship as working, so the contract blocks at the full denominator -- 30 of
-30, never a rate, never a majority.
+P7's blocking gate asks what a correct pipeline makes true regardless of what the model wrote:
+the questions are the frozen thirty, they were answered once under the sealed identity, every
+retrieved row is from the sealed generation inside its own window, every call is in P7's own
+ledger, every cited handle resolves to the question's own retrieved set and to a stored month
+inside the declared window, and a reopened run reproduced the prior run's answers. Those block.
 
-It deliberately does *not* ask whether an answer is any good. Grounded, adequate, correctly
-abstaining, falsely refusing: those are `RAG_QUALITY` (ticket 13), judged by Philip against the
-answer keys, reported beside their bars and blocking nothing. Mixing the two would make a
-disappointing quality number look like a broken phase, and a broken phase is something you
-reopen -- which after a held-out set has been opened is exactly the act ADR-0001 and the seal
-exist to refuse.
+The citation and scope contract keeps its bar -- 30 of 30, never a rate, never a majority --
+and **reports**: `RAG_CONTRACT answers_ok=N/30 bar=30/30 verdict=PASS|FAIL`. An uncited claim,
+a refusal carrying claims, a rejected output are *generator behaviour*: what the frozen model
+did with a held-out question, measured once and never fixed. Blocking on it would make the FAIL
+a reason to reopen, and reopening after the thirty are seen is tuning on the held-out set --
+the act ADR-0001 and the seal exist to refuse. A violating question scores as a failure in
+`RAG_QUALITY` (ticket 13), which is judged against the answer keys and blocks nothing.
 
 The constituents, in the order the gate prints them:
 
@@ -22,7 +25,10 @@ The constituents, in the order the gate prints them:
                  per-window size its retrieval mode declares
   RAG_LEDGER     every model call is in P7's own ledger with its run id, under ADR-0006's
                  ceiling
-  RAG_CONTRACT   the 30/30 itself, with per-rule counts and the first violations verbatim
+  RAG_REOPEN     a run made through `--reopen` names the run it reopened, carries a written
+                 reason, and parsed every answer the prior run parsed to identical bytes
+  RAG_CONTRACT   the 30/30 with per-rule counts, the first violations verbatim, and its own
+                 non-blocking verdict
 
 **A vacuous run cannot pass.** `answers_checked` is a constituent in its own right and the
 contract's denominator is the manifest's question count, not the number of answers that
@@ -33,10 +39,12 @@ Pure over already-loaded facts: no Elasticsearch, no Postgres, no filesystem.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from src.ai.rag_answers import CONTRACT_RULES, contract_violations, rule_of
+from src.ai.rag_answers import CONTRACT_RULES, MECHANICAL_RULES, contract_violations, rule_of
 from src.common.evaluation import Verdict, repro_verdict
 
 GATE_NAME = "RAG_GATE"
@@ -79,11 +87,23 @@ def contract_facts(questions: Sequence[Mapping[str, Any]],
             "per_rule": per_rule, "violations": violations}
 
 
+def contract_met(f: Mapping[str, Any]) -> bool:
+    """The 30/30 bar, unmoved: every question answered, and every answer clean."""
+    return f["questions"] > 0 and f["ok"] == f["questions"]
+
+
+def citations_resolve(f: Mapping[str, Any]) -> bool:
+    """The mechanical half of the contract: no cited handle outside the retrieved set, no cited
+    review outside its declared window. This is what blocks."""
+    return all(f["per_rule"][r] == 0 for r in MECHANICAL_RULES)
+
+
 def contract_lines(f: Mapping[str, Any]) -> list[str]:
     rules = " ".join(f"{r}={f['per_rule'][r]}" for r in CONTRACT_RULES)
-    lines = [(f"RAG_CONTRACT answers_ok={f['ok']}/{f['questions']} "
-              f"answers_recorded={f['answers']} violations={len(f['violations'])} {rules} "
-              f"ok={b(f['ok'] == f['questions'] and f['questions'] > 0)}")]
+    lines = [(f"RAG_CONTRACT answers_ok={f['ok']}/{f['questions']} bar={f['questions']}/"
+              f"{f['questions']} answers_recorded={f['answers']} "
+              f"violations={len(f['violations'])} {rules} "
+              f"verdict={'PASS' if contract_met(f) else 'FAIL'}")]
     for line in f["violations"][:VIOLATIONS_SHOWN]:
         lines.append(f"RAG_VIOLATION {line}")
     if len(f["violations"]) > VIOLATIONS_SHOWN:
@@ -123,20 +143,71 @@ def ledger_line(f: Mapping[str, Any]) -> str:
             f"answers_covered={f['covered']}/{f['expected_covered']} ok={b(f['ok'])}")
 
 
+def parsed_hash(answer: Mapping[str, Any]) -> str | None:
+    """The bytes of one parsed answer, or None for a row that never parsed."""
+    if answer.get("status") != "succeeded":
+        return None
+    return hashlib.sha256(json.dumps(answer.get("parsed"), sort_keys=True,
+                                     ensure_ascii=False).encode()).hexdigest()
+
+
+def reopen_facts(seal: Mapping[str, Any], *, prior_seal: Mapping[str, Any] | None,
+                 prior: Mapping[str, Any] | None, current: Mapping[str, Any] | None
+                 ) -> dict[str, Any]:
+    """Did a reopened run reproduce the run it reopened? Re-derived from the archived answers.
+
+    `seal` is the seal on disk; a reopen stamped `reopened_from` into it. `prior_seal` and
+    `prior` are the archived seal and answers it names, and `current` is the answers document
+    the seal's own run wrote. Every question the prior run parsed must parse in the rerun to
+    the same bytes -- a seeded `temperature 0` decoder is deterministic, and this is where
+    that is asserted rather than assumed (RR-24). A first run is not a reopen and holds.
+    """
+    ro = seal.get("reopened_from")
+    if not ro:
+        return {"reopened": False, "ok": True}
+    prior_rows = {a["question_id"]: a for a in (prior or {}).get("answers", [])}
+    current_rows = {a["question_id"]: a for a in (current or {}).get("answers", [])}
+    prior_hashes = {q: h for q, a in prior_rows.items() if (h := parsed_hash(a)) is not None}
+    differing = sorted(q for q, h in prior_hashes.items()
+                       if q not in current_rows or parsed_hash(current_rows[q]) != h)
+    reason = str(ro.get("reason") or "").strip()
+    prior_run = ro.get("run_id")
+    evidence = (prior_seal is not None and prior is not None and current is not None
+                and bool(prior_run) and prior_seal.get("run_id") == prior_run
+                and prior.get("run_id") == prior_run
+                and current.get("run_id") == seal.get("run_id") != prior_run)
+    return {"reopened": True, "reopened_from": prior_run, "reason": reason,
+            "prior_seal": ro.get("prior_seal"), "prior_answers": ro.get("prior_answers"),
+            "prior_parsed": len(prior_hashes), "identical": len(prior_hashes) - len(differing),
+            "differing": differing,
+            "ok": evidence and bool(reason) and bool(prior_hashes) and not differing}
+
+
+def reopen_line(f: Mapping[str, Any]) -> str:
+    if not f.get("reopened"):
+        return "RAG_REOPEN reopened_from=none ok=true"
+    return (f"RAG_REOPEN reopened_from={(f.get('reopened_from') or 'none')[:8]} "
+            f"prior_seal={f.get('prior_seal') or 'missing'} "
+            f"answers_identical_to_run1={f['identical']}/{f['prior_parsed']} "
+            f"differing={','.join(f.get('differing') or []) or 'none'} "
+            f"reason={'written' if f.get('reason') else 'missing'} ok={b(f['ok'])}")
+
+
 # ----------------------------------------------------------------------- verdict ----
 def gate_checks(facts: Mapping[str, Any], contract: Mapping[str, Any]
                 ) -> tuple[tuple[str, bool], ...]:
-    """Five reproducibility constituents plus the vacuity refusal, in printing order."""
+    """The mechanical constituents, in printing order. Nothing here depends on what the model
+    chose to write -- only on whether the pipeline recorded, resolved and reproduced it."""
     return (("questions_frozen", bool(facts["questions"]["ok"])),
             ("answered_once", bool(facts["seal"]["ok"])),
             ("retrieval_recorded", bool(facts["retrieval"]["ok"])),
             ("call_ledger_complete", bool(facts["ledger"]["ok"])),
+            ("prior_run_reproduced", bool(facts["reopen"]["ok"])),
             # The vacuity refusal, and it is its own constituent rather than an implication of
             # the contract: a run that answered nothing has a real failure -- it produced no
             # answers -- and naming it separately says so instead of reporting 0/30 alone.
             ("answers_checked", contract["questions"] > 0 and contract["answers"] > 0),
-            ("citation_scope_contract", contract["questions"] > 0
-             and contract["ok"] == contract["questions"]))
+            ("citations_resolve", citations_resolve(contract)))
 
 
 def gate_line(*, scope: str, checks: Sequence[tuple[str, bool]],
@@ -149,12 +220,12 @@ def gate_line(*, scope: str, checks: Sequence[tuple[str, bool]],
 
 
 def verdict(facts: Mapping[str, Any], *, scope: str) -> Verdict:
-    """`RAG_GATE` over the contract and the four claims that make it mean anything."""
+    """`RAG_GATE` over the mechanical facts, with the contract reported beside them."""
     contract = facts["contract"]
     checks = gate_checks(facts, contract)
     constituents = [questions_line(facts["questions"]), seal_line(facts["seal"]),
                     retrieval_line(facts["retrieval"]), ledger_line(facts["ledger"]),
-                    *contract_lines(contract)]
+                    reopen_line(facts["reopen"]), *contract_lines(contract)]
     return repro_verdict(GATE_NAME, checks,
                          gate_line(scope=scope, checks=checks, contract=contract),
                          constituents=constituents)
@@ -163,15 +234,22 @@ def verdict(facts: Mapping[str, Any], *, scope: str) -> Verdict:
 def notes(facts: Mapping[str, Any]) -> list[str]:
     """What belongs beside the verdict in the table: what the contract did and did not check."""
     c = facts["contract"]
-    out = [("RAG_GATE checks the citation and scope contract only: every non-refused answer "
-            "cites at least one review from its own retrieved set, in a window the question "
-            "declared and that the review's stored month really falls inside, and a refusal "
-            "carries neither claims nor citations. Whether an answer is grounded, adequate or "
-            "correctly abstaining is RAG_QUALITY (ticket 13), reported and never blocking")]
+    out = [("RAG_GATE blocks on mechanical facts only: the frozen thirty answered once under "
+            "the sealed identity, every retrieved row recorded from the sealed generation "
+            "inside its window, every call in P7's own ledger, every cited handle resolving to "
+            "the question's own retrieved set and to a stored month inside the declared window, "
+            "and a reopened run reproducing the prior run's answers. The 30/30 citation and "
+            "scope contract is reported at its bar (RAG_CONTRACT); an uncited claim, a refusal "
+            "carrying claims or a parse failure is generator behaviour, measured once and never "
+            "fixed, and scores as a failure in RAG_QUALITY (ticket 13; RR-24)")]
     if c["violations"]:
         rules = ", ".join(f"{r}={c['per_rule'][r]}" for r in CONTRACT_RULES if c["per_rule"][r])
-        out.append(f"{len(c['violations'])} contract violation(s) over "
+        out.append(f"RAG_CONTRACT verdict={'PASS' if contract_met(c) else 'FAIL'}: "
+                   f"{len(c['violations'])} contract violation(s) over "
                    f"{c['questions'] - c['ok']} question(s): {rules}")
+    r = facts.get("reopen") or {}
+    if r.get("reopened"):
+        out.append(f"reopened from run {r.get('reopened_from')}: {r.get('reason')}")
     if facts["retrieval"].get("empty_windows"):
         out.append(f"{facts['retrieval']['empty_windows']} declared window(s) retrieved nothing; "
                    "an empty window is a retrieval result, not a contract violation, and it is "

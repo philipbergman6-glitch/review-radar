@@ -268,6 +268,10 @@ rag-dev-answers:  ## answer the development set, for prompt development; never s
 rag-answers:  ## answer the thirty frozen questions ONCE under the frozen prompt; writes eval/rag/answers.json and the seal
 	$(RUN) -m src.ai.rag_run --questions conf/rag-questions.json --question-set evaluation
 
+rag-reopen:  ## the one sanctioned second run of the thirty (RR-24): REASON="…" is mandatory; archives run 1, writes seal 2
+	@test -n "$(REASON)" || (echo "rag-reopen needs REASON=\"why the thirty are opened again\"" >&2; exit 2)
+	$(RUN) -m src.ai.rag_run --questions conf/rag-questions.json --question-set evaluation --reopen "$(REASON)"
+
 gate-rag:  ## re-derive every P7 constituent from the manifest, the seal, the retrieval and the call ledger; prints RAG_GATE
 	$(RUN) scripts/gate_rag.py --scope full
 

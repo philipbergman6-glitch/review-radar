@@ -58,6 +58,15 @@ ANSWER_STATUSES = ("succeeded", "parse_failed", "api_failed")
 CONTRACT_RULES = ("terminal", "refusal_empty", "claims_cite", "citations_retrieved",
                   "citations_in_scope")
 
+#: The split RR-24 drew through the contract. A *mechanical* rule is one a correct pipeline
+#: makes true regardless of what the model wrote -- a cited handle resolving to the retrieved
+#: set, a stored month inside the declared window -- and `RAG_GATE` blocks on it. The rest is
+#: *generator behaviour*: an uncited claim, a refusal carrying claims, a rejected output. It is
+#: measured once against the unmoved 30/30 bar and reported, never fixed after the thirty are
+#: seen (ADR-0006, CONTEXT.md *Mechanical fact / Generator behaviour*).
+MECHANICAL_RULES = ("citations_retrieved", "citations_in_scope")
+GENERATOR_RULES = ("terminal", "refusal_empty", "claims_cite")
+
 
 def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode()).hexdigest()
@@ -121,12 +130,18 @@ class AnswerSpec:
                                   sort_keys=True))
 
     def config_hash(self, prompt_name: str, schema: dict[str, Any], *,
-                    generation: str, model_id: str | None = None) -> str:
-        """Identity of one answering configuration: settings, prompt, schema, retriever."""
+                    generation: str, model_id: str | None = None,
+                    limits: dict[str, Any] | None = None) -> str:
+        """Identity of one answering configuration: settings, prompt, schema, retriever.
+
+        `limits` defaults to this spec's own; a reopen passes the sealed commit's instead, to
+        show that the sealed hash comes back when only the limits are put back (RR-24).
+        """
         p = self.prompts[prompt_name]
+        lim = self.limits if limits is None else limits
         payload = {"inference": self.inference, "system": p.text, "prompt_version": p.version,
                    "schema": schema, "model_id": model_id or self.model_id,
-                   "limits": {k: v for k, v in self.limits.items() if k != "call_ceiling"},
+                   "limits": {k: v for k, v in lim.items() if k != "call_ceiling"},
                    "answer_spec_version": self.answer_spec_version,
                    "retrieval_hash": self.retrieval_hash(generation=generation)}
         return _sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False))

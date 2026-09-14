@@ -5,14 +5,14 @@
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 12.235,
+          "duration_s": 6.231,
           "input_tokens": 2223,
           "output_tokens": 70,
           "validation_error": null
         }
       ],
-      "idempotency_key": "1879d594710186697f85dcf43acd28874d7c5f1f0cd22c1067823ed37e3f879f",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "a1e5b5aa761e288ea6746f8632f9eed9c774838bdf744d06be33525e584b93da",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -176,22 +176,21 @@
         }
       ],
       "retrieved_digest": "a58058eb96f210a71b6681c25f48f2e8c7cf0324527201862444aef5f44852dc",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 14.147,
+          "duration_s": 13.726,
           "input_tokens": 2326,
           "output_tokens": 242,
           "validation_error": null
         }
       ],
-      "idempotency_key": "cf1d8bae4c1e9e521cbd20c3e9045c65b965adac2d7aa66a176a47ab8dd74ed0",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "074ead544f0729d72576128103bda9838b195e36848c7815f0939ab397095d4e",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -386,76 +385,30 @@
         }
       ],
       "retrieved_digest": "4b80123ae5bb1884ecfee93064d5cdd64f8af9fa9f124357e64d28e608649ade",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 22.056,
+          "duration_s": 21.799,
           "input_tokens": 2542,
           "output_tokens": 393,
-          "validation_error": null
+          "validation_error": "subject has 16 words, limit 15"
+        },
+        {
+          "attempt_no": 2,
+          "duration_s": 19.526,
+          "input_tokens": 2542,
+          "output_tokens": 393,
+          "validation_error": "subject has 16 words, limit 15"
         }
       ],
-      "idempotency_key": "2090073ec99c8483543c84d8fb4de4c43faf7520d847f51cd19bbf9e69043d15",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "49b787b546bbfc6b2c41ad3a3e4365579aaa7cc5e3e19a4c78c6de84afb8e523",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
-      "parsed": {
-        "claims": [
-          {
-            "citations": [
-              {
-                "cite_id": "R2",
-                "window": "scope"
-              }
-            ],
-            "claim": "The tint is too dark for medium brown hair with dark brown eyebrows."
-          },
-          {
-            "citations": [
-              {
-                "cite_id": "R2",
-                "window": "scope"
-              }
-            ],
-            "claim": "The tint requires several applications in one sitting for color to stay, dries and appears spotty."
-          },
-          {
-            "citations": [
-              {
-                "cite_id": "R2",
-                "window": "scope"
-              }
-            ],
-            "claim": "The tint does not last as long as expected, you must avoid water exposure to your brows for it to last more than 3-4 days."
-          },
-          {
-            "citations": [
-              {
-                "cite_id": "R7",
-                "window": "scope"
-              }
-            ],
-            "claim": "The color lasts several days, not even a week like the exact same Godefroy tint kit purchased previously."
-          },
-          {
-            "citations": [
-              {
-                "cite_id": "R10",
-                "window": "scope"
-              }
-            ],
-            "claim": "The tint begins to wear off after 3 days (this is with me avoiding washing my brows or applying moisturizers) and I would say by day 5 it's almost completely gone."
-          }
-        ],
-        "refusal_reason": null,
-        "refused": false,
-        "subject": "complaints about Godefroy Tint Kit for Spot Coloring, Dark Brown (ASIN B0BM4GX6TT) between 2016-10 and 2017-09",
-        "subject_supported": true
-      },
+      "parsed": null,
       "prompt_version": "rag-v5",
       "question_id": "product_scoped-02",
       "retrieved": [
@@ -611,22 +564,21 @@
         }
       ],
       "retrieved_digest": "3aebcfe4f8b4dc8373afbd5282439724e92f47157af4e8c6b661af0cc2e4eecc",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 16
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "parse_failed"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 19.764,
+          "duration_s": 24.58,
           "input_tokens": 2619,
           "output_tokens": 319,
           "validation_error": null
         }
       ],
-      "idempotency_key": "bd96523f9ef33824a58549b3190113e9a5523e936a7c81271f4b28a2cbc9325f",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "2c8b048569704ee4fe2119b1b83e01a268d36fc1e147adf1a443fc56a2b19d34",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -827,22 +779,21 @@
         }
       ],
       "retrieved_digest": "8cf95bb589e9131503b6d6634e5e75a09f6095b1dd30831444b535d0e3408f48",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 5
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 27.444,
+          "duration_s": 39.041,
           "input_tokens": 1923,
           "output_tokens": 456,
           "validation_error": null
         }
       ],
-      "idempotency_key": "a2f6a925c411ab407ff61678ae1133e18be5ec73b031f7946d1e7f2c6b9a182c",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "6972ec7d6efd94a92b21ceeb01a17b238b201e77a797aa3d1c2b74e3eafdf452",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -1087,22 +1038,21 @@
         }
       ],
       "retrieved_digest": "f3392d8bcc7102b54ee8b11ba4ccb306ef3b0223a00ee081808b794cd62918b4",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 23.844,
+          "duration_s": 39.606,
           "input_tokens": 2012,
           "output_tokens": 422,
           "validation_error": null
         }
       ],
-      "idempotency_key": "6d04862e38b6388fd2b936cf36acc6ccdff23aef141b4d302eb57d67ec77b78d",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "adbc3f29c7b3303da7924fccddab5e05133906e59baed635eec196e18a4ae1ee",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -1310,22 +1260,21 @@
         }
       ],
       "retrieved_digest": "bb2b2ad982a44f7b4fd7c55e3f79fa104be427e56a63513354b88c99ba01e3a5",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 7.441,
+          "duration_s": 12.914,
           "input_tokens": 2320,
           "output_tokens": 88,
           "validation_error": null
         }
       ],
-      "idempotency_key": "5e15e61541a7583d95f3a5c806ed8d30e3d2914198d89debac429f87d9fd03f3",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "b9ef5a14f094643e734e6c06486be7fd1d99932ca04d511faf15a55c2c47acc5",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -1499,22 +1448,21 @@
         }
       ],
       "retrieved_digest": "9068e84d08239c35297c256af35a123eb2c1c0f81527aa6f0af195586f7dfbc0",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 20.413,
+          "duration_s": 32.27,
           "input_tokens": 2709,
           "output_tokens": 320,
           "validation_error": null
         }
       ],
-      "idempotency_key": "5e5569ab944ebc2ace02f8d03f074e846a2fcd448105940e991495bd2b15e666",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "70266ab582e516d26cdd28fb181b139d7f7d4f08e6f8656d89a44081406ae8c6",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -1733,22 +1681,21 @@
         }
       ],
       "retrieved_digest": "cd8a8e411a0d0e2dd588e9e70f4634f279dafa9990d59e69d966a31bbf5c96fb",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 21.348,
+          "duration_s": 33.074,
           "input_tokens": 2270,
           "output_tokens": 371,
           "validation_error": null
         }
       ],
-      "idempotency_key": "adb5100df0b5efbef52f1068e77910029c65d4146a9cde566c23d7907fdc7c2d",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "aa13220b7922ade8adb4b5e86278f06d5b144ec02ec36791852b45969b5f12b2",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -1971,22 +1918,21 @@
         }
       ],
       "retrieved_digest": "a67dbc90fb14247ac113b18c7d8f69e9c254510c6b943477a9445ca5a7dcbe3c",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 29.377,
+          "duration_s": 42.881,
           "input_tokens": 2209,
           "output_tokens": 513,
           "validation_error": null
         }
       ],
-      "idempotency_key": "af62a78bc0172bee0f312437fbf647801cb8fcc88907b517b7f4112f026cb1de",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "bcc28154c90932260b1c53ed601338a6ecd75cd0ab50304eff4636c73de693a5",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -2218,22 +2164,21 @@
         }
       ],
       "retrieved_digest": "f431ad5db9724f1ae990d5fa17111f875c8b6ad276eb68769f2113cdc240a595",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 7
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 12.391,
+          "duration_s": 17.362,
           "input_tokens": 2074,
           "output_tokens": 185,
           "validation_error": null
         }
       ],
-      "idempotency_key": "4708a48d0cab1daca734f9eb0b4cfe2d65ce62c4059ddb2fbe6d4d3d46e8794d",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "11d8498292b695443aa4039ef25e0fdc9aed88f274c1e5e51e286584f82b72d5",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -2425,22 +2370,21 @@
         }
       ],
       "retrieved_digest": "1e80072e55483d6c72747f37111990dba5621b46103d4364cdc00a4ff90a7896",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 19.836,
+          "duration_s": 5111.219,
           "input_tokens": 2127,
           "output_tokens": 319,
           "validation_error": null
         }
       ],
-      "idempotency_key": "154b603a8fe8bb7290d84460c3537c38ab2460625ee3b3b59fb67eb50ef4c6d6",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "aff26202508e259bfcb56c525d897eb01a63e30c9c407ffaf4cc0d1b1c4bc4cf",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -2659,22 +2603,21 @@
         }
       ],
       "retrieved_digest": "968b1bad163f05471e4f9d9f58a6884ed3aaaec8ceb50cc20d73d28e5a44c211",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 22.867,
+          "duration_s": 3129.583,
           "input_tokens": 2272,
           "output_tokens": 356,
           "validation_error": null
         }
       ],
-      "idempotency_key": "8b8b1c256a595913e1b9a1e873fe82de7a7b96c45b3982cecd7e4a2e289a5ddf",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "f8832d77d361c9a588d4c1c64c3be4f691c4360a20f620f972358b83975cca37",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -2891,22 +2834,21 @@
         }
       ],
       "retrieved_digest": "069e7f00505901e3144d75ea480af70f48509b477d2b8a9bed6e5ebe9526a850",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 5
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 23.357,
+          "duration_s": 2726.645,
           "input_tokens": 2310,
           "output_tokens": 350,
           "validation_error": null
         }
       ],
-      "idempotency_key": "2387eefc0cca19fc10474d116892b70d710b4314c28409f0b1dd035e484f6ab9",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "48714d2011d0abb3dfda66c6e79e5840a9157cef6d95cb1c53522b35a7b17ca5",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -3110,22 +3052,21 @@
         }
       ],
       "retrieved_digest": "345ed826fcecaec601f552514ebe7b9a9f9ec570b72455da9d7f9dffe8ace524",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 26.647,
+          "duration_s": 3098.875,
           "input_tokens": 2746,
           "output_tokens": 331,
           "validation_error": null
         }
       ],
-      "idempotency_key": "28c26e52b6e788968b11905dadcd1edafb4ccca363efc5f75a96fe3d22e6ef82",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "6f4e42aa8eb6507b5bbe377a81b855631dac1762e314f6d6cc3d4a251db32324",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -3344,22 +3285,21 @@
         }
       ],
       "retrieved_digest": "9ba77906ad66d207de78573d0ff6ce8a60a69ab8aafcb45d58b559f380b6ee16",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 26.275,
+          "duration_s": 3491.312,
           "input_tokens": 2875,
           "output_tokens": 326,
           "validation_error": null
         }
       ],
-      "idempotency_key": "306d91139b65279ae998f3fdb316284b6baf30896178abeae9cb75f3b9291a88",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "d45e0a8dc26f6295c422f33776c3af356b5d2e4dcda9f845e91cb14cbcbe9ba6",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -3578,22 +3518,21 @@
         }
       ],
       "retrieved_digest": "9e055634e404246a28233d922b29db0f60b692634db69ea4d146997e385bc76d",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 21.511,
+          "duration_s": 2677.774,
           "input_tokens": 1949,
           "output_tokens": 320,
           "validation_error": null
         }
       ],
-      "idempotency_key": "5d049c88c15e75746de4ef7c5e5a8f4aa41c073a1be3561faa3b3e6bf91cbe2c",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "52a37108bddf7455ee6c0bda43fc755dfdb55befa65f9a45edb8c41a2d27b589",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -3812,22 +3751,21 @@
         }
       ],
       "retrieved_digest": "86ce9697586fee4036533d62eb29bac37387f494372a5858eb977bfc1b77d655",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 30.62,
+          "duration_s": 3694.994,
           "input_tokens": 2008,
           "output_tokens": 482,
           "validation_error": null
         }
       ],
-      "idempotency_key": "dbb82b4dce6f416da4a4c7a10f118ec3fe70004235731b648fb122a1977105fc",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "3ac8b4b237bc8a9c7ab73c4f4e7fc04063e875ca877be0abf50dfecfbf618d0a",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -4062,22 +4000,21 @@
         }
       ],
       "retrieved_digest": "beab466f6fcdb6dc054a7829a1ede5b96d649bffa7418a2cfac9d9e36edef103",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 7
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 12.886,
+          "duration_s": 37.067,
           "input_tokens": 2379,
           "output_tokens": 151,
           "validation_error": null
         }
       ],
-      "idempotency_key": "d3018d35250f30d332aa272ed4ba1642abc2cf5bfa98d4db717dcb735f3bc418",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "a1aac2ffc0c946f30efba862839fc3411beb994e69a819c5e9efa3fb6e13eb25",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -4260,22 +4197,21 @@
         }
       ],
       "retrieved_digest": "823b96dce07f7d1580133237bfcd462fc65d8b63ca92d3e8353c81d574449070",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 24.212,
+          "duration_s": 3063.927,
           "input_tokens": 2359,
           "output_tokens": 346,
           "validation_error": null
         }
       ],
-      "idempotency_key": "972b5ed97a8f8ceaf7e459fae8bce7ad4040286b51af9f2cc9a43771d0c94f4f",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "caafb86f570fe7a207e33c5123b1e3fc59e64a2ab71506d32d0c897a56496de9",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [
@@ -4498,22 +4434,21 @@
         }
       ],
       "retrieved_digest": "edd15f4d01992052f77f25a39758cb605c3fb4d12619eeba88d4d0cde71a3d9a",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 5
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 7.811,
+          "duration_s": 23.058,
           "input_tokens": 2301,
           "output_tokens": 61,
           "validation_error": null
         }
       ],
-      "idempotency_key": "0feb8dd347d7c87dd14988c5f0b08eb1e76b6730d59234a23e6c7b806c8cabf9",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "afb36edd905b930aca540c603ab26de5f76979898d173b75964aed815499ea68",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -4677,22 +4612,21 @@
         }
       ],
       "retrieved_digest": "d21681053263b913136c301d1aa69fb18fdc883f1d5090a1ef90134b9f0ee4c2",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 7
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 12.038,
+          "duration_s": 127.227,
           "input_tokens": 2718,
           "output_tokens": 110,
           "validation_error": null
         }
       ],
-      "idempotency_key": "b03cd31e2ce507cf272e0c7f4606c5912fd2008b54a83fe01fbe8521ebede794",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "a66c6dce32f12bccdc02ae31bbb3d121255073b926934a9ea37faf40f0f456ca",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -4856,22 +4790,21 @@
         }
       ],
       "retrieved_digest": "b915bb0fe332b7ad9d9eb7574fb45a8b049d543eb04118507984e22823b81d18",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 7
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 7.354,
+          "duration_s": 22.545,
           "input_tokens": 1957,
           "output_tokens": 74,
           "validation_error": null
         }
       ],
-      "idempotency_key": "850430c67518db9720ac2f2dae152a7fe3135590d22e265fbe312633c8f103aa",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "5a460cc3dd9791361c23013926dc86b158133f9e63d228e65b34125eb6a25b4b",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -5035,22 +4968,21 @@
         }
       ],
       "retrieved_digest": "27a061ef5a383c2405b25f3de51f4ad2fa2d831ac1847761bfcb2b37294a3860",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 8
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 7.807,
+          "duration_s": 20.132,
           "input_tokens": 2327,
           "output_tokens": 64,
           "validation_error": null
         }
       ],
-      "idempotency_key": "f115732cd1144ff0935310b8784952b82221eed3358d5a7e7cfa48d36148c363",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "09fba0d2205d54225ccb1a922491051160c0b8c0a02dd3a7bf76b709b163b4fc",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -5214,22 +5146,21 @@
         }
       ],
       "retrieved_digest": "13ba0510a1029c810a68b54e91ff09bd213283407e2c7f63daaf0bfae2d1114a",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 8
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 5.766,
+          "duration_s": 1004.34,
           "input_tokens": 1178,
           "output_tokens": 57,
           "validation_error": null
         }
       ],
-      "idempotency_key": "8a90322ac2ae8ef88771ae1b1ce317fee61e388f5d52492fa2d131dfa0b1cce1",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "43683ec292740029ce74a882834bf092dbe5200ad81d1945d0e2e23b00597c90",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -5242,50 +5173,49 @@
       "question_id": "zero_review_scope-01",
       "retrieved": [],
       "retrieved_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 5.986,
+          "duration_s": 17.273,
           "input_tokens": 1164,
           "output_tokens": 99,
-          "validation_error": null
+          "validation_error": "subject has 19 words, limit 15"
+        },
+        {
+          "attempt_no": 2,
+          "duration_s": 18.206,
+          "input_tokens": 1164,
+          "output_tokens": 99,
+          "validation_error": "subject has 19 words, limit 15"
         }
       ],
-      "idempotency_key": "2c36c0b7074b0b928a382b03b7c6c07e2d858b4e9699436f5add32d4dfe303d0",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "8703ec38b1682042f4d15b47324a7acd8f6d46f4d71f1a84bf7e06ded00f837f",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
-      "parsed": {
-        "claims": [],
-        "refusal_reason": "The corpus cannot answer the question because no reviews were retrieved for this product and time frame.",
-        "refused": true,
-        "subject": "complaints about Twin Pack of COTU (R) Ultimate Lather Bath Sponge - 5.75\" L x 4.75\" W (ASIN B0113GT5Q4)",
-        "subject_supported": false
-      },
+      "parsed": null,
       "prompt_version": "rag-v5",
       "question_id": "zero_review_scope-02",
       "retrieved": [],
       "retrieved_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 19
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "parse_failed"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 3.34,
+          "duration_s": 942.761,
           "input_tokens": 1178,
           "output_tokens": 57,
           "validation_error": null
         }
       ],
-      "idempotency_key": "5005691822f2476143f5496e3eb0d2ab9c3618f4151de121602545bb7bdd052f",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "f43a869c3321fada6c4f437ff9afc2d1841192b4620c7d445bc1561fc934c021",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -5298,22 +5228,21 @@
       "question_id": "zero_review_scope-03",
       "retrieved": [],
       "retrieved_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 4
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 7.034,
+          "duration_s": 1055.022,
           "input_tokens": 2196,
           "output_tokens": 62,
           "validation_error": null
         }
       ],
-      "idempotency_key": "fe227a559c4075a93873b5baff8c0bacf52e836774e0ba1050ddbc4692a3c8c0",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "e2339b674b1294697e3fbf30cf85ccea72218971c373b9880678c229bf8a8e9e",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -5477,22 +5406,21 @@
         }
       ],
       "retrieved_digest": "7fdec0b558d1032e98afa721da60ef72336c18e778f658216a2817ce6c90518d",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 5
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 7.027,
+          "duration_s": 19.479,
           "input_tokens": 2079,
           "output_tokens": 62,
           "validation_error": null
         }
       ],
-      "idempotency_key": "969efafe6b66127abd4b970e27ab4762facd508a12af3321fb9d39c42a034b01",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "9f57202cc005815266d375a248c768db2b7344d11c6b0318ae74fd25c6db5eea",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -5656,22 +5584,21 @@
         }
       ],
       "retrieved_digest": "636253a0129ae478390824582b5b423ec5a0770c0a1f3620be76add4466726e0",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 5
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     },
     {
       "attempts": [
         {
           "attempt_no": 1,
-          "duration_s": 8.169,
+          "duration_s": 19.438,
           "input_tokens": 2061,
           "output_tokens": 64,
           "validation_error": null
         }
       ],
-      "idempotency_key": "7562065cfa9d81c9c0a64188aba508b03cef060b90fd3dfd462ad53ce3255156",
-      "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+      "idempotency_key": "cc3cbadbb32ff20e6a7605a59df85fc5a7cf26257b035e75e0bf2f5d8d06d8ad",
+      "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
       "model_id": "qwen3:8b",
       "parsed": {
         "claims": [],
@@ -5835,17 +5762,16 @@
         }
       ],
       "retrieved_digest": "7793ecc64424f167ec8e4d0e8cc879be35fbcf5d4b7397b035fefa67dbbac53f",
-      "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
-      "status": "succeeded",
-      "subject_words": 6
+      "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
+      "status": "succeeded"
     }
   ],
-  "created_at": "2026-09-14T08:33:29+00:00",
+  "created_at": "2026-09-14T01:24:06+00:00",
   "generation": "reviews_s8507728480475534879_d2e56c46",
   "identity": {
     "answer_spec_version": "1",
     "generation": "reviews_s8507728480475534879_d2e56c46",
-    "inference_config_hash": "b31a55efedf33e4e4af0fee56eaccd468cd499e07eff183e36d4641cb069a231",
+    "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
     "model_id": "qwen3:8b",
     "prompt_version": "rag-v5",
     "question_spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
@@ -5855,8 +5781,7 @@
   "question_spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
   "questions_path": "conf/rag-questions.json",
   "questions_version": "1",
-  "reopened_from": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
-  "run_id": "c4ae0dc5-58a5-47ec-96a7-093bac5fddfb",
+  "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106",
   "scope": "full",
   "search_run_id": "d2e56c46-6e05-40d5-9c8b-e24415ab92f9"
 }

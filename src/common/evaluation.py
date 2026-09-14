@@ -16,6 +16,10 @@ The rules the join enforces, and why each exists:
 * **Reproducibility and quality render in separate sections.** Only reproducibility blocks
   a phase; a missed quality bar is a result, not a broken pipeline. Mixing them is what
   makes a disappointing number look like a reason to reopen a frozen protocol.
+* **A prior run's artefact renders as a prior row, never as the capability's verdict.** A
+  sanctioned reopen (RR-24) archives the run it supersedes as `eval/<capability>/gate.<n>.json`;
+  the table shows it beside the current row, marked superseded, so the first result on
+  record is never erased -- and it never stands in when the current artefact is missing.
 
 The functions here are pure over already-loaded artefacts -- no Spark, no Elasticsearch, no
 Postgres, no filesystem beyond the two config files. `scripts/eval_table.py` does the I/O.
@@ -378,6 +382,7 @@ class Row:
     scope: str
     run_id: str
     note: str
+    prior: bool = False
 
 
 def fmt_number(v: float) -> str:
@@ -396,15 +401,19 @@ def _blank(cap: Capability, verdict: str, note: str, *, scope: str = "-") -> Row
                run_id="-", note=note)
 
 
-def build_rows(chain, artifacts: dict[str, dict | None]) -> tuple[list[Row], list[str]]:
+def build_rows(chain, artifacts: dict[str, dict | None],
+               priors: dict[str, list[dict]] | None = None) -> tuple[list[Row], list[str]]:
     """One row per declared capability, plus every reason the table is not trustworthy.
 
     `artifacts` maps capability id to the loaded artefact, or None when its file is absent.
+    `priors` maps capability id to the archived artefacts of runs a reopen superseded, oldest
+    first; each renders as a prior row directly under the current one.
     """
     rows: list[Row] = []
     errors: list[str] = []
     for cap in chain:
         doc = artifacts.get(cap.id)
+        prior_docs = (priors or {}).get(cap.id, [])
         if cap.status == "cut":
             if doc is not None:
                 errors.append(f"{cap.id}: declared cut but {cap.artifact_path} exists -- "
@@ -429,8 +438,25 @@ def build_rows(chain, artifacts: dict[str, dict | None]) -> tuple[list[Row], lis
             errors.extend(f"{cap.id}: {f}" for f in fails)
             rows.append(_blank(cap, MISSING, "artefact does not validate"))
             continue
-        rows.append(_row(cap, doc))
+        current = _row(cap, doc)
+        rows.append(current)
+        for i, prior in enumerate(prior_docs, start=1):
+            prior_fails = validate_artifact(prior)
+            if prior.get("capability") != cap.id:
+                prior_fails.append(f"artefact says {prior.get('capability')!r}")
+            if prior_fails:
+                errors.extend(f"{cap.id}: prior artefact {i}: {f}" for f in prior_fails)
+                continue
+            rows.append(_prior_row(cap, prior, superseded_by=current.run_id))
     return rows, errors
+
+
+def _prior_row(cap: Capability, doc: dict, *, superseded_by: str) -> Row:
+    row = _row(cap, doc)
+    note = (f"prior run, superseded by {superseded_by[:8]} through a sanctioned reopen "
+            f"(RR-24); kept as the first result on record")
+    return Row(**{**row.__dict__, "note": f"{note}; {row.note}" if row.note else note,
+                  "prior": True})
 
 
 def _row(cap: Capability, doc: dict) -> Row:
@@ -463,8 +489,9 @@ def _table(rows: list[Row]) -> list[str]:
     if not rows:
         return ["  (none declared)"]
     cells = [list(HEADERS)] + [
-        [r.phase, r.capability, r.gate_name, r.metric, r.value, r.threshold, r.verdict,
-         r.scope, r.run_id[:8], r.note] for r in rows]
+        [r.phase, f"{r.capability} (prior)" if r.prior else r.capability, r.gate_name,
+         r.metric, r.value, r.threshold, r.verdict, r.scope, r.run_id[:8], r.note]
+        for r in rows]
     widths = [max(len(c[i]) for c in cells) for i in range(len(HEADERS))]
     # The note is last and free-form: pad every column before it, never it.
     lines = []
@@ -485,7 +512,9 @@ def render(rows: list[Row], errors: list[str]) -> str:
     out.append("")
     for e in errors:
         out.append(f"EVAL_TABLE_ERROR {e}")
-    counted = [r for r in rows if r.verdict != MISSING]
+    current = [r for r in rows if not r.prior]
+    counted = [r for r in current if r.verdict != MISSING]
     out.append(f"EVAL_TABLE={'INCOMPLETE' if errors else 'OK'} "
-               f"capabilities={len(rows)} rendered={len(counted)} errors={len(errors)}")
+               f"capabilities={len(current)} rendered={len(counted)} "
+               f"prior_rows={len(rows) - len(current)} errors={len(errors)}")
     return "\n".join(out)

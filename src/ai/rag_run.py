@@ -17,19 +17,33 @@ refused before a single call is made: re-answering the thirty after seeing how t
 tuning against the held-out set, and no later freeze can undo it. Re-running under the *same*
 identity is allowed and is free -- every answer is a cache hit on its idempotency key.
 
+**Reopening (RR-24).** The thirty run once *per identity*. `--reopen "<reason>"` is the one
+sanctioned second run, for a defect in the answer path that could not have been chosen on the
+held-out answers -- a validator limit rejecting content nobody read. It refuses without a
+written reason, refuses if the prompt, model, decoding, schema, retrieval or questions moved
+(the sealed config hash must come back from today's spec with the sealed commit's limits), and
+refuses if nothing moved at all. It archives the prior seal, answers and gate artefact as
+`*.1.json`, writes seal 2 with the reason and the prior run's id, and `RAG_GATE` then asserts
+`answers_identical_to_run1=k/k` over every question the prior run parsed. Run 1 stays the
+first result on record.
+
 Prompt development runs against a separate question set (`--questions`, `--question-set
 development`), instantiated on pre-2020 windows of non-candidate products (ADR-0006). Its
 answers land in their own directory and never touch the seal.
 
 Run:  ./run.sh python -m src.ai.rag_run --questions conf/rag-questions.json
+      ./run.sh python -m src.ai.rag_run --reopen "<reason>"     (once, RR-24)
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import shutil
+import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -49,6 +63,10 @@ sys.stdout.reconfigure(line_buffering=True)
 EVAL_ROOT = PROJECT_ROOT / "eval" / "rag"
 SEAL_PATH = EVAL_ROOT / "answer-seal.json"
 QUESTION_SETS = ("evaluation", "development")
+
+#: The files a reopen archives, numbered by the seal they belonged to: `answers.1.json`.
+ARCHIVED = {"prior_answers": "answers.json", "prior_seal": "answer-seal.json",
+            "prior_gate": "gate.json"}
 
 
 # --------------------------------------------------------------------- retrieval ----
@@ -115,16 +133,103 @@ def check_seal(identity: dict[str, Any], *, path: Path = SEAL_PATH) -> dict[str,
 
 
 def write_seal(identity: dict[str, Any], *, run_id: str, questions: int,
-               path: Path = SEAL_PATH) -> dict[str, Any]:
+               path: Path = SEAL_PATH, reopened_from: dict[str, Any] | None = None,
+               seal_no: int = 1) -> dict[str, Any]:
     sha, _ = runs.git_state()
     seal = {"opened_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "git_commit_sha": sha, "run_id": run_id, "questions": questions,
-            "identity": identity,
-            "note": "the evaluation question set is answered once (ADR-0006); a later run under "
-                    "a different identity is refused before any call is made"}
+            "identity": identity, "seal_no": seal_no,
+            "note": "the evaluation question set is answered once per identity (ADR-0006); a "
+                    "later run under a different identity is refused before any call is made, "
+                    "and the one sanctioned reopen (--reopen, RR-24) records its reason here"}
+    if reopened_from:
+        seal["reopened_from"] = reopened_from
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(seal, indent=2, sort_keys=True) + "\n")
     return seal
+
+
+# ------------------------------------------------------------------------ reopen ----
+@dataclass(frozen=True)
+class ReopenCheck:
+    """A reopen the seal allows: what it reopens, why, and the one identity field that moved."""
+    reason: str
+    prior_run_id: str
+    seal_no: int
+    moved: tuple[str, ...]
+
+
+def check_reopen(seal: dict[str, Any] | None, *, reason: str, identity: dict[str, Any],
+                 sealed_hash_recomputed: str) -> ReopenCheck:
+    """Allow the reopen only if the sole movement is one the held-out answers could not have
+    chosen -- a validator limit.
+
+    `sealed_hash_recomputed` is today's config hash rebuilt with the *sealed commit's* limits.
+    If it equals the hash the seal recorded, then everything else inside that hash -- the
+    prompt text, the model, the decoding settings including the seed, the schema, the
+    retriever -- is what it was when the thirty were opened, and only `limits` moved. The
+    direct identity fields (prompt version, model, retrieval, questions, generation) are
+    compared on their own, so the refusal names the field.
+    """
+    if not str(reason or "").strip():
+        raise ValueError("--reopen needs a written reason: the seal records why the thirty "
+                         "were opened a second time, and an unexplained reopen is a rerun")
+    if seal is None:
+        raise ValueError("nothing to reopen: no seal exists, so the thirty have not been "
+                         "answered yet; run without --reopen")
+    sealed = seal["identity"]
+    moved = tuple(sorted(k for k, v in identity.items() if sealed.get(k) != v))
+    other = [k for k in moved if k != "inference_config_hash"]
+    if other:
+        detail = "; ".join(f"{k}: sealed {str(sealed.get(k))[:12]!r} != now "
+                           f"{str(identity[k])[:12]!r}" for k in other)
+        raise ValueError(f"a reopen may not move the prompt, model, retrieval, questions or "
+                         f"generation, and this one moved {', '.join(other)}: {detail}. That "
+                         "is tuning on the held-out set (ADR-0006)")
+    if not moved:
+        raise ValueError("identity unchanged since the seal: a run under the same identity "
+                         "needs no reopen, and a reopen that changes nothing measures nothing")
+    if sealed_hash_recomputed != sealed["inference_config_hash"]:
+        raise ValueError("the config hash moved for more than the limits: today's prompt text, "
+                         "model, decoding settings, schema and retriever with the sealed "
+                         f"commit's limits give {sealed_hash_recomputed[:12]}, but the seal "
+                         f"recorded {sealed['inference_config_hash'][:12]}. Only a validator "
+                         "limit may move under --reopen (RR-24)")
+    return ReopenCheck(reason=reason.strip(), prior_run_id=seal["run_id"],
+                       seal_no=int(seal.get("seal_no", 1)), moved=moved)
+
+
+def sealed_limits(commit: str, *, path: str = "conf/rag-answer-spec.json") -> dict[str, Any]:
+    """The `limits` block as committed at the seal's commit, read from git, never from disk."""
+    try:
+        text = subprocess.run(["git", "show", f"{commit}:{path}"], check=True,
+                              capture_output=True, text=True, cwd=PROJECT_ROOT).stdout
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"cannot read {path} at the sealed commit {commit[:8]}: "
+                           f"{exc.stderr.strip()}") from exc
+    return json.loads(text)["limits"]
+
+
+def archive_prior(out_dir: Path, *, seal_no: int) -> dict[str, str]:
+    """Move seal `seal_no`'s answers, seal and gate artefact to `*.{seal_no}.json`.
+
+    Refuses to overwrite an earlier archive and refuses when there is no prior run to archive;
+    the gate artefact is optional (the gate may not have been run). Returns the archived
+    names, which the new seal records so the gate can find them.
+    """
+    targets = {k: out_dir / f"{Path(v).stem}.{seal_no}.json" for k, v in ARCHIVED.items()}
+    for k, v in ARCHIVED.items():
+        if not (out_dir / v).exists() and k != "prior_gate":
+            raise FileNotFoundError(f"{out_dir / v} is missing: no prior run to archive")
+        if targets[k].exists():
+            raise FileExistsError(f"{targets[k]} already exists; an archive is never "
+                                  "overwritten")
+    out: dict[str, str] = {}
+    for k, v in ARCHIVED.items():
+        if (out_dir / v).exists():
+            shutil.move(out_dir / v, targets[k])
+            out[k] = targets[k].name
+    return out
 
 
 # --------------------------------------------------------------------------- run ----
@@ -137,8 +242,11 @@ def _cache(path: Path) -> dict[str, dict[str, Any]]:
 
 def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, category: str,
                     prompt_name: str, model_id: str | None, out_dir: Path,
-                    limit: int | None) -> dict[str, Any]:
+                    limit: int | None, reopen: str | None = None) -> dict[str, Any]:
     t0 = time.time()
+    if reopen is not None and question_set != "evaluation":
+        raise ValueError("--reopen is for the sealed evaluation set only; the development set "
+                         "has no seal to reopen")
     spec = rag_answers.load_spec()
     manifest = json.loads(questions_path.read_text())
     qs = manifest["questions"]
@@ -167,7 +275,22 @@ def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, cate
                            spec_hash=manifest.get("spec_hash", ""),
                            retrieval_hash=retrieval_hash, generation=generation)
 
-    seal = check_seal(identity) if question_set == "evaluation" else None
+    reopening: ReopenCheck | None = None
+    if reopen is not None:
+        seal = json.loads(SEAL_PATH.read_text()) if SEAL_PATH.exists() else None
+        limits_then = sealed_limits(seal["git_commit_sha"]) if seal else {}
+        recomputed = spec.config_hash(prompt_name, rag_answers.answer_schema(limits_then),
+                                      generation=generation, model_id=model,
+                                      limits=limits_then) if seal else ""
+        reopening = check_reopen(seal, reason=reopen, identity=identity,
+                                 sealed_hash_recomputed=recomputed)
+        if limit:
+            raise ValueError("a reopen answers all thirty; --limit would leave the seal "
+                             "naming a partial run")
+        print(f"[rag] reopening run {reopening.prior_run_id[:8]} (seal {reopening.seal_no}): "
+              f"{reopening.reason}")
+    else:
+        seal = check_seal(identity) if question_set == "evaluation" else None
     search_run = runs.latest_success("search_index_reviews", category=category, data_scope=scope)
     if search_run is None:
         raise RuntimeError("rag_answers needs a successful search_index_reviews run to pin the "
@@ -176,7 +299,9 @@ def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, cate
     out_dir.mkdir(parents=True, exist_ok=True)
     answers_path = out_dir / "answers.json"
     ledger_path = out_dir / "call-ledger.jsonl"
-    cached = _cache(answers_path)
+    # A reopen changes the identity, so nothing is a cache hit; the archive below keeps the
+    # prior answers on disk for the gate to compare against, not for reuse.
+    cached = {} if reopening else _cache(answers_path)
 
     run = runs.start("rag_answers", runs.RAG_ANSWERS_SPEC_VERSION, category=category,
                      data_scope=scope,
@@ -192,7 +317,9 @@ def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, cate
                      params={"question_set": question_set, "prompt_version": prompt.version,
                              "model_id": model, "api_mode": spec.api_mode,
                              "inference": spec.inference, "retrieval_hash": retrieval_hash,
-                             "question_spec_hash": manifest.get("spec_hash", "")})
+                             "question_spec_hash": manifest.get("spec_hash", ""),
+                             **({"reopened_from": reopening.prior_run_id,
+                                 "reopen_reason": reopening.reason} if reopening else {})})
     outputs: dict[str, Any] = {}
     counts: dict[str, Any] = {"inference_config_hash": config_hash[:12],
                               "retrieval_hash": retrieval_hash[:12]}
@@ -225,6 +352,8 @@ def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, cate
                 calls += res.attempt_count
                 rec = {"question_id": q["question_id"], "idempotency_key": key,
                        "status": res.status, "parsed": res.parsed,
+                       "subject_words": (rag_answers.subject_words(res.parsed)
+                                         if res.parsed else None),
                        "retrieved": retrieved, "retrieved_digest": digest,
                        "prompt_version": prompt.version, "model_id": model,
                        "inference_config_hash": config_hash, "run_id": run.run_id,
@@ -271,7 +400,15 @@ def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, cate
                "run_id": run.run_id, "scope": scope, "alias": alias, "generation": generation,
                "search_run_id": search_run["run_id"], "identity": identity,
                "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
+               **({"reopened_from": reopening.prior_run_id} if reopening else {}),
                "answers": records}
+        archived: dict[str, str] = {}
+        if reopening:
+            # Only now, with every answer in hand: a reopen that failed halfway leaves run 1
+            # exactly where it was, and a second attempt starts from the same seal.
+            archived = archive_prior(out_dir, seal_no=reopening.seal_no)
+            print(f"[rag] archived run {reopening.prior_run_id[:8]} as "
+                  f"{', '.join(sorted(archived.values()))}")
         answers_path.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n")
         sha256 = hashlib.sha256(answers_path.read_bytes()).hexdigest()
         outputs["eval.rag_answers"] = {
@@ -291,7 +428,15 @@ def run_rag_answers(*, questions_path: Path, question_set: str, scope: str, cate
                  records_out=counts["answered"] + counts["refused"],
                  records_rejected=counts["parse_failed"] + counts["api_failed"],
                  outputs=outputs, counts=counts)
-    if question_set == "evaluation" and seal is None:
+    if reopening:
+        seal = write_seal(identity, run_id=run.run_id, questions=len(records),
+                          seal_no=reopening.seal_no + 1,
+                          reopened_from={"run_id": reopening.prior_run_id,
+                                         "reason": reopening.reason,
+                                         "moved": list(reopening.moved), **archived})
+        print(f"[rag] sealed {SEAL_PATH.relative_to(PROJECT_ROOT)} (seal {seal['seal_no']}) "
+              f"at {seal['opened_at']}, reopened from {reopening.prior_run_id[:8]}")
+    elif question_set == "evaluation" and seal is None:
         seal = write_seal(identity, run_id=run.run_id, questions=len(records))
         print(f"[rag] sealed {SEAL_PATH.relative_to(PROJECT_ROOT)} at {seal['opened_at']}")
     print(f"RAG_ANSWERS run_id={run.run_id} set={question_set} scope={scope} model={model} "
@@ -319,6 +464,10 @@ def main() -> None:
                          "eval/rag/dev for the development set)")
     ap.add_argument("--limit", type=int, default=None,
                     help="execution setting: answer at most N questions")
+    ap.add_argument("--reopen", default=None, metavar="REASON",
+                    help="the one sanctioned second run of the sealed evaluation set (RR-24): "
+                         "archives the prior seal, answers and gate artefact, and records this "
+                         "reason in the new seal; refused unless only a validator limit moved")
     args = ap.parse_args()
     spec = rag_answers.load_spec()
     prompt_name = args.prompt or (spec.frozen or {}).get("name") or "rag_v1"
@@ -326,7 +475,7 @@ def main() -> None:
         EVAL_ROOT if args.question_set == "evaluation" else EVAL_ROOT / "dev")
     run_rag_answers(questions_path=Path(args.questions).resolve(), question_set=args.question_set,
                     scope=args.scope, category=args.category, prompt_name=prompt_name,
-                    model_id=args.model, out_dir=out, limit=args.limit)
+                    model_id=args.model, out_dir=out, limit=args.limit, reopen=args.reopen)
 
 
 if __name__ == "__main__":
