@@ -114,6 +114,8 @@ the `RR-01` answer.
 
 - [Reconcile the register, the README and the coverage doc](tickets/RR-14-reconcile-the-three-docs.md) — **the map's closing act; the destination is reached.** Build plan republished as **v4** at the same URL with **zero `open · P…` rows** — all six settled (four of them landing on an option v3 never posed), eleven more added, Out of scope split into its own section with `RR-18` §4's binding wording, phase cards renumbered to `RR-01` carrying `RR-13`'s split gates, a new presentation section with the 9:30 slide table, and the grade table kept but labelled *historical* rather than re-scored. `README.md`: the status table becomes the phase spine (gate name + ADR-0011 verdict per phase, P6–P8/lineage/deliverables represented for the first time), "LLM aspect sentiment" retired everywhere, `349,059` reframed as the raw ceiling vs 345,418 embedded, `6,139` as groups→7,276 rows removed, PostgreSQL's three roles stated, diagram redrawn, ADR index added. `docs/course-coverage.md`: both "Phase 2" refs → P4 Search and marked built, Finding 3 gains the three anti-overclaim qualifications (H-E1 did not hold), Finding 4 cites deck 3:447/450/870 verbatim, Findings 7–8 resolved (HDFS fallback closed, Oozie owned as opinion), the V's paragraph fixed at source, Connect's strong and weak halves separated, plus a new section stating the AI layer earns **no** course-technology credit and fixing the RAG prevalence boundary. Audit repairs R1–R6 verified landed in code. `label_source` propagated, not decided (`RR-13` owns it).
 
+- [Is the first RAG_GATE FAIL a reproducibility failure to reopen, or a measured result to report](tickets/RR-24-rag-gate-fail-reopen-or-report.md) — **Both, split by cause.** The two `parse_failed` rows were a validator defect (15-word subject cap, content never read, sat on the boundary in development) — fixed blind and rerun once through a sanctioned `--reopen` path that archives seal 1, requires `answers_identical_to_run1=28/28`, and keeps run 1's FAIL as a prior row. `temporal-01`'s uncited absence claim is generator behaviour and is **not** fixed — a prompt change after seeing the thirty is tuning. `RAG_GATE` now blocks on mechanical facts only (identity, counts, handles resolving in scope, run contract); the 30/30 contract becomes a reported `RAG_CONTRACT … bar=30/30 verdict=FAIL` line, bar unmoved, and a violating question scores as a failure in `RAG_QUALITY`. `max_attempts` → 1 (identical retry of a seeded decoder is a no-op). `generation_malformed` added before `judge_uncertain`. ADR-0006/0011 amended; terms in `CONTEXT.md`.
+
 ## Not yet specified
 - *(Burst detection threshold removed 2026-09-04 — `gold.bursts` is out of scope, `RR-09`.)*
 - **Decline-rule thresholds (B, R, δ, P, G, K, minimum counts, placebo ceiling).** Set at
@@ -142,9 +144,9 @@ the `RR-01` answer.
 protocol freeze owns them, and setting either before the freeze is precisely the failure
 ADR-0001 exists to prevent. This map closes with them open on purpose.
 
-## Ticket index (updated 2026-09-10, RR-14 closed — **the map is closed**)
+## Ticket index (updated 2026-09-14, RR-24 closed — **the map is closed again**)
 
-Closed: `RR-01`–`RR-23`, all 23. Frontier: empty. Blocked: none.
+Closed: `RR-01`–`RR-24`. `RR-24` was surfaced by ticket 12's first evaluation run and closed the same day. Frontier: empty. Blocked: none. Execution resumes at ticket 12's rerun checklist, then ticket 13.
 
 **The destination is reached.** Every `open · P…` row in the build-plan register is settled
 with a stated rationale; the phase numbering is fixed and Kibana and the explicit ES mapping

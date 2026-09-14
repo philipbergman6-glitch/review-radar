@@ -29,3 +29,22 @@ labelling.
 - [ ] A vacuous run — zero answers checked — cannot print PASS
 - [ ] RAG's own call ledger records every model call with its run id
 - [ ] The evaluation artefact validates against the contract
+
+## Reopened 2026-09-14 (RR-24) — the rerun
+
+Run `ffbbe884` printed `RAG_GATE=FAIL contract=27/30`. Two rows were `parse_failed` on the
+15-word `subject` cap (a validator defect; content never read), one carried an uncited
+absence claim (generator behaviour; not fixed). Decision in `RR-24`; ADR-0006/0011 amended.
+
+- [ ] Run 1's four artefacts committed unchanged as the first result on record
+- [ ] `conf/rag-answer-spec.json`: `subject_max_words` no longer rejects (length reported),
+      `max_attempts: 1`; prompt `rag-v5`, model, seed, retrieval untouched
+- [ ] `rag_run --reopen "<reason>"`: archives `answer-seal.json` → `answer-seal.1.json`,
+      writes seal 2 with the reason, refuses without a reason, refuses if the prompt/model/
+      seed/retrieval identity moved
+- [ ] Gate prints `RAG_REOPEN reopened_from=ffbbe884 answers_identical_to_run1=28/28 ok=`,
+      **FAIL** on any difference; trip case: one altered parsed answer must fail
+- [ ] `RAG_GATE` blocks on mechanical constituents only; `RAG_CONTRACT … bar=30/30
+      verdict=` is printed and written to the artefact as a non-blocking line
+- [ ] Trip cases from the original checklist still trip `RAG_CONTRACT`
+- [ ] `make eval-table` shows run 1's `RAG_GATE=FAIL` as a prior row beside run 2

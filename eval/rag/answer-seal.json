@@ -1,0 +1,16 @@
+{
+  "git_commit_sha": "5e8358b7554491b28e6ab33c4f4bd1bcb5e42d7a",
+  "identity": {
+    "answer_spec_version": "1",
+    "generation": "reviews_s8507728480475534879_d2e56c46",
+    "inference_config_hash": "5ac248c8a3c5ad8aa4101cd57b068edec776854cbe3589ed23cfd0fe91d5f4a5",
+    "model_id": "qwen3:8b",
+    "prompt_version": "rag-v5",
+    "question_spec_hash": "fdaf85463c0fe877b39ff61810a4a3cdfc0e2f216f926a7ee856fba54a5886c1",
+    "retrieval_hash": "00e4c4449eac4f95566f45d888e6e4aa06be06ed71f783e22322543292fb5bc3"
+  },
+  "note": "the evaluation question set is answered once (ADR-0006); a later run under a different identity is refused before any call is made",
+  "opened_at": "2026-09-14T01:24:06+00:00",
+  "questions": 30,
+  "run_id": "ffbbe884-5425-4ce8-9ecd-90f5a6201106"
+}

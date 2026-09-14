@@ -365,10 +365,19 @@ abstention.
 _Avoid_: no answer, abstention (reserved for theme labelling)
 
 **Engineering gate / Quality target**:
-An engineering gate is a mechanical contract a phase must satisfy to count as built; its
-failure reopens the phase. A quality target is a frozen threshold on an evaluated result;
-its failure ships as *built, evaluated, below target* with the number shown.
+An engineering gate is a contract over mechanical facts a phase must satisfy to count as
+built; its failure reopens the phase. A quality target is a frozen threshold on an evaluated
+result; its failure ships as *built, evaluated, below target* with the number shown.
 _Avoid_: hard gate / soft gate, must-have / nice-to-have
+
+**Mechanical fact / Generator behaviour**:
+A mechanical fact is one a correct pipeline makes true regardless of what the model wrote:
+an identity hash, a count that reconciles, a citation handle that resolves to the retrieved
+set, a stored month inside the declared window. Generator behaviour is anything the frozen
+model could have done differently on the same input: an uncited claim, a refusal that still
+carries claims, an output the validator rejects. Only mechanical facts block a phase;
+generator behaviour on a held-out set is measured once and never fixed.
+_Avoid_: bug (ambiguous between the two), model error
 
 **Verdict**:
 The one-word outcome in the evaluation summary table: PASS or FAIL against a frozen

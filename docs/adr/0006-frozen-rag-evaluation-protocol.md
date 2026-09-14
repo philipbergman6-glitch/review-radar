@@ -42,13 +42,34 @@ theme-shift table remains the only quantitative authority on the opening questio
   (engineering gate); grounded-answer success ≥ 16/20 and adequate-answer success ≥ 14/20
   with refusal counted as failure; correct abstention ≥ 8/10, three strata reported;
   false refusal ≤ 2/20. Gate failure reopens P7; quality failure ships as *built, evaluated,
-  below target*.
+  below target*. **Amended 2026-09-14 (RR-24):** `RAG_GATE` blocks on *mechanical facts*
+  only — seal identity, 30/30 recorded, ledger attribution, retrieval sizes and scope, every
+  cited handle resolving to the question's own retrieved set and to a stored month inside the
+  declared window, the run contract. The 30/30 citation contract keeps its bar but reports:
+  `RAG_CONTRACT answers_ok=N/30 bar=30/30 verdict=PASS|FAIL`. An uncited claim, a refusal
+  carrying claims or citations, or a parse failure is *generator behaviour*: it is never
+  fixed after the thirty are seen, and the question scores as a failure in `RAG_QUALITY`
+  (a parse failure counts as a refusal on an answerable question and as a failed abstention
+  on an unanswerable one).
 - Disagreement labels by precedence: `scope_violation` → `failed_abstention` →
   `retrieval_miss` (support confirmed in the index snapshot) → `over_refusal` →
-  `generation_unsupported` → `generation_omission_or_inadequacy` → `judge_uncertain`.
+  `generation_unsupported` → `generation_omission_or_inadequacy` → `generation_malformed`
+  (added 2026-09-14, RR-24: the output was rejected by the answer validator) →
+  `judge_uncertain`.
 - P7 has its own ledger: 200 calls / $2, separate from ADR-0003's fully allocated 12,800.
   Idempotency covers question, prompt and model versions, inference settings, retriever
   spec, snapshot ids, and ordered retrieved ids with content hashes.
+- **Reopening (added 2026-09-14, RR-24).** The thirty run once *per identity*. A second
+  evaluation run is allowed only for a defect in the answer path that could not have been
+  chosen on the held-out answers — a validator rejecting content nobody read — and never for
+  the prompt, model, decoding or retrieval. It goes through `--reopen "<reason>"`, which
+  archives the prior seal beside the new one, embeds the reason in the seal and the gate
+  artefact (`reopened_from=<run_id>`), and asserts `answers_identical_to_run1=k/k` over every
+  question the prior run parsed — a difference is a `RAG_GATE` FAIL. The prior run's verdict
+  stays in the evaluation table as a prior row. First use: run `ffbbe884` failed on a 15-word
+  `subject` cap that sat on the boundary in development; the cap stopped being a rejection
+  reason and `max_attempts` became 1, because an identical retry of a `temperature 0`, seeded
+  decoder returned identical output both times.
 
 ## Consequences
 

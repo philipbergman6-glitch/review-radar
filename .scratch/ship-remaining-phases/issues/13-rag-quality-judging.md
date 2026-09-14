@@ -14,7 +14,14 @@ Philip is sole judge, with the seven-step disagreement precedence already fixed.
 thresholds do not move for a weak result — a miss prints `REPORTED` beside its bar and P7's
 status becomes `built, evaluated, below target`.
 
-**Blocked by:** 12 — answers must exist and have passed the contract gate.
+**Blocked by:** 12's rerun — answers must exist under run 2 with `RAG_GATE=PASS`;
+`RAG_CONTRACT` may be FAIL (RR-24, 2026-09-14).
+
+**Scoring a contract violation (RR-24):** the question is a failure — an uncited claim is
+unsupported (not fully grounded; adequacy judged on cited claims only); a parse failure
+counts as a refusal on an answerable question and a failed abstention on an unanswerable one.
+Disagreement label `generation_malformed` sits before `judge_uncertain`. Denominators stay
+20/20/10/20.
 
 **Status:** ready-for-agent
 
