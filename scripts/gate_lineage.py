@@ -17,7 +17,9 @@ Iceberg snapshot history, Elasticsearch for index generations, the filesystem fo
 A capability the chain declares but that has not run yet contributes no links: it prints
 `LINEAGE_PENDING` and withholds `publication_ready`, which is the honest shape of a submission
 still being built. `--mode publication` makes that a failure; `--mode development` reports it
-beside a PASS.
+beside a PASS. Publication mode cannot pass by construction -- the walk pins superseded runs on
+purpose, and each is a stale output -- so it is declined as a bar and kept for the count it
+prints (ADR-0013).
 
 Exit 0 on LINEAGE_GATE=PASS, 1 otherwise.
 

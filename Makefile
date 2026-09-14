@@ -335,7 +335,7 @@ gate-lineage:  ## walk the declared chain: every artefact, snapshot and ES gener
 reconcile-run:  ## close a run a killed driver left `running`: RUN_ID=<id> REASON="what happened" -- records it failed, never success
 	$(RUN) scripts/reconcile_run.py --run "$(RUN_ID)" --reason "$(REASON)"
 
-gate-lineage-publication:  ## the same walk at the publication bar: every declared capability pinned, current and finished
+gate-lineage-publication:  ## the same walk at the publication bar -- cannot pass by construction (ADR-0013: recorded pins walk superseded runs); kept so the stale count prints
 	$(RUN) scripts/gate_lineage.py --mode publication --scope full
 
 verify:  ## row count, snapshot history, time-travel read

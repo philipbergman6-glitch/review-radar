@@ -37,7 +37,10 @@ never examined (audit F3).
 it is the gate's verdict. `publication_ready` asks the stricter question: is the whole declared
 chain pinned, current and finished. A phase that has not run yet contributes no links and
 leaves `publication_ready=false` while `chain_clean` stays true, which is exactly the shape a
-partial submission should print. `worktree_dirty` is reported as evidence on every run and is
+partial submission should print. It is also the shape the finished one prints: the pin set
+walks superseded runs on purpose (recorded pins, the pre-freeze calibration run, P8's two
+projections), so `publication_ready` is `false` by construction and publication mode is
+declined as a bar (ADR-0013) -- the flag stays, printing the count. `worktree_dirty` is reported as evidence on every run and is
 deliberately *not* folded into either flag: it is a property of how a run was produced, and
 the vocabulary here is closed to `PASS`/`FAIL` -- there is no `PASS(dirty)` (RR-16).
 """
