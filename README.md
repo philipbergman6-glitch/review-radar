@@ -6,11 +6,14 @@ Reviews replay through Kafka into a Spark Structured Streaming job that lands th
 unparsed — and exactly once across an unclean restart — as an Iceberg table on a MinIO
 object store, with the Iceberg catalogue in PostgreSQL. From there a batch lakehouse
 carries them through silver and gold into two Elasticsearch serving projections, and an
-AI layer reads the review text. **Phases P2–P5 are built with passing gates; P6 Themes and
-P7 RAG are mid-flight; P8 Stream is built and both its runs pass; the presentation
-deliverables are designed but not built.**
+AI layer reads the review text. **P2–P8 are built and every reproducibility gate passes; the
+written deliverables are complete. Two things are open and printed rather than hidden:
+`THEMES_QUALITY` is a measured miss, and `THEMES_AGREEMENT` / `RAG_QUALITY` wait on human
+judging. `LINEAGE_GATE` FAILs on one undeclared edge and `make eval-table` exits non-zero on
+`gold_calibration`, which has neither a number nor a `cut_reason`.**
 The table below is the honest split, and it stays in this README until it is all in the
-"built" column.
+"built" column. The two-page version is [`docs/DESIGN.md`](docs/DESIGN.md); the talk is
+[`docs/SLIDES.md`](docs/SLIDES.md).
 
 The project answers one question, fixed before the analysis was run (ADR-0001):
 
@@ -36,24 +39,25 @@ is complete only at `scope=full`.
 | ↳ analyzer decision (quality) | **built** | `REPORTED` | Stemmed vs `text.unstemmed` measured on the frozen set; labels are **model-judged** (`judge=claude`) with a human audit subset — [`docs/decisions/search-analyzer.md`](docs/decisions/search-analyzer.md) says so rather than implying hand labels |
 | P5 Embeddings — vectors, kNN, hybrid | **built** | `EMBED_GATE=PASS` (identities + completeness only) | `conf/embedding-spec.json` (MiniLM-L6-v2, hashed identity, ADR-0005); `src/ai/embed.py` → `lake.gold.review_embeddings`, 345,418 vectors on the ≥ 20-word cohort against a pinned silver snapshot; `text_vector` on alias `reviews`; `knn` + **client-side** RRF `hybrid` in `src/serving/search.py` |
 | ↳ retrieval quality | **built** | `REPORTED` | ANN recall@10 **0.96** vs exact (`eval/embeddings/ann_recall.json`); **H-E1 not held**, H-E2 / H-E3 held; two tables kept separate (controlled cohort vs production) — [`docs/decisions/embeddings-retrieval.md`](docs/decisions/embeddings-retrieval.md) |
-| P6 Themes — complaint-theme labelling | *mid-flight* | `THEMES_GATE` — not yet run at full scope | Ten-theme complaint taxonomy frozen as `conf/theme-taxonomy.json` v1 (discovered pre-2020, `over_ceiling=no`); `conf/theme-terms.json` v1 decides which reviews are *offered*, never what they are labelled. Primary labeller is local **`qwen3:8b`** via Ollama — `ANTHROPIC_API_KEY` is empty, so hosted Haiku ships as a `NOT_RUN` row (ADR-0003 as amended by RR-19) |
-| ↳ theme quality (does **not** block P7) | *planned* | `THEMES_QUALITY` — macro-F1 ≥ 0.70, no theme recall < 0.50 | The bars did **not** move for the weaker labeller; a miss is reported FAIL with the caveat on the theme-shift table |
-| ↳ ground-truth agreement | *planned* | `THEMES_AGREEMENT` → `REPORTED` | The agent labels all 400 blind (`label_source="agent_reference"`, never `human`); Philip hand-labels a stratified 50 of the audit set and the agreement is **published as a number** — per-theme and overall Cohen's kappa with Wilson intervals. Repeat-kappa is `NOT_RUN`: intra-annotator stability is undefined for a deterministic labeller |
-| ↳ MLlib classifier baseline | *planned* | scored inside `THEMES_QUALITY` | `spark.ml` CountVectorizer → IDF → per-theme logistic regression, trained on the 3,000-row LLM-labelled pool, scored beside the LLM labeller and a per-theme star-only baseline. A baseline, never a predictor; `label_source="classifier"` (ADR-0002) |
-| P7 RAG — grounded, cited answers | *planned* (conditional) | `RAG_GATE` = the 30/30 citation and scope contract; `RAG_QUALITY` non-blocking | 30 frozen questions (20 answerable, 10 unanswerable in three strata); thresholds are fixed-denominator integers set before measurement — grounded ≥ 16/20, adequate ≥ 14/20, abstention ≥ 8/10, false refusal ≤ 2/20; Philip is sole judge. ADR-0006 |
+| P6 Themes — complaint-theme labelling | **built** | `THEMES_GATE=PASS` 7/7, `scope=full` (run `e39584c3`) | Ten-theme complaint taxonomy frozen as `conf/theme-taxonomy.json` v1 (discovered pre-2020, `over_ceiling=no`); `conf/theme-terms.json` v1 decides which reviews are *offered*, never what they are labelled. Primary labeller is local **`qwen3:8b`** via Ollama — `ANTHROPIC_API_KEY` is empty, so hosted Haiku ships as a `NOT_RUN` row (ADR-0003 as amended by RR-19) |
+| ↳ theme quality (does **not** block P7) | **built, evaluated, below target** | `THEMES_QUALITY=FAIL` — macro-F1 **0.4583** [0.3647, 0.5223] vs bar 0.70; min supported recall 0.4667 vs 0.50 | Measured once on the held-out 200-review audit set. Beside it on the same pass: MLlib classifier **0.3899** [0.3074, 0.4639] and the star-only floor **0.2968** [0.2612, 0.3493] — the labeller's interval is **disjoint** from the floor's, the classifier's is not. The bars did **not** move for the weaker labeller; 27/200 labellings failed to parse (13.5%) and each scores as an empty prediction |
+| ↳ ground-truth agreement | *owed by the human judge* | `THEMES_AGREEMENT=NOT_RUN` — 0 of the expected 50 | The agent labels all 400 blind (`label_source="agent_reference"`, never `human`); Philip hand-labels a stratified 50 of the audit set and the agreement is **published as a number** — per-theme and overall Cohen's kappa with Wilson intervals. Repeat-kappa is `NOT_RUN`: intra-annotator stability is undefined for a deterministic labeller |
+| ↳ MLlib classifier baseline | **built** | scored inside `THEMES_QUALITY`, macro-F1 0.3899 | `spark.ml` CountVectorizer → IDF → per-theme logistic regression, trained on the 3,000-row LLM-labelled pool, scored beside the LLM labeller and a per-theme star-only baseline. A baseline, never a predictor; `label_source="classifier"` (ADR-0002) |
+| P7 RAG — grounded, cited answers | **built** | `RAG_GATE=PASS` 8/8 `scope=full` (run `c4ae0dc5`); 30/30 answered; 29/30 clear the citation contract, the single violation being an uncited claim rather than a bad citation — every cited handle resolves to its own retrieved set and to a month inside the declared window, which is the half that blocks. `RAG_QUALITY=NOT_RUN` — 0/30 judged, non-blocking | 30 frozen questions (20 answerable, 10 unanswerable in three strata); thresholds are fixed-denominator integers set before measurement — grounded ≥ 16/20, adequate ≥ 14/20, abstention ≥ 8/10, false refusal ≤ 2/20; Philip is sole judge. ADR-0006 |
 | P8 Stream — sorted topic + paced replay | **built** | run contracts `sort_replay`, `stream_produce` | `conf/stream_replay.toml` frozen *before* the first run (3,000 rec/s, slice sizes, lags). `src/ingest/sort_replay.py` orders the file by `(timestamp, review_id, line digest)` in 4.8 s — 701,528 rows, 0 rejects, 2000-11-01 → 2023-09-09, input and output digests in the ledger. `src/ingest/stream_producer.py` paces it into `reviews.stream` with an event-time clock; measured 2,999 rec/s against the frozen 3,000 and the contract fails a run more than 10% off. The sort reproduces silver's dedupe arithmetic independently — see below |
 | ↳ P8 Stream — reconciled projection beside batch | **built**, both runs pass | `STREAM_GATE=PASS run_kind=control` 11/11 (run `74dde108`), `STREAM_GATE=PASS run_kind=demo` 18/18 (run `50caffcf`), both `scope=full` | `withWatermark` 30 d + `dropDuplicatesWithinWatermark(review_id)`, `foreachBatch` summing per-batch contributions into `stream.product_month`. The **control** run replays the sorted file untouched and prints zero drops over 193,939 product-months compared, zero differing. The **demo** run releases slices held back in counts frozen before it ran -- 2,000 rows 7 days late (accepted), 2,000 rows 730 days late (dropped) -- onto `reviews.stream.demo`: exactly 2,000 dropped, and all 1,013 differing plus 309 gold-only product-months explained by the dropped rows, none only in the stream. Near acceptance is *derived*, not observed per row, and the gate line says so. `distinct_users` is not projected (not summable). ADR-0010 |
 | Lineage — the run ledger | **built** | `LINEAGE_GATE gate_mode= chain_clean= publication_ready= chain_links_checked=N` — `make gate-lineage` | `pipeline_runs` is the run ledger: one row per execution attempt of every job, UUID `run_id` stamped into every Iceberg snapshot, ES doc and eval artefact (ADR-0008). [`scripts/gate_lineage.py`](scripts/gate_lineage.py) walks the chain declared in [`conf/lineage_chain.toml`](conf/lineage_chain.toml) — artefact → ledger row → its outputs and the runs its inputs name — and prints how many links it checked, so a pass over an empty chain is impossible. `chain_clean` is the verdict; `publication_ready` is the stricter question and stays false while phases are pending. Every phase gate prints `run_contract_registered` for the jobs the chain gives it |
-| Deliverables — demo notebook | **built**, rehearsed twice | `DEMO_GATE rehearsals=2/2 max_elapsed_s=259 all_cells_ok=true stream_running=true backup_playable=true docs_present=2/4` → `FAIL` — `make gate-demo` | [`notebooks/demo.ipynb`](notebooks/demo.ipynb) — one kernel holding one Spark session, one ES client and one Postgres connection; every cell calls [`src/serving/demo.py`](src/serving/demo.py), so the stage runs the pipeline's own code path. Ten moves in 4:40 of a 5:00 budget, Kibana carrying exactly one; moves 2 and 10 now run the **P8 demo run** on `reviews.stream.demo`, so the control topic survives a rehearsal. A **rehearsal is an executed export** under [`docs/demo/`](docs/demo), never a self-report: the cells' own recorded timestamps give the duration, move 10's `DEMO_LIVE` line gives the projection's micro-batches, and a `stream_produce` ledger run that *began inside* those timestamps is the second, independent record that the stream was live. `make rehearse` produces one (ADR-0009) |
+| Deliverables — demo notebook | **built**, rehearsed twice | `DEMO_GATE rehearsals=2/2 max_elapsed_s=259 all_cells_ok=true stream_running=true backup_playable=true docs_present=4/4` → `PASS` — `make gate-demo` | [`notebooks/demo.ipynb`](notebooks/demo.ipynb) — one kernel holding one Spark session, one ES client and one Postgres connection; every cell calls [`src/serving/demo.py`](src/serving/demo.py), so the stage runs the pipeline's own code path. Ten moves in 4:40 of a 5:00 budget, Kibana carrying exactly one; moves 2 and 10 now run the **P8 demo run** on `reviews.stream.demo`, so the control topic survives a rehearsal. A **rehearsal is an executed export** under [`docs/demo/`](docs/demo), never a self-report: the cells' own recorded timestamps give the duration, move 10's `DEMO_LIVE` line gives the projection's micro-batches, and a `stream_produce` ledger run that *began inside* those timestamps is the second, independent record that the stream was live. `make rehearse` produces one (ADR-0009) |
 | Deliverables — demo runbook | **built** | — | [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md) — Kafka retention, memory, pre-demo checklist, and §3's live section rewritten as the ten moves the notebook runs (ADR-0009/ADR-0010) |
-| Deliverables — design doc, slides | *planned* — the one thing blocking `DEMO_GATE` | `docs_present=2/4` in `DEMO_GATE`, blocking; missing `docs/DESIGN.md`, `docs/SLIDES.md` | Shape decided, not written: **eight sections, two pages hard, links not appendices** for the doc; **eight slides plus a title** for the talk, **9:30** of the 10:00 ceiling (5:00 slides + 4:40 demo + 20 s slack). Outlines live in the `RR-18` ticket and are cited, not copied |
+| Deliverables — design doc, slides | **built** | `docs_present=4/4`, so `DEMO_GATE=PASS` | [`docs/DESIGN.md`](docs/DESIGN.md) — eight sections, links not appendices; its §4 phase table is one row per capability in `conf/lineage_chain.toml` and `tests/test_written_deliverables.py` fails if it disagrees with `make eval-table`. [`docs/SLIDES.md`](docs/SLIDES.md) — eight slides plus a title, **290 s of slides + 280 s of demo = 9:30** of the 10:00 ceiling, slide 2 shipping two variants with the fork rule and the numbers that called it, five prepared Q&A answers each carrying a number, and the four declines in their binding wording |
 
 **Nothing here is omitted for being unbuilt.** Every phase appears with its gate verdict;
 unreached phases print `NOT_RUN` plus a `cut_reason` from `conf/lineage_chain.toml`, where
 `"not reached by submission date"` is a legitimate reason. The renderer that assembles this
-into the one-shape evaluation table (`make eval-table`, *not yet written*) hard-fails on an
-evaluation artefact that is missing *and* not declared cut — a capability is either a number
-or a written reason, never silence.
+into the one-shape evaluation table (`make eval-table`) hard-fails on an evaluation artefact
+that is missing *and* not declared cut — a capability is either a number or a written reason,
+never silence. It does exactly that today, on `gold_calibration`: the protocol freeze has not
+happened, so there is no calibration number, and no `cut_reason` has been written either.
 
 ## Dataset
 
@@ -128,7 +132,7 @@ data/raw/*.jsonl
 │  bronze       [built]  │  │  watermark 30 d      │◀───│  1. Iceberg catalogue  │
 │  silver       [built]  │◀─┼──── JDBC [built] ────┼────│  2. products, 112,590  │
 │  gold         [built]  │  │  reconciled beside   │    │     rows — the SQL     │
-│                        │  │  batch     [planned] │    │     enrichment source  │
+│                        │  │  batch       [built] │    │     enrichment source  │
 └──────┬─────────────┬───┘  └──────────┬───────────┘    │  3. pipeline_runs —    │
        │             │                 │                │     the run ledger     │
        │ Iceberg     │ serving         │ stream.alerts  └────────────────────────┘
@@ -147,16 +151,18 @@ data/raw/*.jsonl
         └──────────────┬───────────────┘
                        ▼
           ┌────────────────────────────┐
-          │  Demo notebook  [planned]  │
+          │  Demo notebook    [built]  │
           │  one kernel, ten moves     │
           │  search · themes · RAG     │
           └────────────────────────────┘
 ```
 
-Solid today: producer → Kafka → bronze → silver → gold on Iceberg/MinIO, and two
-Elasticsearch serving projections (`reviews`, `product_month`) with a Kibana dashboard over
-the gold one, the first carrying MiniLM vectors for kNN and hybrid retrieval. Everything
-marked `[planned]` is architecture, not code.
+Solid today: producer → Kafka → bronze → silver → gold on Iceberg/MinIO, the streaming
+projection reconciled beside batch, and two Elasticsearch serving projections (`reviews`,
+`product_month`) with a Kibana dashboard over the gold one, the first carrying MiniLM vectors
+for kNN and hybrid retrieval. The one box still marked `[planned]` is `stream.alerts`: the
+streaming projection writes `stream.product_month`, and the alert table ADR-0010 sketches on
+top of it is architecture, not code.
 
 **PostgreSQL is in this pipeline three times, and they are different jobs.** (1) It is the
 **Iceberg catalogue** — the thing that swaps the pointer to the current metadata file in a
@@ -179,12 +185,13 @@ were set *before* the measurement:
 
 - **(b) embeddings + semantic search — built.** kNN, client-side RRF hybrid, two evaluation
   tables kept separate, ANN recall@10 0.96; `docs/decisions/embeddings-retrieval.md`.
-- **(a) complaint-theme labelling — mid-flight.** A frozen ten-theme complaint taxonomy over
+- **(a) complaint-theme labelling — built, and below its bar.** A frozen ten-theme complaint taxonomy over
   review text, with a `spark.ml` classifier and a star-only baseline scored against it on a
   held-out post-2020 audit set (ADR-0002, ADR-0003). *Not* "aspect sentiment" — the taxonomy
   is complaint-only and the output is a theme set per review, not a polarity.
-- **(c) RAG on top of (b) — planned, conditional.** Grounded answers with claim-level
-  citations over the P4/P5 retriever (ADR-0006).
+- **(c) RAG on top of (b) — built.** Grounded answers with claim-level citations over the
+  P4/P5 retriever; 30/30 answered, 29/30 clear the contract (ADR-0006). The four quality
+  targets are `NOT_RUN` until the thirty are judged.
 
 (d), (e), (f) and (g) are out of scope, with reasons in `docs/course-coverage.md`.
 
@@ -371,6 +378,24 @@ make gate-stream           # STREAM_GATE for the control run
 make gate-stream-demo      # STREAM_GATE for the demo run -- also requires the control artefact
 ```
 
+**7 — the evaluation table, the gates and the deliverables.** One row per capability declared
+in `conf/lineage_chain.toml`; the command exits non-zero on a capability that has neither an
+artefact nor a `cut_reason`.
+
+```bash
+make eval-table     # the whole submission, one row per capability
+make gate-lineage   # walks artefact -> ledger row -> outputs -> the runs its inputs name
+make rehearse       # execute notebooks/demo.ipynb into docs/demo/<date>/ (run it twice)
+make gate-demo      # DEMO_GATE: 2 rehearsals, <= 300 s each, 4/4 written deliverables
+```
+
+The written deliverables are [`docs/DESIGN.md`](docs/DESIGN.md) (two pages, eight sections),
+[`docs/SLIDES.md`](docs/SLIDES.md) (the talk, 9:30 of a 10:00 ceiling) and
+[`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md). `tests/test_written_deliverables.py` checks the
+design doc's phase table against `conf/lineage_chain.toml` and the live gate artefacts, the
+deck's running order against its own clock, and the four declines against their binding
+wording — so a document cannot quietly drift away from the system it describes.
+
 ### Measured producer throughput
 
 The producer replays the full 701,528-review file in roughly 1.5–3 s: **232,000–484,000
@@ -431,8 +456,11 @@ data/raw/             downloaded JSONL (git-ignored)
 data/sample/          10k reviews + 5k products, committed (see "Running on the sample")
 docs/adr/             eleven ADRs — the decision record; every claim below links to one
 docs/decisions/       measured outcome docs (search analyzer, embeddings retrieval)
-docs/                 profiling output, audit report, demo runbook, course coverage, LLM label runbook
-eval/                 per-capability evaluation artefacts (search, embeddings, themes)
+docs/                 DESIGN.md (the two-page design doc), SLIDES.md (the talk), DEMO_RUNBOOK.md,
+                      profiling output, audit report, course coverage, LLM label runbook
+docs/demo/            the recorded backup: executed rehearsal notebooks, HTML, Kibana PNG, EOS transcript
+eval/                 per-capability evaluation artefacts -- eval/<capability>/gate.json is what
+                      `make eval-table` and `make gate-lineage` both read
 scripts/              download, sample, profile, healthcheck, verify, EOS gate; per-phase gates
                       (silver, search, embeddings, themes) and their independent reproductions;
                       kibana import, search pool/judge/eval, ANN recall; the P6 chain —
