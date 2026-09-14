@@ -22,12 +22,34 @@ The shape:
 
 **Blocked by:** 02 — the built phases must write artefacts the notebook can show.
 
-**Status:** ready-for-agent
+**Status:** done (2026-09-14)
 
-- [ ] One notebook, one kernel, one Spark session / ES client / Postgres connection
-- [ ] Cells call serving helpers; no logic is reimplemented in the notebook
-- [ ] Ten moves laid out with their time budget, totalling 4:40
-- [ ] The replay starts at move 2 and the stream gate prints at move 10
-- [ ] The lineage move queries the ledger and does a `VERSION AS OF` read
-- [ ] Kibana carries exactly one move
-- [ ] Moves for phases not yet built are placed and marked, not omitted
+- [x] One notebook, one kernel, one Spark session / ES client / Postgres connection
+      — `demo.open_stage()` returns all three; the notebook opens it once and closes it once,
+      asserted in `tests/test_demo_moves.py`
+- [x] Cells call serving helpers; no logic is reimplemented in the notebook
+      — `src/serving/demo.py`, one function per move; a test rejects a cell that names
+      `SparkSession`, `Elasticsearch(`, `psycopg`, `spark.read` or a raw `SELECT`
+- [x] Ten moves laid out with their time budget, totalling 4:40
+      — `demo.MOVES` + `demo.budget()`: 260 s of moves + 20 s of surface switches, 20 s of
+      the 300 s ceiling left unspent; `make demo-run-sheet` prints it
+- [x] The replay starts at move 2 and the stream gate prints at move 10
+      — move 2 starts the paced producer and the live projection; move 10 stops the query and
+      shows the recorded `STREAM_GATE`
+- [x] The lineage move queries the ledger and does a `VERSION AS OF` read
+      — move 4: `demo.ledger()` then `demo.time_travel()`, which reads
+      `bronze.reviews_raw VERSION AS OF` the snapshot silver's row pinned and compares the
+      count to that run's `records_in` (701,528, verified)
+- [x] Kibana carries exactly one move
+- [x] Moves for phases not yet built are placed and marked, not omitted
+      — moves 2 and 10 carry `Move.pending`: the injected slices, the alerts table and the
+      demo run's own `STREAM_GATE` are ticket 16's, and the run sheet prints the reason
+
+**Verified by executing the notebook** (`jupyter nbconvert --execute`) with moves 2 and 10's
+stream cells neutralised, because move 2 resets `reviews.stream` and would discard the topic
+the control run's gate re-derives from: every other cell ran clean in 18 s in one kernel. The
+live projection was exercised separately against the existing topic — six micro-batches, the
+event-time clock advancing 2015-06 → 2019-04.
+
+**Not done here, by ticket boundary:** `DEMO_GATE`, the rehearsal exports under
+`docs/demo/<date>/` and the `docs_present` check are ticket 18; the P8 demo run is ticket 16.

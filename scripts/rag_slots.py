@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 import time
 from typing import Any
 
@@ -33,9 +32,10 @@ from src.ai.rag_questions import load_spec, rank_candidates, select_slots
 from src.common import config as C
 from src.common import runs
 from src.common.config import PROJECT_ROOT
+from src.common.console import line_buffered_stdout
 from src.common.spark import CATALOG, build
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 OUT_DIR = PROJECT_ROOT / "eval" / "rag"
 SLOTS_PATH = OUT_DIR / "slots.json"

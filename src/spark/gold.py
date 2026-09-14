@@ -22,7 +22,6 @@ Run:  ./run.sh python -m src.spark.gold [--scope full|sample] [--verify-rerun]
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 from typing import Any
 
@@ -42,13 +41,14 @@ from pyspark.sql.types import (
 from src.common import config as C
 from src.common import evaluation as E
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import CATALOG, build
 from src.gates import gold as gate
 from src.gates import lineage as L
 from src.gold.rule import CLOSED_BY, RULE_PATH, Rule, evaluate, load_rule
 from src.spark.silver import digest, write_replace
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 LONG_TEXT_WORDS = 20  # the vector-cohort predicate, frozen in RR-06
 

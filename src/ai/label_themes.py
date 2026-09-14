@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 import time
 from datetime import UTC, datetime
 from typing import Any
@@ -46,9 +45,10 @@ from src.ai.theme_labels import (
 )
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import build
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 LABEL_SOURCE = "local_llm"
 

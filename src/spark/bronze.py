@@ -25,19 +25,19 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 from pathlib import Path
 
 from pyspark.sql import functions as F
 
 from src.common import config as C
+from src.common.console import line_buffered_stdout
 from src.common.spark import CATALOG, build
 
 # The exactly-once gate kills this process with SIGKILL. stdout redirected to a
 # file is block-buffered by default, so everything printed since the last 4 KB
 # boundary dies with the process and the log ends mid-startup (F7). Line
 # buffering costs nothing here and makes the log a usable post-mortem.
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 
 def names_for(topic: str) -> tuple[str, Path]:

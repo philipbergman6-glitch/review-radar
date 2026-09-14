@@ -23,7 +23,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import sys
 import time
 from typing import Any
 
@@ -40,9 +39,10 @@ from src.ai.theme_labels import ensure_table, label_row, merge_chunk, table_name
 from src.common import config as C
 from src.common import runs
 from src.common.config import PROJECT_ROOT
+from src.common.console import line_buffered_stdout
 from src.common.spark import build
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 LABEL_SOURCE = "agent_reference"
 MODEL_ID = "claude-opus-5"          # the annotator's identity, recorded like any other

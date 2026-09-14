@@ -11,7 +11,6 @@ Run:  ./run.sh python -m src.serving.index_product_month [--scope full|sample] [
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 from collections.abc import Iterator
 from typing import Any
@@ -20,11 +19,12 @@ from pyspark.sql import DataFrame, SparkSession
 
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import build
 from src.serving import projection as P
 from src.serving.contract import Contract, load_contract
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 DOC_COLS = ["parent_asin", "month", "month_date", "review_count", "rating_sum", "mean_rating",
             "neg_count", "neg_share", "verified_count", "verified_rating_sum", "verified_mean",

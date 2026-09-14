@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 import time
 from datetime import UTC, datetime
 from typing import Any
@@ -30,9 +29,10 @@ from src.ai import ollama
 from src.ai.labels import DISCOVERY_SCHEMA, idempotency_key, load_spec, validate_discovery
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import CATALOG, build
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 BUDGET_LINE = "discovery"
 LABEL_SOURCE = "local_llm"

@@ -16,7 +16,6 @@ Run:  ./run.sh python -m src.serving.index_reviews [--scope full|sample] [--prun
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 from collections.abc import Iterator
 from typing import Any
@@ -26,11 +25,12 @@ from pyspark.sql import functions as F
 
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import build
 from src.serving import projection as P
 from src.serving.contract import Contract, load_contract, run_analyzer_tests
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 DOC_COLS = ["review_id", "parent_asin", "asin", "user_id", "event_ts", "review_month", "rating",
             "title", "text", "text_word_count", "verified_purchase", "helpful_vote", "image_count",

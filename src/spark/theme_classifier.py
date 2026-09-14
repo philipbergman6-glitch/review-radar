@@ -27,7 +27,6 @@ import argparse
 import hashlib
 import json
 import shutil
-import sys
 import time
 from typing import Any
 
@@ -53,9 +52,10 @@ from src.ai.labels import idempotency_key, load_taxonomy
 from src.ai.theme_labels import ensure_table, label_row, merge_chunk, table_name
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import build
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 MODEL_DIR = C.PROJECT_ROOT / "data" / "models" / "theme_classifier"
 SPEC_VERSION = runs.THEME_CLASSIFIER_SPEC_VERSION

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import shutil
-import sys
 import time
 from typing import Any
 
@@ -26,9 +25,10 @@ from src.ai import embedder
 from src.ai.spec import EmbeddingSpec, load_spec, prepare_text
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import CATALOG, build
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 CHUNK = 4096
 NORM_TOL = 1e-3

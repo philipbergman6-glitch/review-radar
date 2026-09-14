@@ -34,9 +34,11 @@ import sys
 import time
 from pathlib import Path
 
+from src.common.console import line_buffered_stdout
+
 ROOT = Path(__file__).resolve().parents[1]
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 ENV = {**os.environ,
        "JAVA_HOME": os.environ.get("JAVA_HOME", "/opt/homebrew/opt/openjdk@17")}

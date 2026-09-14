@@ -47,7 +47,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from collections import Counter
 from typing import Any
 
@@ -62,8 +61,9 @@ from src.ai.rag_questions import (
 from src.common import config as C
 from src.common import pg
 from src.common.config import PROJECT_ROOT
+from src.common.console import line_buffered_stdout
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 OUT_DIR = PROJECT_ROOT / "eval" / "rag"
 SLOTS_PATH = OUT_DIR / "slots.json"

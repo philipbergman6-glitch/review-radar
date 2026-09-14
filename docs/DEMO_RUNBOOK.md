@@ -191,19 +191,42 @@ cold, plus ~15 s if the reload in §1 is needed.
 - [ ] Laptop on mains power, sleep disabled, notifications off
 - [ ] Terminal font large enough to read from the back of the room
 
-**Live, in order**
+**Live, in order** — ten moves, 4:40 of the 5:00 (ADR-0009, ADR-0010). Move 1 is the only
+one in this terminal; moves 2–10 are cell groups in `notebooks/demo.ipynb`, run top to
+bottom in one kernel, and move 5 is a tab-switch to Kibana. The running order and its
+seconds live in `src/serving/demo.py` (`demo.run_sheet()`), which is where they are changed
+— this list is a copy for the person holding the laptop.
 
-1. `./run.sh python scripts/healthcheck.py` — the stack is real
-2. `./run.sh python -m src.ingest.producer --source data/sample/All_Beauty.sample.jsonl`
-   — replay is visible and finishes in seconds
-3. `./run.sh python -m src.spark.bronze --trigger once --max-per-trigger 150000`
-   — no `--reset`: the existing checkpoint means only the 10,000 new records are
-   read, not the 701,528 already ingested. That is the point worth saying out
-   loud. Bronze goes 701,528 → 711,528.
-4. `./run.sh python scripts/verify_iceberg.py` — snapshots + time travel
-5. `./run.sh python scripts/prove_exactly_once.py --records 120000 --kill-after 25`
-   — ~65 s; the one thing worth watching live. It uses its own topic
-   (`reviews.eos`) and its own table, so it cannot damage the production bronze.
+| # | move | surface | s |
+|---|---|---|---|
+| 1 | `make health` — the stack is real | terminal | 10 |
+| 2 | paced replay + streaming projection started | notebook | 20 |
+| 3 | `SILVER_GATE` — every bronze row accounted for | notebook | 15 |
+| 4 | every run this data went through, `VERSION AS OF` the pinned snapshot | notebook | 30 |
+| 5 | decline candidates over `product_month` | Kibana | 45 |
+| 6 | hybrid decomposition: BM25 rank, kNN rank, fused score | notebook | 35 |
+| 7 | cached complaint-theme labels for the top decline candidate | notebook | 30 |
+| 8 | `make eval-table` — one row per capability | notebook | 20 |
+| 9 | one frozen RAG question, claim by claim, citations resolved | notebook | 30 |
+| 10 | the live query stopped, then `STREAM_GATE` | notebook | 25 |
+
+260 s of moves + ~20 s for the two surface switches = 4:40, leaving 20 s of the ceiling
+unspent.
+
+Two things it no longer contains, and why:
+
+- **The exactly-once proof** (`./run.sh python scripts/prove_exactly_once.py --records 120000
+  --kill-after 25`, ~65 s) is a fifth of the clock. It is a figure in the design doc and a
+  terminal transcript in the recorded backup, played only if asked. Move 2 carries the
+  streaming story live instead.
+- **The 701,528 → 711,528 incremental-bronze claim** retired with it: move 2 now starts the
+  paced replay onto the stream's own topic, which is where event order and the watermark are
+  demonstrated (ADR-0010).
+
+Move 2 resets `reviews.stream`, so the control run's `STREAM_GATE` cannot be re-derived from
+the topic afterwards. That is intended on the day and destructive on a working machine — do
+not run move 2 during development. (The P8 demo run gets a topic of its own, ticket 16; when
+it lands, move 2 replays onto that one and this warning goes.)
 
 **If something fails live**
 

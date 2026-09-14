@@ -59,11 +59,12 @@ import pandas as pd
 from src.common import config as C
 from src.common import evaluation as E
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import build
 from src.gates import gold as verdicts
 from src.gates import lineage as L
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 RULE_PATH = C.PROJECT_ROOT / "conf" / "decline_rule.toml"
 

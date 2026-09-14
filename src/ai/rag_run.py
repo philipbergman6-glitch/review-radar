@@ -41,7 +41,6 @@ import hashlib
 import json
 import shutil
 import subprocess
-import sys
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -55,10 +54,11 @@ from src.ai.rag_answers import AnswerSpec
 from src.common import config as C
 from src.common import runs
 from src.common.config import PROJECT_ROOT
+from src.common.console import line_buffered_stdout
 from src.serving import projection as P
 from src.serving import search as S
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 EVAL_ROOT = PROJECT_ROOT / "eval" / "rag"
 SEAL_PATH = EVAL_ROOT / "answer-seal.json"

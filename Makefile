@@ -14,7 +14,7 @@ PROMPT ?= label_v5
 # development target reads it -- the evaluation run refuses any prompt but the frozen one.
 RAG_PROMPT ?= rag_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample stream-aggregate stream-aggregate-sample gate-stream bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers rag-judge-export rag-judge rag-judge-check rag-judge-import gate-rag eval-table gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample stream-produce-demo stream-aggregate stream-aggregate-sample stream-aggregate-demo gate-stream gate-stream-demo stream-demo bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers rag-judge-export rag-judge rag-judge-check rag-judge-import gate-rag eval-table demo demo-run-sheet gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -56,14 +56,25 @@ stream-produce:  ## paced replay of the sorted file into a freshly reset reviews
 stream-produce-sample:  ## same, over the sorted sample -> reviews.stream.sample
 	$(RUN) -m src.ingest.stream_producer --source $(SAMPLE:.jsonl=.sorted.jsonl) --scope sample
 
+stream-produce-demo:  ## the demo replay: the frozen near/far slices released late into a freshly reset reviews.stream.demo
+	$(RUN) -m src.ingest.stream_producer --category $(CATEGORY) --scope full --reset --inject
+
 stream-aggregate:  ## the watermarked product-month projection beside batch; drains reviews.stream and stops
 	$(RUN) -m src.spark.stream_product_month --scope full
+
+stream-aggregate-demo:  ## same, over the demo topic; the watermark must drop exactly the far slice
+	$(RUN) -m src.spark.stream_product_month --scope full --run-kind demo
 
 stream-aggregate-sample:  ## same, over reviews.stream.sample
 	$(RUN) -m src.spark.stream_product_month --scope sample
 
-gate-stream:  ## re-read the topic and reconcile the projection against gold; prints STREAM_GATE
+gate-stream:  ## re-read the topic and reconcile the projection against gold; prints STREAM_GATE (control run)
 	$(RUN) scripts/gate_stream.py --scope full
+
+gate-stream-demo:  ## the demo run's STREAM_GATE: far slice dropped exactly, every difference explained, control run present
+	$(RUN) scripts/gate_stream.py --scope full --run-kind demo
+
+stream-demo: stream-produce-demo stream-aggregate-demo  ## the demo run end to end (the notebook backgrounds this at move 2 and prints gate-stream-demo at move 10)
 
 bronze:  ## drain the topic into the bronze Iceberg table, one trigger
 	$(RUN) -m src.spark.bronze --trigger once --max-per-trigger 150000
@@ -295,6 +306,12 @@ rag-judge-import:  ## import Philip's thirty judgements as a rag_judgements ledg
 
 gate-rag:  ## re-derive every P7 constituent from the manifest, the seal, the retrieval and the call ledger; prints RAG_GATE, then RAG_QUALITY (reported)
 	$(RUN) scripts/gate_rag.py --scope full
+
+demo:  ## open the demo notebook (ten moves, one kernel) in Jupyter Lab
+	./run.sh python -m jupyter lab notebooks/demo.ipynb
+
+demo-run-sheet:  ## print the running order, its seconds and any move marked pending
+	$(RUN) -c "from src.serving import demo; print(demo.run_sheet().to_string(index=False)); print(demo.budget())"
 
 eval-table:  ## the whole evaluation table from conf/lineage_chain.toml + eval/*/gate.json; non-zero on a capability that is neither a number nor a written reason
 	$(RUN) scripts/eval_table.py

@@ -37,11 +37,12 @@ import pandas as pd
 from src.common import config as C
 from src.common import evaluation as E
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import build
 from src.gates import lineage as L
 from src.gates import silver as gate
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 TS_MIN_MS = int(datetime(1995, 1, 1, tzinfo=UTC).timestamp() * 1000)
 INT_RE = re.compile(r"^-?[0-9]{1,19}$")

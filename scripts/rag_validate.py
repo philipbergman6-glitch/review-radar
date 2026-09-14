@@ -30,13 +30,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from typing import Any
 
 from src.ai.rag_questions import ANSWERABLE_MIN_SUPPORT, answerability, load_spec
 from src.common.config import PROJECT_ROOT
+from src.common.console import line_buffered_stdout
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 OUT_DIR = PROJECT_ROOT / "eval" / "rag"
 WORKLIST_PATH = OUT_DIR / "scan-worklist.jsonl"

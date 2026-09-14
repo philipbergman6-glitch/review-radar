@@ -25,7 +25,6 @@ Run:
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 from typing import Any
 
@@ -41,12 +40,13 @@ from pyspark.sql.types import (
 
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import CATALOG, build
 from src.gates import silver as gate
 from src.gates.silver import REJECT_REASONS
 from src.spark.bronze import names_for
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 # ---------------------------------------------------------------- constants ----
 # Timestamps before this are impossible for Amazon reviews (named, not job time).

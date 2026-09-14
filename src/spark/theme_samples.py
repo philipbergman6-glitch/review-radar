@@ -30,7 +30,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 import time
 from typing import Any
 
@@ -40,6 +39,7 @@ from pyspark.sql import functions as F
 from src.ai.theme_terms import TERMS_PATH, load_terms, matched_terms
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import CATALOG, build
 from src.gold.controls import (
     SAMPLING_PATH,
@@ -53,7 +53,7 @@ from src.gold.controls import (
 )
 from src.gold.rule import RULE_PATH, load_rule
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 SAMPLE_NAMES = ("discovery", "development", "training_pool", "audit", "inference")
 TAXONOMY_PATH = C.PROJECT_ROOT / "conf" / "theme-taxonomy.json"
