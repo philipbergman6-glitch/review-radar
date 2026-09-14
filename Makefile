@@ -101,10 +101,10 @@ gold-sample:  ## same, over the sample silver tables
 	$(RUN) -m src.spark.gold --scope sample --verify-rerun
 
 calibrate-gold:  ## placebo trigger rate + injected-decline power on pre-2020 only; prints GOLD_CALIBRATION and picks the thresholds
-	$(RUN) python scripts/calibrate_gold.py --scope full
+	$(RUN) scripts/calibrate_gold.py --scope full
 
 freeze-rule:  ## THE PROTOCOL FREEZE: write the calibrated thresholds into conf/decline_rule.toml and seal it (one commit, never edited again)
-	$(RUN) python scripts/freeze_rule.py $(if $(ACCEPT_POWER_SHORTFALL),--accept-power-shortfall,) $(if $(DRY_RUN),--dry-run,)
+	$(RUN) scripts/freeze_rule.py $(if $(ACCEPT_POWER_SHORTFALL),--accept-power-shortfall,) $(if $(DRY_RUN),--dry-run,)
 
 reproduce-gold:  ## independent re-derivation of the three gold tables from the pinned silver snapshot
 	$(RUN) scripts/reproduce_gold.py --scope full
