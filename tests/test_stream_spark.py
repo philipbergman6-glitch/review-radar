@@ -54,7 +54,8 @@ def _write_files(root: Path, groups: list[list[dict]]) -> Path:
     return root
 
 
-def _run_stream(spark, src: Path, tmp_path: Path, *, validate=None) -> dict:
+def _run_stream(spark, src: Path, tmp_path: Path, *, validate=None,
+                watermark: str = WATERMARK) -> dict:
     """Drain the files through the streaming path; return the counts the job would record."""
     from pyspark.sql import functions as F
     from pyspark.sql.types import StringType, StructField, StructType
@@ -74,7 +75,7 @@ def _run_stream(spark, src: Path, tmp_path: Path, *, validate=None) -> dict:
         event_ts.alias("event_ts"),
         F.to_date(F.date_trunc("month", event_ts)).alias("review_month"),
         silver.word_count_col(F.col("text")).alias("text_word_count"))
-    stream = S.deduplicated(reviews, watermark=WATERMARK)
+    stream = S.deduplicated(reviews, watermark=watermark)
 
     out = tmp_path / "batches"
     seen = {"rows": 0}
@@ -243,3 +244,55 @@ def test_a_micro_batch_that_never_ran_leaves_the_projection_short(spark, tmp_pat
     assert counts["micro_batches"] >= 2
     assert sum(r["review_count"] for r in counts["aggregates"]) == counts["unique_review_ids"]
     assert time.time() - start < 300
+
+
+# ------------------------------------------------------- the watermark model ----
+
+def _inject(spark, tmp_path, *, batches: list[list[dict]], watermark: str) -> tuple[int, int]:
+    """(Spark's drops, the model's drops) for the same batches under the same watermark."""
+    from src.ingest.lateness import simulate_watermark
+    counts = _run_stream(spark, _write_files(tmp_path / "in", batches), tmp_path,
+                         watermark=watermark)
+    flat = [r["timestamp"] for group in batches for r in group]
+    size = len(batches[0])
+    assert all(len(g) == size for g in batches), "equal batches so one batch size fits"
+    modelled = simulate_watermark(flat, batch_size=size, delay_ms=int(watermark.split()[0])
+                                  * DAY_MS)
+    return counts["natural_drops"], len(modelled)
+
+
+def test_the_watermark_model_agrees_with_spark_on_an_injected_sequence(spark, tmp_path):
+    """The prediction ticket 16 freezes rests on this: the model drops what Spark drops.
+
+    Two rows are released late into an otherwise sorted replay -- one 7 days late, inside the
+    30-day watermark, and one 730 days late, well outside it. Spark must drop exactly the far
+    one, and the pure model must say the same before Spark runs.
+    """
+    far = _review("uF", "p1", BASE_MS)                                   # its natural time
+    near = _review("uN", "p2", BASE_MS + 700 * DAY_MS)
+    batches = [
+        [_review("u1", "p1", BASE_MS + 10 * DAY_MS), _review("u2", "p1", BASE_MS + 300 * DAY_MS)],
+        [_review("u3", "p1", BASE_MS + 600 * DAY_MS), _review("u4", "p1", BASE_MS + 705 * DAY_MS)],
+        [near, _review("u5", "p1", BASE_MS + 710 * DAY_MS)],             # near: 7 days late
+        [far, _review("u6", "p1", BASE_MS + 740 * DAY_MS)],              # far: 730 days late
+    ]
+    spark_drops, modelled = _inject(spark, tmp_path, batches=batches, watermark="30 days")
+    assert spark_drops == modelled == 1
+
+
+def test_a_zero_watermark_drops_the_near_slice_in_spark_too(spark, tmp_path):
+    """The trip case ticket 16 names: with no delay, 7 days late is late.
+
+    The near row sits two batches after the batch that reached day 705, because Spark judges a
+    batch's late rows by the watermark in force for the batch before it -- the model has to get
+    that lag right too, or it would predict a drop here one batch early.
+    """
+    near = _review("uN", "p2", BASE_MS + 700 * DAY_MS)
+    batches = [
+        [_review("u1", "p1", BASE_MS + 10 * DAY_MS), _review("u2", "p1", BASE_MS + 300 * DAY_MS)],
+        [_review("u3", "p1", BASE_MS + 600 * DAY_MS), _review("u4", "p1", BASE_MS + 705 * DAY_MS)],
+        [_review("u5", "p1", BASE_MS + 706 * DAY_MS), _review("u6", "p1", BASE_MS + 708 * DAY_MS)],
+        [near, _review("u7", "p1", BASE_MS + 710 * DAY_MS)],
+    ]
+    spark_drops, modelled = _inject(spark, tmp_path, batches=batches, watermark="0 days")
+    assert spark_drops == modelled == 1

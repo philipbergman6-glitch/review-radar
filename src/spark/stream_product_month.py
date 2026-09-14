@@ -34,17 +34,18 @@ millisecond. The count it removes is therefore predictable before the run -- `so
 recorded it as `key_collision_rows` -- and the gate asserts the two agree.
 
 The control run (ticket 15) reads a topic that holds the sorted file and nothing else, so its
-`numRowsDroppedByWatermark` must be zero. Ticket 16 injects the held-back slices and that
-number stops being zero on purpose.
+`numRowsDroppedByWatermark` must be zero. The demo run (`--run-kind demo`, ticket 16) reads the
+topic into which the producer released the held-back slices late, and that number is then
+predicted -- the far slice, exactly -- rather than zero. The job is the same job either way:
+it names the replay it consumed, and `STREAM_GATE` decides what the number must be.
 
-Run:  ./run.sh python -m src.spark.stream_product_month [--scope full|sample]
+Run:  ./run.sh python -m src.spark.stream_product_month [--scope full|sample] [--run-kind control|demo]
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import inspect
-import sys
 import time
 from datetime import datetime
 from typing import Any
@@ -54,13 +55,14 @@ from pyspark.sql import functions as F
 
 from src.common import config as C
 from src.common import runs
+from src.common.console import line_buffered_stdout
 from src.common.spark import CATALOG, build
 from src.ingest.replay_config import ReplayConfig, load_replay_config
 from src.spark import silver
 from src.spark.gold import monthly_aggregates
 from src.spark.silver import digest, write_replace
 
-sys.stdout.reconfigure(line_buffering=True)
+line_buffered_stdout()
 
 #: Silver's validation, bound rather than reimplemented. The names exist so the sharing is a
 #: fact a test can assert (`stream.VALIDATE is silver.parse_and_validate`) and so the digest
@@ -128,7 +130,15 @@ def review_rows(records: DataFrame) -> DataFrame:
     them (`src/spark/silver.py`), from the shared column expressions -- this is projection, not
     a second opinion about what a review month is.
     """
-    typed = TYPE_ROWS(VALIDATE(records))
+    return typed_reviews(TYPE_ROWS(VALIDATE(records)))
+
+
+def typed_reviews(typed: DataFrame) -> DataFrame:
+    """The projection's columns from silver-typed rows; `review_rows` after validation.
+
+    Split out so `STREAM_GATE` can aggregate the held-back rows it finds in its own re-read of
+    the topic through exactly the expressions the stream used (ticket 16).
+    """
     event_ts = F.timestamp_millis(F.col("timestamp_ms"))
     return typed.select(
         "review_id", "parent_asin", "user_id", "rating", "verified_purchase",
@@ -224,11 +234,19 @@ def progress_counts(query: Any, *, spark: SparkSession) -> dict[str, int]:
 
 
 def run_stream(spark: SparkSession, *, scope: str, category: str, cfg: ReplayConfig,
-               replay_run: dict[str, Any], sort_run: dict[str, Any]) -> dict[str, Any]:
+               replay_run: dict[str, Any], sort_run: dict[str, Any],
+               run_kind: str = "control") -> dict[str, Any]:
     t0 = time.time()
-    topic = cfg.topic_for(scope)
+    # The topic the replay *recorded*, checked against the one the frozen config names for
+    # this run kind: a demo projection draining the control topic would print zero drops and
+    # call the injection a success.
+    topic = replay_run["outputs"]["kafka"]["topic"]
+    if topic != cfg.topic_for(scope, run_kind):
+        raise SystemExit(f"replay run {replay_run['run_id'][:8]} wrote to '{topic}' but the "
+                         f"frozen config names '{cfg.topic_for(scope, run_kind)}' for a "
+                         f"{run_kind} run at scope={scope}")
     names = stream_names(scope)
-    checkpoint = C.CHECKPOINTS / f"stream_product_month_{scope}"
+    checkpoint = C.CHECKPOINTS / f"stream_product_month_{scope}_{run_kind}"
     source = sort_run["outputs"]["sorted_file"]
 
     run = runs.start(
@@ -239,7 +257,7 @@ def run_stream(spark: SparkSession, *, scope: str, category: str, cfg: ReplayCon
                            "sha256": source["sha256"]},
                 "protocol": {"path": str(cfg.path.relative_to(C.PROJECT_ROOT)),
                              "status": cfg.status, "config_hash": cfg.config_hash}},
-        params={"run_kind": "control", "watermark": cfg.watermark,
+        params={"run_kind": run_kind, "watermark": cfg.watermark,
                 "max_offsets_per_trigger": cfg.max_offsets_per_trigger,
                 "replay_config_hash": cfg.config_hash,
                 "validation_source_sha256": validation_digest()})
@@ -287,7 +305,7 @@ def run_stream(spark: SparkSession, *, scope: str, category: str, cfg: ReplayCon
                  .foreachBatch(write_batch)
                  .trigger(availableNow=True)
                  .start())
-        print(f"[stream] draining '{topic}' under a {cfg.watermark} watermark "
+        print(f"[stream] {run_kind} run: draining '{topic}' under a {cfg.watermark} watermark "
               f"({cfg.max_offsets_per_trigger:,} offsets per batch)")
         query.awaitTermination()
         counts.update(progress_counts(query, spark=spark))
@@ -314,6 +332,7 @@ def run_stream(spark: SparkSession, *, scope: str, category: str, cfg: ReplayCon
 
         counts.update({
             "unique_review_ids": projected["n"],
+            "run_kind": run_kind,
             "product_months": product_months,
             "reviews_on_projection": on_projection,
             "ingested_at": replay_run["started_at"].isoformat(),
@@ -367,15 +386,22 @@ def main() -> None:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scope", default="full", choices=["full", "sample"])
     ap.add_argument("--category", default=C.CATEGORY)
+    ap.add_argument("--run-kind", default="control", choices=["control", "demo"],
+                    help="which replay to project: the control run's or the demo run's, "
+                         "each on its own topic (ticket 16)")
     args = ap.parse_args()
 
     cfg = load_replay_config()
+    # Pinned by run kind, not by recency: after the demo replay, "the latest stream_produce
+    # run" is the demo's, and a control projection built on it would drain injected lateness.
     replay_run = runs.latest_success("stream_produce", category=args.category,
-                                     data_scope=args.scope)
+                                     data_scope=args.scope,
+                                     params_match={"run_kind": args.run_kind})
     if replay_run is None:
-        raise SystemExit(f"no successful stream_produce run for {args.category}/{args.scope}; "
-                         "run `make stream-produce` first -- the projection names the replay "
-                         "it consumed")
+        raise SystemExit(f"no successful {args.run_kind} stream_produce run for "
+                         f"{args.category}/{args.scope}; run `make stream-produce"
+                         f"{'-demo' if args.run_kind == 'demo' else ''}` first -- the "
+                         "projection names the replay it consumed")
     sort_run = runs.latest_success("sort_replay", category=args.category, data_scope=args.scope)
     if sort_run is None:
         raise SystemExit(f"no successful sort_replay run for {args.category}/{args.scope}; "
@@ -397,7 +423,7 @@ def main() -> None:
     spark.conf.set(PROGRESS_RETAINED_CONF, str(PROGRESS_RETAINED))
     try:
         run_stream(spark, scope=args.scope, category=args.category, cfg=cfg,
-                   replay_run=replay_run, sort_run=sort_run)
+                   replay_run=replay_run, sort_run=sort_run, run_kind=args.run_kind)
     finally:
         spark.stop()
 

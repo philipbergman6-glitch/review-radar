@@ -163,7 +163,10 @@ phase = "P8 Stream"
 gate_name = "STREAM_GATE"
 kind = "reproducibility"
 status = "declared"
-jobs = []
+# The same three jobs as the control run, on the demo topic with the held-back slices
+# released late (ticket 16). The demo's gate also requires the control artefact above to be
+# present and passing under the same protocol hash: two runs, or neither means anything.
+jobs = ["sort_replay", "stream_produce", "stream_aggregate"]
 
 # --------------------------------------------------------------- Lineage track ----
 [[capability]]
@@ -306,6 +309,8 @@ downstream = "stream_aggregate"
 input = "replay"
 upstream = "stream_produce"
 status = "declared"
+upstream_pin = "recorded"
+pin_reason = "P8 runs the replay twice -- the control run on reviews.stream and the demo run on reviews.stream.demo with the late slices held back (ticket 16) -- so two stream_produce outputs are live at once and the later one is not the right upstream for the control projection. Each projection names the replay whose topic it read, and both replays are walked: the control aggregate would otherwise fail against the demo replay it never consumed"
 
 [[edge]]
 downstream = "stream_aggregate"
@@ -322,6 +327,13 @@ downstream = "stream_produce"
 input = "source"
 upstream = "sort_replay"
 spec_version = "2"
+status = "declared"
+
+[[edge]]
+downstream = "stream_produce"
+input = "source"
+upstream = "sort_replay"
+spec_version = "3"
 status = "declared"
 
 # ================================================= How a table says who wrote it ====

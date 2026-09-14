@@ -69,8 +69,11 @@ PRODUCE_SPEC_VERSION = "1"
 SORT_REPLAY_SPEC_VERSION = "1"
 # v2 names the `sort_replay` run whose file it is replaying, so the ordering a replay carried
 # is a join rather than a matching digest someone eyeballed. v1 recorded the digest alone and
-# is kept so the smoke replays made under it still validate.
-STREAM_PRODUCE_SPEC_VERSION = "2"
+# is kept so the smoke replays made under it still validate. v3 (ticket 16) records the
+# held-back slices: which rows were released late, by how much, and what the watermark was
+# predicted to do to them -- for a control run all of that is zero and the sidecar is empty,
+# so the two run kinds validate under one contract and differ in `run_kind` alone.
+STREAM_PRODUCE_SPEC_VERSION = "3"
 # `stream_aggregate` is the watermarked projection beside batch (ticket 15). Its numbers are
 # an accounting of one topic: everything read is a row the projection counted or a duplicate
 # the watermark removed, and nothing else may go missing in between.
@@ -326,6 +329,39 @@ def _stream_produce_identity(records: dict[str, int | None], counts: dict[str, A
     return fails
 
 
+def _stream_produce_v3_identity(records: dict[str, int | None],
+                                counts: dict[str, Any]) -> list[str]:
+    """v2's identity, plus: the slices are what the run kind says they are.
+
+    A control run holds nothing back. A demo run holds back exactly the frozen sizes, the
+    sidecar lists every held-back row, and the watermark model predicted the whole far slice
+    dropped and the whole near slice accepted -- the producer refuses to send a plan that does
+    not, so a success row saying otherwise is a row that skipped the check.
+    """
+    fails = _stream_produce_identity(records, counts)
+    kind = counts.get("run_kind")
+    if kind not in ("control", "demo"):
+        return fails + [f"counts.run_kind must be control|demo, got {kind!r}"]
+    near, far, held = (_n(counts, k) for k in ("near_rows", "far_rows", "held_back_rows"))
+    accepted, dropped = _n(counts, "expected_near_accepted"), _n(counts, "expected_far_dropped")
+    if None in (near, far, held, accepted, dropped):
+        return fails + [("identity: near_rows/far_rows/held_back_rows/expected_near_accepted/"
+                         "expected_far_dropped must all be set on success")]
+    if held != near + far:
+        fails.append(f"identity: held_back_rows {held} != near_rows {near} + far_rows {far}")
+    if kind == "control" and (near or far):
+        fails.append(f"a control run holds nothing back, but near_rows={near} far_rows={far}")
+    if kind == "demo" and not (near > 0 and far > 0):
+        fails.append(f"a demo run holds both slices back, but near_rows={near} far_rows={far}")
+    if accepted != near:
+        fails.append(f"expected_near_accepted {accepted} != near_rows {near}: the plan was not "
+                     "predicted to accept the whole near slice")
+    if dropped != far:
+        fails.append(f"expected_far_dropped {dropped} != far_rows {far}: the plan was not "
+                     "predicted to drop the whole far slice")
+    return fails
+
+
 REGISTRY: dict[tuple[str, str], Contract] = {}
 
 
@@ -432,12 +468,22 @@ _register(Contract(
     identity=_stream_produce_identity))
 
 _register(Contract(
-    "stream_produce", STREAM_PRODUCE_SPEC_VERSION,
+    "stream_produce", "2",
     inputs={"source": ("run_id", "path", "sha256", "bytes"),
             "protocol": ("path", "status", "config_hash")},
     outputs={"kafka": ("topic",)},
     counts=_STREAM_PRODUCE_COUNTS,
     identity=_stream_produce_identity))
+
+_register(Contract(
+    "stream_produce", STREAM_PRODUCE_SPEC_VERSION,
+    inputs={"source": ("run_id", "path", "sha256", "bytes"),
+            "protocol": ("path", "status", "config_hash")},
+    outputs={"kafka": ("topic",),
+             "held_back": ("path", "sha256", "rows")},
+    counts=_STREAM_PRODUCE_COUNTS + ("run_kind", "near_rows", "far_rows", "held_back_rows",
+                                     "expected_near_accepted", "expected_far_dropped"),
+    identity=_stream_produce_v3_identity))
 
 def _stream_aggregate_identity(records: dict[str, int | None], counts: dict[str, Any]) -> list[str]:
     """What the topic held, what reached the projection, and what the projection holds.

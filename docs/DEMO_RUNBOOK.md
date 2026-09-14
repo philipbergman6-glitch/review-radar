@@ -223,10 +223,14 @@ Two things it no longer contains, and why:
   paced replay onto the stream's own topic, which is where event order and the watermark are
   demonstrated (ADR-0010).
 
-Move 2 resets `reviews.stream`, so the control run's `STREAM_GATE` cannot be re-derived from
-the topic afterwards. That is intended on the day and destructive on a working machine — do
-not run move 2 during development. (The P8 demo run gets a topic of its own, ticket 16; when
-it lands, move 2 replays onto that one and this warning goes.)
+Move 2 as wired today resets `reviews.stream`, so the control run's `STREAM_GATE` cannot be
+re-derived from the topic afterwards — intended on the day, destructive on a working
+machine, so do not run move 2 during development. Ticket 16 gives the demo run a topic of
+its own (`reviews.stream.demo`, replayed by `stream_producer --inject`, projected by
+`stream_product_month --run-kind demo`), so move 2 can be pointed at that one and stop
+touching the control topic; wiring it is ticket 18's. Move 10 prints `STREAM_GATE` — the
+alerts table ADR-0010's move list mentions is not built, so the gate line is all it
+prints.
 
 **If something fails live**
 

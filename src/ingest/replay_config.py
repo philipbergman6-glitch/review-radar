@@ -47,6 +47,7 @@ class ReplayConfig:
     spec_version: str
     topic: str
     sample_topic: str
+    demo_topic: str
     partitions: int
     tiebreak: str
     suffix: str
@@ -72,10 +73,23 @@ class ReplayConfig:
     def watermark_days(self) -> int:
         return watermark_days(self.watermark)
 
-    def topic_for(self, scope: str) -> str:
-        """`full` -> the stream topic, `sample` -> its own. They never share (ADR-0008)."""
+    def topic_for(self, scope: str, run_kind: str = "control") -> str:
+        """`full` -> the stream topic, `sample` -> its own; the demo run has its own again.
+
+        Sample and full never share a topic (ADR-0008), and the control and demo runs never
+        do either: the lineage gate resolves a replay by its topic's record count, so two
+        replays on one topic would leave the count belonging to neither (ticket 16). The demo
+        run is a full-scope run only -- the frozen slices cannot be drawn from the sample.
+        """
         if scope not in ("full", "sample"):
             raise ValueError(f"scope must be 'full' or 'sample', got {scope!r}")
+        if run_kind not in ("control", "demo"):
+            raise ValueError(f"run_kind must be 'control' or 'demo', got {run_kind!r}")
+        if run_kind == "demo":
+            if scope != "full":
+                raise ValueError("the demo run is full-scope only: the frozen slices are drawn "
+                                 "from the whole file and the sample cannot hold them")
+            return self.demo_topic
         return self.topic if scope == "full" else self.sample_topic
 
     def as_params(self) -> dict[str, Any]:
@@ -99,8 +113,11 @@ def load_replay_config(path: Path = CONFIG_PATH) -> ReplayConfig:
     topic, sort, pacing, sl = doc["topic"], doc["sort"], doc["pacing"], doc["slices"]
     stream = doc["stream"]
 
-    if topic["name"] == topic["sample_name"]:
-        raise ValueError("topic.name and topic.sample_name must differ (ADR-0008)")
+    names = (topic["name"], topic["sample_name"], topic["demo_name"])
+    if len(set(names)) != len(names):
+        raise ValueError("topic.name, topic.sample_name and topic.demo_name must all differ: "
+                         "two replays on one topic leave its record count belonging to "
+                         "neither (ADR-0008, ticket 16)")
     if int(topic["partitions"]) != 1:
         raise ValueError(
             f"topic.partitions must be 1, got {topic['partitions']}. Kafka orders records "
@@ -137,7 +154,7 @@ def load_replay_config(path: Path = CONFIG_PATH) -> ReplayConfig:
     return ReplayConfig(
         status=status, spec_version=str(doc["protocol"]["spec_version"]),
         topic=topic["name"], sample_topic=topic["sample_name"],
-        partitions=int(topic["partitions"]),
+        demo_topic=topic["demo_name"], partitions=int(topic["partitions"]),
         tiebreak=sort["tiebreak"], suffix=sort["suffix"],
         records_per_second=int(pacing["records_per_second"]),
         clock_every_records=int(pacing["clock_every_records"]),

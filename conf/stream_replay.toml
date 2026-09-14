@@ -22,6 +22,13 @@ spec_version = "1"
 # order for the watermark job. Two orderings of the same file are two different streams.
 name = "reviews.stream"
 sample_name = "reviews.stream.sample"
+# The demo run's topic (ticket 16). The control run and the demo run are two different
+# streams -- the same rows in two orderings, one with the held-back slices released late --
+# and the lineage gate resolves a replay's output by comparing the topic's record count with
+# the run's acked count, so the two cannot share a topic without the second erasing the
+# first's lineage. Added 2026-09-14 before the first demo run; the control run was replayed
+# under the resulting protocol hash so both runs are measured under one frozen document.
+demo_name = "reviews.stream.demo"
 # One partition, where the batch topic has six (ticket 15). Kafka orders records within a
 # partition and nowhere else, so a six-partition stream topic does not carry the sort job's
 # output in event-time order -- it carries six interleavings of it, and a consumer reading a

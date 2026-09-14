@@ -7,8 +7,8 @@ unparsed — and exactly once across an unclean restart — as an Iceberg table 
 object store, with the Iceberg catalogue in PostgreSQL. From there a batch lakehouse
 carries them through silver and gold into two Elasticsearch serving projections, and an
 AI layer reads the review text. **Phases P2–P5 are built with passing gates; P6 Themes and
-P7 RAG are mid-flight; P8 Stream's sorted topic and paced replay are built and its
-streaming projection is not; the presentation deliverables are designed but not built.**
+P7 RAG are mid-flight; P8 Stream is built and both its runs pass; the presentation
+deliverables are designed but not built.**
 The table below is the honest split, and it stays in this README until it is all in the
 "built" column.
 
@@ -42,7 +42,7 @@ is complete only at `scope=full`.
 | ↳ MLlib classifier baseline | *planned* | scored inside `THEMES_QUALITY` | `spark.ml` CountVectorizer → IDF → per-theme logistic regression, trained on the 3,000-row LLM-labelled pool, scored beside the LLM labeller and a per-theme star-only baseline. A baseline, never a predictor; `label_source="classifier"` (ADR-0002) |
 | P7 RAG — grounded, cited answers | *planned* (conditional) | `RAG_GATE` = the 30/30 citation and scope contract; `RAG_QUALITY` non-blocking | 30 frozen questions (20 answerable, 10 unanswerable in three strata); thresholds are fixed-denominator integers set before measurement — grounded ≥ 16/20, adequate ≥ 14/20, abstention ≥ 8/10, false refusal ≤ 2/20; Philip is sole judge. ADR-0006 |
 | P8 Stream — sorted topic + paced replay | **built** | run contracts `sort_replay`, `stream_produce` | `conf/stream_replay.toml` frozen *before* the first run (3,000 rec/s, slice sizes, lags). `src/ingest/sort_replay.py` orders the file by `(timestamp, review_id, line digest)` in 4.8 s — 701,528 rows, 0 rejects, 2000-11-01 → 2023-09-09, input and output digests in the ledger. `src/ingest/stream_producer.py` paces it into `reviews.stream` with an event-time clock; measured 2,999 rec/s against the frozen 3,000 and the contract fails a run more than 10% off. The sort reproduces silver's dedupe arithmetic independently — see below |
-| ↳ P8 Stream — reconciled projection beside batch | *planned* (conditional) | `STREAM_GATE=PASS\|FAIL run_kind=control\|demo` | `withWatermark` 30 d + `dropDuplicatesWithinWatermark`; lateness is **injected** (near lag 7 d must be accepted, far lag 730 d must be dropped, counts known before the run) and a control run must print zero natural drops. ADR-0010 |
+| ↳ P8 Stream — reconciled projection beside batch | **built**, both runs pass | `STREAM_GATE=PASS run_kind=control` 11/11 (run `74dde108`), `STREAM_GATE=PASS run_kind=demo` 18/18 (run `50caffcf`), both `scope=full` | `withWatermark` 30 d + `dropDuplicatesWithinWatermark(review_id)`, `foreachBatch` summing per-batch contributions into `stream.product_month`. The **control** run replays the sorted file untouched and prints zero drops over 193,939 product-months compared, zero differing. The **demo** run releases slices held back in counts frozen before it ran -- 2,000 rows 7 days late (accepted), 2,000 rows 730 days late (dropped) -- onto `reviews.stream.demo`: exactly 2,000 dropped, and all 1,013 differing plus 309 gold-only product-months explained by the dropped rows, none only in the stream. Near acceptance is *derived*, not observed per row, and the gate line says so. `distinct_users` is not projected (not summable). ADR-0010 |
 | Lineage — the run ledger | **built** | `LINEAGE_GATE gate_mode= chain_clean= publication_ready= chain_links_checked=N` — `make gate-lineage` | `pipeline_runs` is the run ledger: one row per execution attempt of every job, UUID `run_id` stamped into every Iceberg snapshot, ES doc and eval artefact (ADR-0008). [`scripts/gate_lineage.py`](scripts/gate_lineage.py) walks the chain declared in [`conf/lineage_chain.toml`](conf/lineage_chain.toml) — artefact → ledger row → its outputs and the runs its inputs name — and prints how many links it checked, so a pass over an empty chain is impossible. `chain_clean` is the verdict; `publication_ready` is the stricter question and stays false while phases are pending. Every phase gate prints `run_contract_registered` for the jobs the chain gives it |
 | Deliverables — demo notebook | **built**, unrehearsed | `DEMO_GATE … rehearsals=N max_elapsed_s= docs_present=`, threshold `rehearsals ≥ 2` | [`notebooks/demo.ipynb`](notebooks/demo.ipynb) — one kernel holding one Spark session, one ES client and one Postgres connection; every cell calls [`src/serving/demo.py`](src/serving/demo.py), so the stage runs the pipeline's own code path. Ten moves in 4:40 of a 5:00 budget, Kibana carrying exactly one; the two moves that need the P8 demo run are **placed and marked pending**, not dropped. No rehearsal export exists yet, so `DEMO_GATE` is still `MISSING` in the evaluation table (ADR-0009) |
 | Deliverables — demo runbook | **built** | — | [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md) — Kafka retention, memory, pre-demo checklist, and §3's live section rewritten as the ten moves the notebook runs (ADR-0009/ADR-0010) |
@@ -356,8 +356,20 @@ The replay paces against an absolute schedule rather than sleeping a fixed inter
 record, and the run contract fails a run whose measured rate is more than 10% off the frozen
 target: `701,528 / 3,000 = 234 s`, so twenty-three years of event time pass in 3:54 of wall
 clock while the rest of the demo runs. Lateness is **not** injected here — that is the
-control run ADR-0010 requires, and the held-back slices are frozen in the same config for
-the injected run to release.
+control run ADR-0010 requires. `make stream-demo` runs the same replay with `--inject`: `src/ingest/lateness.py` draws the two slices from the frozen config by
+`slice_rank(seed, salt, review_id)`, holds each drawn row back until the first natural row
+at or after its event time plus its lag, and simulates the watermark over that order —
+a plan not predicted to land exactly on the frozen counts fails before Kafka is opened.
+Spark judges a batch's late rows by the watermark in force one batch earlier, which the
+model reproduces and `tests/test_stream_spark.py` checks against
+`numRowsDroppedByWatermark`. The demo goes onto its own topic because the lineage gate
+resolves a Kafka output by comparing the topic's record count with the run's acked count.
+
+```bash
+make stream-demo          # replay with --inject onto reviews.stream.demo, then project it
+make gate-stream           # STREAM_GATE for the control run
+make gate-stream-demo      # STREAM_GATE for the demo run -- also requires the control artefact
+```
 
 ### Measured producer throughput
 

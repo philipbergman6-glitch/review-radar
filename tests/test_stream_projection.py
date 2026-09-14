@@ -215,3 +215,165 @@ def test_a_collision_class_with_no_batch_survivor_fails_the_gate():
     v = _verdict(survivor={**CONTROL["survivor"], "unresolvable": 3})
     assert v.status == "FAIL"
     assert "no_unresolvable_collisions" in v.failed
+
+
+# ------------------------------------------------------------------ the demo run ----
+
+# The demo run: the same topic contents in a different order, the far slice dropped exactly,
+# every difference from gold explained by those rows, and a passing control run beside it.
+DEMO = {
+    **CONTROL,
+    "replay_run_id": "5" * 36,
+    "topic": "reviews.stream.demo",
+    "dedupe": {**CONTROL["dedupe"], "unique": 692_252},
+    "watermark": {"delay": "30 days", "natural_drops": 2_000},
+    "reconcile": {"gold_run_id": "2" * 36, "compared": 193_800, "differing": 1_850,
+                  "differing_explained": 1_850, "differing_unexplained": 0,
+                  "only_in_stream": 0, "only_in_gold": 139, "only_in_gold_explained": 139,
+                  "only_in_gold_unexplained": 0, "only_in_stream_unmaterialised": 210_541,
+                  "dropped_product_months": 1_996, "dropped_outside_gold": 7},
+    "injection": {"near_rows": 2_000, "near_lag_days": 7, "far_rows": 2_000,
+                  "far_lag_days": 730, "held_back_sha256": "77" * 32,
+                  "near_on_topic": 2_000, "far_on_topic": 2_000, "expected_drops": 2_000,
+                  "frozen": {"near_rows": 2_000, "far_rows": 2_000, "near_lag_days": 7,
+                             "far_lag_days": 730, "watermark_days": 30}},
+    "control": {"run_id": "3" * 36, "artifact_run_id": "3" * 36, "ledger_run_found": True,
+                "status": "PASS",
+                "scope": "full", "ledger_status": "success", "natural_drops": 0,
+                "differing": 0, "protocol_hash": "cd" * 32},
+}
+
+
+def _demo(**overrides):
+    return gate.demo({**DEMO, **overrides}, run_id="6" * 36, scope="full")
+
+
+def test_a_clean_demo_run_passes_and_names_both_runs():
+    v = _demo()
+    assert v.status == "PASS", v.failed
+    assert v.terminal.endswith("STREAM_GATE=PASS")
+    assert "run_kind=demo" in v.terminal
+    assert "dropped_by_watermark=2000 expected_drops=2000" in v.terminal
+    assert "unexplained=0" in v.terminal
+    assert f"control_run={'3' * 8}" in v.terminal
+
+
+def test_the_demo_prints_its_injection_and_control_constituents():
+    v = _demo()
+    names = [line.split(" ", 1)[0] for line in v.constituents]
+    assert names == ["STREAM_SOURCE", "STREAM_VALIDATION", "STREAM_DEDUPE", "STREAM_WATERMARK",
+                     "STREAM_SURVIVOR", "STREAM_RECONCILE", "STREAM_INJECTION",
+                     "STREAM_EXPLAINED", "STREAM_CONTROL"]
+    assert "run_kind=demo" in v.constituents[0]
+    # The demo's drops are injected, not natural, and the line says which.
+    assert "injected_drops=2000" in v.constituents[3]
+    assert "near_accepted=derived" in v.constituents[6]
+    assert "same_protocol=true" in v.constituents[8]
+
+
+def test_a_zero_watermark_drops_the_near_slice_too_and_fails_the_gate():
+    """The trip case ticket 16 names: both slices dropped is 4,000, not the frozen 2,000."""
+    v = _demo(watermark={"delay": "0 days", "natural_drops": 4_000},
+              dedupe={**DEMO["dedupe"], "unique": 690_252},
+              reconcile={**DEMO["reconcile"], "differing": 3_700, "differing_unexplained": 1_850,
+                         "only_in_gold": 280, "only_in_gold_unexplained": 141})
+    assert v.status == "FAIL"
+    assert "far_slice_dropped_exactly" in v.failed
+    assert "near_slice_accepted" in v.failed
+    assert "every_difference_explained_by_dropped_rows" in v.failed
+    assert "near_accepted=false" in v.constituents[6]
+
+
+def test_a_far_row_that_survived_fails_the_count_and_the_explanation():
+    """One far row accepted: 1,999 drops, and a product-month gold and the stream agree on
+    where the explanation says they should differ."""
+    v = _demo(watermark={"delay": "30 days", "natural_drops": 1_999},
+              dedupe={**DEMO["dedupe"], "unique": 692_253},
+              reconcile={**DEMO["reconcile"], "differing": 1_849, "differing_explained": 1_849,
+                         "differing_unexplained": 1})
+    assert v.status == "FAIL"
+    assert set(v.failed) >= {"far_slice_dropped_exactly", "near_slice_accepted",
+                             "every_difference_explained_by_dropped_rows"}
+
+
+def test_a_difference_the_dropped_rows_do_not_explain_fails_the_gate():
+    v = _demo(reconcile={**DEMO["reconcile"], "differing": 1_851, "differing_unexplained": 1})
+    assert v.status == "FAIL"
+    assert v.failed == ("near_slice_accepted", "every_difference_explained_by_dropped_rows")
+
+
+def test_a_gold_month_missing_for_no_dropped_reason_fails_the_gate():
+    v = _demo(reconcile={**DEMO["reconcile"], "only_in_gold": 140,
+                         "only_in_gold_unexplained": 1})
+    assert v.status == "FAIL"
+    assert "every_missing_month_explained_by_dropped_rows" in v.failed
+
+
+def test_a_held_back_row_the_topic_never_received_fails_the_gate():
+    v = _demo(injection={**DEMO["injection"], "far_on_topic": 1_999})
+    assert v.status == "FAIL"
+    assert "held_back_rows_on_topic" in v.failed
+
+
+def test_a_demo_whose_dropped_rows_touch_no_gold_month_is_vacuous_and_fails():
+    v = _demo(watermark={"delay": "30 days", "natural_drops": 2_000},
+              reconcile={**DEMO["reconcile"], "differing": 0, "differing_explained": 0,
+                         "only_in_gold": 0, "only_in_gold_explained": 0})
+    assert v.status == "FAIL"
+    assert v.failed == ("dropped_rows_visible_in_reconciliation",)
+
+
+@pytest.mark.parametrize("injected, failing", [
+    ({"near_rows": 1_999}, "injection_matches_frozen_config"),
+    ({"far_rows": 1_999, "expected_drops": 1_999}, "injection_matches_frozen_config"),
+    ({"far_lag_days": 60}, "injection_matches_frozen_config"),
+    ({"expected_drops": 1_999}, "far_slice_dropped_exactly"),
+])
+def test_a_run_that_injected_something_other_than_the_frozen_counts_fails(injected, failing):
+    """The frozen document, not the run's own claim: the gate reads conf/stream_replay.toml
+    and a replay that recorded different sizes or lags is refused."""
+    v = _demo(injection={**DEMO["injection"], **injected})
+    assert v.status == "FAIL"
+    assert failing in v.failed
+
+
+@pytest.mark.parametrize("control, reason", [
+    ({"status": "FAIL"}, "the control run failed"),
+    ({"scope": "sample"}, "the control run is a smoke test"),
+    ({"ledger_status": "failed"}, "the ledger does not hold the control as a success"),
+    ({"artifact_run_id": "9" * 36}, "the control artefact judges a run that is not current"),
+])
+def test_the_demo_requires_a_passing_current_control_run(control, reason):
+    """Both runs must be present: a gate that only ever saw the demo run could not tell a
+    working watermark from an unsorted file."""
+    v = _demo(control={**DEMO["control"], **control})
+    assert v.status == "FAIL", reason
+    assert v.failed == ("control_run_present_and_passing",)
+
+
+@pytest.mark.parametrize("control, failing", [
+    ({"run_id": "", "artifact_run_id": "", "ledger_run_found": False},
+     "control_run_present_and_passing"),
+    ({"natural_drops": 1}, "control_run_dropped_nothing"),
+    ({"differing": 4}, "control_run_dropped_nothing"),
+])
+def test_a_control_run_that_is_missing_or_not_clean_fails_the_demo(control, failing):
+    """No control run at all leaves both ids empty, which must not read as agreement; and a
+    control that dropped rows or differed from batch is not a control this demo can lean on."""
+    v = _demo(control={**DEMO["control"], **control})
+    assert v.status == "FAIL"
+    assert failing in v.failed
+
+
+def test_the_two_runs_must_share_the_frozen_protocol():
+    """A control run under a different watermark or slice sizes is not this run's control."""
+    v = _demo(control={**DEMO["control"], "protocol_hash": "ee" * 32})
+    assert v.status == "FAIL"
+    assert v.failed == ("control_and_demo_share_protocol",)
+    assert "same_protocol=false" in v.constituents[8]
+
+
+def test_demo_population_names_both_runs_and_the_slices():
+    pop = gate.demo_population(DEMO, category="All_Beauty")
+    assert pop["control_run_id"] == "3" * 36
+    assert (pop["near_rows"], pop["far_rows"]) == (2_000, 2_000)

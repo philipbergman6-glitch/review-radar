@@ -266,7 +266,10 @@ def test_the_default_pin_is_the_strict_one():
     assert all(e.pin_reason for e in E.load_edges() if e.upstream_pin == "recorded")
     assert set(loose) == {"theme_labels_llm<-theme_samples.samples",
                           "theme_labels_reference<-theme_samples.samples",
-                          "theme_samples<-gold.gold"}
+                          "theme_samples<-gold.gold",
+                          # P8 replays twice -- control and demo topics -- so each projection
+                          # names the replay it read rather than the later of the two (ticket 16).
+                          "stream_aggregate<-stream_produce.replay"}
 
 
 def test_a_table_attributed_by_column_declares_the_column_and_the_reason(tmp_path):

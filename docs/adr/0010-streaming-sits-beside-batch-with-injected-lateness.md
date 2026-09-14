@@ -96,3 +96,52 @@ holds a fixed historical replay, so wall-clock retention has nothing to express 
 `retention.ms` and `retention.bytes` are set to -1 at replay time. The replay also resets the
 topic first, so it holds exactly one ordering of the file and the lineage gate can resolve the
 producer's Kafka output by comparing the topic's record count with the run's acked count.
+
+## Amended 2026-09-14 (ticket 16), by building the demo run
+
+The injection this ADR promised is built, and four things about it were decided at the
+implementation rather than here. The demo run printed `STREAM_GATE=PASS` over 18
+constituents: 2,000 dropped against 2,000 expected, 1,013 differing product-months and 309
+months present only in gold, all 1,322 explained by dropped rows, with zero months present
+only in the stream.
+
+**The slices are drawn, held back and *predicted* before a record is sent.**
+`src/ingest/lateness.py` is pure: it draws each slice by `slice_rank(seed, salt, review_id)`
+over the frozen config, computes the send order that holds each drawn row back until the
+first natural row at or after its event time plus its lag, and then simulates the watermark
+over that order. A plan whose simulation does not land exactly on the frozen counts -- 2,000
+near accepted, 2,000 far dropped, no natural row touched -- is an `InjectionPlanError`
+before Kafka is opened, not a gate failure hours later. The held-back rows are written to a
+sidecar whose sha256 the ledger records, so the gate reads the same list the producer sent.
+The gate then opens `conf/stream_replay.toml` itself and checks the run's recorded sizes
+and lags against the frozen ones: a run checked only against its own counts would pass
+having injected 1,999.
+
+**Spark judges a batch's late rows by the watermark in force one batch earlier.** The
+watermark computed from batch N is the one applied to batch N+2, not N+1
+(`eventTimeWatermarkForLateEvents` in `IncrementalExecution`); verified against pyspark
+3.5.3 in `tests/test_stream_spark.py`, where the model's drop set and
+`numRowsDroppedByWatermark` agree on an injected sequence. Eligibility for the far slice
+therefore requires a natural row two batches and two slack widths before the release point
+to be past `T + watermark`, which is what makes the drop independent of where the batch
+boundary happens to fall. Under that rule 528,600 of the file's rows are far-eligible and
+58,065 are undecidable in the sparse early years; the frozen 2,000 is drawn from the former.
+
+**The demo replays onto its own topic, `reviews.stream.demo`.** The lineage gate resolves a
+producer's Kafka output by comparing the topic's record count with the run's acked count, so
+two replays cannot share one topic. Adding the name changed the protocol hash, so the sort
+and the control run were replayed under the new hash (`4c8bccff40bd`) and the gate's
+`control_and_demo_share_protocol` check holds. Two `stream_produce` runs are now live at
+once, so the chain's `stream_aggregate ← stream_produce` edge is declared
+`upstream_pin = "recorded"`: each projection names the replay whose topic it read, and both
+replays are walked.
+
+**Near acceptance is derived, and says so.** The projection carries product-months, not
+review ids, so no row in it can be pointed at as "the near slice". What is observed is the
+drop count (2,000, equal to the far slice), that all 2,000 far ids are on the topic, and that
+every differing and every gold-only product-month is explained by exactly the far
+contribution. Near acceptance follows from those; `STREAM_INJECTION` prints
+`near_accepted=derived` rather than claiming an observation it did not make.
+
+The alerts table the move list above promises is still not built; move 10 prints
+`STREAM_GATE` only.

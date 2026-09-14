@@ -35,7 +35,7 @@ def test_config_hash_covers_the_whole_document():
     keys = {f"{table}.{key}" for table, body in doc.items() for key in body}
     assert keys == {
         "protocol.status", "protocol.spec_version",
-        "topic.name", "topic.sample_name", "topic.partitions",
+        "topic.name", "topic.sample_name", "topic.demo_name", "topic.partitions",
         "sort.tiebreak", "sort.suffix",
         "pacing.records_per_second", "pacing.clock_every_records",
         "stream.watermark", "stream.max_offsets_per_trigger",
@@ -62,7 +62,24 @@ def test_provisional_protocol_refuses_to_load(tmp_path):
 def test_stream_may_not_share_the_sample_topic(tmp_path):
     p = _write_config(tmp_path,
                       **{'sample_name = "reviews.stream.sample"': 'sample_name = "reviews.stream"'})
-    with pytest.raises(ValueError, match="must differ"):
+    with pytest.raises(ValueError, match="must all differ"):
+        load_replay_config(p)
+
+
+def test_the_demo_run_has_its_own_topic_and_is_full_scope_only():
+    """Two replays on one topic leave its record count belonging to neither (ticket 16)."""
+    cfg = load_replay_config()
+    assert cfg.topic_for("full", "demo") == cfg.demo_topic
+    assert len({cfg.topic, cfg.sample_topic, cfg.demo_topic}) == 3
+    assert cfg.topic_for("full") == cfg.topic_for("full", "control") == cfg.topic
+    with pytest.raises(ValueError, match="full-scope only"):
+        cfg.topic_for("sample", "demo")
+
+
+def test_the_demo_topic_may_not_reuse_the_control_topic(tmp_path):
+    p = _write_config(tmp_path,
+                      **{'demo_name = "reviews.stream.demo"': 'demo_name = "reviews.stream"'})
+    with pytest.raises(ValueError, match="must all differ"):
         load_replay_config(p)
 
 
@@ -286,9 +303,17 @@ STREAM_OK_COUNTS = {
     "first_event_ms": 1, "last_event_ms": 2,
     "records_per_second_target": 3000, "records_per_second_actual": 2950.0,
     "elapsed_s": 0.34, "replay_config_hash": "cd" * 32,
+    "run_kind": "control", "near_rows": 0, "far_rows": 0, "held_back_rows": 0,
+    "expected_near_accepted": 0, "expected_far_dropped": 0,
+}
+STREAM_DEMO_COUNTS = STREAM_OK_COUNTS | {
+    "run_kind": "demo", "near_rows": 2000, "far_rows": 2000, "held_back_rows": 4000,
+    "expected_near_accepted": 2000, "expected_far_dropped": 2000,
 }
 STREAM_OK_RECORDS = {"records_in": 1000, "records_out": 1000, "records_rejected": 0}
-STREAM_OK_OUTPUTS = {"kafka": {"topic": "reviews.stream"}}
+STREAM_OK_OUTPUTS = {"kafka": {"topic": "reviews.stream"},
+                     "held_back": {"path": "data/raw/All_Beauty.sorted.jsonl.held_back.control.jsonl",
+                                   "sha256": "ab" * 32, "rows": 0}}
 
 
 def test_stream_contract_holds_on_a_clean_control_run():
@@ -322,3 +347,76 @@ def test_a_backwards_replay_fails_the_contract():
                                                           "last_event_ms": 2},
                                raise_=False)
     assert any("not in event-time order" in f for f in failures)
+
+
+def test_a_demo_replay_holding_back_the_frozen_slices_validates():
+    assert validate_finish("stream_produce", runs.STREAM_PRODUCE_SPEC_VERSION,
+                           records=STREAM_OK_RECORDS,
+                           outputs=STREAM_OK_OUTPUTS | {"held_back": {"path": "p", "sha256": "s",
+                                                                       "rows": 4000}},
+                           counts=STREAM_DEMO_COUNTS, raise_=False) == []
+
+
+def test_a_control_replay_that_held_rows_back_fails_the_contract():
+    failures = validate_finish("stream_produce", runs.STREAM_PRODUCE_SPEC_VERSION,
+                               records=STREAM_OK_RECORDS, outputs=STREAM_OK_OUTPUTS,
+                               counts=STREAM_OK_COUNTS | {"far_rows": 5, "held_back_rows": 5,
+                                                          "expected_far_dropped": 5},
+                               raise_=False)
+    assert any("a control run holds nothing back" in f for f in failures)
+
+
+def test_a_demo_replay_not_predicted_to_drop_its_whole_far_slice_fails_the_contract():
+    """The producer refuses such a plan; a success row saying otherwise skipped the check."""
+    failures = validate_finish("stream_produce", runs.STREAM_PRODUCE_SPEC_VERSION,
+                               records=STREAM_OK_RECORDS, outputs=STREAM_OK_OUTPUTS,
+                               counts=STREAM_DEMO_COUNTS | {"expected_far_dropped": 1990},
+                               raise_=False)
+    assert any("expected_far_dropped 1990 != far_rows 2000" in f for f in failures)
+
+
+def test_a_replay_without_a_held_back_sidecar_fails_the_contract():
+    failures = validate_finish("stream_produce", runs.STREAM_PRODUCE_SPEC_VERSION,
+                               records=STREAM_OK_RECORDS,
+                               outputs={"kafka": {"topic": "reviews.stream"}},
+                               counts=STREAM_OK_COUNTS, raise_=False)
+    assert "outputs.held_back missing" in failures
+
+
+# ------------------------------------------------------------- the demo producer ----
+
+def test_the_producer_index_recomputes_the_identity_and_refuses_a_backwards_file(tmp_path):
+    from src.ingest.stream_producer import index_source
+
+    src = tmp_path / "in.sorted.jsonl"
+    src.write_text("\n".join([_review("u1", "p1", 1000), _review("u2", "p2", 2000)]) + "\n")
+    ts, ids, offsets = index_source(src)
+    assert ts == [1000, 2000]
+    assert ids == [review_id("u1", "p1", 1000), review_id("u2", "p2", 2000)]
+    assert offsets[0] == 0 and offsets[1] > 0
+
+    src.write_text("\n".join([_review("u1", "p1", 2000), _review("u2", "p2", 1000)]) + "\n")
+    with pytest.raises(SystemExit, match="goes backwards in event time"):
+        index_source(src)
+
+
+def test_the_held_back_sidecar_is_empty_for_a_control_run_and_lists_every_row_for_a_demo(tmp_path):
+    from src.ingest.lateness import DAY_MS, InjectionSpec, plan_injection
+    from src.ingest.stream_producer import sequence, write_held_back
+
+    _, rows = write_held_back(tmp_path / "control.jsonl", None)
+    assert rows == 0 and (tmp_path / "control.jsonl").read_text() == ""
+
+    ts = [1_600_000_000_000 + i * 5 * DAY_MS for i in range(400)]
+    ids = [f"r{i}" for i in range(400)]
+    plan = plan_injection(ts, ids, spec=InjectionSpec(
+        seed=1, near_salt="n", near_rows=2, near_lag_days=7, far_salt="f", far_rows=2,
+        far_lag_days=730, watermark_days=30, batch_size=10))
+    _, rows = write_held_back(tmp_path / "demo.jsonl", plan)
+    lines = [json.loads(x) for x in (tmp_path / "demo.jsonl").read_text().splitlines()]
+    assert rows == 4 and len(lines) == 4
+    assert {x["slice"] for x in lines} == {"near", "far"}
+    assert {x["review_id"] for x in lines} == {h.review_id for h in plan.held_back}
+    # The control send order is the file's; the demo's is the plan's.
+    assert [i for i, _, _ in sequence(ts, None)] == list(range(400))
+    assert sorted(i for i, _, _ in sequence(ts, plan)) == list(range(400))
