@@ -71,11 +71,11 @@ reopens a phase ([ADR-0011](adr/0011-phase-gates-print-a-number-and-only-reprodu
 | P8 Stream | `stream_control` | `STREAM_GATE` | **PASS** | 11/11 · 129,330 product-months vs gold, 0 differing |
 | P8 Stream | `stream_demo` | `STREAM_GATE` | **PASS** | 18/18 · 2,000 far-slice rows dropped exactly, 882 diffs all explained |
 | Lineage track | `lineage` | `LINEAGE_GATE` | **PASS** | 7/7 · `chain_clean=true` over 101 links |
-| Deliverables track | `demo` | `DEMO_GATE` | **PASS** | 5/5 · 2 rehearsals, 259 s of 300 s, 4/4 documents |
+| Deliverables track | `demo` | `DEMO_GATE` | **PASS** | 5/5 · 4 rehearsals (2 required), 259 s of 300 s, 4/4 documents |
 
 A capability is either a number or a written reason; the command exits non-zero on one that is
-neither. Every row above is now one or the other, so the command exits 0; the two `NOT_RUN`
-rows waiting on a human judgement carry their reason.
+neither. Every row above is now one or the other, so the command exits 0; the three `NOT_RUN`
+rows are cut, not pending, and each carries its reason.
 
 ## 5. The AI capability, and why this one
 
@@ -149,7 +149,7 @@ conceded up front. **Local `qwen3:8b` instead of hosted Haiku**, with the 0.70 b
 unmoved, so the constraint surfaces as a reported miss rather than a relaxed target. **Public
 but sensitive review text** — only title and text cross the wire to the model, never `user_id`s.
 
-**Five declines, in the wording that binds them.**
+**Four declines, in the wording that binds them, and a fifth internal to the lineage gate.**
 
 - **Kafka Connect Elasticsearch sink — dropped for time.** Not argued from the deck's
   `Except for a trivial "file" connector` line, which covers a Connect *source*; the deck
@@ -162,10 +162,7 @@ but sensitive review text** — only title and text cross the wire to the model,
   run ledger fills the role, but Oozie is not retired and the decks teach it across 25 mentions.
   GraphFrames/GraphX go the same way, as a detour.
 - **The lineage gate's publication mode — declined as unreachable, not as pending.**
-  `publication_ready` counts a stale output for every walked run behind its table's head, and
-  the walk must include runs behind the head: the gold run P6's frozen frames were drawn from,
-  the pre-freeze gold run the rule was calibrated on, and whichever of P8's two projections ran
-  first. Nine stale outputs, all on runs the chain pins on purpose, so the flag cannot print
-  `true` by running anything in any order. The submission's lineage claim is `chain_clean=true`
-  over `chain_links_checked=101`; publication mode stays in the tree, printing `false` and why
+  The walk pins superseded runs on purpose (P6's frozen frames, the pre-freeze calibration run,
+  P8's two projections), so `publication_ready` cannot print `true` in any run order; the claim
+  is `chain_clean=true` over `chain_links_checked=101`
   ([ADR-0013](adr/0013-publication-ready-is-unreachable-by-construction-and-declined.md)).
