@@ -30,3 +30,6 @@ data/models/
 # Job stdout. The run ledger, the THEME_* summary lines and eval/ artefacts are the
 # evidence; these files are progress spam with carriage returns in them.
 logs/
+
+# graphify knowledge-graph output (local tooling)
+graphify-out/

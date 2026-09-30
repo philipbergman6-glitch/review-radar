@@ -63,7 +63,9 @@ print zero drops.
 Three things this ADR assumed turned out not to hold, and the decisions that replaced them.
 None of them moves a number or a threshold; all three were settled before the first control
 run, and the run that followed printed `STREAM_GATE=PASS` with zero drops and zero differing
-product-months over 193,939 compared.
+product-months over 193,939 compared. (Those were against the pre-freeze gold run; re-run on
+2026-09-14 against the frozen gold `0cbdcc0d`, `eval/stream_control/gate.json` reads 129,330
+compared, 0 differing — the spine shrank with the frozen `min_reviews`, the verdict did not.)
 
 **Append-mode aggregates per calendar month are not expressible in Spark.** `window()` refuses
 any interval carrying months, and append mode keys its state on an event-time attribute in the
@@ -103,7 +105,9 @@ The injection this ADR promised is built, and four things about it were decided 
 implementation rather than here. The demo run printed `STREAM_GATE=PASS` over 18
 constituents: 2,000 dropped against 2,000 expected, 1,013 differing product-months and 309
 months present only in gold, all 1,322 explained by dropped rows, with zero months present
-only in the stream.
+only in the stream. (Against the frozen gold `0cbdcc0d`, run `c95be84a` on 2026-09-14 reads
+882 differing and 177 gold-only, all 1,059 explained, zero only in the stream —
+`eval/stream_demo/gate.json`.)
 
 **The slices are drawn, held back and *predicted* before a record is sent.**
 `src/ingest/lateness.py` is pure: it draws each slice by `slice_rank(seed, salt, review_id)`

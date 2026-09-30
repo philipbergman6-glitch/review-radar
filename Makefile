@@ -14,7 +14,7 @@ PROMPT ?= label_v5
 # development target reads it -- the evaluation run refuses any prompt but the frozen one.
 RAG_PROMPT ?= rag_v5
 
-.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample stream-produce-demo stream-aggregate stream-aggregate-sample stream-aggregate-demo gate-stream gate-stream-demo stream-demo bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample calibrate-gold freeze-rule reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-dev-questions rag-dev-answers rag-answers rag-judge-export rag-judge rag-judge-check rag-judge-import gate-rag eval-table demo demo-run-sheet rehearse gate-demo gate-lineage gate-lineage-publication reconcile-run verify eos test lint check
+.PHONY: help up up-ui down health pg-migrate catalogue produce produce-sample sort-replay sort-replay-sample stream-produce stream-produce-sample stream-produce-demo stream-aggregate stream-aggregate-sample stream-aggregate-demo gate-stream gate-stream-demo stream-demo bronze bronze-sample silver silver-sample gate-silver reproduce-silver gold gold-sample calibrate-gold freeze-rule reproduce-gold index-reviews index-reviews-sample index-product-month index-product-month-sample kibana-import pool-search judge-search eval-search gate-search embed embed-sample index-reviews-vectors index-reviews-vectors-sample pool-embeddings export-judgements eval-embeddings ann-recall gate-embeddings theme-samples theme-samples-sample freeze-theme-terms theme-frames discover-phrases blind-export label-themes label-pool pool-census import-reference score-themes select-prompt gate-themes adjudicate-export adjudicate-import agreement-draw agreement-export agreement-labeller agreement-check agreement-import agreement-score sentiment-check star-baseline-fit star-baseline-score audit-once classifier-train classifier-thresholds classifier-score classifier-table diagnose-failures discovery-failures propose-taxonomy score-taxonomy rag-ranking rag-prefilter rag-slots rag-scan rag-validate rag-questions-draft rag-freeze rag-dev-questions rag-dev-answers rag-answers rag-reopen rag-judge-export rag-judge rag-judge-check rag-judge-import gate-rag eval-table demo demo-run-sheet rehearse gate-demo gate-lineage gate-lineage-publication reconcile-run slides design-pdf verify eos test lint check
 
 help:  ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -337,6 +337,13 @@ reconcile-run:  ## close a run a killed driver left `running`: RUN_ID=<id> REASO
 
 gate-lineage-publication:  ## the same walk at the publication bar -- cannot pass by construction (ADR-0013: recorded pins walk superseded runs); kept so the stale count prints
 	$(RUN) scripts/gate_lineage.py --mode publication --scope full
+
+slides:  ## the deck: docs/SLIDES.md's running order as docs/slides/review-radar.pptx, plus a PDF through LibreOffice
+	./run.sh --with python-pptx python scripts/build_slides.py
+	soffice --headless --convert-to pdf --outdir docs/slides docs/slides/review-radar.pptx
+
+design-pdf:  ## docs/DESIGN.md -> docs/DESIGN.pdf (A4, Mermaid rendered); non-zero past two pages
+	$(RUN) scripts/render_design_pdf.py
 
 verify:  ## row count, snapshot history, time-travel read
 	$(RUN) scripts/verify_iceberg.py
