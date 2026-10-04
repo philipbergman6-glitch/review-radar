@@ -2,6 +2,16 @@
 
 BIU 8688697201 — Big Data and AI, final project (solo, approved by the instructor).
 
+**Deliverables (brief §7):** code — this repository, run instructions under
+[Setup](#setup) and [Running the pipeline](#running-the-pipeline) ·
+design document — [`docs/DESIGN.pdf`](docs/DESIGN.pdf) ·
+dataset — [Amazon Reviews 2023](https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023) ·
+slides — [`docs/slides/review-radar.pdf`](docs/slides/review-radar.pdf) ·
+demo — live in class; recorded backup is the executed rehearsal
+[`docs/demo/2026-09-14-2/demo.executed.ipynb`](docs/demo/2026-09-14-2/demo.executed.ipynb)
+(12/12 cells, 0 errors, stream live) with its
+[Kibana dashboard](docs/demo/2026-09-14-2/kibana-dashboard.png).
+
 Reviews replay through Kafka into a Spark Structured Streaming job that lands them
 unparsed — and exactly once across an unclean restart — as an Iceberg table on a MinIO
 object store, with the Iceberg catalogue in PostgreSQL. From there a batch lakehouse
