@@ -75,7 +75,7 @@ comparison is easy to overclaim:
    the production hybrid. Reporting a single number across both would compare
    retrievers on different corpora.
 2. **"Hybrid beats BM25" is a pre-registered hypothesis that was tested, not a
-   claim.** H-E1 did **not** hold; H-E2 and H-E3 held (`README.md` P5 row,
+   claim.** H-E1 did **not** hold; H-E2 and H-E3 held (`docs/REFERENCE.md` P5 row,
    `docs/decisions/embeddings-retrieval.md`). Say which held. The honest framing
    is the one the deck sets up — neither method wins alone — and a hypothesis
    that failed is evidence the evaluation was real.
